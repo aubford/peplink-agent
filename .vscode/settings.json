@@ -1,0 +1,5 @@
+{
+    "files.exclude": {
+        "langchain_pepwave_env": true
+    }
+}

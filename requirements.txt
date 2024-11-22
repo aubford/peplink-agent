@@ -1,0 +1,13 @@
+langchain
+langserve[all]
+langsmith
+langchain-openai
+langchain-experimental
+langchain-community
+torch
+transformers
+sentence-transformers
+pinecone-client
+python-dotenv
+tiktoken
+notebook
