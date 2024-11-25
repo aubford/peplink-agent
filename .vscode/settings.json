@@ -1,5 +1,9 @@
 {
     "files.exclude": {
-        "langchain_pepwave_env": true
+        "langchain_pepwave_env": true,
+        ".idea": true,
+    },
+    "search.exclude": {
+        ".vscode": true
     }
 }

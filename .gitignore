@@ -1,3 +1,5 @@
+langchain_pepwave_env
+
 ### VisualStudioCode template
 .vscode/*
 !.vscode/settings.json
