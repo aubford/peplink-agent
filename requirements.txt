@@ -11,3 +11,5 @@ pinecone-client
 python-dotenv
 tiktoken
 notebook
+youtube-transcript-api
+google-api-python-client==2.154.0
