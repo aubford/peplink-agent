@@ -13,3 +13,6 @@ tiktoken
 notebook
 youtube-transcript-api
 google-api-python-client==2.154.0
+pydantic
+pandas
+pyarrow==18.1.0
