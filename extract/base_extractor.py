@@ -16,7 +16,18 @@ class BaseExtractor:
         """
         self.source_name = source_name
 
-    def save_raw_data(self, data: Any, identifier: str) -> None:
+    def _ensure_dir(self, dir_type: str) -> Path:
+        """Create and return path to a data directory of specified type."""
+        dir_path = Path("data") / self.source_name / dir_type
+        dir_path.mkdir(parents=True, exist_ok=True)
+        return dir_path
+
+    def _generate_filename(self, identifier: str, extension: str) -> str:
+        """Generate a timestamped filename with the given extension."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{self.source_name}_{identifier}_{timestamp}.{extension}"
+
+    def save_raw_data(self, data: Any, identifier: str) -> Path:
         """
         Save raw data to a JSON file in the data directory.
 
@@ -24,18 +35,7 @@ class BaseExtractor:
             data: Data to save (any JSON-serializable object)
             identifier: Unique identifier for the data (e.g., channel name, user handle)
         """
-        # Ensure data directories exist
-        data_dir = Path("data")
-        target_dir = data_dir / self.source_name
-        json_dir = target_dir / "raw"
-        json_dir.mkdir(parents=True, exist_ok=True)
-
-        # Generate filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        base_filename = f"{self.source_name}_{identifier}_{timestamp}"
-
-        # Save JSON
-        json_path = json_dir / f"{base_filename}.json"
+        json_path = self._ensure_dir("raw") / self._generate_filename(identifier, "json")
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         print(f"Saved JSON file to: {json_path}")
@@ -53,18 +53,6 @@ class BaseExtractor:
             print("No data to save.")
             return
 
-        # Ensure data directories exist
-        data_dir = Path("data")
-        target_dir = data_dir / self.source_name
-        parquet_dir = target_dir / "parquet"
-        parquet_dir.mkdir(parents=True, exist_ok=True)
-
-        # Generate filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        base_filename = f"{self.source_name}_{identifier}_{timestamp}"
-
-        # Save Parquet
-        df = pd.DataFrame(data)
-        parquet_path = parquet_dir / f"{base_filename}.parquet"
-        df.to_parquet(parquet_path)
+        parquet_path = self._ensure_dir("parquet") / self._generate_filename(identifier, "parquet")
+        pd.DataFrame(data).to_parquet(parquet_path)
         print(f"Saved Parquet file to: {parquet_path}")
