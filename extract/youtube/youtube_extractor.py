@@ -87,7 +87,7 @@ class YouTubeExtractor(BaseExtractor):
                             video = VideoItem.model_validate(video_item)
                             videos_with_transcripts.append(video.model_dump())
                         except Exception as e:
-                            print(f"Could not load transcript for video {video_id}: {str(e)}")
+                            print(f"Could not load transcript for video {video_id}")
                             continue
 
             next_page_token = playlist_response.get("nextPageToken")

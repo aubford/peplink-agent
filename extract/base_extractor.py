@@ -22,10 +22,34 @@ class BaseExtractor:
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
 
+    def _sanitize_filename(self, identifier: str) -> str:
+        """
+        Sanitize the identifier to be safe for use in filenames across all systems.
+        Removes/replaces invalid filename characters using a standard approach.
+        """
+        # Common invalid filename characters
+        invalid_chars = '<>:"/\\|?*'
+
+        # First handle leading special characters
+        while identifier and (identifier[0] in invalid_chars or not identifier[0].isalnum()):
+            identifier = identifier[1:]
+
+        # Then replace remaining invalid characters with underscore
+        for char in invalid_chars:
+            identifier = identifier.replace(char, '_')
+
+        # Replace spaces with underscore and remove any duplicate underscores
+        identifier = '_'.join(identifier.split())
+        while '__' in identifier:
+            identifier = identifier.replace('__', '_')
+
+        return identifier.strip('_')
+
     def _generate_filename(self, identifier: str, extension: str) -> str:
         """Generate a timestamped filename with the given extension."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return f"{self.source_name}_{identifier}_{timestamp}.{extension}"
+        safe_identifier = self._sanitize_filename(identifier)
+        return f"{self.source_name}_{safe_identifier}_{timestamp}.{extension}"
 
     def save_raw_data(self, data: Any, identifier: str) -> Path:
         """
