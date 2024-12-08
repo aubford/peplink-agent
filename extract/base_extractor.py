@@ -16,9 +16,34 @@ class BaseExtractor:
         """
         self.source_name = source_name
 
+    def save_raw_data(self, data: Any, identifier: str) -> None:
+        """
+        Save raw data to a JSON file in the data directory.
+
+        Args:
+            data: Data to save (any JSON-serializable object)
+            identifier: Unique identifier for the data (e.g., channel name, user handle)
+        """
+        # Ensure data directories exist
+        data_dir = Path("data")
+        target_dir = data_dir / self.source_name
+        json_dir = target_dir / "raw"
+        json_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        base_filename = f"{self.source_name}_{identifier}_{timestamp}"
+
+        # Save JSON
+        json_path = json_dir / f"{base_filename}.json"
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        print(f"Saved JSON file to: {json_path}")
+        return json_path
+
     def save_data(self, data: List[Dict[Any, Any]], identifier: str) -> None:
         """
-        Save data to JSON and Parquet files in the data directories.
+        Save data to Parquet file in the data directory.
 
         Args:
             data: List of data items to save
@@ -31,21 +56,12 @@ class BaseExtractor:
         # Ensure data directories exist
         data_dir = Path("data")
         target_dir = data_dir / self.source_name
-        json_dir = target_dir / "json"
         parquet_dir = target_dir / "parquet"
-
-        for dir_path in [data_dir, target_dir, json_dir, parquet_dir]:
-            dir_path.mkdir(parents=True, exist_ok=True)
+        parquet_dir.mkdir(parents=True, exist_ok=True)
 
         # Generate filename
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         base_filename = f"{self.source_name}_{identifier}_{timestamp}"
-
-        # Save JSON
-        json_path = json_dir / f"{base_filename}.json"
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"Saved JSON file to: {json_path}")
 
         # Save Parquet
         df = pd.DataFrame(data)
