@@ -1,4 +1,4 @@
-langchain
+langchain==0.3.7
 langserve[all]
 langsmith
 langchain-openai
@@ -9,10 +9,13 @@ transformers
 sentence-transformers
 pinecone-client
 python-dotenv
-tiktoken
 notebook
-youtube-transcript-api
+youtube-transcript-api==0.6.3
+tiktoken==0.8.0
 google-api-python-client==2.154.0
-pydantic
-pandas
 pyarrow==18.1.0
+google-api-python-client-stubs==1.28.0
+pydantic==2.10.0
+pydantic-settings==2.6.1
+pydantic_core==2.27.0
+pandas==2.2.3
