@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Dict, Any, TypeVar, Type, Optional
+from typing import List, Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 import json
 import pandas as pd
@@ -38,8 +38,8 @@ class BaseExtractor:
             source_name: Name of the data source (e.g., 'youtube', 'twitter', etc.)
         """
         self.source_name = source_name
-        self.raw_data: Dict[str, Any] = {}
-        self.data: Dict[str, T] = {}
+        # Dictionary to track active streams: filename -> (raw_path, parquet_path)
+        self._active_streams: Dict[str, Tuple[Type[T], Path, Path]] = {}
 
     def _ensure_dir(self, dir_type: str) -> Path:
         """Create and return path to a data directory of specified type."""
@@ -70,71 +70,85 @@ class BaseExtractor:
 
         return filename.strip('_')
 
-    def _generate_filename(self, filename: str, extension: str) -> str:
-        """Generate a timestamped filename with the given extension."""
+    def start_stream(self, model_class: Type[T], *, identifier: Optional[str] = None) -> str:
+        """
+        Start a new streaming session for a specific model type.
+        Creates new files for both raw and processed data.
+
+        Args:
+            model_class: The Pydantic model class to stream
+        """
+        modelname = inflection.underscore(model_class.__name__)
+        safe_identifier = self._sanitize_filename(modelname) + (f"_{identifier}" if identifier else "")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_identifier = self._sanitize_filename(filename)
-        return f"{self.source_name}_{safe_identifier}_{timestamp}.{extension}"
+        filename = f"{self.source_name}_{safe_identifier}_{timestamp}"
 
-    def save_raw_data(self, data: List[Dict[str, Any]], filename: str) -> Path:
+        # Check if stream already exists using the stream_key
+        if safe_identifier in self._active_streams:
+            raise ValueError(f"Stream for {safe_identifier} already exists")
+
+        # Set up raw data file (JSONL)
+        raw_path = self._ensure_dir("raw") / f"{filename}.jsonl"
+        # Set up processed data file (Parquet)
+        parquet_path = self._ensure_dir("parquet") / f"{filename}.parquet"
+
+        self._active_streams[safe_identifier] = (model_class, raw_path, parquet_path)
+
+        print(f"Started stream for {safe_identifier}:\nRaw: {raw_path}\nProcessed: {parquet_path}")
+        return safe_identifier
+
+    def stream_item(self, data: Dict[str, Any], stream_key: str) -> None:
         """
-        Save raw data to a JSON file in the data directory.
+        Validate and stream a single item to both raw and processed files.
 
         Args:
-            data: Data to save (any JSON-serializable object)
-            identifier: Unique identifier for the data (e.g., channel name, user handle)
-        """
-        json_path = self._ensure_dir("raw") / self._generate_filename(filename, "json")
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"Saved JSON file to: {json_path}")
-        return json_path
-
-    def save_data(self, data: List[Dict[str, T]], filename: str) -> None:
-        """
-        Save data to Parquet file in the data directory.
-
-        Args:
-            data: List of data items to save
-            filename: Unique identifier for the data (e.g., channel name, user handle)
-        """
-        if not data:
-            print("No data to save.")
-            return
-
-        parquet_path = self._ensure_dir("parquet") / self._generate_filename(filename, "parquet")
-        pd.DataFrame(data).to_parquet(parquet_path)
-        print(f"Saved Parquet file to: {parquet_path}")
-
-    def save_data_to_file(self) -> None:
-        """
-        Save data to a file in the data directory.
-        """
-        for filename, data in self.data.items():
-            self.save_data(data, filename)
-        for filename, data in self.raw_data.items():
-            self.save_raw_data(data, filename)
-
-
-    def validate_and_convert_model(self, data: Dict[str, Any], model_class: Type[T], *, filename: Optional[str] = None) -> None:
-        """
-        Validate dictionary data against a Pydantic model and store in self.data and self.raw_data.
-
-        Args:
-            data: Dictionary containing the data
+            data: Dictionary containing the item data
             model_class: The Pydantic model class to validate against
-            identifier: Unique identifier to use as key in self.data and self.raw_data dictionaries
         """
-        key = filename if filename else inflection.underscore(model_class.__name__)
-        # save raw data regardless of validation for inspection (being lazy)
-        self.raw_data[key] = data
+        if stream_key not in self._active_streams:
+            raise RuntimeError(f"Must call start_stream() for {stream_key} before streaming items")
+
+        model_class, raw_path, parquet_path = self._active_streams[stream_key]
+
+        # Stream raw data
+        with open(raw_path, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(data, ensure_ascii=False) + '\n')
+
+        # Validate data
         try:
             validated_model = model_class.model_validate(data)
-            self.data[key] = validated_model.model_dump()
+            processed_data = validated_model.model_dump()
         except ValidationError as e:
             error_message = (
-                f"Validation error for identifier '{key}' with data: {json.dumps(data, ensure_ascii=False, indent=2)} \n"
+                f"Validation error for {model_class.__name__} with data: {json.dumps(data, ensure_ascii=False, indent=2)} \n"
                 f"Error: {e}"
             )
             print(error_message)
             logger.error(error_message)
+            return
+
+        # Stream processed data
+        df = pd.DataFrame([processed_data])
+        # If file doesn't exist, write with schema, otherwise append
+        if not parquet_path.exists():
+            df.to_parquet(parquet_path)
+        else:
+            df.to_parquet(parquet_path, append=True)
+
+    def end_stream(self, stream_key: str) -> None:
+        """
+        End a specific streaming session.
+
+        Args:
+            model_class: The Pydantic model class whose stream to end
+        """
+        if stream_key not in self._active_streams:
+            raise ValueError(f"No active stream for {stream_key}")
+
+        del self._active_streams[stream_key]
+        print(f"Ended stream for {stream_key}")
+
+    def end_all_streams(self) -> None:
+        """End all active streaming sessions."""
+        for stream_key in list(self._active_streams.keys()):
+            self.end_stream(stream_key)

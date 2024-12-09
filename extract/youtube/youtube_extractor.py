@@ -6,6 +6,8 @@ from config import config
 from extract.base_extractor import BaseExtractor
 import logging
 from logging.handlers import RotatingFileHandler
+import json
+from pathlib import Path
 
 # Configure rotating file handler
 handler = RotatingFileHandler(
@@ -66,17 +68,15 @@ class YouTubeExtractor(BaseExtractor):
 
     def fetch_videos_with_transcripts(self) -> None:
         """
-        Fetch all public videos with their transcripts from the channel.
-
-        Returns:
-            List of video items with transcripts
+        Fetch all public videos with their transcripts from the channel and stream them to files.
+        Each video is processed and written immediately.
         """
         if not self.uploads_playlist_id:
-            return []
+            return
 
-        videos_with_transcripts = []
+        video_item_stream = self.start_stream(VideoItem)
+
         next_page_token = None
-
         while True:
             playlist_request = self.youtube_client.playlistItems().list(
                 part="contentDetails",
@@ -104,19 +104,20 @@ class YouTubeExtractor(BaseExtractor):
                         try:
                             loader = YoutubeLoader(video_id=video_id)
                             docs = loader.load()
-                            video_item["transcript"] = docs[0].page_content
                         except Exception as e:
                             print(f"Could not load transcript for video {video_id}")
                             self.logger.error(
                                 f"Could not load transcript for video {video_id}: {e}")
                             continue
-                        self.validate_and_convert_model(video_item, VideoItem)
+
+                        video_item["transcript"] = docs[0].page_content
+                        self.stream_item(video_item, video_item_stream)
 
             next_page_token = playlist_response.get("nextPageToken")
             if not next_page_token:
                 break
 
-        self.save_data_to_file()
+        self.end_all_streams()
 
 
 def main():
