@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 import logging
+import inflection
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -35,7 +36,7 @@ class BaseExtractor:
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
 
-    def _sanitize_filename(self, identifier: str) -> str:
+    def _sanitize_filename(self, filename: str) -> str:
         """
         Sanitize the identifier to be safe for use in filenames across all systems.
         Removes/replaces invalid filename characters using a standard approach.
@@ -44,27 +45,27 @@ class BaseExtractor:
         invalid_chars = '<>:"/\\|?*'
 
         # First handle leading special characters
-        while identifier and (identifier[0] in invalid_chars or not identifier[0].isalnum()):
-            identifier = identifier[1:]
+        while filename and (filename[0] in invalid_chars or not filename[0].isalnum()):
+            filename = filename[1:]
 
         # Then replace remaining invalid characters with underscore
         for char in invalid_chars:
-            identifier = identifier.replace(char, '_')
+            filename = filename.replace(char, '_')
 
         # Replace spaces with underscore and remove any duplicate underscores
-        identifier = '_'.join(identifier.split())
-        while '__' in identifier:
-            identifier = identifier.replace('__', '_')
+        filename = '_'.join(filename.split())
+        while '__' in filename:
+            filename = filename.replace('__', '_')
 
-        return identifier.strip('_')
+        return filename.strip('_')
 
-    def _generate_filename(self, identifier: str, extension: str) -> str:
+    def _generate_filename(self, filename: str, extension: str) -> str:
         """Generate a timestamped filename with the given extension."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_identifier = self._sanitize_filename(identifier)
+        safe_identifier = self._sanitize_filename(filename)
         return f"{self.source_name}_{safe_identifier}_{timestamp}.{extension}"
 
-    def save_raw_data(self, data: Any, identifier: str) -> Path:
+    def save_raw_data(self, data: Any, filename: str) -> Path:
         """
         Save raw data to a JSON file in the data directory.
 
@@ -72,13 +73,13 @@ class BaseExtractor:
             data: Data to save (any JSON-serializable object)
             identifier: Unique identifier for the data (e.g., channel name, user handle)
         """
-        json_path = self._ensure_dir("raw") / self._generate_filename(identifier, "json")
+        json_path = self._ensure_dir("raw") / self._generate_filename(filename, "json")
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         print(f"Saved JSON file to: {json_path}")
         return json_path
 
-    def save_data(self, data: List[Dict[Any, Any]], identifier: str) -> None:
+    def save_data(self, data: List[Dict[Any, Any]], filename: str) -> None:
         """
         Save data to Parquet file in the data directory.
 
@@ -90,11 +91,11 @@ class BaseExtractor:
             print("No data to save.")
             return
 
-        parquet_path = self._ensure_dir("parquet") / self._generate_filename(identifier, "parquet")
+        parquet_path = self._ensure_dir("parquet") / self._generate_filename(filename, "parquet")
         pd.DataFrame(data).to_parquet(parquet_path)
         print(f"Saved Parquet file to: {parquet_path}")
 
-    def validate_and_convert_model(self, data: dict, model_class: Type[T], identifier: str) -> None:
+    def validate_and_convert_model(self, data: dict, model_class: Type[T], *, filename: str) -> None:
         """
         Validate dictionary data against a Pydantic model and store in self.data and self.raw_data.
 
@@ -103,11 +104,15 @@ class BaseExtractor:
             model_class: The Pydantic model class to validate against
             identifier: Unique identifier to use as key in self.data and self.raw_data dictionaries
         """
+        key = filename if filename else inflection.underscore(model_class.__name__)
         try:
             validated_model = model_class.model_validate(data)
-            self.raw_data[identifier] = data
-            self.data[identifier] = validated_model.model_dump()
+            self.data[key] = validated_model.model_dump()
+            self.raw_data[key] = data
         except ValidationError as e:
-            error_message = f"Validation error for identifier '{identifier}': {e}"
+            error_message = (
+                f"Validation error for identifier '{key}' with data: {json.dumps(data, ensure_ascii=False, indent=2)} \n"
+                f"Error: {e}"
+            )
             print(error_message)
             logging.error(error_message)
