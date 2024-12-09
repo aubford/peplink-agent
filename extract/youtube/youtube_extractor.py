@@ -2,8 +2,26 @@ from typing import List, Optional
 from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.youtube.VideoItem import VideoItem
-from config.config import config
+from config import config
 from extract.base_extractor import BaseExtractor
+import logging
+from logging.handlers import RotatingFileHandler
+
+# Configure rotating file handler
+handler = RotatingFileHandler(
+    'youtube_extractor.log',  # Log file name
+    maxBytes=10*1024*1024,    # Maximum file size in bytes (10 MB)
+    backupCount=0             # No backup files
+)
+
+# Set up logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# Get the logger and set its level
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
 
 class YouTubeExtractor(BaseExtractor):
     def __init__(self, username: str):
@@ -18,6 +36,7 @@ class YouTubeExtractor(BaseExtractor):
         self.youtube_client = build("youtube", "v3", developerKey=config.get("YOUTUBE_API_KEY"))
         self.channel_id = self._get_channel_id()
         self.uploads_playlist_id = self._get_uploads_playlist_id()
+        self.logger = logger
 
     def _get_channel_id(self) -> Optional[str]:
         """Get channel ID from username."""
@@ -45,7 +64,7 @@ class YouTubeExtractor(BaseExtractor):
         response = request.execute()
         return response["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
 
-    def fetch_videos_with_transcripts(self) -> List[dict]:
+    def fetch_videos_with_transcripts(self) -> None:
         """
         Fetch all public videos with their transcripts from the channel.
 
@@ -66,6 +85,7 @@ class YouTubeExtractor(BaseExtractor):
                 pageToken=next_page_token,
             )
             playlist_response = playlist_request.execute()
+            self.logger.debug(f"Playlist response: {playlist_response}")
 
             for item in playlist_response["items"]:
                 video_id = item["contentDetails"]["videoId"]
@@ -74,6 +94,7 @@ class YouTubeExtractor(BaseExtractor):
                     id=video_id
                 )
                 video_response = video_request.execute()
+                self.logger.debug(f"Video response for {video_id}: {video_response}")
 
                 if video_response["items"]:
                     video_item = video_response["items"][0]
@@ -86,6 +107,8 @@ class YouTubeExtractor(BaseExtractor):
                             video_item["transcript"] = docs[0].page_content
                         except Exception as e:
                             print(f"Could not load transcript for video {video_id}")
+                            self.logger.error(
+                                f"Could not load transcript for video {video_id}: {e}")
                             continue
                         self.validate_and_convert_model(video_item, VideoItem)
 
@@ -93,22 +116,13 @@ class YouTubeExtractor(BaseExtractor):
             if not next_page_token:
                 break
 
-        return videos_with_transcripts
+        self.save_data_to_file()
 
-    def save_videos(self, videos: List[dict]) -> None:
-        """
-        Save videos to JSON and Parquet files in the data directories.
-
-        Args:
-            videos: List of video items
-        """
-        self.save_data(videos, self.username)
 
 def main():
     """Example usage of YouTubeExtractor."""
     extractor = YouTubeExtractor("@peplink")
-    videos = extractor.fetch_videos_with_transcripts()
-    extractor.save_videos(videos)  # Will save to data/youtube by default
+    extractor.fetch_videos_with_transcripts()
 
 if __name__ == "__main__":
     main()
