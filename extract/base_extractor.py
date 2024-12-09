@@ -5,17 +5,27 @@ import json
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 import logging
+from logging.handlers import RotatingFileHandler
 import inflection
 import os
 
 T = TypeVar('T', bound=BaseModel)
 
-# Configure logging at the beginning of your module
-logging.basicConfig(
-    filename=os.path.join('logs', 'base_extractor.log'),
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+# Configure rotating file handler
+handler = RotatingFileHandler(
+    os.path.join('logs', 'base_extractor.log'),  # Log file name
+    maxBytes=10*1024*1024,    # Maximum file size in bytes (10 MB)
+    backupCount=0             # No backup files
 )
+
+# Set up logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# Get the logger and set its level
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+logger.addHandler(handler)
 
 class BaseExtractor:
     """Base class for all data extractors."""
@@ -127,4 +137,4 @@ class BaseExtractor:
                 f"Error: {e}"
             )
             print(error_message)
-            logging.error(error_message)
+            logger.error(error_message)
