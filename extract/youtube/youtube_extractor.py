@@ -84,11 +84,10 @@ class YouTubeExtractor(BaseExtractor):
                             loader = YoutubeLoader(video_id=video_id)
                             docs = loader.load()
                             video_item["transcript"] = docs[0].page_content
-                            video = VideoItem.model_validate(video_item)
-                            videos_with_transcripts.append(video.model_dump())
                         except Exception as e:
                             print(f"Could not load transcript for video {video_id}")
                             continue
+                        self.validate_and_convert_model(video_item, VideoItem)
 
             next_page_token = playlist_response.get("nextPageToken")
             if not next_page_token:
@@ -103,8 +102,7 @@ class YouTubeExtractor(BaseExtractor):
         Args:
             videos: List of video items
         """
-        identifier = self.username.replace('@', '')
-        self.save_data(videos,identifier)
+        self.save_data(videos, self.username)
 
 def main():
     """Example usage of YouTubeExtractor."""

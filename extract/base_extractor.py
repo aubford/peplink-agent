@@ -1,8 +1,19 @@
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, TypeVar, Type
 from datetime import datetime
 import json
 import pandas as pd
+from pydantic import BaseModel, ValidationError
+import logging
+
+T = TypeVar('T', bound=BaseModel)
+
+# Configure logging at the beginning of your module
+logging.basicConfig(
+    filename='extractor.log',
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 class BaseExtractor:
     """Base class for all data extractors."""
@@ -15,6 +26,8 @@ class BaseExtractor:
             source_name: Name of the data source (e.g., 'youtube', 'twitter', etc.)
         """
         self.source_name = source_name
+        self.raw_data: Dict[str, dict] = {}
+        self.data: Dict[str, dict] = {}
 
     def _ensure_dir(self, dir_type: str) -> Path:
         """Create and return path to a data directory of specified type."""
@@ -80,3 +93,21 @@ class BaseExtractor:
         parquet_path = self._ensure_dir("parquet") / self._generate_filename(identifier, "parquet")
         pd.DataFrame(data).to_parquet(parquet_path)
         print(f"Saved Parquet file to: {parquet_path}")
+
+    def validate_and_convert_model(self, data: dict, model_class: Type[T], identifier: str) -> None:
+        """
+        Validate dictionary data against a Pydantic model and store in self.data and self.raw_data.
+
+        Args:
+            data: Dictionary containing the data
+            model_class: The Pydantic model class to validate against
+            identifier: Unique identifier to use as key in self.data and self.raw_data dictionaries
+        """
+        try:
+            validated_model = model_class.model_validate(data)
+            self.raw_data[identifier] = data
+            self.data[identifier] = validated_model.model_dump()
+        except ValidationError as e:
+            error_message = f"Validation error for identifier '{identifier}': {e}"
+            print(error_message)
+            logging.error(error_message)
