@@ -1,29 +1,12 @@
-from typing import List, Optional
+import logging
+from typing import Optional
 from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.youtube.VideoItem import VideoItem
 from config import config
 from extract.base_extractor import BaseExtractor
-import logging
-from logging.handlers import RotatingFileHandler
-import json
-from pathlib import Path
 
-# Configure rotating file handler
-handler = RotatingFileHandler(
-    'youtube_extractor.log',  # Log file name
-    maxBytes=10*1024*1024,    # Maximum file size in bytes (10 MB)
-    backupCount=0             # No backup files
-)
-
-# Set up logging format
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-# Get the logger and set its level
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.addHandler(handler)
+logger = logging.getLogger('extractor')
 
 class YouTubeExtractor(BaseExtractor):
     def __init__(self, username: str):

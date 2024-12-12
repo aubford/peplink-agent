@@ -1,31 +1,40 @@
 from pathlib import Path
-from typing import List, Dict, Any, TypeVar, Type, Optional, Tuple
+from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 import json
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 import logging
-from logging.handlers import RotatingFileHandler
 import inflection
-import os
 
 T = TypeVar('T', bound=BaseModel)
 
-# Configure rotating file handler
-handler = RotatingFileHandler(
-    os.path.join('logs', 'base_extractor.log'),  # Log file name
-    maxBytes=10*1024*1024,    # Maximum file size in bytes (10 MB)
-    backupCount=0             # No backup files
-)
+logger = logging.getLogger('extractor')
 
-# Set up logging format
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
 
-# Get the logger and set its level
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
-logger.addHandler(handler)
+def sanitize_filename(filename: str) -> str:
+    """
+    Sanitize the identifier to be safe for use in filenames across all systems.
+    Removes/replaces invalid filename characters using a standard approach.
+    """
+    # Common invalid filename characters
+    invalid_chars = '<>:"/\\|?*'
+
+    # First handle leading special characters
+    while filename and (filename[0] in invalid_chars or not filename[0].isalnum()):
+        filename = filename[1:]
+
+    # Then replace remaining invalid characters with underscore
+    for char in invalid_chars:
+        filename = filename.replace(char, '_')
+
+    # Replace spaces with underscore and remove any duplicate underscores
+    filename = '_'.join(filename.split())
+    while '__' in filename:
+        filename = filename.replace('__', '_')
+
+    return filename.strip('_')
+
 
 class BaseExtractor:
     """Base class for all data extractors."""
@@ -47,29 +56,6 @@ class BaseExtractor:
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
 
-    def _sanitize_filename(self, filename: str) -> str:
-        """
-        Sanitize the identifier to be safe for use in filenames across all systems.
-        Removes/replaces invalid filename characters using a standard approach.
-        """
-        # Common invalid filename characters
-        invalid_chars = '<>:"/\\|?*'
-
-        # First handle leading special characters
-        while filename and (filename[0] in invalid_chars or not filename[0].isalnum()):
-            filename = filename[1:]
-
-        # Then replace remaining invalid characters with underscore
-        for char in invalid_chars:
-            filename = filename.replace(char, '_')
-
-        # Replace spaces with underscore and remove any duplicate underscores
-        filename = '_'.join(filename.split())
-        while '__' in filename:
-            filename = filename.replace('__', '_')
-
-        return filename.strip('_')
-
     def start_stream(self, model_class: Type[T], *, identifier: Optional[str] = None) -> str:
         """
         Start a new streaming session for a specific model type.
@@ -77,9 +63,10 @@ class BaseExtractor:
 
         Args:
             model_class: The Pydantic model class to stream
+            identifier: label
         """
         modelname = inflection.underscore(model_class.__name__)
-        safe_identifier = self._sanitize_filename(modelname) + (f"_{identifier}" if identifier else "")
+        safe_identifier = sanitize_filename(modelname) + (f"_{identifier}" if identifier else "")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{self.source_name}_{safe_identifier}_{timestamp}"
 
@@ -103,7 +90,7 @@ class BaseExtractor:
 
         Args:
             data: Dictionary containing the item data
-            model_class: The Pydantic model class to validate against
+            stream_key: Stream key
         """
         if stream_key not in self._active_streams:
             raise RuntimeError(f"Must call start_stream() for {stream_key} before streaming items")
@@ -140,7 +127,7 @@ class BaseExtractor:
         End a specific streaming session.
 
         Args:
-            model_class: The Pydantic model class whose stream to end
+            stream_key: Stream key
         """
         if stream_key not in self._active_streams:
             raise ValueError(f"No active stream for {stream_key}")

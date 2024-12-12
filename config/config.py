@@ -1,10 +1,13 @@
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 from typing import Any, Dict
+
 
 class Config:
     _instance = None
     _env_vars: Dict[str, Any] = {}
+    root_dir: Path
 
     def __new__(cls):
         if cls._instance is None:
@@ -14,6 +17,10 @@ class Config:
 
     def _initialize(self):
         """Initialize configuration by loading environment variables."""
+        root_dir = Path(__file__).parent.parent
+        os.chdir(root_dir)
+        self.root_dir = root_dir
+
         load_dotenv()
         self._load_environment_variables()
 
@@ -67,5 +74,15 @@ class Config:
         """Get all configuration values."""
         return self._env_vars.copy()
 
+
 # Create a global instance
 config = Config()
+
+# check that the correct work dir is set
+def main():
+    print(config.root_dir)
+    print(Path().resolve())
+
+
+if __name__ == "__main__":
+    main()
