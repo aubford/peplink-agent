@@ -88,12 +88,11 @@ class YouTubeExtractor(BaseExtractor):
                             loader = YoutubeLoader(video_id=video_id)
                             docs = loader.load()
                         except Exception as e:
-                            print(f"Could not load transcript for video {video_id}")
                             self.logger.error(
-                                f"Could not load transcript for video {video_id}: {e}")
+                                f"Could not load transcript for video {video_id}: {str(e)[:300]}")
                             continue
 
-                        video_item["transcript"] = docs[0].page_content
+                        video_item["transcript"] = docs[0].page_content if docs else None
                         self.stream_item(video_item, video_item_stream)
 
             next_page_token = playlist_response.get("nextPageToken")

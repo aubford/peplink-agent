@@ -47,10 +47,10 @@ class VideoItem(BaseModel):
     id: str
     kind: str
     etag: str
-    transcript: str
+    transcript: Optional[str] = None
     snippet: Snippet
     contentDetails: ContentDetails
     status: Status
     statistics: Statistics
     player: Player
-    topicDetails: Optional[TopicDetails]
+    topicDetails: Optional[TopicDetails] = None

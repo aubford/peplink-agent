@@ -107,10 +107,9 @@ class BaseExtractor:
             processed_data = validated_model.model_dump()
         except ValidationError as e:
             error_message = (
-                f"Validation error for {model_class.__name__} with data: {json.dumps(data, ensure_ascii=False, indent=2)} \n"
+                f"Validation error for model: {model_class.__name__}\n"
                 f"Error: {e}"
             )
-            print(error_message)
             logger.error(error_message)
             return
 

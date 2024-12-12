@@ -2,7 +2,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
-from typing import Optional
 
 
 class RotatingFileLogger(logging.Logger):
@@ -33,6 +32,3 @@ class RotatingFileLogger(logging.Logger):
         ))
         self.addHandler(handler)
 
-
-# Register our logger class
-logging.setLoggerClass(RotatingFileLogger)
