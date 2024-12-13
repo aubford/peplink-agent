@@ -40,9 +40,6 @@ class Statistics(BaseModel):
 class Player(BaseModel):
     embedHtml: str
 
-class TopicDetails(BaseModel):
-    topicCategories: List[str]
-
 class VideoItem(BaseModel):
     id: str
     kind: str
@@ -52,5 +49,3 @@ class VideoItem(BaseModel):
     contentDetails: ContentDetails
     status: Status
     statistics: Statistics
-    player: Player
-    topicDetails: Optional[TopicDetails] = None

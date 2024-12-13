@@ -1,4 +1,5 @@
 langchain_pepwave_env
+logs
 
 ### VisualStudioCode template
 .vscode/*
