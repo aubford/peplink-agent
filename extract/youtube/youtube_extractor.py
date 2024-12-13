@@ -16,7 +16,7 @@ class YouTubeExtractor(BaseExtractor):
         Args:
             username: YouTube channel username (e.g. "@channelname")
         """
-        super().__init__(source_name="youtube")
+        super().__init__(source_name="youtube_" + username)
         self.username = username
         self.youtube_client = build("youtube", "v3", developerKey=config.get("YOUTUBE_API_KEY"))
         self.channel_id = self._get_channel_id()

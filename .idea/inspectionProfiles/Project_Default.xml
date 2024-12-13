@@ -373,6 +373,8 @@
     <inspection_tool class="AngularUndefinedModuleExport" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="AngularUndefinedTag" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="AngularUnresolvedPipe" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="AngularUnsupportedSyntax" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="AngularUnusedComponentImport" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="Annotation" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="AnnotationClass" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="Annotator" enabled="true" level="ERROR" enabled_by_default="true" />
@@ -503,6 +505,7 @@
     <inspection_tool class="BashWrapWord" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="BatchJobDomInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="BatchXmlDomInspection" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="BeatScheduleCeleryTaskInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="BeforeClassOrAfterClassIsPublicStaticVoidNoArg" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="BeforeOrAfterIsPublicVoidNoArg" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="BigDecimalEquals" enabled="false" level="WARNING" enabled_by_default="false" />
@@ -749,6 +752,8 @@
     <inspection_tool class="ConfusingPlusesOrMinusesJS" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConnectionResource" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConstPropertyName" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="ConstanceFieldsetsMissingInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ConstanceSettingUsageInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConstantAssertArgument" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConstantAssertCondition" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConstantConditionIf" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
@@ -873,6 +878,7 @@
     <inspection_tool class="CyclomaticComplexity" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_limit" value="10" />
     </inspection_tool>
+    <inspection_tool class="CyclomaticComplexityInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="CyclomaticComplexityJS" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_limit" value="10" />
     </inspection_tool>
@@ -946,7 +952,13 @@
     <inspection_tool class="DollarSignInName" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="DontUsePairConstructor" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="DotEnvDuplicateKeyInspection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="DotEnvExtraBlankLineInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DotEnvIncorrectDelimiterInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DotEnvLeadingCharacterInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DotEnvLowercaseKeyInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DotEnvSpaceAroundSeparatorInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="DotEnvSpaceInsideNonQuotedInspection" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="DotEnvTrailingWhitespaceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="DoubleBraceInitialization" enabled="false" level="INFORMATION" enabled_by_default="false" />
     <inspection_tool class="DoubleCheckedLocking" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="ignoreOnVolatileVariables" value="false" />
@@ -1508,11 +1520,13 @@
     <inspection_tool class="HtmlUnknownTarget" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="HtmlWrongAttributeValue" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HttpClientInappropriateProtocolUsageInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="HttpClientRunRequestNameInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="HttpClientUnresolvedAuthId" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="HttpClientUnresolvedVariable" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HttpRequestContentLengthIsIgnored" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="HttpRequestCustomHttpMethodInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HttpRequestEnvironmentAuthConfigurationValidationInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="HttpRequestJsonBodyInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="HttpRequestPlaceholder" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="HttpRequestRequestSeparatorJsonBodyInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="HttpRequestRequestSeparatorXmlBodyInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
@@ -2530,6 +2544,7 @@
     <inspection_tool class="PyShadowingNamesInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="PySimplifyBooleanCheckInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="PySingleQuotedDocstringInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="PySparkDataFrameColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PyStatementEffectInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PyStringExceptionInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="PyStringFormatInspection" enabled="false" level="WARNING" enabled_by_default="false" />
@@ -2863,7 +2878,11 @@
     </inspection_tool>
     <inspection_tool class="SortModifiers" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="SortedCollectionWithNonComparableKeys" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="SpellCheckingInspection" enabled="true" level="TYPO" enabled_by_default="true" />
+    <inspection_tool class="SpellCheckingInspection" enabled="true" level="TYPO" enabled_by_default="true">
+      <option name="processCode" value="true" />
+      <option name="processLiterals" value="true" />
+      <option name="processComments" value="true" />
+    </inspection_tool>
     <inspection_tool class="SpringAopErrorsInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="SpringAopWarningsInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SpringBatchModel" enabled="false" level="ERROR" enabled_by_default="false" />
@@ -2962,6 +2981,7 @@
     <inspection_tool class="SqlInsertIntoGeneratedColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SqlInsertNullIntoNotNullInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SqlInsertValuesInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlJoinCountInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SqlJoinWithoutOnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SqlMisleadingReferenceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SqlMissingColumnAliasesInspection" enabled="false" level="WARNING" enabled_by_default="false" />

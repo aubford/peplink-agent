@@ -3,6 +3,7 @@ from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 import json
 import pandas as pd
+from fastparquet import write
 from pydantic import BaseModel, ValidationError
 import logging
 import inflection
@@ -115,11 +116,11 @@ class BaseExtractor:
 
         # Stream processed data
         df = pd.DataFrame([processed_data])
-        # If file doesn't exist, write with schema, otherwise append
+
         if not parquet_path.exists():
-            df.to_parquet(parquet_path)
+            write(parquet_path, df)
         else:
-            df.to_parquet(parquet_path, append=True)
+            write(parquet_path, df, append=True)
 
     def end_stream(self, stream_key: str) -> None:
         """
