@@ -2,8 +2,6 @@ from pathlib import Path
 from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 import json
-import pandas as pd
-from fastparquet import write
 from pydantic import BaseModel, ValidationError
 import logging
 import inflection
@@ -48,8 +46,8 @@ class BaseExtractor:
             source_name: Name of the data source (e.g., 'youtube', 'twitter', etc.)
         """
         self.source_name = source_name
-        # Dictionary to track active streams: filename -> (raw_path, parquet_path)
-        self._active_streams: Dict[str, Tuple[Type[T], Path, Path]] = {}
+        # Dictionary to track active streams: filename -> (model_class, raw_path)
+        self._active_streams: Dict[str, Tuple[Type[T], Path]] = {}
 
     def _ensure_dir(self, dir_type: str) -> Path:
         """Create and return path to a data directory of specified type."""
@@ -60,16 +58,16 @@ class BaseExtractor:
     def start_stream(self, model_class: Type[T], *, identifier: Optional[str] = None) -> str:
         """
         Start a new streaming session for a specific model type.
-        Creates new files for both raw and processed data.
+        Creates new file for raw data.
 
         Args:
             model_class: The Pydantic model class to stream
             identifier: label
         """
         modelname = inflection.underscore(model_class.__name__)
-        safe_identifier = sanitize_filename(modelname) + (f"_{identifier}" if identifier else "")
+        safe_identifier = sanitize_filename(modelname (f"_{identifier}" if identifier else "")) 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.source_name}_{safe_identifier}_{timestamp}"
+        filename = f"{self.source_name}_{safe_identifier}__T_{timestamp}"
 
         # Check if stream already exists using the stream_key
         if safe_identifier in self._active_streams:
@@ -77,17 +75,15 @@ class BaseExtractor:
 
         # Set up raw data file (JSONL)
         raw_path = self._ensure_dir("raw") / f"{filename}.jsonl"
-        # Set up processed data file (Parquet)
-        parquet_path = self._ensure_dir("parquet") / f"{filename}.parquet"
 
-        self._active_streams[safe_identifier] = (model_class, raw_path, parquet_path)
+        self._active_streams[safe_identifier] = (model_class, raw_path)
 
-        print(f"Started stream for {safe_identifier}:\nRaw: {raw_path}\nProcessed: {parquet_path}")
+        print(f"Started stream for {safe_identifier}:\nRaw: {raw_path}")
         return safe_identifier
 
     def stream_item(self, data: Dict[str, Any], stream_key: str) -> None:
         """
-        Validate and stream a single item to both raw and processed files.
+        Validate and stream a single item to raw file.
 
         Args:
             data: Dictionary containing the item data
@@ -96,11 +92,7 @@ class BaseExtractor:
         if stream_key not in self._active_streams:
             raise RuntimeError(f"Must call start_stream() for {stream_key} before streaming items")
 
-        model_class, raw_path, parquet_path = self._active_streams[stream_key]
-
-        # Stream raw data
-        with open(raw_path, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(data, ensure_ascii=False) + '\n')
+        model_class, raw_path = self._active_streams[stream_key]
 
         # Validate data
         try:
@@ -114,13 +106,9 @@ class BaseExtractor:
             logger.error(error_message)
             return
 
-        # Stream processed data
-        df = pd.DataFrame([processed_data])
-
-        if not parquet_path.exists():
-            write(parquet_path, df)
-        else:
-            write(parquet_path, df, append=True)
+        # Stream raw data
+        with open(raw_path, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(processed_data, ensure_ascii=False) + '\n')
 
     def end_stream(self, stream_key: str) -> None:
         """

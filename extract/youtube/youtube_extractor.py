@@ -8,6 +8,7 @@ from extract.base_extractor import BaseExtractor
 
 logger = logging.getLogger('extractor')
 
+
 class YouTubeExtractor(BaseExtractor):
     def __init__(self, username: str):
         """
@@ -16,7 +17,7 @@ class YouTubeExtractor(BaseExtractor):
         Args:
             username: YouTube channel username (e.g. "@channelname")
         """
-        super().__init__(source_name="youtube_" + username)
+        super().__init__(source_name="youtube")
         self.username = username
         self.youtube_client = build("youtube", "v3", developerKey=config.get("YOUTUBE_API_KEY"))
         self.channel_id = self._get_channel_id()
@@ -57,7 +58,7 @@ class YouTubeExtractor(BaseExtractor):
         if not self.uploads_playlist_id:
             return
 
-        video_item_stream = self.start_stream(VideoItem)
+        video_item_stream = self.start_stream(VideoItem, identifier=self.username)
 
         next_page_token = None
         while True:
@@ -106,6 +107,7 @@ def main():
     """Example usage of YouTubeExtractor."""
     extractor = YouTubeExtractor("@peplink")
     extractor.fetch_videos_with_transcripts()
+
 
 if __name__ == "__main__":
     main()
