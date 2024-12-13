@@ -17,7 +17,7 @@ def sanitize_filename(filename: str) -> str:
     Removes/replaces invalid filename characters using a standard approach.
     """
     # Common invalid filename characters
-    invalid_chars = '<>:"/\\|?*'
+    invalid_chars = '<>:"/\\|?*@'
 
     # First handle leading special characters
     while filename and (filename[0] in invalid_chars or not filename[0].isalnum()):
@@ -65,7 +65,7 @@ class BaseExtractor:
             identifier: label
         """
         modelname = inflection.underscore(model_class.__name__)
-        safe_identifier = sanitize_filename(modelname (f"_{identifier}" if identifier else "")) 
+        safe_identifier = sanitize_filename(modelname + (f"_{identifier}" if identifier else ""))
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{self.source_name}_{safe_identifier}__T_{timestamp}"
 
