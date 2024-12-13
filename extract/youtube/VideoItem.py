@@ -33,9 +33,9 @@ class Status(BaseModel):
 
 class Statistics(BaseModel):
     viewCount: str
-    likeCount: str
     favoriteCount: str
-    commentCount: str
+    likeCount: Optional[str] = None
+    commentCount: Optional[str] = None
 
 class Player(BaseModel):
     embedHtml: str

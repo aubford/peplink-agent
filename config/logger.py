@@ -2,6 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
+import sys
 
 
 class RotatingFileLogger(logging.Logger):
@@ -22,13 +23,18 @@ class RotatingFileLogger(logging.Logger):
         # Set default log file if none provided
         log_file = os.path.join('logs', f'{name}.log')
 
+        # Create common formatter
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
         # Configure rotating file handler
-        handler = RotatingFileHandler(
+        file_handler = RotatingFileHandler(
             log_file,
             maxBytes=10 * 1024 * 1024  # 10 MB
         )
-        handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        ))
-        self.addHandler(handler)
+        file_handler.setFormatter(formatter)
+        self.addHandler(file_handler)
 
+        # Add console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        self.addHandler(console_handler)

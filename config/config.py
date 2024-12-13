@@ -1,11 +1,9 @@
-import logging
 
 from dotenv import load_dotenv
 import os
 import pandas as pd
 from pathlib import Path
 from typing import Any, Dict
-from config.logger import RotatingFileLogger
 
 
 class Config:
@@ -27,7 +25,6 @@ class Config:
 
         load_dotenv()
         pd.options.io.parquet.engine = 'fastparquet'
-        logging.setLoggerClass(RotatingFileLogger)
         self._load_environment_variables()
 
     def _load_environment_variables(self):

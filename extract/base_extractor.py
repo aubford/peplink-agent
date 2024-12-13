@@ -3,12 +3,11 @@ from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 import json
 from pydantic import BaseModel, ValidationError
-import logging
 import inflection
+from config import RotatingFileLogger
+import logging
 
 T = TypeVar('T', bound=BaseModel)
-
-logger = logging.getLogger('extractor')
 
 
 def sanitize_filename(filename: str) -> str:
@@ -43,11 +42,15 @@ class BaseExtractor:
         Initialize the base extractor.
 
         Args:
-            source_name: Name of the data source (e.g., 'youtube', 'twitter', etc.)
+            source_name: Name of the data source and folder it should exist under in data/(e.g., 'youtube', 'reddit', etc.)
         """
         self.source_name = source_name
-        # Dictionary to track active streams: filename -> (model_class, raw_path)
         self._active_streams: Dict[str, Tuple[Type[T], Path]] = {}
+        self.logger = logging.getLogger(source_name)
+        self.validation_error_items = []
+
+    def set_logger(self, name: str):
+        self.logger = RotatingFileLogger(sanitize_filename(name))
 
     def _ensure_dir(self, dir_type: str) -> Path:
         """Create and return path to a data directory of specified type."""
@@ -65,7 +68,7 @@ class BaseExtractor:
             identifier: label
         """
         modelname = inflection.underscore(model_class.__name__)
-        safe_identifier = sanitize_filename(modelname + (f"_{identifier}" if identifier else ""))
+        safe_identifier = sanitize_filename(f"{modelname}_{identifier if identifier else ''}")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{self.source_name}_{safe_identifier}__T_{timestamp}"
 
@@ -78,7 +81,7 @@ class BaseExtractor:
 
         self._active_streams[safe_identifier] = (model_class, raw_path)
 
-        print(f"Started stream for {safe_identifier}:\nRaw: {raw_path}")
+        self.logger.info(f"Started stream for {safe_identifier}:\nRaw: {raw_path}")
         return safe_identifier
 
     def stream_item(self, data: Dict[str, Any], stream_key: str) -> None:
@@ -99,11 +102,12 @@ class BaseExtractor:
             validated_model = model_class.model_validate(data)
             processed_data = validated_model.model_dump()
         except ValidationError as e:
+            self.validation_error_items.append(data)
             error_message = (
                 f"Validation error for model: {model_class.__name__}\n"
                 f"Error: {e}"
             )
-            logger.error(error_message)
+            self.logger.error(error_message)
             return
 
         # Stream raw data

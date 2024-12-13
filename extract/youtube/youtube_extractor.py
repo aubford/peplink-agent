@@ -1,12 +1,9 @@
-import logging
 from typing import Optional
 from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.youtube.VideoItem import VideoItem
 from config import config
 from extract.base_extractor import BaseExtractor
-
-logger = logging.getLogger('extractor')
 
 
 class YouTubeExtractor(BaseExtractor):
@@ -17,38 +14,45 @@ class YouTubeExtractor(BaseExtractor):
         Args:
             username: YouTube channel username (e.g. "@channelname")
         """
-        super().__init__(source_name="youtube")
+        source_name = "youtube"
+        super().__init__(source_name)
         self.username = username
-        self.youtube_client = build("youtube", "v3", developerKey=config.get("YOUTUBE_API_KEY"))
-        self.channel_id = self._get_channel_id()
-        self.uploads_playlist_id = self._get_uploads_playlist_id()
-        self.logger = logger
+        self.set_logger(f"{source_name}_{username}")
+        self.youtube_client = build(
+            "youtube", "v3", developerKey=config.get("YOUTUBE_API_KEY"))
+        self.channel_id = None
+        self.uploads_playlist_id = None
 
     def _get_channel_id(self) -> Optional[str]:
         """Get channel ID from username."""
         request = self.youtube_client.search().list(
-            part='snippet',
+            part='id,snippet',
             q=self.username,
             type='channel',
-            maxResults=1
+            maxResults=10
         )
         response = request.execute()
 
         if response['items']:
-            return response['items'][0]['snippet']['channelId']
-        return None
+            self.channel_id = response['items'][0]['snippet']['channelId']
+        else:
+            raise FileNotFoundError(f"Channel {self.username} not found.  Response: {response}")
 
-    def _get_uploads_playlist_id(self) -> Optional[str]:
+    def get_uploads_playlist_id(self) -> Optional[str]:
         """Get uploads playlist ID for the channel."""
-        if not self.channel_id:
-            return None
+        channel_id = self._get_channel_id()
 
         request = self.youtube_client.channels().list(
             part="contentDetails",
-            id=self.channel_id
+            id=channel_id
         )
         response = request.execute()
-        return response["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+        uploads_playlist_id = response["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+        if not uploads_playlist_id:
+            raise FileNotFoundError(
+                f"Could not find uploads playlist for {self.username} with channel ID {channel_id}")
+        self.uploads_playlist_id = uploads_playlist_id
+        return self.uploads_playlist_id
 
     def fetch_videos_with_transcripts(self) -> None:
         """
@@ -56,9 +60,11 @@ class YouTubeExtractor(BaseExtractor):
         Each video is processed and written immediately.
         """
         if not self.uploads_playlist_id:
-            return
+            raise SystemError(
+                f"Could not find uploads playlist for {self.username}")
 
-        video_item_stream = self.start_stream(VideoItem, identifier=self.username)
+        video_item_stream = self.start_stream(
+            VideoItem, identifier=self.username)
 
         next_page_token = None
         while True:
@@ -101,13 +107,3 @@ class YouTubeExtractor(BaseExtractor):
                 break
 
         self.end_all_streams()
-
-
-def main():
-    """Example usage of YouTubeExtractor."""
-    extractor = YouTubeExtractor("@peplink")
-    extractor.fetch_videos_with_transcripts()
-
-
-if __name__ == "__main__":
-    main()
