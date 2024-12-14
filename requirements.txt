@@ -21,3 +21,4 @@ pydantic_core==2.27.0
 pandas==2.2.3
 inflection==0.5.1
 fastparquet==2024.11.0
+praw==7.8.1

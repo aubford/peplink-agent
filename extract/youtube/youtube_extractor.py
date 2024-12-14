@@ -1,13 +1,11 @@
-from typing import Optional
 from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.youtube.VideoItem import VideoItem
-from config import config
 from extract.base_extractor import BaseExtractor
-
+from config import ConfigType
 
 class YouTubeExtractor(BaseExtractor):
-    def __init__(self, username: str):
+    def __init__(self, username: str, config: ConfigType):
         """
         Initialize YouTubeExtractor for a specific channel.
 
@@ -23,10 +21,10 @@ class YouTubeExtractor(BaseExtractor):
         self.channel_id = None
         self.uploads_playlist_id = None
 
-    def _get_channel_id(self) -> Optional[str]:
+    def _get_channel_id(self) -> None:
         """Get channel ID from username."""
         request = self.youtube_client.search().list(
-            part='id,snippet',
+            part='snippet',
             q=self.username,
             type='channel',
             maxResults=10
@@ -38,19 +36,19 @@ class YouTubeExtractor(BaseExtractor):
         else:
             raise FileNotFoundError(f"Channel {self.username} not found.  Response: {response}")
 
-    def get_uploads_playlist_id(self) -> Optional[str]:
+    def get_uploads_playlist_id(self) -> str:
         """Get uploads playlist ID for the channel."""
-        channel_id = self._get_channel_id()
+        self._get_channel_id()
 
         request = self.youtube_client.channels().list(
             part="contentDetails",
-            id=channel_id
+            id=self.channel_id
         )
         response = request.execute()
         uploads_playlist_id = response["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
         if not uploads_playlist_id:
             raise FileNotFoundError(
-                f"Could not find uploads playlist for {self.username} with channel ID {channel_id}")
+                f"Could not find uploads playlist for {self.username} with channel ID {self.channel_id}")
         self.uploads_playlist_id = uploads_playlist_id
         return self.uploads_playlist_id
 
