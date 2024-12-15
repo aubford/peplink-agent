@@ -78,11 +78,11 @@ class Config:
 
 
 # Create a global instance
-config = Config()
+global_config = Config()
 
 # check that the correct work dir is set
 def main():
-    print(config.root_dir)
+    print(global_config.root_dir)
     print(Path().resolve())
 
 

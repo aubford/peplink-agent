@@ -2,7 +2,7 @@ from langchain_community.document_loaders import RedditPostsLoader
 from langchain_core.documents import Document
 from typing import List
 from toolz import keyfilter
-from config import config, ConfigType
+from config import global_config, ConfigType
 from extract.base_extractor import BaseExtractor
 from util.util import serialize_document, deduplicate_page_content
 
@@ -59,6 +59,6 @@ class RedditPostExtractor(BaseExtractor):
         return serialized
 
 
-extractor = RedditPostExtractor(config, ['Peplink'])
+extractor = RedditPostExtractor(global_config, ['Peplink'])
 data = extractor.extract()
 extractor.write_json(data, "peplink")
