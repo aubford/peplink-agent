@@ -29,7 +29,7 @@ class RotatingFileLogger(logging.Logger):
         # Configure rotating file handler
         file_handler = RotatingFileHandler(
             log_file,
-            maxBytes=10 * 1024 * 1024  # 10 MB
+            maxBytes=20 * 1024 * 1024  # 10 MB
         )
         file_handler.setFormatter(formatter)
         self.addHandler(file_handler)

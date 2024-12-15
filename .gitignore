@@ -1,5 +1,8 @@
 langchain_pepwave_env
 logs
+data
+!data/**/*.py
+data_backup
 
 ### VisualStudioCode template
 .vscode/*

@@ -1,12 +1,12 @@
 from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
-from extract.youtube.VideoItem import VideoItem
 from extract.base_extractor import BaseExtractor
+from extract.youtube.VideoItem import VideoItem
 from config import ConfigType
 from util.util import serialize_document
 
 class YouTubeExtractor(BaseExtractor):
-    def __init__(self, username: str, config: ConfigType):
+    def __init__(self, _config: ConfigType, username: str):
         """
         Initialize YouTubeExtractor for a specific channel.
 
@@ -18,7 +18,7 @@ class YouTubeExtractor(BaseExtractor):
         self.username = username
         self.set_logger(f"{source_name}_{username}")
         self.youtube_client = build(
-            "youtube", "v3", developerKey=config.get("YOUTUBE_API_KEY"))
+            "youtube", "v3", developerKey=_config.get("YOUTUBE_API_KEY"))
         self.channel_id = None
         self.uploads_playlist_id = None
 
@@ -37,7 +37,7 @@ class YouTubeExtractor(BaseExtractor):
         else:
             raise FileNotFoundError(f"Channel {self.username} not found.  Response: {response}")
 
-    def get_uploads_playlist_id(self) -> str:
+    def get_uploads_playlist_id(self):
         """Get uploads playlist ID for the channel."""
         self._get_channel_id()
 
@@ -51,7 +51,7 @@ class YouTubeExtractor(BaseExtractor):
             raise FileNotFoundError(
                 f"Could not find uploads playlist for {self.username} with channel ID {self.channel_id}")
         self.uploads_playlist_id = uploads_playlist_id
-        return self.uploads_playlist_id
+        print(f"Uploads playlist ID for {self.username}: {self.uploads_playlist_id}")
 
     def fetch_videos_with_transcripts(self) -> None:
         """

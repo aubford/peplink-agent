@@ -4,8 +4,20 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.vscode" />
       <excludeFolder url="file://$MODULE_DIR$/langchain_pepwave_env" />
+      <excludeFolder url="file://$MODULE_DIR$/data_backup" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at ~/workspace/langchain-pepwave/langchain_pepwave_env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PyNamespacePackagesService">
+    <option name="namespacePackageFolders">
+      <list>
+        <option value="$MODULE_DIR$/extract" />
+        <option value="$MODULE_DIR$/util" />
+        <option value="$MODULE_DIR$/load" />
+        <option value="$MODULE_DIR$/transform" />
+        <option value="$MODULE_DIR$/config" />
+      </list>
+    </option>
   </component>
 </module>

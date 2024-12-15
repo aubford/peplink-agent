@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 
 class Thumbnail(BaseModel):
     url: str
@@ -39,12 +39,16 @@ class Statistics(BaseModel):
 
 class Player(BaseModel):
     embedHtml: str
+    
+class Document(BaseModel):
+    page_content: str
+    metadata: dict
 
 class VideoItem(BaseModel):
     id: str
     kind: str
     etag: str
-    transcript: Optional[str] = None
+    transcript: Optional[Document] = None
     snippet: Snippet
     contentDetails: ContentDetails
     status: Status

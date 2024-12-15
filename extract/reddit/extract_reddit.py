@@ -8,7 +8,7 @@ from util.util import serialize_document, deduplicate_page_content
 
 
 class RedditPostExtractor(BaseExtractor):
-    def __init__(self, search_queries: List[str], _config: ConfigType):
+    def __init__(self, _config: ConfigType, search_queries: List[str]):
         super().__init__("reddit")
         self.loader = RedditPostsLoader(
             client_id=_config.get("REDDIT_CLIENT_ID"),
@@ -59,6 +59,6 @@ class RedditPostExtractor(BaseExtractor):
         return serialized
 
 
-extractor = RedditPostExtractor(['Peplink'], config)
+extractor = RedditPostExtractor(config, ['Peplink'])
 data = extractor.extract()
 extractor.write_json(data, "peplink")
