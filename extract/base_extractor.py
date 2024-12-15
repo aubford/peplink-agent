@@ -67,6 +67,7 @@ class BaseExtractor:
 
     def write_json(self, data: list[Document | dict], identifier: str):
         file_path = self._ensure_dir("raw") / f"{self._get_filename(identifier)}.json"
+        print(f"Writing {len(data)} documents to {file_path}")
         with open(file_path, "w") as json_file:
             json_file.write(dumps(data, ensure_ascii=False))
 
