@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from langchain_core.documents import Document
 
 class Thumbnail(BaseModel):
     url: str

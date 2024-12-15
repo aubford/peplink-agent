@@ -2,9 +2,7 @@ from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.base_extractor import BaseExtractor
 from extract.youtube.VideoItem import VideoItem
-from config import ConfigType
 from util.util import serialize_document
-from langchain_core.documents import Document
 
 
 class YouTubeExtractor(BaseExtractor):

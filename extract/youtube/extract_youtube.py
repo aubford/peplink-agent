@@ -13,13 +13,8 @@ class YouTubeExtractorManager(ExtractorManager):
 
 # %%
 
-fg_store = YouTubeExtractor('@5Gstore')
-fg_store.get_uploads_playlist_id()
-# fg_store.fetch_videos_with_transcripts()
-
-# %%
-
-manager = YouTubeExtractorManager(['@MobileInternetResourceCenter', '@Frontierus', '@MobileMustHave', '@Technorv'])
+# ['@MobileInternetResourceCenter', '@Frontierus', '@MobileMustHave', '@Technorv', '@Peplink', '@5Gstore']
+manager = YouTubeExtractorManager(['@Peplink', '@MobileMustHave', '@Technorv', '@5Gstore'])
 manager.fetch_all()
 
 # %%
