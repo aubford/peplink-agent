@@ -3,6 +3,7 @@ from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.youtube.VideoItem import VideoItem
 from extract.base_extractor import BaseExtractor
 from config import ConfigType
+from util.util import serialize_document
 
 class YouTubeExtractor(BaseExtractor):
     def __init__(self, username: str, config: ConfigType):
@@ -97,7 +98,7 @@ class YouTubeExtractor(BaseExtractor):
                                 f"Could not load transcript for video {video_id}: {str(e)[:300]}")
                             continue
 
-                        video_item["transcript"] = docs[0].page_content if docs else None
+                        video_item["transcript"] = serialize_document(docs[0]) if docs else None
                         self.stream_item(video_item, video_item_stream)
 
             next_page_token = playlist_response.get("nextPageToken")

@@ -1,11 +1,13 @@
+import json
+import inflection
+import logging
 from pathlib import Path
 from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
-import json
 from pydantic import BaseModel, ValidationError
-import inflection
 from config import RotatingFileLogger
-import logging
+from langchain_core.load import dumps
+from langchain_core.documents import Document
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -58,6 +60,16 @@ class BaseExtractor:
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
 
+    def _get_filename(self, identifier: str) -> str:
+        sanitized_identifier = sanitize_filename(identifier)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{self.source_name}_{sanitized_identifier}__T_{timestamp}"
+
+    def write_json(self, data: list[Document | dict], identifier: str):
+        file_path = self._ensure_dir("raw") / f"{self._get_filename(identifier)}.json"
+        with open(file_path, "w") as json_file:
+            json_file.write(dumps(data, ensure_ascii=False))
+
     def start_stream(self, model_class: Type[T], *, identifier: Optional[str] = None) -> str:
         """
         Start a new streaming session for a specific model type.
@@ -69,8 +81,7 @@ class BaseExtractor:
         """
         modelname = inflection.underscore(model_class.__name__)
         safe_identifier = sanitize_filename(f"{modelname}_{identifier if identifier else ''}")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.source_name}_{safe_identifier}__T_{timestamp}"
+        filename = self._get_filename(safe_identifier)
 
         # Check if stream already exists using the stream_key
         if safe_identifier in self._active_streams:
