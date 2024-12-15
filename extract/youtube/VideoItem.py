@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from langchain_core.documents import Document
 
 class Thumbnail(BaseModel):
     url: str
@@ -39,17 +40,16 @@ class Statistics(BaseModel):
 
 class Player(BaseModel):
     embedHtml: str
-    
-class Document(BaseModel):
-    page_content: str
-    metadata: dict
 
-class VideoItem(BaseModel):
+class VideoItemMetadata(BaseModel):
     id: str
     kind: str
     etag: str
-    transcript: Optional[Document] = None
     snippet: Snippet
     contentDetails: ContentDetails
     status: Status
     statistics: Statistics
+
+class VideoItem(BaseModel):
+    page_content: str
+    metadata: VideoItemMetadata

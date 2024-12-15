@@ -2,17 +2,16 @@ from langchain_community.document_loaders import RedditPostsLoader
 from langchain_core.documents import Document
 from typing import List
 from toolz import keyfilter
-from config import global_config, ConfigType
 from extract.base_extractor import BaseExtractor
 from util.util import serialize_document, deduplicate_page_content
 
 
 class RedditPostExtractor(BaseExtractor):
-    def __init__(self, _config: ConfigType, search_queries: List[str]):
+    def __init__(self, search_queries: List[str]):
         super().__init__("reddit")
         self.loader = RedditPostsLoader(
-            client_id=_config.get("REDDIT_CLIENT_ID"),
-            client_secret=_config.get("REDDIT_CLIENT_SECRET"),
+            client_id=self.config.get("REDDIT_CLIENT_ID"),
+            client_secret=self.config.get("REDDIT_CLIENT_SECRET"),
             user_agent="Mozilla/5.0 (compatible; MyBot/1.0; +https://www.example.com)",
             categories=["hot", "new", "top", "rising"],
             mode="subreddit",
@@ -59,6 +58,6 @@ class RedditPostExtractor(BaseExtractor):
         return serialized
 
 
-extractor = RedditPostExtractor(global_config, ['Peplink'])
+extractor = RedditPostExtractor(['Peplink'])
 data = extractor.extract()
 extractor.write_json(data, "peplink")

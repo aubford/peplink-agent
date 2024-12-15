@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import json
 import inflection
 import logging
@@ -5,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
-from config import RotatingFileLogger
+from config import RotatingFileLogger, global_config, ConfigType
 from langchain_core.load import dumps
 from langchain_core.documents import Document
 
@@ -36,7 +37,7 @@ def sanitize_filename(filename: str) -> str:
     return filename.strip('_')
 
 
-class BaseExtractor:
+class BaseExtractor(ABC):
     """Base class for all data extractors."""
 
     def __init__(self, source_name: str):
@@ -50,6 +51,23 @@ class BaseExtractor:
         self._active_streams: Dict[str, Tuple[Type[T], Path]] = {}
         self.logger = logging.getLogger(source_name)
         self.validation_error_items = []
+
+    @property
+    def config(self) -> ConfigType:
+        """Get the global config singleton."""
+        return global_config
+
+    @abstractmethod
+    def extract(self) -> Any:
+        """Extract data according to implementation-specific rules.
+
+            Returns:
+                The extracted data in implementation-specific format.
+
+            Raises:
+                NotImplementedError: If the subclass does not implement this method.
+            """
+        pass
 
     def set_logger(self, name: str):
         self.logger = RotatingFileLogger(sanitize_filename(name))

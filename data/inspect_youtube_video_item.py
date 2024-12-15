@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 DATA_ITEM = 'youtube'
-raw_path = Path().resolve() / DATA_ITEM / 'raw'
+raw_path = Path(__file__).parent / DATA_ITEM / 'raw'
 
 # get the latest parquet file
 raw_files = list(raw_path.glob('*.jsonl'))
@@ -35,5 +35,7 @@ def get_column_json_info(df: pd.DataFrame, column_name: str) -> list[str]:
 # %%
 
 
-get_column_json_info(mainframe, 'topicDetails')
-display(mainframe['player'][1])
+mainframe.iloc[1]
+
+
+# %%

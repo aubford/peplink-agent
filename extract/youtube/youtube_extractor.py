@@ -4,9 +4,11 @@ from extract.base_extractor import BaseExtractor
 from extract.youtube.VideoItem import VideoItem
 from config import ConfigType
 from util.util import serialize_document
+from langchain_core.documents import Document
+
 
 class YouTubeExtractor(BaseExtractor):
-    def __init__(self, _config: ConfigType, username: str):
+    def __init__(self, username: str):
         """
         Initialize YouTubeExtractor for a specific channel.
 
@@ -18,7 +20,7 @@ class YouTubeExtractor(BaseExtractor):
         self.username = username
         self.set_logger(f"{source_name}_{username}")
         self.youtube_client = build(
-            "youtube", "v3", developerKey=_config.get("YOUTUBE_API_KEY"))
+            "youtube", "v3", developerKey=self.config.get("YOUTUBE_API_KEY"))
         self.channel_id = None
         self.uploads_playlist_id = None
 
@@ -37,7 +39,7 @@ class YouTubeExtractor(BaseExtractor):
         else:
             raise FileNotFoundError(f"Channel {self.username} not found.  Response: {response}")
 
-    def get_uploads_playlist_id(self):
+    def get_uploads_playlist_id(self) -> None:
         """Get uploads playlist ID for the channel."""
         self._get_channel_id()
 
@@ -98,11 +100,16 @@ class YouTubeExtractor(BaseExtractor):
                                 f"Could not load transcript for video {video_id}: {str(e)[:300]}")
                             continue
 
-                        video_item["transcript"] = serialize_document(docs[0]) if docs else None
-                        self.stream_item(video_item, video_item_stream)
+                        serialized = serialize_document(docs[0]) if docs else {"page_content": "", "metadata": {}}
+                        serialized["metadata"] = video_item
+                        self.stream_item(serialized, video_item_stream)
 
             next_page_token = playlist_response.get("nextPageToken")
             if not next_page_token:
                 break
 
         self.end_all_streams()
+
+    def extract(self) -> None:
+        self.get_uploads_playlist_id()
+        self.fetch_videos_with_transcripts()
