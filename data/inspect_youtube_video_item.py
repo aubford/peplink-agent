@@ -7,7 +7,10 @@ from pathlib import Path
 DATA_ITEM = 'youtube'
 raw_path = Path(__file__).parent / DATA_ITEM / 'raw'
 
-# get the latest parquet file
+# %%
+
+# JSONL File Inspection
+
 raw_files = list(raw_path.glob('*.jsonl'))
 latest_raw_file = max(raw_files, key=lambda x: x.stat().st_mtime)
 
@@ -34,8 +37,30 @@ def get_column_json_info(df: pd.DataFrame, column_name: str) -> list[str]:
 
 # %%
 
-
 mainframe.iloc[1]
+
+# %%
+backup_filename = 'reddit_peplink__T_20241215_013334.json'
+json_path = Path("..").resolve() / 'data_backup' / backup_filename
+json_frame = pd.read_json(json_path)
+
+print(json_frame['page_content'].dtype)
+
+# First check what we're dealing with
+print("Original dtype:", json_frame['page_content'].dtype)
+print("Sample value type:", type(json_frame['page_content'].iloc[0]))
+
+# Try forced conversion through pd.Series
+json_frame['page_content'] = pd.Series(json_frame['page_content'].values, dtype="string")
+
+# Verify the conversion
+print("New dtype:", json_frame['page_content'].dtype)
+
+print(f"Number of elements in json_frame: {len(json_frame)}")
+display(json_frame['page_content'].describe())
+
+
+
 
 
 # %%

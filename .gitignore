@@ -3,6 +3,7 @@ logs
 data
 !data/**/*.py
 data_backup
+!data_backup/**/*.py
 
 ### VisualStudioCode template
 .vscode/*

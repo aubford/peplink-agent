@@ -14,7 +14,7 @@ class YouTubeExtractorManager(ExtractorManager):
 # %%
 
 # ['@MobileInternetResourceCenter', '@Frontierus', '@MobileMustHave', '@Technorv', '@Peplink', '@5Gstore']
-manager = YouTubeExtractorManager(['@Peplink', '@MobileMustHave', '@Technorv', '@5Gstore'])
+manager = YouTubeExtractorManager(['@5Gstore'])
 manager.fetch_all()
 
 # %%
