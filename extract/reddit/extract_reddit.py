@@ -55,9 +55,8 @@ class RedditPostExtractor(BaseExtractor):
         deduplicated = deduplicate_page_content(documents)
         print(f"Deduplicated to {len(deduplicated)} documents")
         serialized = [self.serialize_doc(document) for document in deduplicated]
-        return serialized
+        self.write_json(serialized, self.file_id)
 
 
 extractor = RedditPostExtractor(['Peplink'])
-data = extractor.extract()
-extractor.write_json(data, "peplink")
+extractor.extract()

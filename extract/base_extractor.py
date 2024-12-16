@@ -1,40 +1,19 @@
 from abc import ABC, abstractmethod
-import json
 import inflection
-import logging
 from pathlib import Path
 from typing import Dict, Any, TypeVar, Type, Optional, Tuple
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
 from config import RotatingFileLogger, global_config, ConfigType
 from langchain_core.load import dumps
-from langchain_core.documents import Document
+from util.util import sanitize_filename
 
 T = TypeVar('T', bound=BaseModel)
 
 
-def sanitize_filename(filename: str) -> str:
-    """
-    Sanitize the identifier to be safe for use in filenames across all systems.
-    Removes/replaces invalid filename characters using a standard approach.
-    """
-    # Common invalid filename characters
-    invalid_chars = '<>:"/\\|?*@'
-
-    # First handle leading special characters
-    while filename and (filename[0] in invalid_chars or not filename[0].isalnum()):
-        filename = filename[1:]
-
-    # Then replace remaining invalid characters with underscore
-    for char in invalid_chars:
-        filename = filename.replace(char, '_')
-
-    # Replace spaces with underscore and remove any duplicate underscores
-    filename = '_'.join(filename.split())
-    while '__' in filename:
-        filename = filename.replace('__', '_')
-
-    return filename.strip('_')
+class Ldoc(BaseModel):
+    page_content: str
+    metadata: dict
 
 
 class BaseExtractor(ABC):
@@ -49,7 +28,7 @@ class BaseExtractor(ABC):
         """
         self.source_name = source_name
         self._active_streams: Dict[str, Tuple[Type[T], Path]] = {}
-        self.logger = logging.getLogger(source_name)
+        self.set_logger(source_name)
         self.validation_error_items = []
 
     @property
@@ -58,7 +37,7 @@ class BaseExtractor(ABC):
         return global_config
 
     @abstractmethod
-    def extract(self) -> Any:
+    def extract(self) -> None:
         """Extract data according to implementation-specific rules.
 
             Returns:
@@ -83,7 +62,7 @@ class BaseExtractor(ABC):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{self.source_name}_{sanitized_identifier}__T_{timestamp}"
 
-    def write_json(self, data: list[Document | dict], identifier: str):
+    def write_json(self, data: list[dict], identifier: str):
         file_path = self._ensure_dir("raw") / f"{self._get_filename(identifier)}.json"
         print(f"Writing {len(data)} documents to {file_path}")
         with open(file_path, "w") as json_file:
@@ -142,7 +121,7 @@ class BaseExtractor(ABC):
 
         # Stream raw data
         with open(raw_path, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(processed_data, ensure_ascii=False) + '\n')
+            f.write(dumps(processed_data, ensure_ascii=False) + '\n')
 
     def end_stream(self, stream_key: str) -> None:
         """

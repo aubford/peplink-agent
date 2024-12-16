@@ -20,21 +20,19 @@ class RotatingFileLogger(logging.Logger):
         log_dir = Path('logs')
         log_dir.mkdir(exist_ok=True)
 
-        # Set default log file if none provided
-        log_file = os.path.join('logs', f'{name}.log')
-
         # Create common formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
         # Configure rotating file handler
         file_handler = RotatingFileHandler(
-            log_file,
-            maxBytes=20 * 1024 * 1024  # 10 MB
+            os.path.join('logs', f'{name}.log'),
+            maxBytes=20 * 1024 * 1024,  # 20 MB
         )
         file_handler.setFormatter(formatter)
         self.addHandler(file_handler)
 
-        # Add console handler
+        # Configure console handler with same formatter
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
+        console_handler.setLevel(log_level)  # Set same level as logger
         self.addHandler(console_handler)

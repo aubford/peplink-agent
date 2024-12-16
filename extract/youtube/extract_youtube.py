@@ -1,7 +1,7 @@
 # %%
 from extract.extractor_manager import ExtractorManager
 from extract.youtube.youtube_channel_extractor import YouTubeChannelExtractor
-
+from extract.youtube.youtube_videos_extractor import YouTubeVideosExtractor
 
 class YouTubeExtractorManager(ExtractorManager):
     def __init__(self, channels):
@@ -13,10 +13,12 @@ class YouTubeExtractorManager(ExtractorManager):
 
 # %%
 
-# ['@MobileInternetResourceCenter', '@Frontierus', '@MobileMustHave', '@Technorv', '@Peplink', '@5Gstore']
-manager = YouTubeExtractorManager(['@5Gstore'])
+# ['@NetworkDirection', '@MobileInternetResourceCenter', '@Frontierus', '@MobileMustHave', '@Technorv', '@Peplink', '@5Gstore']
+manager = YouTubeExtractorManager(['@5Gstore', '@NetworkDirection'])
 manager.fetch_all()
 
-# %%
-print(manager.extractors)
-manager.fetch_all()
+#%%
+
+
+extractors = YouTubeVideosExtractor("extra_videos", video_ids=['0PbTi_Prpgs', '_IOZ8_cPgu8', 'oHQvWa6J8dU',])
+extractors.extract()
