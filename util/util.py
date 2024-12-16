@@ -8,6 +8,7 @@ def serialize_document(document: Document) -> Dict[str, Any]:
         "metadata": document.metadata
     }
 
+
 def deduplicate_page_content(documents: List[Document]) -> List[Document]:
     """Remove documents with duplicate page_content while preserving order.
 
@@ -25,3 +26,7 @@ def deduplicate_page_content(documents: List[Document]) -> List[Document]:
             seen.add(content)
             deduped.append(doc)
     return deduped
+
+
+def empty_document_dict(metadata: Dict[str, Any] = {}) -> Dict[str, Any]:
+    return {"page_content": "", "metadata": metadata}

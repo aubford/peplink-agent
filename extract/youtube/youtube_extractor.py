@@ -2,7 +2,7 @@ from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.base_extractor import BaseExtractor
 from extract.youtube.VideoItem import VideoItem
-from util.util import serialize_document
+from util.util import serialize_document, empty_document_dict
 
 
 class YouTubeExtractor(BaseExtractor):
@@ -53,6 +53,31 @@ class YouTubeExtractor(BaseExtractor):
         self.uploads_playlist_id = uploads_playlist_id
         print(f"Uploads playlist ID for {self.username}: {self.uploads_playlist_id}")
 
+    def fetch_video(self, video_id: str) -> dict:
+        video_request = self.youtube_client.videos().list(
+            part="status,contentDetails,snippet,statistics,topicDetails,localizations,player,recordingDetails",
+            id=video_id
+        )
+        video_response = video_request.execute()
+        self.logger.debug(f"Video response for {video_id}: {video_response}")
+
+        if video_response["items"]:
+            video_item = video_response["items"][0]
+            is_public = video_item["status"]["privacyStatus"] == "public"
+
+            if is_public:
+                try:
+                    loader = YoutubeLoader(video_id=video_id)
+                    docs = loader.load()
+                except Exception as e:
+                    self.logger.error(
+                        f"Could not load transcript for video {video_id}: {str(e)[:300]}")
+                    return empty_document_dict(video_item)
+
+                serialized = serialize_document(docs[0]) if docs else empty_document_dict(video_item)
+                serialized["metadata"] = video_item
+                return serialized
+
     def fetch_videos_with_transcripts(self) -> None:
         """
         Fetch all public videos with their transcripts from the channel and stream them to files.
@@ -78,29 +103,8 @@ class YouTubeExtractor(BaseExtractor):
 
             for item in playlist_response["items"]:
                 video_id = item["contentDetails"]["videoId"]
-                video_request = self.youtube_client.videos().list(
-                    part="status,contentDetails,snippet,statistics,topicDetails,localizations,player,recordingDetails",
-                    id=video_id
-                )
-                video_response = video_request.execute()
-                self.logger.debug(f"Video response for {video_id}: {video_response}")
-
-                if video_response["items"]:
-                    video_item = video_response["items"][0]
-                    is_public = video_item["status"]["privacyStatus"] == "public"
-
-                    if is_public:
-                        try:
-                            loader = YoutubeLoader(video_id=video_id)
-                            docs = loader.load()
-                        except Exception as e:
-                            self.logger.error(
-                                f"Could not load transcript for video {video_id}: {str(e)[:300]}")
-                            continue
-
-                        serialized = serialize_document(docs[0]) if docs else {"page_content": "", "metadata": {}}
-                        serialized["metadata"] = video_item
-                        self.stream_item(serialized, video_item_stream)
+                video = self.fetch_video(video_id)
+                self.stream_item(video, video_item_stream)
 
             next_page_token = playlist_response.get("nextPageToken")
             if not next_page_token:
