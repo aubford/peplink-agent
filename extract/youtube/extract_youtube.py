@@ -1,12 +1,12 @@
 # %%
 from extract.extractor_manager import ExtractorManager
-from extract.youtube.youtube_extractor import YouTubeExtractor
+from extract.youtube.youtube_channel_extractor import YouTubeChannelExtractor
 
 
 class YouTubeExtractorManager(ExtractorManager):
     def __init__(self, channels):
         super().__init__([
-            YouTubeExtractor(channel)
+            YouTubeChannelExtractor(channel)
             for channel in channels
         ])
 

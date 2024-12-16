@@ -38,7 +38,7 @@ def sanitize_filename(filename: str) -> str:
 
 
 class BaseExtractor(ABC):
-    """Base class for all data extractors."""
+    """Base class for all data extractors.  Enforces a common folders structure in the data dir."""
 
     def __init__(self, source_name: str):
         """
