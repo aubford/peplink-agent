@@ -28,7 +28,7 @@ class BaseExtractor(ABC):
         """
         self.source_name = source_name
         self._active_streams: Dict[str, Tuple[Type[T], Path]] = {}
-        self.set_logger(source_name)
+        self.logger = RotatingFileLogger(sanitize_filename(source_name))
         self.validation_error_items = []
 
     @property

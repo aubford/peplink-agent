@@ -38,7 +38,7 @@ def sanitize_filename(filename: str) -> str:
     Removes/replaces invalid filename characters using a standard approach.
     """
     # Common invalid filename characters including period
-    invalid_chars = '<>:"/\\|?*@.'
+    invalid_chars = '<>:"/\\|?*@.-'
 
     # First handle leading special characters
     while filename and (filename[0] in invalid_chars or not filename[0].isalnum()):
