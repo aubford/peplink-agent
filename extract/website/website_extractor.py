@@ -1,5 +1,3 @@
-# %%
-
 from langchain_community.document_loaders import RecursiveUrlLoader
 from bs4 import BeautifulSoup
 from extract.base_extractor import BaseExtractor, Ldoc
@@ -44,19 +42,3 @@ class WebsiteExtractor(BaseExtractor):
         for doc in self.loader.lazy_load():
             self.stream_item(serialize_document(doc), stream_key)
         self.end_stream(stream_key)
-
-#%%
-extractor = WebsiteExtractor("https://www.peplink.com/")
-extractor.extract()
-
-#%%
-extractor = WebsiteExtractor("https://www.martinlangmaid.com/2014/12/15/managing-multiple-wan-links-peplink-routers")
-extractor.extract()
-
-#%%
-extractor = WebsiteExtractor("https://www.peplink.com/company/about-us/glossary-and-definitions/")
-extractor.extract()
-
-#%%
-extractor = WebsiteExtractor("https://www.peplink.com/technology/speedfusion-bonding-technology/")
-extractor.extract()

@@ -1,8 +1,5 @@
-#%%
-
 from langchain_community.document_loaders import RedditPostsLoader
 from langchain_core.documents import Document
-from typing import List
 from toolz import keyfilter
 from extract.base_extractor import BaseExtractor
 from util.util import serialize_document, deduplicate_page_content
@@ -52,25 +49,10 @@ class RedditPostExtractor(BaseExtractor):
             metadata['post_author'] = filtered
         return serialized_document
 
-    def extract(self) -> List[dict]:
+    def extract(self) -> None:
         documents = self.loader.load()
         print(f"Fetched {len(documents)} documents")
         deduplicated = deduplicate_page_content(documents)
         print(f"Deduplicated to {len(deduplicated)} documents")
         serialized = [self.serialize_doc(document) for document in deduplicated]
         self.write_json(serialized, self.subreddit)
-
-#%%
-
-pep_extractor = RedditPostExtractor('Peplink')
-pep_extractor.extract()
-
-#%%
-
-net_extractor = RedditPostExtractor('networking')
-net_extractor.extract()
-
-#%%
-
-sys_extractor = RedditPostExtractor('sysadmin')
-sys_extractor.extract()
