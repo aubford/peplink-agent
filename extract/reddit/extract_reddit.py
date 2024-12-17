@@ -1,3 +1,5 @@
+#%%
+
 from langchain_community.document_loaders import RedditPostsLoader
 from langchain_core.documents import Document
 from typing import List
@@ -7,7 +9,7 @@ from util.util import serialize_document, deduplicate_page_content
 
 
 class RedditPostExtractor(BaseExtractor):
-    def __init__(self, search_queries: List[str]):
+    def __init__(self, subreddit: str):
         super().__init__("reddit")
         self.loader = RedditPostsLoader(
             client_id=self.config.get("REDDIT_CLIENT_ID"),
@@ -15,9 +17,10 @@ class RedditPostExtractor(BaseExtractor):
             user_agent="Mozilla/5.0 (compatible; MyBot/1.0; +https://www.example.com)",
             categories=["hot", "new", "top", "rising"],
             mode="subreddit",
-            search_queries=search_queries,
+            search_queries=[subreddit],
             number_posts=5000
         )
+        self.subreddit = subreddit
 
     @staticmethod
     def serialize_doc(document: Document) -> dict:
@@ -55,8 +58,19 @@ class RedditPostExtractor(BaseExtractor):
         deduplicated = deduplicate_page_content(documents)
         print(f"Deduplicated to {len(deduplicated)} documents")
         serialized = [self.serialize_doc(document) for document in deduplicated]
-        self.write_json(serialized, self.file_id)
+        self.write_json(serialized, self.subreddit)
 
+#%%
 
-extractor = RedditPostExtractor(['Peplink'])
-extractor.extract()
+pep_extractor = RedditPostExtractor('Peplink')
+pep_extractor.extract()
+
+#%%
+
+net_extractor = RedditPostExtractor('networking')
+net_extractor.extract()
+
+#%%
+
+sys_extractor = RedditPostExtractor('sysadmin')
+sys_extractor.extract()

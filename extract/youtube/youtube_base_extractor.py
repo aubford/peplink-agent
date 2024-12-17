@@ -37,20 +37,20 @@ class YouTubeBaseExtractor(BaseExtractor, ABC):
 
         if video_response["items"]:
             video_item = video_response["items"][0]
-            is_public = video_item["status"]["privacyStatus"] == "public"
+            # is_public = video_item["status"]["privacyStatus"] == "public"
 
-            if is_public:
-                try:
-                    loader = YoutubeLoader(video_id=video_id)
-                    docs = loader.load()
-                except Exception as e:
-                    self.logger.error(
-                        f"Could not load transcript for video {video_id}: {str(e)[:300]}")
-                    return empty_document_dict(video_item)
+            # if is_public:
+            try:
+                loader = YoutubeLoader(video_id=video_id)
+                docs = loader.load()
+            except Exception as e:
+                self.logger.error(
+                    f"Could not load transcript for video {video_id}: {str(e)[:300]}")
+                return empty_document_dict(video_item)
 
-                serialized = serialize_document(docs[0]) if docs else empty_document_dict(video_item)
-                serialized["metadata"] = video_item
-                return serialized
+            serialized = serialize_document(docs[0]) if docs else empty_document_dict(video_item)
+            serialized["metadata"] = video_item
+            return serialized
 
 
     def fetch_videos_for_playlist(self, playlist_id: str) -> None:

@@ -22,3 +22,12 @@ class YouTubeVideosExtractor(YouTubeBaseExtractor):
             self.stream_item(video, video_item_stream)
 
         self.end_stream(video_item_stream)
+
+
+class YouTubePlaylistExtractor(YouTubeBaseExtractor):
+    def __init__(self, file_id: str, playlist_id: str):
+        super().__init__(file_id)
+        self.playlist_id = playlist_id
+
+    def extract(self) -> None:
+        self.fetch_videos_for_playlist(self.playlist_id)

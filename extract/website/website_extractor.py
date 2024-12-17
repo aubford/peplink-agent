@@ -17,10 +17,10 @@ class WebsiteExtractor(BaseExtractor):
             use_async=False,
             max_depth=max_depth,
             extractor=self._extract_content,
-            prevent_outside=True,
-            headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            },
+            # prevent_outside=True,
+            # headers={
+            #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            # },
             exclude_dirs=(
                 "/cart", "/login", "/account", "/search", "/pdf", ".pdf", "/wp-admin/", "/wp-includes/", "/cgi-bin/",
                 "/private/", "/tmp/", "/admin/", "/login/", "/user/", "/dashboard/", "/scripts/", "/styles/")
@@ -45,7 +45,18 @@ class WebsiteExtractor(BaseExtractor):
             self.stream_item(serialize_document(doc), stream_key)
         self.end_stream(stream_key)
 
+#%%
+extractor = WebsiteExtractor("https://www.peplink.com/")
+extractor.extract()
 
-extractor = WebsiteExtractor("https://www.javatpoint.com/fundamentals-of-computer-networking",
-                             base_url="https://www.javatpoint.com")
+#%%
+extractor = WebsiteExtractor("https://www.martinlangmaid.com/2014/12/15/managing-multiple-wan-links-peplink-routers")
+extractor.extract()
+
+#%%
+extractor = WebsiteExtractor("https://www.peplink.com/company/about-us/glossary-and-definitions/")
+extractor.extract()
+
+#%%
+extractor = WebsiteExtractor("https://www.peplink.com/technology/speedfusion-bonding-technology/")
 extractor.extract()
