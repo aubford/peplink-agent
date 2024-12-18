@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "label": "Open in Jetbrains Python",
+        "type": "process",
+        "command": "dataspell",
+        "args": [
+            "--line",
+            "${lineNumber}",
+            "${file}"
+        ],
+        "presentation": {
+            "reveal": "never"
+        },
+        "problemMatcher": []
+    }
+]
+}
