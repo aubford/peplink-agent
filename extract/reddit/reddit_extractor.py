@@ -26,21 +26,20 @@ class RedditPostExtractor(BaseExtractor):
         post_author = metadata['post_author']
         if post_author is not None:
             pick_keys = {'id',
-                         'total_karma',
                          'verified',
                          'fullname',
                          'has_subscribed',
                          'has_verified_email',
-                         'hide_from_robots',
                          'accept_followers',
                          'awardee_karma',
                          'awarder_karma',
                          'comment_karma',
+                         'total_karma',
+                         'link_karma',
                          'is_blocked',
                          'is_employee',
                          'is_gold',
                          'is_mod',
-                         'link_karma',
                          'name'}
             filtered = keyfilter(
                 pick_keys.__contains__,

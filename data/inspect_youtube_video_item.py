@@ -40,7 +40,7 @@ def get_column_json_info(df: pd.DataFrame, column_name: str) -> list[str]:
 mainframe.iloc[1]
 
 # %%
-backup_filename = 'reddit_peplink__T_20241215_013334.json'
+backup_filename = 'reddit_peplink_OP_only__T_20241215_013334.json'
 json_path = Path("..").resolve() / 'data_backup' / backup_filename
 json_frame = pd.read_json(json_path)
 
