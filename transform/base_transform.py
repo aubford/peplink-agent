@@ -1,6 +1,7 @@
 from abc import abstractmethod
 import logging
 from typing import Any, Dict
+from config import global_config, ConfigType
 import pandas as pd
 from fastparquet import write
 from pathlib import Path
@@ -15,8 +16,13 @@ class BaseTransform:
     def __init__(self, folder_name: str):
         self.folder_name = folder_name
 
+    @property
+    def config(self) -> ConfigType:
+        """Get the global config singleton."""
+        return global_config
+
     @abstractmethod
-    def transform(self, data: Dict[str, Any]) -> pd.DataFrame:
+    def transform_file(self, data: Dict[str, Any]) -> pd.DataFrame:
         """Transform the data according to implementation-specific rules.
 
         Args:
@@ -27,7 +33,7 @@ class BaseTransform:
         """
         pass
 
-    def process_files(self) -> None:
+    def transform(self) -> None:
         """Process all files in raw directory and save to staging."""
         raw_dir = Path("data") / self.folder_name / "raw"
         staging_dir = self._ensure_dir()
@@ -37,7 +43,7 @@ class BaseTransform:
 
         for file_path in raw_dir.glob("*"):
             try:
-                df = self.transform(file_path)
+                df = self.transform_file(file_path)
                 output_path = staging_dir / f"{file_path.stem}.parquet"
                 write(output_path, df)
 
