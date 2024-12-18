@@ -23,7 +23,7 @@ class Config:
         self.root_dir = root_dir
 
         load_dotenv()
-        pd.options.io.parquet.engine = 'fastparquet'
+        # pd.options.io.parquet.engine = 'fastparquet'
         self._load_environment_variables()
 
     def _load_environment_variables(self):
