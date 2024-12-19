@@ -2,11 +2,12 @@ import pandas as pd
 from pathlib import Path
 from load.base_load import BaseLoad
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 
 
-class YoutubeLoad(BaseLoad):
+class PdfLoad(BaseLoad):
     def __init__(self):
-        super().__init__("youtube")
+        super().__init__("pdf")
 
     def load_file(self, file_path: Path) -> pd.DataFrame:
 
@@ -17,14 +18,15 @@ class YoutubeLoad(BaseLoad):
             length_function=len,
         )
 
-        documents = self.parquet_to_documents(file_path)
+        loader = PyPDFLoader(file_path)
+        documents = loader.load()
+        
         print(documents)
-        split_docs = text_splitter.split_documents(documents)
-        print(split_docs)
 
+        # split_docs = text_splitter.split_documents(documents)
         # self.store_documents(split_docs)
 
 
 if __name__ == "__main__":
-    youtube_load = YoutubeLoad()
-    youtube_load.load()
+    pdf_load = PdfLoad()
+    pdf_load.load()

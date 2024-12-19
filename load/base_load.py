@@ -75,6 +75,10 @@ class BaseLoad:
             documents.append(doc)
         return documents
 
-    def store_documents(self, documents: List[Document], namespace: str = index_namespaces.PEPWAVE_NAMESPACE) -> None:
+    def parquet_to_documents(self, file_path: Path) -> List[Document]:
+        df = self.parquet_to_df(file_path)
+        return self.df_to_documents(df)
+
+    def store_documents(self, documents: List[Document], namespace: str = index_namespaces.PEPWAVE) -> None:
         """Store documents in vector store."""
         self.vector_store.add_documents(documents, namespace=namespace)
