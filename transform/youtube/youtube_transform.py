@@ -51,7 +51,8 @@ class YouTubeTransform(BaseTransform):
                     # Statistics (favorite_count not included because it only has zeroes)
                     'view_count':  statistics['viewCount'],
                     'like_count': statistics['likeCount'],
-                    'comment_count': statistics['commentCount']
+                    'comment_count': statistics['commentCount'],
+                    'word_count': len(data['page_content'].split())
                 }
                 videos.append(video)
 
@@ -63,3 +64,8 @@ class YouTubeTransform(BaseTransform):
         df['comment_count'] = pd.to_numeric(df['comment_count'], errors='coerce').fillna(0).astype('Int64')
 
         return df
+
+
+if __name__ == "__main__":
+    transformer = YouTubeTransform()
+    transformer.transform()

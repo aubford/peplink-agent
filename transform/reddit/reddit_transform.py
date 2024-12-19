@@ -72,3 +72,8 @@ class RedditTransform(BaseTransform):
         #     df[field] = df[field].fillna(False).astype(bool)
 
         return df
+
+
+if __name__ == "__main__":
+    transformer = RedditTransform()
+    transformer.transform()

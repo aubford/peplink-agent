@@ -24,14 +24,6 @@ class BaseTransform:
 
     @abstractmethod
     def transform_file(self, data: Dict[str, Any]) -> pd.DataFrame:
-        """Transform the data according to implementation-specific rules.
-
-        Args:
-            data: Dictionary containing the raw data
-
-        Returns:
-            DataFrame containing the transformed data
-        """
         pass
 
     def transform(self) -> None:

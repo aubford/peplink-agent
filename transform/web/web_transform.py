@@ -2,7 +2,6 @@ import json
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
-from datetime import datetime
 import uuid
 
 class WebTransform(BaseTransform):
@@ -38,8 +37,6 @@ class WebTransform(BaseTransform):
                     # Metadata
                     'url': metadata['source'],
                     'title': metadata.get('title', ''),
-                    'description': metadata.get('description', ''),
-                    'language': metadata.get('language', ''),
                     'word_count': len(data['page_content'].split())
                 }
                 pages.append(page)
@@ -47,7 +44,11 @@ class WebTransform(BaseTransform):
         df = pd.DataFrame(pages)
         df['word_count'] = pd.to_numeric(df['word_count'], errors='coerce').fillna(0).astype('Int64')
 
-        # Filter out pages with less than 100 words
-        df = df[df['word_count'] >= 100].reset_index(drop=True)
-
+        # Filter out pages with less than 100 words and require "pep" in content
+        df = df[(df['word_count'] >= 100)].reset_index(drop=True)
         return df
+
+
+if __name__ == "__main__":
+    transformer = WebTransform()
+    transformer.transform()

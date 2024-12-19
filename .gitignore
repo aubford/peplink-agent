@@ -2,8 +2,8 @@ langchain_pepwave_env
 logs
 data
 !data/**/*.py
-data_backup
-!data_backup/**/*.py
+backup_data
+!backup_data/**/*.py
 
 ### VisualStudioCode template
 .vscode/*

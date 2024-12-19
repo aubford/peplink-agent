@@ -1,7 +1,7 @@
 # %%
 
 from pathlib import Path
-from transform.reddit_transform import RedditTransform
+from transform.reddit.reddit_transform import RedditTransform
 import pandas as pd
 from IPython.display import display
 
