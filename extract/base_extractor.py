@@ -13,7 +13,7 @@ T = TypeVar('T', bound=BaseModel)
 
 class Ldoc(BaseModel):
     page_content: str
-    metadata: dict
+    metadata: Dict[str, Any]
 
 
 class BaseExtractor(ABC):

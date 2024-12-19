@@ -25,7 +25,7 @@ df.info()
 display(df[df['like_count'].isna()])
 
 def print_column_transformation(column_name):
-    display(list(zip(df[column_name].unique(), dfc[column_name].unique()))[0:20])
+    display(list(zip(df[column_name].unique(), df[column_name].unique()))[0:20])
 
 display(df[['comment_count', 'like_count', 'view_count']].describe())
 # print(df['comment_count'].dtype)  # Should show Int64

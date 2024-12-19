@@ -1,57 +1,23 @@
-from langchain_community.document_loaders import RedditPostsLoader
-from langchain_core.documents import Document
-from toolz import keyfilter
-from extract.base_extractor import BaseExtractor
-from util.util import serialize_document, deduplicate_page_content
-
+from extract.reddit.ForkedRedditPostsLoader import ForkedRedditPostsLoader
+from extract.base_extractor import BaseExtractor, Ldoc
+from util.util import serialize_document
+import time
 
 class RedditPostExtractor(BaseExtractor):
     def __init__(self, subreddit: str):
         super().__init__("reddit")
-        self.loader = RedditPostsLoader(
+        self.loader = ForkedRedditPostsLoader(
             client_id=self.config.get("REDDIT_CLIENT_ID"),
             client_secret=self.config.get("REDDIT_CLIENT_SECRET"),
             user_agent="Mozilla/5.0 (compatible; MyBot/1.0; +https://www.example.com)",
             categories=["hot", "new", "top", "rising"],
-            mode="subreddit",
-            search_queries=[subreddit],
-            number_posts=5000
+            search_queries=[subreddit]
         )
         self.subreddit = subreddit
 
-    @staticmethod
-    def serialize_doc(document: Document) -> dict:
-        serialized_document = serialize_document(document)
-        metadata = serialized_document["metadata"]
-        post_author = metadata['post_author']
-        if post_author is not None:
-            pick_keys = {'id',
-                         'verified',
-                         'fullname',
-                         'has_subscribed',
-                         'has_verified_email',
-                         'accept_followers',
-                         'awardee_karma',
-                         'awarder_karma',
-                         'comment_karma',
-                         'total_karma',
-                         'link_karma',
-                         'is_blocked',
-                         'is_employee',
-                         'is_gold',
-                         'is_mod',
-                         'name'}
-            filtered = keyfilter(
-                pick_keys.__contains__,
-                post_author.__dict__
-            )
-            metadata['post_author'] = filtered
-        return serialized_document
-
     def extract(self) -> None:
-        documents = self.loader.load()
-        print(f"Fetched {len(documents)} documents")
-        deduplicated = deduplicate_page_content(documents)
-        print(f"Deduplicated to {len(deduplicated)} documents")
-        serialized = [self.serialize_doc(document) for document in deduplicated]
-        self.write_json(serialized, self.subreddit)
+        stream_key = self.start_stream(Ldoc, identifier=self.subreddit)
+        for doc in self.loader.lazy_load():
+            self.stream_item(serialize_document(doc), stream_key)
+            # time.sleep(1)
+        self.end_stream(stream_key)
