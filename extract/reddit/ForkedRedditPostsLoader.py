@@ -72,15 +72,15 @@ class ForkedRedditPostsLoader(BaseLoader):
             if post.id in self.seen:
                 continue
             metadata = {
-                "post_subreddit": post.subreddit_name_prefixed,
-                "post_subreddit_id": post.subreddit_id,
-                "post_category": category,
-                "post_title": post.title,
-                "post_score": post.score,
-                "post_id": post.id,
-                "post_url": post.url,
+                "subreddit": post.subreddit_name_prefixed,
+                "subreddit_id": post.subreddit_id,
+                "category": category,
+                "title": post.title,
+                "score": post.score,
+                "id": post.id,
+                "url": post.url,
                 "post_author": self._format_author(post.author),
-                "post_comments": self._get_comments(post.comments, roots_only=True)}
+                "comments": self._get_comments(post.comments, roots_only=True)}
             self.seen.add(post.id)
             yield Document(page_content=post.selftext, metadata=metadata, )
 
@@ -102,7 +102,7 @@ class ForkedRedditPostsLoader(BaseLoader):
             "id": comment.id,
             "body": comment.body,
             "score": comment.score,
-            "author": self._format_author(comment.author),
+            "comment_author": self._format_author(comment.author),
             "created_utc": comment.created_utc,
             "edited": comment.edited,
             "distinguished": comment.distinguished,
