@@ -35,7 +35,7 @@ class BaseTransform:
         pass
 
     def transform(self) -> None:
-        """Process all files in raw directory and save to staging."""
+        """Process all files in raw directory and save to documents."""
         raw_dir = Path("data") / self.folder_name / "raw"
         staging_dir = self._ensure_dir()
 
@@ -53,7 +53,7 @@ class BaseTransform:
                 raise e
 
     def _ensure_dir(self) -> Path:
-        """Create and return path to staging directory."""
-        dir_path = Path("data") / self.folder_name / "staging"
+        """Create and return path to documents directory."""
+        dir_path = Path("data") / self.folder_name / "documents"
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
