@@ -1,20 +1,33 @@
 from abc import abstractmethod
-import logging
 from typing import Any, Dict
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
 from langchain.docstore.document import Document
+from typing import List
+from types import SimpleNamespace
+from pinecone import Pinecone
+from langchain_pinecone import PineconeVectorStore
+from langchain.embeddings import OpenAIEmbeddings
+from config.logger import RotatingFileLogger
+
+index_namespaces = SimpleNamespace(
+    PEPWAVE="pepwave",
+    NETWORKING="networking"
+)
 
 
-logger = logging.getLogger('loader')
-
-
-class BaseLoader:
+class BaseLoad:
     """Base class for all data transformers."""
 
     def __init__(self, folder_name: str):
         self.folder_name = folder_name
+        self.index_namespaces = index_namespaces
+        self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
+
+        pc = Pinecone(api_key=self.config.get("PINECONE_API_KEY"))
+        index = pc.Index("pepwave")
+        self.vector_store = PineconeVectorStore(index=index, embedding=OpenAIEmbeddings())
 
     @property
     def config(self) -> ConfigType:
@@ -36,8 +49,19 @@ class BaseLoader:
                 self.load_file(file_path)
 
             except Exception as e:
-                logger.error(f"Error processing {file_path}")
+                self.logger.error(f"Error processing {file_path}")
                 raise e
+
+    def parquet_to_df(self, file_path: Path) -> pd.DataFrame:
+        if not str(file_path).endswith('.parquet'):
+            raise FileNotFoundError(f"File {file_path} is not a parquet file")
+
+        df = pd.read_parquet(file_path)
+
+        if df.empty:
+            raise ValueError(f"File {file_path} is empty")
+
+        return df
 
     def df_to_documents(self, df: pd.DataFrame) -> List[Document]:
         documents = []
@@ -50,3 +74,7 @@ class BaseLoader:
             )
             documents.append(doc)
         return documents
+
+    def store_documents(self, documents: List[Document], namespace: str = index_namespaces.PEPWAVE_NAMESPACE) -> None:
+        """Store documents in vector store."""
+        self.vector_store.add_documents(documents, namespace=namespace)
