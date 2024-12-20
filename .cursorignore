@@ -2,7 +2,6 @@
 .ipynb_checkpoints/
 __pycache__/
 .idea/
-!langchain_docs/
 backup_data/
 data/**/documents/
 data/pdf/

@@ -80,7 +80,7 @@ class BaseLoad:
         df.to_parquet(self.staging_path)
         self.logger.info(f"Saved {len(docs)} documents to {self.staging_path}")
 
-    def to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
+    def staging_to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
         """Upload staged documents to Pinecone."""
         if not self.staging_path.exists():
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
