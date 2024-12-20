@@ -8,6 +8,7 @@ from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
 from config.logger import RotatingFileLogger
+from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
 import uuid
 
@@ -21,20 +22,13 @@ class BaseLoad:
         self.folder_name = folder_name
         self.index_namespaces = index_namespaces
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
-        self._vector_store: PineconeVectorStore | None = None
+        self.vector_store: VectorStore | None = None
         self.staging_path = Path("load") / self.folder_name / "staging.parquet"
 
     @property
     def config(self) -> ConfigType:
         """Get the global config singleton."""
         return global_config
-
-    @property
-    def vector_store(self) -> PineconeVectorStore:
-        """Lazy initialization of vector store."""
-        if self._vector_store is None:
-            self._vector_store = self.initialize_pinecone_index()
-        return self._vector_store
 
     @abstractmethod
     def load_file(self, data: Dict[str, Any]) -> pd.DataFrame:
@@ -61,43 +55,54 @@ class BaseLoad:
         index = pc.Index("pepwave")
         vector_store = PineconeVectorStore(index=index, embedding=OpenAIEmbeddings())
         self.logger.info("Initialized Pinecone vector store")
-        return vector_store
+        self.vector_store = vector_store
 
-    def stage_documents(self, docs: List[Document], namespace: str = index_namespaces.PEPWAVE) -> None:
+    def staging_to_vector_store(
+        self, namespace: str = index_namespaces.PEPWAVE
+    ) -> None:
+        """Upload staged documents to Pinecone."""
+        if not self.staging_path.exists():
+            raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
+
+        docs = self.parquet_to_documents(self.staging_path)
+        self.log_load(docs)
+        self.vector_store.add_documents(docs, namespace=namespace)
+        self.logger.info(
+            f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}"
+        )
+
+    def stage_documents(
+        self, docs: List[Document], namespace: str = index_namespaces.PEPWAVE
+    ) -> None:
         """Store documents to local parquet file."""
-        self.log_documents(docs)
 
         records = []
         for doc in docs:
             record = {
                 "id": str(uuid.uuid4()),
                 "page_content": doc.page_content,
-                **doc.metadata
+                **doc.metadata,
             }
             records.append(record)
 
+        self.log_load(records)
         df = pd.DataFrame(records)
         df.to_parquet(self.staging_path)
         self.logger.info(f"Saved {len(docs)} documents to {self.staging_path}")
 
-    def staging_to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
-        """Upload staged documents to Pinecone."""
-        if not self.staging_path.exists():
-            raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
-
-        docs = self.parquet_to_documents(self.staging_path)
-        ids = [doc.id for doc in docs]
-        self.vector_store.add_documents(docs, namespace=namespace, ids=ids)
-        self.logger.info(f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}")
-
     def load(self) -> None:
         documents_dir = Path("data") / self.folder_name / "documents"
+        # todo: to enable namespaces, iterate over subfolders in documents_dir
 
         if not documents_dir.exists():
-            raise FileNotFoundError(f"Documents directory does not exist: {documents_dir}")
+            raise FileNotFoundError(
+                f"Documents directory does not exist: {documents_dir}"
+            )
 
         if self.staging_path.exists():
-            raise FileNotFoundError(f"Staging data file already exists at {self.staging_path}")
+            raise FileNotFoundError(
+                f"Staging data file already exists at {self.staging_path}"
+            )
 
         for file_path in documents_dir.glob("*"):
             try:
@@ -123,7 +128,9 @@ class BaseLoad:
         for _, row in df.iterrows():
             metadata = row.drop(["page_content", "id"]).to_dict()
             metadata["record_id"] = row["id"]
-            doc = Document(id=row["id"], page_content=row["page_content"], metadata=metadata)
+            doc = Document(
+                id=row["id"], page_content=row["page_content"], metadata=metadata
+            )
             documents.append(doc)
         return documents
 
@@ -131,7 +138,7 @@ class BaseLoad:
         df = self.parquet_to_df(file_path)
         return self.df_to_documents(df)
 
-    def log_documents(self, docs: List[Document]) -> None:
+    def log_load(self, docs: List[Document]) -> None:
         doc = docs[0]
         print(f"Storing {len(docs)} documents.")
         print(f"First document:")
@@ -139,8 +146,3 @@ class BaseLoad:
         self.logger.info(f"Metadata: \n{doc.metadata}\n")
         self.logger.info(f"Content: \n{doc.page_content}")
         self.logger.info("\n\n-----------")
-
-    def store_documents(self, docs: List[Document], namespace: str = index_namespaces.PEPWAVE) -> None:
-        """Store documents in vector store."""
-        self.log_documents(docs)
-        self.vector_store.add_documents(docs, namespace=namespace)

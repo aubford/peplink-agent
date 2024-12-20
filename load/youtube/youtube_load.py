@@ -7,6 +7,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 class YoutubeLoad(BaseLoad):
     def __init__(self):
         super().__init__("youtube")
+        self.initialize_pinecone_index()
 
     def load_file(self, file_path: Path):
         # Create text splitter
