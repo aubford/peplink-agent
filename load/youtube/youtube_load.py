@@ -9,20 +9,12 @@ class YoutubeLoad(BaseLoad):
         super().__init__("youtube")
 
     def load_file(self, file_path: Path) -> pd.DataFrame:
-
         # Create text splitter
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=100,
-            length_function=len,
-        )
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100, length_function=len)
 
         documents = self.parquet_to_documents(file_path)
-        print(documents)
         split_docs = text_splitter.split_documents(documents)
-        print(split_docs)
-
-        # self.store_documents(split_docs)
+        self.store_documents(split_docs)
 
 
 if __name__ == "__main__":

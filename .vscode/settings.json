@@ -2,12 +2,12 @@
     "files.exclude": {
         ".idea": true,
         "**/__pycache__": true,
-        "data_backup": true,
-        "langchain_pepwave_env": true,
-        "langchain_docs": true
+        "backup_data": true,
+        "langchain_pepwave_env": true
     },
     "search.exclude": {
         ".vscode": true
     },
-    "editor.wordWrapColumn": 120
+    "editor.wordWrapColumn": 120,
+    "python.formatting.provider": "black"
 }

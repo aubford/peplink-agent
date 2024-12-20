@@ -59,13 +59,9 @@ class YouTubeTransform(BaseTransform):
         df = pd.DataFrame(videos)
         df['duration'] = pd.to_timedelta(df['duration'])
         df = df[df['duration'] >= pd.Timedelta(minutes=5)].reset_index(drop=True)
+        df['duration'] = df['duration'].dt.total_seconds()
         df['view_count'] = pd.to_numeric(df['view_count'], errors='coerce').fillna(0).astype('Int64')
         df['like_count'] = pd.to_numeric(df['like_count'], errors='coerce').fillna(0).astype('Int64')
         df['comment_count'] = pd.to_numeric(df['comment_count'], errors='coerce').fillna(0).astype('Int64')
 
         return df
-
-
-if __name__ == "__main__":
-    transformer = YouTubeTransform()
-    transformer.transform()
