@@ -36,6 +36,7 @@ class Config:
 # Create a global instance
 global_config = Config()
 
+
 # check that the correct work dir is set
 def main():
     print(global_config.root_dir)

@@ -42,8 +42,12 @@ class BaseLoad:
 
         if "pepwave" not in existing_indexes:
             # Create new index
-            pc.create_index(name="pepwave", dimension=1536,  # OpenAI embeddings dimension
-                            metric="cosine", spec=ServerlessSpec(cloud="aws", region="us-east-1"))
+            pc.create_index(
+                name="pepwave",
+                dimension=1536,  # OpenAI embeddings dimension
+                metric="cosine",
+                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+            )
             self.logger.info("Created new Pinecone index: pepwave")
 
         # Initialize the index
@@ -81,7 +85,7 @@ class BaseLoad:
         documents = []
         for _, row in df.iterrows():
             metadata = row.drop(["page_content", "id"]).to_dict()
-            metadata['record_id'] = row["id"]
+            metadata["record_id"] = row["id"]
             doc = Document(id=row["id"], page_content=row["page_content"], metadata=metadata)
             documents.append(doc)
         return documents

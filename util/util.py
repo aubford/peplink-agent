@@ -3,10 +3,7 @@ from langchain_core.documents import Document
 
 
 def serialize_document(document: Document) -> Dict[str, Any]:
-    return {
-        "page_content": document.page_content,
-        "metadata": document.metadata
-    }
+    return {"page_content": document.page_content, "metadata": document.metadata}
 
 
 def deduplicate_page_content(documents: List[Document]) -> List[Document]:
@@ -46,11 +43,11 @@ def sanitize_filename(filename: str) -> str:
 
     # Then replace remaining invalid characters with underscore
     for char in invalid_chars:
-        filename = filename.replace(char, '_')
+        filename = filename.replace(char, "_")
 
     # Replace spaces with underscore and remove any duplicate underscores
-    filename = '_'.join(filename.split())
-    while '__' in filename:
-        filename = filename.replace('__', '_')
+    filename = "_".join(filename.split())
+    while "__" in filename:
+        filename = filename.replace("__", "_")
 
-    return filename.strip('_')
+    return filename.strip("_")

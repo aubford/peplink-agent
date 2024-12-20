@@ -22,46 +22,52 @@ class YouTubeTransform(BaseTransform):
         """
         videos = []
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             for line in f:
                 data = json.loads(line)
-                metadata = data['metadata']
-                snippet = metadata['snippet']
-                content_details = metadata['contentDetails']
-                statistics = metadata['statistics']
+                metadata = data["metadata"]
+                snippet = metadata["snippet"]
+                content_details = metadata["contentDetails"]
+                statistics = metadata["statistics"]
 
                 video = {
                     # Document properties
-                    'id': metadata['id'],
-                    'page_content': data['page_content'],
-
+                    "id": metadata["id"],
+                    "page_content": data["page_content"],
                     # Source tracking
-                    'source_file': file_path.name,
-
+                    "source_file": file_path.name,
                     # Snippet information
-                    'date': datetime.strptime(snippet['publishedAt'], '%Y-%m-%dT%H:%M:%SZ').date(),
-                    'channel_id': snippet['channelId'],
-                    'title': snippet['title'],
-                    'description': snippet['description'],
-                    'channel_title': snippet['channelTitle'],
-
+                    "date": datetime.strptime(
+                        snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
+                    ).date(),
+                    "channel_id": snippet["channelId"],
+                    "title": snippet["title"],
+                    "description": snippet["description"],
+                    "channel_title": snippet["channelTitle"],
                     # Content details
-                    'duration': content_details['duration'],
-
+                    "duration": content_details["duration"],
                     # Statistics (favorite_count not included because it only has zeroes)
-                    'view_count':  statistics['viewCount'],
-                    'like_count': statistics['likeCount'],
-                    'comment_count': statistics['commentCount'],
-                    'word_count': len(data['page_content'].split())
+                    "view_count": statistics["viewCount"],
+                    "like_count": statistics["likeCount"],
+                    "comment_count": statistics["commentCount"],
+                    "word_count": len(data["page_content"].split()),
                 }
                 videos.append(video)
 
         df = pd.DataFrame(videos)
-        df['duration'] = pd.to_timedelta(df['duration'])
-        df = df[df['duration'] >= pd.Timedelta(minutes=5)].reset_index(drop=True)
-        df['duration'] = df['duration'].dt.total_seconds()
-        df['view_count'] = pd.to_numeric(df['view_count'], errors='coerce').fillna(0).astype('Int64')
-        df['like_count'] = pd.to_numeric(df['like_count'], errors='coerce').fillna(0).astype('Int64')
-        df['comment_count'] = pd.to_numeric(df['comment_count'], errors='coerce').fillna(0).astype('Int64')
+        df["duration"] = pd.to_timedelta(df["duration"])
+        df = df[df["duration"] >= pd.Timedelta(minutes=5)].reset_index(drop=True)
+        df["duration"] = df["duration"].dt.total_seconds()
+        df["view_count"] = (
+            pd.to_numeric(df["view_count"], errors="coerce").fillna(0).astype("Int64")
+        )
+        df["like_count"] = (
+            pd.to_numeric(df["like_count"], errors="coerce").fillna(0).astype("Int64")
+        )
+        df["comment_count"] = (
+            pd.to_numeric(df["comment_count"], errors="coerce")
+            .fillna(0)
+            .astype("Int64")
+        )
 
         return df

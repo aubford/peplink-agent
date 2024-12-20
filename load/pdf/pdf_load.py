@@ -20,7 +20,7 @@ class PdfLoad(BaseLoad):
 
         loader = PyPDFLoader(file_path)
         documents = loader.load()
-        
+
         print(documents)
 
         # split_docs = text_splitter.split_documents(documents)

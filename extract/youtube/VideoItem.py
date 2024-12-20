@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class Thumbnail(BaseModel):
     url: str
     width: int
     height: int
+
 
 class Snippet(BaseModel):
     publishedAt: str
@@ -15,6 +17,7 @@ class Snippet(BaseModel):
     categoryId: str
     liveBroadcastContent: str
 
+
 class ContentDetails(BaseModel):
     duration: str
     dimension: str
@@ -22,6 +25,7 @@ class ContentDetails(BaseModel):
     caption: str
     licensedContent: bool
     projection: str
+
 
 class Status(BaseModel):
     uploadStatus: str
@@ -31,14 +35,17 @@ class Status(BaseModel):
     publicStatsViewable: bool
     madeForKids: bool
 
+
 class Statistics(BaseModel):
     viewCount: str
     favoriteCount: str
     likeCount: Optional[str] = None
     commentCount: Optional[str] = None
 
+
 class Player(BaseModel):
     embedHtml: str
+
 
 class VideoItemMetadata(BaseModel):
     id: str
@@ -48,6 +55,7 @@ class VideoItemMetadata(BaseModel):
     contentDetails: ContentDetails
     status: Status
     statistics: Statistics
+
 
 class VideoItem(BaseModel):
     page_content: str

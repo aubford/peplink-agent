@@ -8,7 +8,7 @@ import pyarrow.parquet as pq
 from pathlib import Path
 
 
-logger = logging.getLogger('transformer')
+logger = logging.getLogger("transformer")
 
 
 class BaseTransform:

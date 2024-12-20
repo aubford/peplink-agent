@@ -8,7 +8,7 @@ from config import RotatingFileLogger, global_config, ConfigType
 from langchain_core.load import dumps
 from util.util import sanitize_filename
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 class Ldoc(BaseModel):
@@ -40,12 +40,12 @@ class BaseExtractor(ABC):
     def extract(self) -> None:
         """Extract data according to implementation-specific rules.
 
-            Returns:
-                The extracted data in implementation-specific format.
+        Returns:
+            The extracted data in implementation-specific format.
 
-            Raises:
-                NotImplementedError: If the subclass does not implement this method.
-            """
+        Raises:
+            NotImplementedError: If the subclass does not implement this method.
+        """
         pass
 
     def set_logger(self, name: str):
@@ -68,7 +68,9 @@ class BaseExtractor(ABC):
         with open(file_path, "w") as json_file:
             json_file.write(dumps(data, ensure_ascii=False))
 
-    def start_stream(self, model_class: Type[T], *, identifier: Optional[str] = None) -> str:
+    def start_stream(
+        self, model_class: Type[T], *, identifier: Optional[str] = None
+    ) -> str:
         """
         Start a new streaming session for a specific model type.
         Creates new file for raw data.
@@ -78,7 +80,9 @@ class BaseExtractor(ABC):
             identifier: label
         """
         modelname = inflection.underscore(model_class.__name__)
-        safe_identifier = sanitize_filename(f"{modelname}_{identifier if identifier else ''}")
+        safe_identifier = sanitize_filename(
+            f"{modelname}_{identifier if identifier else ''}"
+        )
         filename = self._get_filename(safe_identifier)
 
         # Check if stream already exists using the stream_key
@@ -102,7 +106,9 @@ class BaseExtractor(ABC):
             stream_key: Stream key
         """
         if stream_key not in self._active_streams:
-            raise RuntimeError(f"Must call start_stream() for {stream_key} before streaming items")
+            raise RuntimeError(
+                f"Must call start_stream() for {stream_key} before streaming items"
+            )
 
         model_class, raw_path = self._active_streams[stream_key]
 
@@ -113,15 +119,14 @@ class BaseExtractor(ABC):
         except ValidationError as e:
             self.validation_error_items.append(data)
             error_message = (
-                f"Validation error for model: {model_class.__name__}\n"
-                f"Error: {e}"
+                f"Validation error for model: {model_class.__name__}\n" f"Error: {e}"
             )
             self.logger.error(error_message)
             return
 
         # Stream raw data
-        with open(raw_path, 'a', encoding='utf-8') as f:
-            f.write(dumps(processed_data, ensure_ascii=False) + '\n')
+        with open(raw_path, "a", encoding="utf-8") as f:
+            f.write(dumps(processed_data, ensure_ascii=False) + "\n")
 
     def end_stream(self, stream_key: str) -> None:
         """

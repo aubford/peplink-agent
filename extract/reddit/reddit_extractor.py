@@ -3,6 +3,7 @@ from extract.base_extractor import BaseExtractor, Ldoc
 from util.util import serialize_document
 import time
 
+
 class RedditPostExtractor(BaseExtractor):
     def __init__(self, subreddit: str):
         super().__init__("reddit")
@@ -11,7 +12,7 @@ class RedditPostExtractor(BaseExtractor):
             client_secret=self.config.get("REDDIT_CLIENT_SECRET"),
             user_agent="Mozilla/5.0 (compatible; MyBot/1.0; +https://www.example.com)",
             categories=["hot", "new", "top", "rising"],
-            search_queries=[subreddit]
+            search_queries=[subreddit],
         )
         self.subreddit = subreddit
 

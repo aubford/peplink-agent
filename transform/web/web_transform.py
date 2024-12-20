@@ -4,6 +4,7 @@ from pathlib import Path
 from transform.base_transform import BaseTransform
 import uuid
 
+
 class WebTransform(BaseTransform):
     """Transform web page data from JSONL files into a structured DataFrame."""
 
@@ -21,31 +22,31 @@ class WebTransform(BaseTransform):
         """
         pages = []
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             for line in f:
                 data = json.loads(line)
-                metadata = data['metadata']
+                metadata = data["metadata"]
 
                 page = {
                     # Document properties
-                    'id': str(uuid.uuid4()),
-                    'page_content': data['page_content'],
-
+                    "id": str(uuid.uuid4()),
+                    "page_content": data["page_content"],
                     # Source tracking
-                    'source_file': file_path.name,
-
+                    "source_file": file_path.name,
                     # Metadata
-                    'url': metadata['source'],
-                    'title': metadata.get('title', ''),
-                    'word_count': len(data['page_content'].split())
+                    "url": metadata["source"],
+                    "title": metadata.get("title", ""),
+                    "word_count": len(data["page_content"].split()),
                 }
                 pages.append(page)
 
         df = pd.DataFrame(pages)
-        df['word_count'] = pd.to_numeric(df['word_count'], errors='coerce').fillna(0).astype('Int64')
+        df["word_count"] = (
+            pd.to_numeric(df["word_count"], errors="coerce").fillna(0).astype("Int64")
+        )
 
         # Filter out pages with less than 100 words and require "pep" in content
-        df = df[(df['word_count'] >= 100)].reset_index(drop=True)
+        df = df[(df["word_count"] >= 100)].reset_index(drop=True)
         return df
 
 

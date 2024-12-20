@@ -8,6 +8,5 @@
     "search.exclude": {
         ".vscode": true
     },
-    "editor.wordWrapColumn": 120,
-    "python.formatting.provider": "black"
+    "editor.wordWrapColumn": 120
 }

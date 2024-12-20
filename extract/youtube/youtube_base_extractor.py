@@ -5,6 +5,7 @@ from extract.youtube.VideoItem import VideoItem
 from util.util import serialize_document, empty_document_dict
 from abc import ABC
 
+
 class YouTubeBaseExtractor(BaseExtractor, ABC):
     def __init__(self, file_id: str):
         """
@@ -14,7 +15,9 @@ class YouTubeBaseExtractor(BaseExtractor, ABC):
         """
         source_name = "youtube"
         super().__init__(source_name)
-        self.youtube_client = build("youtube", "v3", developerKey=self.config.get("YOUTUBE_API_KEY"))
+        self.youtube_client = build(
+            "youtube", "v3", developerKey=self.config.get("YOUTUBE_API_KEY")
+        )
         self.file_id = file_id
         self.set_logger(f"{source_name}_{file_id}")
 
@@ -30,7 +33,7 @@ class YouTubeBaseExtractor(BaseExtractor, ABC):
         """
         video_request = self.youtube_client.videos().list(
             part="status,contentDetails,snippet,statistics,topicDetails,localizations,player,recordingDetails",
-            id=video_id
+            id=video_id,
         )
         video_response = video_request.execute()
         self.logger.debug(f"Video response for {video_id}: {video_response}")
@@ -45,13 +48,15 @@ class YouTubeBaseExtractor(BaseExtractor, ABC):
                 docs = loader.load()
             except Exception as e:
                 self.logger.error(
-                    f"Could not load transcript for video {video_id}: {str(e)[:300]}")
+                    f"Could not load transcript for video {video_id}: {str(e)[:300]}"
+                )
                 return empty_document_dict(video_item)
 
-            serialized = serialize_document(docs[0]) if docs else empty_document_dict(video_item)
+            serialized = (
+                serialize_document(docs[0]) if docs else empty_document_dict(video_item)
+            )
             serialized["metadata"] = video_item
             return serialized
-
 
     def fetch_videos_for_playlist(self, playlist_id: str) -> None:
         video_item_stream = self.start_stream(VideoItem, identifier=self.file_id)
