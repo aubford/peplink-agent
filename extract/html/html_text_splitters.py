@@ -11,6 +11,7 @@ from typing import (
     Tuple,
     TypedDict,
 )
+import copy
 
 from langchain_core.documents import BaseDocumentTransformer, Document
 from langchain_text_splitters.character import RecursiveCharacterTextSplitter
@@ -318,19 +319,29 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
         placeholder_count: int = 0
 
         def _get_element_text(element: Any) -> str:
-            """Recursively extracts and processes the text of an element.
-
-            Applies custom handlers where applicable, and ensures correct spacing.
-
-            Args:
-                element (Any): The HTML element to process.
-
-            Returns:
-                str: The processed text of the element.
-            """
             if element.name in self._custom_handlers:
                 return self._custom_handlers[element.name](element)
 
+            # For preserved elements, keep only the specified tags
+            if element.name in self._elements_to_preserve:
+                # Create a copy to avoid modifying the original
+                elem_copy = copy.copy(element)
+
+                # Remove all tags except those we want to preserve
+                for tag in elem_copy.find_all(True):
+                    if tag.name not in self._elements_to_preserve:
+                        tag.unwrap()
+                    else:
+                        # Keep the tag but remove all attributes
+                        tag.attrs = {}
+
+                # Convert to string and clean up whitespace
+                html_str = str(elem_copy)
+                # Collapse all whitespace and remove spaces around tags in one pass
+                html_str = re.sub(r'\s*([<>])\s*', r'\1', html_str)
+                return html_str.strip()
+
+            # Process non-preserved elements normally
             text = ""
 
             if element.name is not None:

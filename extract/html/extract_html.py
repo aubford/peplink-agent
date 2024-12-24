@@ -7,7 +7,7 @@ def h3_pagetitle_filter(element):
 splitter = HTMLSemanticPreservingSplitter(
     max_chunk_size=3000,
     headers_to_split_on=[("h3", "Section")],
-    elements_to_preserve=["table", "tr", "td", "ul", "ol", "pre", "code"],
+    elements_to_preserve=["table", "tr", "td", "th","ul", "li","ol"],
     # preserve_images=True,
     custom_handlers={"h3": h3_pagetitle_filter}
 )
