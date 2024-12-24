@@ -1,6 +1,6 @@
-langchain_pepwave_env
+langchain_pepwave_env/*
 logs
-data
+data/*
 !data/**/*.py
 backup_data
 !backup_data/**/*.py

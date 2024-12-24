@@ -1,9 +1,9 @@
 {
     "files.exclude": {
-        ".idea": true,
-        "**/__pycache__": true,
-        "backup_data": true,
-        "langchain_pepwave_env": true
+        ".idea": false,
+        "**/__pycache__": false,
+        "backup_data": false,
+        "langchain_pepwave_env/*": false
     },
     "search.exclude": {
         ".vscode": true
