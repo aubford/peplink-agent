@@ -9,7 +9,7 @@ splitter = HTMLSemanticPreservingSplitter(
     headers_to_split_on=[("h3", "Section")],
     elements_to_preserve=["table","ul","ol"],
     tags_to_preserve=["table", "tr", "td", "th","li"],
-    # preserve_images=True,
+    preserve_image_metadata=True
 )
 
 # Load and split the HTML file
