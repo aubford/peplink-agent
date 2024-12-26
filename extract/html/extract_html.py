@@ -7,9 +7,9 @@ def h3_pagetitle_filter(element):
 splitter = HTMLSemanticPreservingSplitter(
     max_chunk_size=3000,
     headers_to_split_on=[("h3", "Section")],
-    elements_to_preserve=["table", "tr", "td", "th","ul", "li","ol"],
+    elements_to_preserve=["table","ul","ol"],
+    tags_to_preserve=["table", "tr", "td", "th","li"],
     # preserve_images=True,
-    custom_handlers={"h3": h3_pagetitle_filter}
 )
 
 # Load and split the HTML file
@@ -21,5 +21,7 @@ chunks = splitter.split_text(html_content)
 
 # Print each chunk separated by a divider
 for chunk in chunks:
-    print(chunk)
-    print("------------\n\n")
+    print("Content: \n", chunk.page_content)
+    print("\n")
+    print("Metadata: \n", chunk.metadata)
+    print("------------\n")

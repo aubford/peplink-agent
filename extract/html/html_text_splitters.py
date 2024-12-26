@@ -108,6 +108,7 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
         chunk_overlap: int = 0,
         separators: Optional[List[str]] = None,
         elements_to_preserve: Optional[List[str]] = None,
+        tags_to_preserve: Optional[List[str]] = None,
         preserve_links: bool = False,
         preserve_images: bool = False,
         preserve_videos: bool = False,
@@ -132,7 +133,7 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
                 "Could not import BeautifulSoup. "
                 "Please install it with 'pip install bs4'."
             )
-
+        self._tags_to_preserve = tags_to_preserve or []
         self._headers_to_split_on = sorted(headers_to_split_on)
         self._max_chunk_size = max_chunk_size
         self._elements_to_preserve = elements_to_preserve or []
@@ -332,6 +333,12 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
                     text += child_text
             elif element.string:
                 text += element.string
+
+            if element.name in self._tags_to_preserve:
+                if text:
+                    text = f"<{element.name}>{text}</{element.name}>"
+                else:
+                    text = f"<{element.name}/>"
 
             return self._normalize_and_clean_text(text)
 
