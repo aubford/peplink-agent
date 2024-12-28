@@ -1,3 +1,4 @@
+import uuid
 from abc import abstractmethod
 import logging
 from typing import Any, Dict
@@ -49,3 +50,20 @@ class BaseTransform:
         dir_path = Path("data") / self.folder_name / "documents"
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
+
+    def add_required_columns(
+        self,
+        columns: dict,
+        page_content: str,
+        file_path: Path,
+        doc_id: str | uuid.UUID | None = None,
+    ) -> dict:
+        columns["id"] = str(uuid.uuid4()) if doc_id is None else doc_id
+        columns["source_file"] = self.get_stem(file_path)
+        columns["page_content"] = page_content
+        return columns
+
+    @staticmethod
+    def get_stem(file_path: Path) -> str:
+        """Get the stem of a file path."""
+        return Path(file_path.name).stem

@@ -30,28 +30,28 @@ class YouTubeTransform(BaseTransform):
                 content_details = metadata["contentDetails"]
                 statistics = metadata["statistics"]
 
-                video = {
-                    # Document properties
-                    "id": metadata["id"],
-                    "page_content": data["page_content"],
-                    # Source tracking
-                    "source_file": file_path.name,
-                    # Snippet information
-                    "date": datetime.strptime(
-                        snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
-                    ).date(),
-                    "channel_id": snippet["channelId"],
-                    "title": snippet["title"],
-                    "description": snippet["description"],
-                    "channel_title": snippet["channelTitle"],
-                    # Content details
-                    "duration": content_details["duration"],
-                    # Statistics (favorite_count not included because it only has zeroes)
-                    "view_count": statistics["viewCount"],
-                    "like_count": statistics["likeCount"],
-                    "comment_count": statistics["commentCount"],
-                    "word_count": len(data["page_content"].split()),
-                }
+                video = self.add_required_columns(
+                    columns={
+                        # Snippet information
+                        "date": datetime.strptime(
+                            snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
+                        ).date(),
+                        "channel_id": snippet["channelId"],
+                        "title": snippet["title"],
+                        "description": snippet["description"],
+                        "channel_title": snippet["channelTitle"],
+                        # Content details
+                        "duration": content_details["duration"],
+                        # Statistics (favorite_count not included because it only has zeroes)
+                        "view_count": statistics["viewCount"],
+                        "like_count": statistics["likeCount"],
+                        "comment_count": statistics["commentCount"],
+                        "word_count": len(data["page_content"].split()),
+                    },
+                    page_content=data["page_content"],
+                    file_path=file_path,
+                    doc_id=metadata["id"],
+                )
                 videos.append(video)
 
         df = pd.DataFrame(videos)
@@ -71,3 +71,7 @@ class YouTubeTransform(BaseTransform):
         )
 
         return df
+
+if __name__ == "__main__":
+    transformer = YouTubeTransform()
+    transformer.transform()

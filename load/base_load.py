@@ -59,6 +59,9 @@ class BaseLoad:
 
     def staging_to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
         """Upload staged documents to Pinecone."""
+
+        if self.vector_store is None:
+            self.initialize_pinecone_index()
         if not self.staging_path.exists():
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
 

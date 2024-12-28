@@ -15,37 +15,39 @@ class RedditTransform(BaseTransform):
         posts = []
         for post in data:
             author = post["metadata"]["post_author"]
-            transformed_post = {
-                # Main post content
-                "id": post["metadata"]["post_id"],
-                "page_content": post["page_content"],
-                # Post metadata
-                "subreddit": post["metadata"]["post_subreddit"],
-                "category": post["metadata"]["post_category"],
-                "title": post["metadata"]["post_title"],
-                "score": post["metadata"]["post_score"],
-                "url": post["metadata"]["post_url"],
-                # Author metadata
-                "author_name": author.get("name", ""),
-                "author_id": author.get("id", ""),
-                "author_is_employee": author.get("is_employee", False),
-                "author_is_mod": author.get("is_mod", False),
-                "author_is_gold": author.get("is_gold", False),
-                "author_verified": author.get("verified", False),
-                "author_has_verified_email": author.get("has_verified_email", False),
-                "author_hide_from_robots": author.get("hide_from_robots", False),
-                "author_is_blocked": author.get("is_blocked", False),
-                "author_accept_followers": author.get("accept_followers", True),
-                "author_has_subscribed": author.get("has_subscribed", True),
-                # Author karma
-                "author_total_karma": author.get("total_karma", 0),
-                "author_awardee_karma": author.get("awardee_karma", 0),
-                "author_awarder_karma": author.get("awarder_karma", 0),
-                "author_link_karma": author.get("link_karma", 0),
-                "author_comment_karma": author.get("comment_karma", 0),
-                # Source tracking
-                "source_file": file_path.name,
-            }
+            transformed_post = self.add_required_columns(
+                columns={
+                    # Post metadata
+                    "subreddit": post["metadata"]["post_subreddit"],
+                    "category": post["metadata"]["post_category"],
+                    "title": post["metadata"]["post_title"],
+                    "score": post["metadata"]["post_score"],
+                    "url": post["metadata"]["post_url"],
+                    # Author metadata
+                    "author_name": author.get("name", ""),
+                    "author_id": author.get("id", ""),
+                    "author_is_employee": author.get("is_employee", False),
+                    "author_is_mod": author.get("is_mod", False),
+                    "author_is_gold": author.get("is_gold", False),
+                    "author_verified": author.get("verified", False),
+                    "author_has_verified_email": author.get(
+                        "has_verified_email", False
+                    ),
+                    "author_hide_from_robots": author.get("hide_from_robots", False),
+                    "author_is_blocked": author.get("is_blocked", False),
+                    "author_accept_followers": author.get("accept_followers", True),
+                    "author_has_subscribed": author.get("has_subscribed", True),
+                    # Author karma
+                    "author_total_karma": author.get("total_karma", 0),
+                    "author_awardee_karma": author.get("awardee_karma", 0),
+                    "author_awarder_karma": author.get("awarder_karma", 0),
+                    "author_link_karma": author.get("link_karma", 0),
+                    "author_comment_karma": author.get("comment_karma", 0),
+                },
+                page_content=post["page_content"],
+                file_path=file_path,
+                doc_id=post["metadata"]["post_id"],
+            )
 
             posts.append(transformed_post)
 

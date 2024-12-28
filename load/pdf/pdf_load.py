@@ -1,6 +1,5 @@
 from typing import List
 from langchain.docstore.document import Document
-import pandas as pd
 from load.base_load import BaseLoad
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PDFPlumberLoader
@@ -15,6 +14,7 @@ class PdfLoad(BaseLoad):
             length_function=len,
         )
 
+    # todo: temp for testing
     def stage_documents(self, docs: List[Document]) -> None:
         for doc in docs:
             print(f"\n{doc.page_content}\n-------\n")

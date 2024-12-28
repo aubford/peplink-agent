@@ -2,7 +2,6 @@ import json
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
-import uuid
 
 
 class WebTransform(BaseTransform):
@@ -21,23 +20,20 @@ class WebTransform(BaseTransform):
             DataFrame containing transformed web page data
         """
         pages = []
-
         with open(file_path, "r") as f:
             for line in f:
                 data = json.loads(line)
                 metadata = data["metadata"]
 
-                page = {
-                    # Document properties
-                    "id": str(uuid.uuid4()),
-                    "page_content": data["page_content"],
-                    # Source tracking
-                    "source_file": file_path.name,
-                    # Metadata
-                    "url": metadata["source"],
-                    "title": metadata.get("title", ""),
-                    "word_count": len(data["page_content"].split()),
-                }
+                page = self.add_required_columns(
+                    columns={
+                        "url": metadata["source"],
+                        "title": metadata.get("title", ""),
+                        "word_count": len(data["page_content"].split()),
+                    },
+                    page_content=data["page_content"],
+                    file_path=file_path,
+                )
                 pages.append(page)
 
         df = pd.DataFrame(pages)
