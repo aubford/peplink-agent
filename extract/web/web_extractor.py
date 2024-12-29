@@ -6,8 +6,10 @@ import time
 
 
 class WebsiteExtractor(BaseExtractor):
+    source_name = "web"
+
     def __init__(self, url: str, *, base_url: str = None, max_depth: int = 6):
-        super().__init__("web")
+        super().__init__()
         self.file_id = (
             url.split("://", 1)[-1].replace("www.", "").replace("/", "_")[:40]
         )

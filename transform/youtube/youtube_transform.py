@@ -25,6 +25,10 @@ class YouTubeTransform(BaseTransform):
         with open(file_path, "r") as f:
             for line in f:
                 data = json.loads(line)
+                # Skip videos with empty page content
+                if not data.get("page_content"):
+                    continue
+
                 metadata = data["metadata"]
                 snippet = metadata["snippet"]
                 content_details = metadata["contentDetails"]

@@ -30,7 +30,7 @@ class BaseTransform:
     def transform(self) -> None:
         """Process all files in raw directory and save to documents."""
         raw_dir = Path("data") / self.folder_name / "raw"
-        staging_dir = self._ensure_dir()
+        parquet_dir = self._ensure_dir()
 
         if not raw_dir.exists():
             raise FileNotFoundError(f"Raw directory does not exist: {raw_dir}")
@@ -38,7 +38,7 @@ class BaseTransform:
         for file_path in raw_dir.glob("*"):
             try:
                 df = self.transform_file(file_path)
-                output_path = staging_dir / f"{file_path.stem}.parquet"
+                output_path = parquet_dir / f"{file_path.stem}.parquet"
                 pq.write_table(pyarrow.Table.from_pandas(df), output_path)
 
             except Exception as e:

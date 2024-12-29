@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
-
+from util.util import deduplicate_df_page_content
 
 class WebTransform(BaseTransform):
     """Transform web page data from JSONL files into a structured DataFrame."""
@@ -37,6 +37,7 @@ class WebTransform(BaseTransform):
                 pages.append(page)
 
         df = pd.DataFrame(pages)
+        df = deduplicate_df_page_content(df, similarity_threshold=0.85)
         df["word_count"] = (
             pd.to_numeric(df["word_count"], errors="coerce").fillna(0).astype("Int64")
         )

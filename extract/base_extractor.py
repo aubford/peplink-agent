@@ -8,7 +8,8 @@ from config import RotatingFileLogger, global_config, ConfigType
 from langchain_core.load import dumps
 from util.util import sanitize_filename
 from pandas import DataFrame, read_json
-import json
+import logging
+
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -21,16 +22,12 @@ class Ldoc(BaseModel):
 class BaseExtractor(ABC):
     """Base class for all data extractors.  Enforces a common folders structure in the data dir."""
 
-    def __init__(self, source_name: str):
-        """
-        Initialize the base extractor.
+    source_name: str = NotImplemented
 
-        Args:
-            source_name: Name of the data source and folder it should exist under in data/(e.g., 'youtube', 'reddit', etc.)
-        """
-        self.source_name = source_name
+    def __init__(self):
+        """Initialize the base extractor."""
         self._active_streams: Dict[str, Tuple[Type[T], Path]] = {}
-        self.logger = RotatingFileLogger(sanitize_filename(source_name))
+        self.logger = RotatingFileLogger(sanitize_filename(self.source_name))
         self.validation_error_items = []
 
     @property
@@ -148,36 +145,32 @@ class BaseExtractor(ABC):
         for stream_key in list(self._active_streams.keys()):
             self.end_stream(stream_key)
 
-    def get_rawfiles(self, dir_type: str = "raw") -> list[Path]:
+    @classmethod
+    def get_rawfiles(cls) -> list[Path]:
         """
         Get all files created by this extractor in the specified directory type.
-
-        Args:
-            dir_type: Type of directory to look in (e.g., 'raw'). Defaults to 'raw'.
 
         Returns:
             List of Path objects for files matching this extractor's source name
         """
-        dir_path = Path("data") / self.source_name / dir_type
+        dir_path = Path("data") / cls.source_name / "raw"
         if not dir_path.exists():
             return []
 
         return sorted(
-            p for p in dir_path.glob(f"{self.source_name}_*")
+            p for p in dir_path.glob(f"{cls.source_name}_*")
             if p.is_file()
         )
 
-    def get_rawfile_dataframes(self, dir_type: str = "raw") -> list[DataFrame]:
+    @classmethod
+    def get_rawfile_dataframes(cls) -> list[tuple[str, DataFrame]]:
         """
         Load all files created by this extractor into pandas DataFrames.
 
-        Args:
-            dir_type: Type of directory to look in (e.g., 'raw'). Defaults to 'raw'.
-
         Returns:
-            List of DataFrames containing the data from each file
+            List of tuples containing (filename, DataFrame) for each file
         """
-        files = self.get_rawfiles(dir_type)
+        files = cls.get_rawfiles()
         dataframes = []
 
         for file_path in files:
@@ -192,6 +185,6 @@ class BaseExtractor(ABC):
                 dataframes.append((file_path.name, df))
 
             except Exception as e:
-                self.logger.error(f"Error loading {file_path}: {str(e)}")
+                logging.error(f"Failed to load DataFrame from {file_path}: {str(e)}")
 
         return dataframes

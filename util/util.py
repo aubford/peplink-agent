@@ -58,26 +58,36 @@ def sanitize_filename(filename: str) -> str:
 def similarity_ratio(a: str, b: str) -> float:
         return SequenceMatcher(None, a, b).ratio()
 
-def similarity_count(string_list: List[str]) -> int:
+def group_strings_return_longest(string_list: List[str], similarity_threshold: float = 0.75) -> List[str]:
     """
-    Count the number of strings that are similar to another string in the list.
+    Groups similar strings and returns the longest string from each group.
+    Returns a list of representative strings, one per group.
     """
-    similar_count = 0
+    if not string_list:
+        return []
 
-    for i in range(len(string_list)):
-        for j in range(i + 1, len(string_list)):
-            if similarity_ratio(string_list[i], string_list[j]) > 0.75:
-                similar_count += 1
+    groups: List[List[str]] = []
+
+    for s in string_list:
+        found_group = False
+        for group in groups:
+            if any(similarity_ratio(s, existing) > similarity_threshold for existing in group):
+                group.append(s)
+                found_group = True
                 break
+        if not found_group:
+            groups.append([s])
 
-    return similar_count
+    return [max(group, key=len) for group in groups]
 
-
-def get_dissimilar_content_count(df: DataFrame) -> int:
+def deduplicate_df_page_content(df: DataFrame, similarity_threshold: float = 0.85) -> DataFrame:
+    """
+    Deduplicate a dataframe based on the page_content column.
+    Uses similarity_threshold to determine how to deduplicate.
+    """
+    count = df.shape[0]
     content = df["page_content"].tolist()
-    if len(content) == 0:
-        return 0
-    similar_count = similarity_count(content)
-    print(f"total entries: {len(content)}")
-    print(f"unique-ish entries: {len(content) - similar_count + 1}")
-    return len(content) - similar_count + 1
+    unique_content = group_strings_return_longest(content, similarity_threshold)
+    filtered = df[df["page_content"].isin(unique_content)]
+    print(f"removed {count - filtered.shape[0]} entries to {filtered.shape[0]} unique entries")
+    return filtered

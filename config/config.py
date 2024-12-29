@@ -36,12 +36,6 @@ class Config:
 # Create a global instance
 global_config = Config()
 
-
-# check that the correct work dir is set
-def main():
+if __name__ == "__main__":
     print(global_config.root_dir)
     print(Path().resolve())
-
-
-if __name__ == "__main__":
-    main()

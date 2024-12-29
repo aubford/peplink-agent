@@ -5,8 +5,10 @@ import time
 
 
 class RedditPostExtractor(BaseExtractor):
+    source_name = "reddit"
+
     def __init__(self, subreddit: str):
-        super().__init__("reddit")
+        super().__init__()
         self.loader = ForkedRedditPostsLoader(
             client_id=self.config.get("REDDIT_CLIENT_ID"),
             client_secret=self.config.get("REDDIT_CLIENT_SECRET"),

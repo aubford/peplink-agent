@@ -7,19 +7,20 @@ from abc import ABC
 
 
 class YouTubeBaseExtractor(BaseExtractor, ABC):
+    source_name = "youtube"
+
     def __init__(self, file_id: str):
         """
         Initialize base YouTube extractor with common functionality.
         Args:
             file_id: id for end of the filename
         """
-        source_name = "youtube"
-        super().__init__(source_name)
+        super().__init__()
         self.youtube_client = build(
             "youtube", "v3", developerKey=self.config.get("YOUTUBE_API_KEY")
         )
         self.file_id = file_id
-        self.set_logger(f"{source_name}_{file_id}")
+        self.set_logger(f"{self.source_name}_{file_id}")
 
     def fetch_video(self, video_id: str) -> dict:
         """
