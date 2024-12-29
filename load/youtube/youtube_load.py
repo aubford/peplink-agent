@@ -10,7 +10,6 @@ class YoutubeLoad(BaseLoad):
         super().__init__("youtube")
 
     def load_file(self, file_path: Path) -> List[Document]:
-        # Create text splitter
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000, chunk_overlap=100, length_function=len
         )

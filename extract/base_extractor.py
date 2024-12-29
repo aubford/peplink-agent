@@ -7,6 +7,8 @@ from pydantic import BaseModel, ValidationError
 from config import RotatingFileLogger, global_config, ConfigType
 from langchain_core.load import dumps
 from util.util import sanitize_filename
+from pandas import DataFrame, read_json
+import json
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -145,3 +147,51 @@ class BaseExtractor(ABC):
         """End all active streaming sessions."""
         for stream_key in list(self._active_streams.keys()):
             self.end_stream(stream_key)
+
+    def get_rawfiles(self, dir_type: str = "raw") -> list[Path]:
+        """
+        Get all files created by this extractor in the specified directory type.
+
+        Args:
+            dir_type: Type of directory to look in (e.g., 'raw'). Defaults to 'raw'.
+
+        Returns:
+            List of Path objects for files matching this extractor's source name
+        """
+        dir_path = Path("data") / self.source_name / dir_type
+        if not dir_path.exists():
+            return []
+
+        return sorted(
+            p for p in dir_path.glob(f"{self.source_name}_*")
+            if p.is_file()
+        )
+
+    def get_rawfile_dataframes(self, dir_type: str = "raw") -> list[DataFrame]:
+        """
+        Load all files created by this extractor into pandas DataFrames.
+
+        Args:
+            dir_type: Type of directory to look in (e.g., 'raw'). Defaults to 'raw'.
+
+        Returns:
+            List of DataFrames containing the data from each file
+        """
+        files = self.get_rawfiles(dir_type)
+        dataframes = []
+
+        for file_path in files:
+            try:
+                if file_path.suffix == '.jsonl':
+                    # Read JSONL file line by line
+                    df = read_json(file_path, lines=True)
+                else:
+                    # Read regular JSON file
+                    df = read_json(file_path)
+
+                dataframes.append((file_path.name, df))
+
+            except Exception as e:
+                self.logger.error(f"Error loading {file_path}: {str(e)}")
+
+        return dataframes
