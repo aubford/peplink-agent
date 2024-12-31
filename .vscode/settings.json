@@ -3,7 +3,6 @@
         ".idea": true,
         "backup_data": true,
         "logs": true,
-        "langchain_pepwave_env": true,
         "**/__pycache__": true
     },
     "search.exclude": {

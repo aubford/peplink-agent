@@ -12,17 +12,20 @@ from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
 from uuid import uuid4
 
+from util.util import deduplicate_df_page_content
+
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
 
 class BaseLoad:
     """Base class for all data transformers."""
 
-    def __init__(self, folder_name: str):
+    def __init__(self, folder_name: str, similarity_threshold: float = 0.95):
         self.folder_name = folder_name
         self.index_namespaces = index_namespaces
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
         self.vector_store: VectorStore | None = None
         self.staging_path = Path("load") / self.folder_name / "staging.parquet"
+        self.similarity_threshold = similarity_threshold
 
     @property
     def config(self) -> ConfigType:
@@ -30,7 +33,7 @@ class BaseLoad:
         return global_config
 
     @abstractmethod
-    def load_file(self, file_path: str) -> List[Document]:
+    def load_docs(self, documents: List[Document]) -> List[Document]:
         pass
 
     def initialize_pinecone_index(self) -> None:
@@ -65,13 +68,13 @@ class BaseLoad:
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
 
         docs = self.parquet_to_documents(self.staging_path)
-        self.log_documents(docs)
+        self._log_documents(docs)
         self.vector_store.add_documents(docs, namespace=namespace)
         self.logger.info(f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}")
 
     def stage_documents(self, docs: List[Document]) -> None:
         """Store documents to local parquet file."""
-        self.log_documents(docs)
+        self._log_documents(docs)
 
         records = []
         for doc in docs:
@@ -82,7 +85,7 @@ class BaseLoad:
             }
             records.append(record)
 
-        df = pd.DataFrame(records)
+        df = pd.DataFrame(records).set_index("id", drop=False)
         df.to_parquet(self.staging_path)
         self.logger.info(f"Saved {len(docs)} documents to {self.staging_path}")
 
@@ -96,7 +99,7 @@ class BaseLoad:
         if self.staging_path.exists():
             raise FileNotFoundError(f"Staging data file already exists at {self.staging_path}")
 
-        all_documents = []
+        dfs = []
         for file_path in documents_dir.glob("*"):
             # Skip system files
             if file_path.name.startswith("."):
@@ -104,19 +107,27 @@ class BaseLoad:
 
             try:
                 print(f"--------------- Loading file: {file_path}---------\n\n")
-                docs = self.load_file(file_path)
-                all_documents.extend(docs)
+                df = self.parquet_to_df(file_path)
+                dfs.append(df)
 
             except Exception as e:
                 self.logger.error(f"Error processing {file_path}")
                 raise e
-        self.stage_documents(all_documents)
+
+        # Combine all dataframes and convert to documents
+        combined_df = pd.concat(dfs)
+        combined_df = deduplicate_df_page_content(combined_df, self.similarity_threshold)
+        all_documents = self.df_to_documents(combined_df)
+
+        staging_docs = self.load_docs(all_documents)
+        self.stage_documents(staging_docs)
 
     def parquet_to_df(self, file_path: Path) -> pd.DataFrame:
         if not str(file_path).endswith(".parquet"):
             raise FileNotFoundError(f"File {file_path} is not a parquet file")
 
         df = pd.read_parquet(file_path)
+        df = df.set_index("id", drop=False)
 
         if df.empty:
             raise ValueError(f"File {file_path} is empty")
@@ -136,7 +147,7 @@ class BaseLoad:
         df = self.parquet_to_df(file_path)
         return self.df_to_documents(df)
 
-    def log_documents(self, docs: List[Document]) -> None:
+    def _log_documents(self, docs: List[Document]) -> None:
         doc = docs[0]
         print(f"Storing {len(docs)} documents.")
         print(f"First document:")

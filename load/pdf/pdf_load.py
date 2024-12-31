@@ -14,16 +14,10 @@ class PdfLoad(BaseLoad):
             length_function=len,
         )
 
-    # todo: temp for testing
-    def stage_documents(self, docs: List[Document]) -> None:
-        for doc in docs:
-            print(f"\n{doc.page_content}\n-------\n")
-
-    def load_file(self, file_path: str) -> List[Document]:
-        loader = PDFPlumberLoader(file_path)
+    def load_docs(self, documents: List[Document]) -> List[Document]:
+        loader = PDFPlumberLoader(documents)
         documents = loader.load()
 
-        # Inspect the extracted elements
         for doc in documents:
             print(f"Page {doc.metadata.get('page')}")
             print(f"Type: {type(doc.metadata.get('plumber_table'))}")  # Will be None if not a table

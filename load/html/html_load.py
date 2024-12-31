@@ -10,14 +10,8 @@ from load.base_load import BaseLoad
 class HtmlLoad(BaseLoad):
     def __init__(self):
         super().__init__("html")
-        
-        
-    # todo: temp for testing
-    def stage_documents(self, docs: List[Document]) -> None:
-        for doc in docs:
-            print(f"\n{doc.page_content}\n-------\n")
 
-    def load_file(self, file_path: str) -> List[Document]:
+    def load_docs(self, file_path: str) -> List[Document]:
         df = self.parquet_to_df(file_path)
         print(df)
 

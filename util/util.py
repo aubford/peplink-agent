@@ -82,6 +82,7 @@ def group_strings_return_longest(string_list: List[str], similarity_threshold: f
                 break
         if not found_group:
             groups.append([s])
+        print_replace(f"Deduping: {len(groups)}/{len(string_list)}")
 
     return [max(group, key=len) for group in groups]
 
