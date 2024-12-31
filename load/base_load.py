@@ -10,10 +10,9 @@ from langchain_openai import OpenAIEmbeddings
 from config.logger import RotatingFileLogger
 from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
-import uuid
+from uuid import uuid4
 
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
-
 
 class BaseLoad:
     """Base class for all data transformers."""
@@ -77,7 +76,7 @@ class BaseLoad:
         records = []
         for doc in docs:
             record = {
-                "id": str(uuid.uuid4()),
+                "id": str(uuid4()),
                 "page_content": doc.page_content,
                 **doc.metadata,
             }
@@ -99,6 +98,10 @@ class BaseLoad:
 
         all_documents = []
         for file_path in documents_dir.glob("*"):
+            # Skip system files
+            if file_path.name.startswith("."):
+                continue
+
             try:
                 print(f"--------------- Loading file: {file_path}---------\n\n")
                 docs = self.load_file(file_path)

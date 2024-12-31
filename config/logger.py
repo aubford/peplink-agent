@@ -18,7 +18,8 @@ class RotatingFileLogger(logging.Logger):
 
         # Create common formatter
         formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(asctime)s (%(name)s) %(levelname)s: %(message)s",
+            datefmt='%Y-%m-%d %H:%M:%S'  # Specify date format without subseconds
         )
 
         # Configure rotating file handler
@@ -31,6 +32,13 @@ class RotatingFileLogger(logging.Logger):
 
         # Configure console handler with same formatter
         console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(formatter)
         console_handler.setLevel(log_level)  # Set same level as logger
         self.addHandler(console_handler)
+
+    def n_info(self, msg: str) -> None:
+        self.info("")
+        self.info(msg)
+        
+    def br_info(self, msg: str) -> None:
+        self.info("-" * 100)
+        self.info(msg)

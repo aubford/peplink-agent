@@ -2,13 +2,20 @@ import json
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
-from util.util import deduplicate_df_page_content
+from util.util import (
+    deduplicate_df_page_content,
+    get_column_word_count,
+    set_string_columns,
+)
+
 
 class WebTransform(BaseTransform):
     """Transform web page data from JSONL files into a structured DataFrame."""
 
+    folder_name = "web"
+
     def __init__(self):
-        super().__init__("web")
+        super().__init__()
 
     def transform_file(self, file_path: Path) -> pd.DataFrame:
         """Transform web page data from a JSONL file.
@@ -23,27 +30,30 @@ class WebTransform(BaseTransform):
         with open(file_path, "r") as f:
             for line in f:
                 data = json.loads(line)
-                metadata = data["metadata"]
-
-                page = self.add_required_columns(
-                    columns={
-                        "url": metadata["source"],
-                        "title": metadata.get("title", ""),
-                        "word_count": len(data["page_content"].split()),
-                    },
+                meta = data["metadata"]
+                page = self._add_required_columns(
+                    columns={"url": meta["source"], "title": meta.get("title", "")},
                     page_content=data["page_content"],
                     file_path=file_path,
                 )
                 pages.append(page)
+        df = self._make_df(pages)
 
-        df = pd.DataFrame(pages)
+        # filter out pages with empty title
+        df = df[df["title"].str.strip().str.len() > 0]
+        self._notify_dropped_rows(df, "empty title")
+
+        set_string_columns(df, ["url", "title"], False)
+
+        df["word_count"] = get_column_word_count(df, "page_content")
+
+        # filter out pages with less than 100 words
+        df = df[df["word_count"] >= 100]
+        self._notify_dropped_rows(df, ">100 words")
+
+        # deduplicate pages with similar content
         df = deduplicate_df_page_content(df, similarity_threshold=0.85)
-        df["word_count"] = (
-            pd.to_numeric(df["word_count"], errors="coerce").fillna(0).astype("Int64")
-        )
 
-        # Filter out pages with less than 100 words and require "pep" in content
-        df = df[(df["word_count"] >= 100)].reset_index(drop=True)
         return df
 
 

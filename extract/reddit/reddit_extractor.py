@@ -22,5 +22,5 @@ class RedditPostExtractor(BaseExtractor):
         stream_key = self.start_stream(Ldoc, identifier=self.subreddit)
         for doc in self.loader.lazy_load():
             self.stream_item(serialize_document(doc), stream_key)
-            time.sleep(1)
+            time.sleep(2)
         self.end_stream(stream_key)

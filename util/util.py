@@ -1,7 +1,9 @@
 from typing import Dict, Any, List
 from langchain_core.documents import Document
 from difflib import SequenceMatcher
-from pandas import DataFrame
+import pandas as pd
+from IPython.display import display
+from pathlib import Path
 
 
 def serialize_document(document: Document) -> Dict[str, Any]:
@@ -27,7 +29,9 @@ def deduplicate_page_content(documents: List[Document]) -> List[Document]:
     return deduped
 
 
-def empty_document_dict(metadata: Dict[str, Any] = {}) -> Dict[str, Any]:
+def empty_document_dict(metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+    if metadata is None:
+        metadata = {}
     return {"page_content": "", "metadata": metadata}
 
 
@@ -56,7 +60,8 @@ def sanitize_filename(filename: str) -> str:
 
 
 def similarity_ratio(a: str, b: str) -> float:
-        return SequenceMatcher(None, a, b).ratio()
+    return SequenceMatcher(None, a, b).ratio()
+
 
 def group_strings_return_longest(string_list: List[str], similarity_threshold: float = 0.75) -> List[str]:
     """
@@ -80,7 +85,8 @@ def group_strings_return_longest(string_list: List[str], similarity_threshold: f
 
     return [max(group, key=len) for group in groups]
 
-def deduplicate_df_page_content(df: DataFrame, similarity_threshold: float = 0.85) -> DataFrame:
+
+def deduplicate_df_page_content(df: pd.DataFrame, similarity_threshold: float = 0.85) -> pd.DataFrame:
     """
     Deduplicate a dataframe based on the page_content column.
     Uses similarity_threshold to determine how to deduplicate.
@@ -89,5 +95,77 @@ def deduplicate_df_page_content(df: DataFrame, similarity_threshold: float = 0.8
     content = df["page_content"].tolist()
     unique_content = group_strings_return_longest(content, similarity_threshold)
     filtered = df[df["page_content"].isin(unique_content)]
-    print(f"removed {count - filtered.shape[0]} entries to {filtered.shape[0]} unique entries")
+    print(f"Deduplicated {count} entries to {filtered.shape[0]}")
     return filtered
+
+
+def print_replace(text: str) -> None:
+    """
+    Print text and replace the previous line.
+    """
+    print(f"{text}", end="\r", flush=True)
+
+
+def get_column_word_count(df: pd.DataFrame, column: str) -> pd.DataFrame:
+    """
+    Calculate word count for a text column in a DataFrame.
+
+    Args:
+        df: DataFrame containing the text column
+        column: Name of the column to count words from
+
+    Returns:
+        Series containing word counts as Int64 type
+    """
+    return df[column].str.split().str.len().astype("Int64")
+
+
+def validate_string_column(df: pd.DataFrame, column: str, allow_empty: bool = True) -> None:
+    """
+    Validate that all values in a column are non-empty strings.
+    Raises ValueError for any invalid values.
+    """
+    log_path = Path("logs/validate_string_column_error_rows.parquet")
+    log_path.parent.mkdir(exist_ok=True)
+
+    if column not in df.columns:
+        print(f"Available columns: {', '.join(df.columns)}")
+        raise ValueError(f"Column '{column}' not found in DataFrame")
+    if df[column].apply(lambda x: not isinstance(x, str)).any():
+        non_string_rows = df[df[column].apply(lambda x: not isinstance(x, str))]
+        display(non_string_rows[column])
+        raise ValueError(f"Column '{column}' contains non-string values")
+    if df[column].isna().any():
+        nan_rows = df[df[column].isna()]
+        nan_rows.to_parquet(log_path)
+        raise ValueError(f"Column '{column}' contains NaN values")
+    if not allow_empty:
+        if (df[column] == "").any():
+            empty_rows = df[df[column] == ""]
+            empty_rows.to_parquet(log_path)
+            print(f"Found {len(empty_rows)} rows with empty strings in '{column}'")
+            raise ValueError(f"Column '{column}' contains empty strings")
+
+        spaces = df[column].apply(lambda x: x.isspace())
+        if spaces.any():
+            whitespace_rows = df[spaces]
+            whitespace_rows.to_parquet(log_path)
+            raise ValueError(f"Column '{column}' contains whitespace-only strings")
+
+
+def validate_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: bool = True) -> None:
+    """
+    Validate that all values in a list of columns are non-empty strings.
+    Raises ValueError for any invalid values.
+    """
+    for column in columns:
+        validate_string_column(df, column, allow_empty)
+
+
+def set_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: bool = True) -> None:
+    """
+    Set the string columns to the strict string type.
+    """
+    validate_string_columns(df, columns, allow_empty)
+    for column in columns:
+        df[column] = df[column].astype("string[pyarrow]", errors="raise")

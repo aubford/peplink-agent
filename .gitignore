@@ -5,6 +5,7 @@ data/*
 backup_data
 !backup_data/**/*.py
 # langchain_docs/
+*.parquet
 
 ### VisualStudioCode template
 .vscode/*

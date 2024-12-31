@@ -2,13 +2,15 @@ import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
 from transform.html.langchain_splitter_fork import HTMLSemanticPreservingSplitter
-
+from util.util import set_string_columns
 
 class HTMLTransform(BaseTransform):
     """Transform and chunk HTML documents."""
 
+    folder_name = "html"
+
     def __init__(self):
-        super().__init__("html")
+        super().__init__()
         self.splitter = HTMLSemanticPreservingSplitter(
             headers_to_split_on=[("h3", "section")],
             max_chunk_size=3000,
@@ -25,12 +27,7 @@ class HTMLTransform(BaseTransform):
 
         documents = []
         for chunk in chunks:
-            # raw_images = chunk.metadata.get("images", [])
-            # images = [
-            #     str(url) if not isinstance(url, str) else url for url in raw_images
-            # ]
-
-            doc = self.add_required_columns(
+            doc = self._add_required_columns(
                 columns={
                     "section": chunk.metadata.get("section", ""),
                     "images": chunk.metadata.get("images", []),
@@ -39,10 +36,8 @@ class HTMLTransform(BaseTransform):
                 file_path=file_path,
             )
             documents.append(doc)
-
-        df = pd.DataFrame(documents)
-        # df['images'] = df['images'].astype('object')
-
+        df = self._make_df(documents)
+        set_string_columns(df, ["section"], False)
         return df
 
 

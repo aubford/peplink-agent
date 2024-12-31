@@ -11,7 +11,7 @@ class YoutubeLoad(BaseLoad):
 
     def load_file(self, file_path: Path) -> List[Document]:
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000, chunk_overlap=100, length_function=len
+            chunk_size=3000, chunk_overlap=300, length_function=len
         )
 
         documents = self.parquet_to_documents(file_path)

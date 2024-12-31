@@ -3,13 +3,16 @@ import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
 from datetime import datetime
+from util.util import get_column_word_count, set_string_columns
 
 
 class YouTubeTransform(BaseTransform):
     """Transform YouTube video data from JSONL files into a structured DataFrame."""
 
+    folder_name = "youtube"
+
     def __init__(self):
-        super().__init__("youtube")
+        super().__init__()
 
     def transform_file(self, file_path: Path) -> pd.DataFrame:
         """Transform YouTube video data from a JSONL file.
@@ -34,12 +37,10 @@ class YouTubeTransform(BaseTransform):
                 content_details = metadata["contentDetails"]
                 statistics = metadata["statistics"]
 
-                video = self.add_required_columns(
+                video = self._add_required_columns(
                     columns={
                         # Snippet information
-                        "date": datetime.strptime(
-                            snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
-                        ).date(),
+                        "date": datetime.strptime(snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ").date(),
                         "channel_id": snippet["channelId"],
                         "title": snippet["title"],
                         "description": snippet["description"],
@@ -50,31 +51,51 @@ class YouTubeTransform(BaseTransform):
                         "view_count": statistics["viewCount"],
                         "like_count": statistics["likeCount"],
                         "comment_count": statistics["commentCount"],
-                        "word_count": len(data["page_content"].split()),
                     },
                     page_content=data["page_content"],
                     file_path=file_path,
                     doc_id=metadata["id"],
                 )
+                # Skip if video with same ID already exists
+                if any(v["id"] == video["id"] for v in videos):
+                    continue
                 videos.append(video)
+        df = self._make_df(videos)
 
-        df = pd.DataFrame(videos)
+        set_string_columns(df, ["description"])
+        set_string_columns(df, ["title", "channel_title", "duration", "channel_id"], False)
+
+        df["word_count"] = get_column_word_count(df, "page_content")
+
+        # filter out videos less than 3 minutes and word count less than 300
         df["duration"] = pd.to_timedelta(df["duration"])
-        df = df[df["duration"] >= pd.Timedelta(minutes=5)].reset_index(drop=True)
-        df["duration"] = df["duration"].dt.total_seconds()
-        df["view_count"] = (
-            pd.to_numeric(df["view_count"], errors="coerce").fillna(0).astype("Int64")
-        )
-        df["like_count"] = (
-            pd.to_numeric(df["like_count"], errors="coerce").fillna(0).astype("Int64")
-        )
-        df["comment_count"] = (
-            pd.to_numeric(df["comment_count"], errors="coerce")
-            .fillna(0)
-            .astype("Int64")
-        )
+        df = df[(df["duration"] >= pd.Timedelta(minutes=3)) & (df["word_count"] >= 300)]
+        self._notify_dropped_rows(df, ">3 min and >300 words")
+
+        # Filter for "pep" content unless from allowed sources
+        df = self._filter_for_pep(df, file_path)
+
+        # set duration to final state for persistence
+        df["duration"] = df["duration"].dt.total_seconds().astype("int64")
+
+        # clean count data
+        df["view_count"] = pd.to_numeric(df["view_count"], errors="coerce").fillna(0).astype("int64")
+        df["like_count"] = pd.to_numeric(df["like_count"], errors="coerce").fillna(0).astype("int64")
+        df["comment_count"] = pd.to_numeric(df["comment_count"], errors="coerce").fillna(0).astype("int64")
+
+        # todo: remove the word "uh" from the page_content
 
         return df
+
+    def _filter_for_pep(self, df: pd.DataFrame, file_path: Path) -> pd.DataFrame:
+        file_name = str(file_path).lower()
+        sources_to_filter = ["Frontierus", "MobileInternetResourceCenter", "Technorv", "MobileMustHave", "5Gstore"]
+        if any(source.lower() in file_name for source in sources_to_filter):
+            df = df[df["page_content"].str.lower().str.contains("pep")]
+            self._notify_dropped_rows(df, "contains 'pep'")
+
+        return df
+
 
 if __name__ == "__main__":
     transformer = YouTubeTransform()

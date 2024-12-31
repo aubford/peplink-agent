@@ -48,7 +48,7 @@ class BaseExtractor(ABC):
         pass
 
     def set_logger(self, name: str):
-        self.logger = RotatingFileLogger(sanitize_filename(name))
+        self.logger = RotatingFileLogger(f"extract__{sanitize_filename(name)}")
 
     def _ensure_dir(self, dir_type: str) -> Path:
         """Create and return path to a data directory of specified type."""
@@ -93,7 +93,8 @@ class BaseExtractor(ABC):
 
         self._active_streams[safe_identifier] = (model_class, raw_path)
 
-        self.logger.info(f"Started stream for {safe_identifier}:\nRaw: {raw_path}")
+        self.logger.info({datetime.now().strftime("%Y-%m-%d %H:%M")})
+        self.logger.br_info(f"Started stream for {safe_identifier}:\nRaw: {raw_path}")
         return safe_identifier
 
     def stream_item(self, data: Dict[str, Any], stream_key: str) -> None:
@@ -157,10 +158,7 @@ class BaseExtractor(ABC):
         if not dir_path.exists():
             return []
 
-        return sorted(
-            p for p in dir_path.glob(f"{cls.source_name}_*")
-            if p.is_file()
-        )
+        return sorted(p for p in dir_path.glob(f"{cls.source_name}_*") if p.is_file())
 
     @classmethod
     def get_rawfile_dataframes(cls) -> list[tuple[str, DataFrame]]:
@@ -175,7 +173,7 @@ class BaseExtractor(ABC):
 
         for file_path in files:
             try:
-                if file_path.suffix == '.jsonl':
+                if file_path.suffix == ".jsonl":
                     # Read JSONL file line by line
                     df = read_json(file_path, lines=True)
                 else:
