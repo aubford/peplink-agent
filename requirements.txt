@@ -30,3 +30,6 @@ pypdf
 openai
 langchain-google-community==2.0.3
 google-api-python-client==2.156.0
+text-dedup==0.4.0
+datasketch==1.6.5
+spacy==3.8.3

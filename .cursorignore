@@ -5,5 +5,5 @@ __pycache__/
 backup_data/
 data/**/documents/
 data/pdf/
-langchain_pepwave_env/*
-!langchain_pepwave_env/lib/
+!langchain_pepwave_env/*
+!langchain_pepwave_env/lib/**/*

@@ -1,11 +1,11 @@
-langchain_pepwave_env/*
 logs
 data/*
 !data/**/*.py
 backup_data
 !backup_data/**/*.py
-# langchain_docs/
 *.parquet
+langchain_pepwave_env/*
+# langchain_docs/
 
 ### VisualStudioCode template
 .vscode/*
