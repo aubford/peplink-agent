@@ -72,10 +72,6 @@ demo_texts = [
     # *generate_random_texts(300, 50),
 ]
 
-print(demo_texts[0])
-print("-" * 25)
-print(demo_texts[1])
-
 
 #%%
 
@@ -127,13 +123,6 @@ def compute_precision_from_jaccard(
     intersection = jaccard_similarity * (len_a + len_b) / (1 + jaccard_similarity)
     return intersection / shorter_string_len
 
-def compute_recall_from_jaccard(
-    jaccard_similarity: float, len_a: int, len_b: int
-) -> float:
-    longer_string_len = max(len_a, len_b)
-    intersection = jaccard_similarity * (len_a + len_b) / (1 + jaccard_similarity)
-    return intersection / longer_string_len
-
 def compute_cosine_similarity(a: str, b: str) -> float:
     vectorizer = TfidfVectorizer()
     tfidf = vectorizer.fit_transform([a, b])
@@ -141,8 +130,14 @@ def compute_cosine_similarity(a: str, b: str) -> float:
     return float(similarity[0, 0])
 
 def get_classic_jaccard(tokens_a: List[str], tokens_b: List[str]) -> float:
-    intersection = set(tokens_a) & set(tokens_b)
-    union = set(tokens_a) | set(tokens_b)
+    """Compute Jaccard similarity between two token lists."""
+    set_a = set(tokens_a)
+    set_b = set(tokens_b)
+    intersection = set_a & set_b
+    union = set_a | set_b
+    if not union:
+        return 0.0
+    print(f"Expected Precision: {len(intersection) / min(len(set_a), len(set_b))}")
     return len(intersection) / len(union)
 
 ###### Dedupe ############
@@ -169,7 +164,7 @@ def get_duplicate_candidates_classic_jaccard(tokenized_corpus: List[List[str]]) 
             item_j = tokenized_corpus[j]
 
             jaccard = get_classic_jaccard(item_i, item_j)
-            precision = compute_precision_from_jaccard(jaccard, len(item_i), len(item_j))
+            precision = compute_precision_from_jaccard(jaccard, len(set(item_i)), len(set(item_j)))
 
             print(f"Items {i}/{j} ({len(item_i)}/{len(item_j)}): Jaccard: {jaccard:.2f}, Precision: {precision:.2f}")
 
@@ -240,10 +235,8 @@ time1 = time.time() - start
 print(f"Classic: {time1:.2f}s")
 print(result1)
 
-start = time.time()
-result4 = get_duplicates(nltk_tokenized_corpus)
-time4 = time.time() - start
-print(f"Rapidfuzz: {time4:.2f}s")
-print(result4)
-
-# %%
+# start = time.time()
+# result4 = get_duplicates(nltk_tokenized_corpus)
+# time4 = time.time() - start
+# print(f"Rapidfuzz: {time4:.2f}s")
+# print(result4)
