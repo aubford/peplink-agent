@@ -9,10 +9,14 @@ from typing import List
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 import spacy
+from rapidfuzz import fuzz, process
+from nltk.corpus import brown
+import random
 
 nlp = spacy.load('en_core_web_sm')
 nlp.max_length = 100000000
 
+# nltk.download('brown')
 # nltk.download('stopwords')
 # nltk.download('punkt')
 # nltk.download('punkt_tab')
@@ -20,17 +24,60 @@ nlp.max_length = 100000000
 
 stop_words = set(stopwords.words("english"))
 
+mult = 1000
 
-mult = 100
+def generate_random_texts(n: int, avg_length: int) -> List[str]:
+    """
+    Generate n random texts using coherent phrases from Brown corpus
+
+    Args:
+        n: Number of texts to generate
+        avg_length: Approximate number of words per text
+    """
+    # Get sentences from Brown corpus
+    sentences = brown.sents(categories=['news', 'editorial', 'reviews'])
+
+    texts = []
+    for _ in range(n):
+        # Generate new random length for each text
+        target_length = avg_length * random.randint(1, mult)
+
+        text = []
+        word_count = 0
+        while word_count < target_length:
+            sent = random.choice(sentences)
+            text.extend(sent)
+            word_count += len(sent)
+
+        text = ' '.join(text[:target_length]).lower()
+        texts.append(text)
+
+    return texts
+
+repeated_text_0_1 = "This is the first text about natural language processing. "
+semantic_text_2 = "This processing text is the very first course item about doing language. "
+similar__text_3 = "This text is the very first one about natural language processing. "
+
+random_texts = generate_random_texts(2, 100)
+
 demo_texts = [
-    "This is the first text about natural language processing but this one runs on and has a lot of additional words." * mult,
-    "This is the first text about natural language ||| processing.<><>><><<><><" * mult,
-    "This is the first text about natural language processing." * mult,
-    "This is one of the very first texts ever about natural language processing." * mult,
-    "Blah blah blah." * mult,
-    "This is the second text. It also discusses natural language processing." * mult,
-    "Natural language processing is a field of computer science." * mult,
+    # (repeated_text_0_1 * mult) + generate_random_texts(1, 50),
+    (repeated_text_0_1) + random_texts[0],
+    (repeated_text_0_1) + random_texts[1],
+    # repeated_text_0_1 * mult,
+    # semantic_text_2 * mult,
+    # similar__text_3 * mult,
+    # "This is the second text. It also discusses natural language processing." * mult,
+    # "Natural language processing is a field of computer science." * mult,
+    # *generate_random_texts(300, 50),
 ]
+
+print(demo_texts[0])
+print("-" * 25)
+print(demo_texts[1])
+
+
+#%%
 
 ####### Tokenization ############
 
@@ -118,7 +165,15 @@ def get_duplicate_candidates_classic_jaccard(tokenized_corpus: List[List[str]]) 
     candidates = set()
     for i in range(len(tokenized_corpus)):
         for j in range(i + 1, len(tokenized_corpus)):
-            if get_classic_jaccard(tokenized_corpus[i], tokenized_corpus[j]) > 0.8:
+            item_i = tokenized_corpus[i]
+            item_j = tokenized_corpus[j]
+
+            jaccard = get_classic_jaccard(item_i, item_j)
+            precision = compute_precision_from_jaccard(jaccard, len(item_i), len(item_j))
+
+            print(f"Items {i}/{j} ({len(item_i)}/{len(item_j)}): Jaccard: {jaccard:.2f}, Precision: {precision:.2f}")
+
+            if precision > 0.8:
                 candidates.add(i)
                 candidates.add(j)
     return candidates
@@ -140,26 +195,38 @@ def get_duplicate_candidates_minhash(tokenized_encoded_corpus: List[List[str]]) 
 
     return candidates
 
+def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
+    """
+    Use rapidfuzz.process.cdist to efficiently find duplicate candidates
+    """
+    # Calculate all pairwise similarities at once
+    distances = process.cdist(tokenized_corpus, tokenized_corpus, scorer=fuzz.partial_ratio)
+    duplicates = set()
+    for i in range(len(tokenized_corpus)):
+        for j in range(i + 1, len(tokenized_corpus)):
+            if distances[i][j] > 90:
+                duplicates.add(i)
+                duplicates.add(j)
+
+    return duplicates
+
 ####### Test ############
 
-test_corpus = demo_texts * 100
-
 start = time.time()
-nltk_tokenized_corpus = [nltk_get_tokens(text) for text in test_corpus]
+nltk_tokenized_corpus = [nltk_get_tokens(text) for text in demo_texts]
 tokenization_time_1 = time.time() - start
+nltk_tokenized_corpus_encoded = [[token.encode("utf8") for token in text] for text in nltk_tokenized_corpus]
 print(f"NLTK: {tokenization_time_1:.2f}s")
 
-start = time.time()
-nltk_tokenized_corpus_encoded = [nltk_get_tokens(text, encode=True) for text in test_corpus]
-tokenization_time_2 = time.time() - start
-print(f"NLTK Encoded: {tokenization_time_2:.2f}s")
+# print(nltk_tokenized_corpus[0])
+# print(nltk_tokenized_corpus[1])
+# print(nltk_tokenized_corpus[2])
+# print(nltk_tokenized_corpus[3])
 
 # start = time.time()
 # spacy_tokenized_corpus = [get_tokens(text) for text in test_corpus]
 # corpus_time_2 = time.time() - start
 # print(f"Spacy: {corpus_time_2:.2f}s")
-
-final_corpus = nltk_tokenized_corpus
 
 start = time.time()
 result2 = get_duplicate_candidates_minhash(nltk_tokenized_corpus_encoded)
@@ -168,15 +235,15 @@ print(f"Bulk: {time2:.2f}s")
 print(result2)
 
 start = time.time()
-result3 = get_duplicate_candidates_cosine(final_corpus)
-time3 = time.time() - start
-print(f"Cosine: {time3:.2f}s")
-print(result3)
-
-start = time.time()
-result1 = get_duplicate_candidates_classic_jaccard(final_corpus)
+result1 = get_duplicate_candidates_classic_jaccard(nltk_tokenized_corpus)
 time1 = time.time() - start
 print(f"Classic: {time1:.2f}s")
 print(result1)
 
-print(result1 == result2 == result3)
+start = time.time()
+result4 = get_duplicates(nltk_tokenized_corpus)
+time4 = time.time() - start
+print(f"Rapidfuzz: {time4:.2f}s")
+print(result4)
+
+# %%
