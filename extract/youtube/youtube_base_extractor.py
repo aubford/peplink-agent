@@ -2,7 +2,7 @@ from googleapiclient.discovery import build
 from langchain_community.document_loaders.youtube import YoutubeLoader
 from extract.base_extractor import BaseExtractor
 from extract.youtube.VideoItem import VideoItem
-from util.util import serialize_document, empty_document_dict
+from util.util_main import serialize_document, empty_document_dict
 from abc import ABC
 
 

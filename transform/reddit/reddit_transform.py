@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
-from util.util import set_string_columns
+from util.util_main import set_string_columns
 
 class RedditTransform(BaseTransform):
     folder_name = "reddit"

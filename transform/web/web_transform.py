@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
-from util.util import (
+from util.util_main import (
     deduplicate_df_page_content,
     get_column_word_count,
     set_string_columns,

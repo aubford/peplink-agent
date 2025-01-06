@@ -6,7 +6,7 @@ from datetime import datetime
 from pydantic import BaseModel, ValidationError
 from config import RotatingFileLogger, global_config, ConfigType
 from langchain_core.load import dumps
-from util.util import sanitize_filename
+from util.util_main import sanitize_filename
 from pandas import DataFrame, read_json
 import logging
 

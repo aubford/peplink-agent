@@ -1,6 +1,6 @@
 from extract.reddit.ForkedRedditPostsLoader import ForkedRedditPostsLoader
 from extract.base_extractor import BaseExtractor, Ldoc
-from util.util import serialize_document
+from util.util_main import serialize_document
 import time
 
 

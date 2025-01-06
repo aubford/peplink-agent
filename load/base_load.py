@@ -12,7 +12,7 @@ from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
 from uuid import uuid4
 
-from util.util import deduplicate_df_page_content
+from util.util_main import deduplicate_df_page_content
 
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
 

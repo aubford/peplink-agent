@@ -2,7 +2,6 @@ from typing import Dict, Any, List
 from langchain_core.documents import Document
 from difflib import SequenceMatcher
 import pandas as pd
-from IPython.display import display
 from pathlib import Path
 
 
@@ -134,7 +133,7 @@ def validate_string_column(df: pd.DataFrame, column: str, allow_empty: bool = Tr
         raise ValueError(f"Column '{column}' not found in DataFrame")
     if df[column].apply(lambda x: not isinstance(x, str)).any():
         non_string_rows = df[df[column].apply(lambda x: not isinstance(x, str))]
-        display(non_string_rows[column])
+        print(non_string_rows[column])
         raise ValueError(f"Column '{column}' contains non-string values")
     if df[column].isna().any():
         nan_rows = df[df[column].isna()]
@@ -170,3 +169,6 @@ def set_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: bool =
     validate_string_columns(df, columns, allow_empty)
     for column in columns:
         df[column] = df[column].astype("string[pyarrow]", errors="raise")
+
+def test():
+    print('test*************************')

@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
 from datetime import datetime
-from util.util import get_column_word_count, set_string_columns
+from util.util_main import get_column_word_count, set_string_columns
 
 
 class YouTubeTransform(BaseTransform):

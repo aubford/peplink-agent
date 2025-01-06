@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import RecursiveUrlLoader
 from bs4 import BeautifulSoup
 from extract.base_extractor import BaseExtractor, Ldoc
-from util.util import serialize_document
+from util.util_main import serialize_document
 import time
 
 
