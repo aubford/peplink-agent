@@ -272,27 +272,35 @@ def get_duplicate_candidates_minhash_precision(
     return candidates
 
 
-def get_duplicate_candidates_minhash(
+def filter_exact_duplicates_minhash(
     tokenized_encoded_corpus: List[List[str]],
     *,
-    threshold: float = 0.95,
-) -> set[int]:
+    threshold: float = 0.99,
+) -> List[set[int]]:
     """
     Use MinHashLSH to find duplicate candidates
     This is the fastest method when there are many documents
     """
-    print("\nGetting duplicate candidates with minhash jaccard")
+    print("\nGetting exact duplicate for removal with minhash jaccard")
     minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
     lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
-    candidates = set()
+    results: List[set[int]] = []
     for i, m in enumerate(minhashes):
+        # insert lazily for speed
         lsh.insert(i, m)
-        result = lsh.query(m)
+        result = set(lsh.query(m))
         if len(result) > 1:
-            candidates.update(result)
+            # Check if we can merge with an existing set
+            for existing_set in results:
+                if result - {i} == existing_set:
+                    existing_set.add(i)
+                    break
+            else:
+                # No matching set found, append new set
+                results.append(result)
 
-    return candidates
+    return results
 
 #  needs to take two candidate sets, one is the set of subsets, the other is the set of superset
 def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:

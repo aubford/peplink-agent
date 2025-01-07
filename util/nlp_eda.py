@@ -10,6 +10,7 @@ from util.viz import (
 import time
 from extract.web.web_extractor import WebExtractor
 from extract.reddit.reddit_extractor import RedditExtractor
+from typing import List
 
 
 web_dfs = WebExtractor.get_rawfile_dataframes()
@@ -81,7 +82,7 @@ import util.nlp
 importlib.reload(util.nlp)
 
 from util.nlp import (
-    get_duplicate_candidates_minhash,
+    filter_exact_duplicates_minhash,
     get_duplicate_candidates_minhash_precision,
     get_duplicate_candidates_simple_precision,
     get_duplicates,
@@ -97,7 +98,7 @@ from util.nlp import (
 # print(f"len: {len(simple_result)}")
 
 start = time.time()
-minhash_result = get_duplicate_candidates_minhash(
+minhash_result = filter_exact_duplicates_minhash(
     nltk_tokenized_corpus_encoded, threshold=0.99
 )
 time3 = time.time() - start
@@ -117,15 +118,26 @@ print(len(nltk_tokenized_corpus))
 # time3 = time.time() - start
 # print(f"Minhash precision: {time3:.2f}s")
 # print(minhash_result)
-# %%
 # %% ########################################################################
 ############ VIZ ###########################################################
 #############################################################################
-print(f"len simple: {len(simple_result)} vs {len(nltk_tokenized_corpus)}")
-print(f"len minhash: {len(minhash_result)} vs {len(nltk_tokenized_corpus)}")
 
-for i in range(len(minhash_result)):
-    get_intersection_stats(i, i + 1)
+# print(minhash_result)
+
+for i, result in enumerate(minhash_result):
+    if len(result) > 1:
+        print(f"\nindex[{i}]: {result}")
+
+#%%
+
+for i in minhash_result[1340]:
+    for idx, j in enumerate(minhash_result):
+        if i in j and len(j) < 5:
+            print(f"num[{i}]: {j}")
+
+
+# for i in range(len(minhash_result)):
+#     get_intersection_stats(i, i + 1)
 
 
 # %% ########################################################################
@@ -139,3 +151,62 @@ time4 = time.time() - start
 print(f"Rapidfuzz: {time4:.2f}s")
 print(result4)
 print(f"len: {len(result4)}")
+
+#%%
+def clean_incremental_groups(minhash_result: List[list]) -> List[list]:
+    """Remove intermediate groups that are subsets of later groups."""
+    cleaned_groups = []
+
+    for i, current_group in enumerate(minhash_result):
+        # Convert lists to sets for comparison
+        current_set = set(current_group)
+        # Check if this group is a subset of any later group
+        is_intermediate = any(
+            current_set.issubset(set(later_group)) and current_set != set(later_group)
+            for later_group in minhash_result[i+1:]
+        )
+
+        if not is_intermediate:
+            cleaned_groups.append(current_group)
+
+    return cleaned_groups
+
+def analyze_overlapping_groups(minhash_result):
+    # First clean up intermediate groups
+    cleaned_results = clean_incremental_groups(minhash_result)
+    print(f"Reduced from {len(minhash_result)} to {len(cleaned_results)} groups")
+
+    # Rest of the analysis remains the same
+    number_to_groups = {}
+    for group_idx, group in enumerate(cleaned_results):
+        if len(group) > 1:
+            for num in group:
+                if num not in number_to_groups:
+                    number_to_groups[num] = []
+                number_to_groups[num].append(group_idx)
+
+    breakpoint()
+    overlapping_numbers = {
+        num: groups for num, groups in number_to_groups.items()
+        if len(groups) > 1
+    }
+
+    breakpoint()
+
+    if overlapping_numbers:
+        print("\nNumbers appearing in multiple groups:")
+        for num, group_indices in overlapping_numbers.items():
+            print(f"\nNumber {num} appears in {len(group_indices)} groups:")
+            for group_idx in group_indices:
+                print(f"  Group {group_idx}: {cleaned_results[group_idx]}")
+    else:
+        print("\nNo numbers appear in multiple groups")
+
+    return overlapping_numbers
+
+# Call the analysis function
+overlapping = analyze_overlapping_groups(minhash_result)
+print(f"\nTotal numbers appearing in multiple groups: {len(overlapping)}")
+
+cleaned_results = clean_incremental_groups(minhash_result)
+print(cleaned_results)
