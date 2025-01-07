@@ -1,13 +1,11 @@
-# %%
+# %% ########################################################################
+import importlib
+from itertools import chain
 from util.nlp import *
-from util.util_pandas import plot_content_length_dist, plot_list_length_dist
+from util.viz import plot_content_length_dist, plot_list_length_dist, get_word_counts, plot_word_frequency
 import time
-from typing import List
-from nltk.corpus import brown
-import random
 from extract.youtube.youtube_base_extractor import YouTubeBaseExtractor
 
-mult = 100
 
 youtube_dfs = YouTubeBaseExtractor.get_rawfile_dataframes()
 
@@ -16,59 +14,8 @@ for idx, item in enumerate(youtube_dfs):
 
 mirc_df = youtube_dfs[2][1]
 df_contents = mirc_df["page_content"]
-plot_content_length_dist(df_contents, title="Distribution of Content Lengths", bins=50)
+# plot_content_length_dist(df_contents, title="Distribution of Content Lengths", bins=50)
 demo_texts = list(df_contents)
-
-
-def get_word_counts(text: list[str]) -> dict[str, int]:
-    """
-    Get word frequency counts from a tokenized text.
-
-    Args:
-        text: List of tokens
-        top_n: Optional number of top frequency words to return. Returns all if None.
-
-    Returns:
-        Dictionary mapping words to their counts, sorted by frequency
-    """
-    print("Word Counts" + "-" * 100)
-    print(f"TOTAL WORDS: {len(text)}")
-    word_counts = {}
-    for token in text:
-        word_counts[token] = word_counts.get(token, 0) + 1
-    sorted_counts = dict(sorted(word_counts.items(), key=lambda x: x[1], reverse=True))
-    for word, count in sorted_counts.items():
-        print(f"{word}: {count}")
-    print("-" * 100)
-
-
-def generate_random_texts(n: int, avg_length: int) -> List[str]:
-    """
-    Generate n random texts using coherent phrases from Brown corpus
-
-    Args:
-        n: Number of texts to generate
-        avg_length: Approximate number of words per text
-    """
-    # Get sentences from Brown corpus
-    sentences = brown.sents(categories=["news", "editorial", "reviews"])
-
-    texts = []
-    for _ in range(n):
-        # Generate new random length for each text
-        target_length = avg_length * random.randint(1, mult)
-
-        text = []
-        word_count = 0
-        while word_count < target_length:
-            sent = random.choice(sentences)
-            text.extend(sent)
-            word_count += len(sent)
-
-        text = " ".join(text[:target_length]).lower()
-        texts.append(text)
-
-    return texts
 
 
 # demo_texts = [
@@ -78,30 +25,72 @@ def generate_random_texts(n: int, avg_length: int) -> List[str]:
 #     "Managing Multiple WAN links with Peplink Routers – Martin Langmaid – SDWAN Architect Featured Peplink Pepwave Managing Multiple WAN links with Peplink Routers 15th December 2014 4 Comments Easy WAN Management Whenever I am describing Peplink Multi WAN management to potential customers I find myself using the word ‘easy’ a great deal. A key phrase that pops up in conversation is ‘simple, easy WAN management’, and most people just nod at that and wait for me to get to the meat of why Peplink gear is something they should be looking at. You see, simplicity is something that all modern devices should have – there is an assumption that good design should lead to simplicity of use and although that is true, its surprisingly rare to see real management interface simplicity in enterprise level equipment. All Web UIs are equal – but some are more equal than others Many vendors will point to their ‘easy to use’ web interface on their device and say its simple. ‘You’ll have everything configured in just a few clicks’, they say, ‘Its really easy – anyone can do it’, they assure us. However if you have ever sat in front of a piece of network equipment that has a complicated function in your infrastructure, you’ll know that there a varying levels of ‘ease of use’ and ‘simplicity’. I’ll be the first to admit that no matter which vendors kit I’m using, it takes me a moment to orientate myself to the interface – that’s normal after all, but its not the point I’m getting at. For me what is always frustrating is when you have to dig through multiple pages of settings to get to where you need to make changes, or when you use a web ui that then requires offline config file editing where you have to download the current config, edit it in a text editor and upload it again to save your settings. Frankly most web interfaces seem a little dated – not always visually, but from a user process perspective. Introducing Peplink Simplicity For me that’s where the Peplink Web UI really shines. Let me give you an example. Imagine I have a MAX HD2 with DSL, Satellite and Cellular WAN connections which are all being used for load balancing and I want to change the way the HD2 uses the satellite WAN so its only used if the DSL and cellular WANs aren’t available. This is how you do it in the UI: You really don’t get much easier than that right? This single drag and drop action which is performed on the HD2 dashboard takes but a moment and any one can do it – even an end customer. In fact the Peplink Web UI is so easy that we have managed service providers who will give their end users access to it so they can easily manage how WAN links are used to best suit whatever links are available at any given time. How many web interfaces have you used as an engineer where you would be happy to let your end users make changes like that? Not many right? Intelligent WAN Management OK – so that was a pretty easy setting to change. How about something a little more complicated? Picture the following scenario: An HD2 with DSL (Unlimited), Satellite (unlimited) and an embedded cellular link(limited to 8GB a month) You want to configure Internet access by cost per MB, so that the DSL WAN is used first, and then when its saturated you then use the satellite connection and then the cellular link. This is what that rule looks like in the Web UI: As you can see this is nice and easy with Peplinks Overflow Algorithm . When creating the rule we set: Traffic Source ANY Traffic Destination ANY Protocol ANY Algorithm OVERFLOW And then drag and drop the WAN links into the correct order. If I wanted to change the priority so that vSAT is used first because it has more bandwidth than the DSL (and I might want to save the DSL for VoIP since it has lower latency characteristics), I just drag and drop like so: Then click save and apply and we’re done. Easy isn’t it? But Wait – there’s more The Peplink UI really shines though when you have a complicated set of rules you need to build. Picture the following scenario: An HD2 with the following WAN Links: Slow DSL (<1Mbps) vSAT 20Mbps download (High Latency) Embedded 4G Cellular SIM from a mobile service provider (7-12Mbps – capped at 8GB/Month) An occasionally tethered android smartphone (4Mbps- unlimited bandwidth) With the following LAN devices: Work PC that connects via pepVPN to the head office  Balance 580 (low latency low to medium bandwidth needed) A VoIP handset that connects to a cloud based PBX (Low latency low bandwidth needed) A Smart TV that streams Netflix and other online video (high bandwidth – latency insensitive) Other devices like Laptops and smartphones So the requirements might read like this: For General Internet Access : Use the available cellular links first as I will get a better internet experience over cellular than the higher latency satellite. Only use Satellite if I need more bandwidth and only use DSL if I have maxed out the previous connections bandwidth (or if all the other WAN links are unavailable) For the Smart TV Always use the high bandwidth satellite link for streaming video. If satellite is not available use the cellular links. If all the other links are unavailable use the DSL as a last resort For the VoIP handset I just want to use the lowest latency link (whatever that might be) – always. This is what the rule set looks like: Lets look at each rule in turn. Smart TV Since the Smart TV needs lots of bandwidth but isn’t affected by high latency links (apart from taking longer to start to stream a Netflix video for example), I am using a priority algorithm here which means that the WAN links are used in the order of priority starting with the satellite WAN, but the next WAN link in the list is only used if the preceding one is unavailable (or has reached its bandwidth cap). I am identifying the Smart TV by source IP so the router knows which traffic to apply this rule to. VoIP Handset For the VoIP handset I just want to use whichever available WAN link has the current lowest latency . Since DSL will always have the lowest latency compared to the other WAN links it will be the normal path for our VoIP traffic. However if DSL wasn’t available, the router would send the VoIP over the next lowest latency WAN link (likely one of the cellular links). I am identifying the VoIP handset by source IP so the router knows which traffic to apply this rule to. General Internet access As you can see we have used the overflow algorithm here so that WAN links will be used in the order of priority set and when they saturate, traffic overflows to the next WAN link in the list. Of note is that I have put the tethered smartphone first on the list, the idea being that I will only connect the smartphone if i really need to (perhaps because my embedded cellular link has run out of monthly bandwidth allowance), so if it is connected then I want to use it for internet access. Since this will normally be disconnected, generally the embedded 4G cellular connection will be used first for LAN client internet access (unless that LAN client is the Smart TV or VoiP Handset as we saw above). Hang on – Whats HTTPS Persistence? The HTTPS Persistence rule comes preconfigured on all Peplink multi WAN devices. Its purpose is to lock multiple https sessions from a LAN client to the same WAN link which makes secure webistes (like your online banking) work, since https websites can frequently get cross (timeout or deauth you) if your WAN IP changes. In Summary As you have seen, even when creating traffic rules in an environment with multiple WAN links of different types with multiple LAN client types with multiple requirements the configuration is easy because of the Peplink Web UI. This is what I mean when I say Peplink devices can provide ‘simple, easy WAN management’. Peplink have a live demo of the MAX Web UI you can log into and play with here: http://www.peplink.com/products/max-cellular-router/max-live-demo/ Share Article: Tags: cellular cellular routers DSL vsat Martin Langmaid I am a Peplink SD WAN architect, trainer, technical solution designer, and co-founder of the Navugo Group where we aim to transform lives with connectivity. 9th December 2014 How to reduce VPN latency over Satellite links 24th December 2014 Why you should consider Peplink (Even if you are happy with your current vendor) 4 Comments Major Upgrade to Pepwave Max BR1 Cellular Router / Minor Upgrade to Pepwave Surf SOHO – RV Mobile Internet Resource Center on 21st February 2015 […] a built in cellular modem – all capable of being powered directly off of DC power, with a slew of high-end networking features built […] Reply Shane on 6th February 2016 Hi Martin, This was super helpful for me! I’m moving into a house with very limited internet access and I am considering a setup very much like what you just described. However, I’m wondering if it supports an even slightly more complex issue. Xbox One and PC Gaming. I’m curious if I can get even more granular on the choice of WAN such that downloads of games, movies and other files on those devices uses the high latency satellite WAN but when someone is playing a multiplayer game requiring low latency that those packets could be detected and routed to the low latency cellular connection. I’m happy to figure out how to make it work after I buy everything but I am wondering if you have any advice on whether such an arrangement is even possible. Thanks! Reply martin.langmaid on 14th February 2016 Hi Shane, Yes what you ask is technically possible but i wonder if its practical. You could have a general rule that sends all traffic via the satellite link, then create separate outbound policies for specific traffic types or destinations. You would need to know either the target/destination IPs or Ports that the application uses to be able to identify the multi-player game traffic or VoIP or whatever else you need to go via the lower latency cellular WANs. It is doable, but will take a moment of research I bet to work out those identifiers. Reply Cell Beat on 23rd May 2018 The thing that is loved about peplink is that VoIP is crystal clear, high bandwidth and network is not interrupted and the low cost is an attraction. A great service in a low cost sure is an attraction for all of us and peplink is providing it to us. Reply Leave a Reply to martin.langmaid Cancel reply Save my name, email, and website in this browser for the next time I comment. Δ Recent Posts Drone Video Streaming Mobile Video Streaming & Remote Camera Operation Over Wifi MESH & 5G How to 5x your cellular bandwidth in london Everything that moves needs Dual 4G/5G Home Data Cabinet Shame! Recent Comments Martin Langmaid on Setting Up FusionHub on Vultr Martin on Setting Up FusionHub on Vultr Martin Langmaid on Setting Up FusionHub on Vultr Nick on Setting Up FusionHub on Vultr Cell Beat on Managing Multiple WAN links with Peplink Routers Related Articles 2nd November 2024 Drone Video Streaming 12th May 2024 Mobile Video Streaming & Remote Camera Operation Over Wifi MESH & 5G 24th April 2024 How to 5x your cellular bandwidth in london 27th May 2022 Everything that moves needs Dual 4G/5G 14th April 2022 Home Data Cabinet Shame! Tag Cloud Case Studies Featured iot LTE News Opinion Peplink Pepwave Portfolio Projects sd-wan Tutorial Tutorials Uncategorised Videos VoIP WiFi Categories Case Studies (3) Featured (49) iot (3) LTE (6) News (11) Opinion (5) Peplink (50) Pepwave (26) Portfolio (2) Projects (5) sd-wan (13) Tutorial (2) Tutorials (5) Uncategorised (1) Videos (6) VoIP (1) WiFi (2) Recent Tweets",
 # ]
 
-# %%
+# %% ########################################################################
 ############ TOKENIZE ###################################################
+#############################################################################
+from util.viz import plot_word_frequency
+
 start = time.time()
 nltk_tokenized_corpus = [nltk_get_tokens(text) for text in demo_texts]
 tokenization_time_1 = time.time() - start
-start = time.time()
+print(f"NLTK: {tokenization_time_1:.2f}s")
 nltk_tokenized_corpus_encoded = [
     [token.encode("utf8") for token in text] for text in nltk_tokenized_corpus
 ]
-tokenization_time_2 = time.time() - start
-print(f"NLTK: {tokenization_time_1:.2f}s")
-print(f"Encoding: {tokenization_time_2:.2f}s")
+
+start = time.time()
+spacy_tokenized_corpus = [spacy_get_tokens(text) for text in demo_texts]
+corpus_time_2 = time.time() - start
+print(f"Spacy: {corpus_time_2:.2f}s")
+
+spacy_tokenized_corpus_encoded = [
+    [token.encode("utf8") for token in text] for text in spacy_tokenized_corpus
+]
+
+
+# %% ########################################################################
+############ VIZ TOKENIZE ###################################################
+#############################################################################
+from itertools import chain
 
 # plot_list_length_dist(nltk_tokenized_corpus)
+# for text in nltk_tokenized_corpus:
+#     get_word_counts(text)
+flattened_tokens = list(chain.from_iterable(nltk_tokenized_corpus))
+plot_word_frequency(flattened_tokens)
 
-# %%
+# %% ########################################################################
+############ EDA TOKENIZE NLTK ##############################################
+#############################################################################
+import util
+importlib.reload(util.viz)
+from util.viz import plot_word_frequency
+importlib.reload(util.nlp)
+from util.nlp import get_duplicate_candidates_minhash_precision
 
+plot_word_frequency(nltk_tokenized_corpus[657])
+plot_word_frequency(nltk_tokenized_corpus[89])
+result3 = get_duplicate_candidates_minhash_precision(
+    [nltk_tokenized_corpus_encoded[657], nltk_tokenized_corpus_encoded[89]]
+)
+# %% ########################################################################
+############ EDA TOKENIZE SPACY #############################################
+#############################################################################
+import util
+importlib.reload(util.viz)
+from util.viz import plot_word_frequency
 
-get_word_counts(nltk_tokenized_corpus[0])
+plot_word_frequency(spacy_tokenized_corpus[657])
+plot_word_frequency(spacy_tokenized_corpus[89])
+result3 = get_duplicate_candidates_minhash_precision(
+    [spacy_tokenized_corpus_encoded[657], spacy_tokenized_corpus_encoded[89]]
+)
 
-
-# %%
-
+# %% ########################################################################
+############ TEST ###########################################################
+#############################################################################
 import importlib
+import util.nlp
 
 importlib.reload(util.nlp)
 
@@ -113,19 +102,12 @@ from util.nlp import (
 )
 
 
-####### TEST ################################################################
-
 # start = time.time()
-# spacy_tokenized_corpus = [get_tokens(text) for text in test_corpus]
-# corpus_time_2 = time.time() - start
-# print(f"Spacy: {corpus_time_2:.2f}s")
-
-start = time.time()
-result2 = get_duplicate_candidates_minhash(nltk_tokenized_corpus_encoded)
-time2 = time.time() - start
-print(f"Minhash jaccard: {time2:.2f}s")
-print(result2)
-print(f"len: {len(result2)}")
+# result2 = get_duplicate_candidates_minhash(nltk_tokenized_corpus_encoded)
+# time2 = time.time() - start
+# print(f"Minhash jaccard: {time2:.2f}s")
+# print(result2)
+# print(f"len: {len(result2)}")
 
 
 start = time.time()
@@ -135,12 +117,12 @@ print(f"Minhash precision: {time3:.2f}s")
 print(result3)
 print(f"len: {len(result3)}")
 
-start = time.time()
-result1 = get_duplicate_candidates_simple_jaccard_precision(nltk_tokenized_corpus)
-time1 = time.time() - start
-print(f"Simple Jaccard: {time1:.2f}s")
-print(result1)
-print(f"len: {len(result1)}")
+# start = time.time()
+# result1 = get_duplicate_candidates_simple_jaccard_precision(nltk_tokenized_corpus)
+# time1 = time.time() - start
+# print(f"Simple Jaccard: {time1:.2f}s")
+# print(result1)
+# print(f"len: {len(result1)}")
 
 # start = time.time()
 # result4 = get_duplicates(nltk_tokenized_corpus)
@@ -148,4 +130,3 @@ print(f"len: {len(result1)}")
 # print(f"Rapidfuzz: {time4:.2f}s")
 # print(result4)
 # print(f"len: {len(result4)}")
-df_contents

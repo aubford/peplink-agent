@@ -7,8 +7,10 @@ from typing import List
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
-import spacy
+from nltk.corpus import brown
 from rapidfuzz import fuzz, process
+import spacy
+import random
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 100000000
@@ -19,21 +21,50 @@ nlp.max_length = 100000000
 # nltk.download('punkt_tab')
 # nltk.download('wordnet')
 
-stop_words = set(stopwords.words("english"))
 
-mult = 100
+def generate_random_texts(n: int, avg_length: int, mult: int = 100) -> List[str]:
+    """
+    Generate n random texts using coherent phrases from Brown corpus
+
+    Args:
+        n: Number of texts to generate
+        avg_length: Approximate number of words per text
+    """
+    # Get sentences from Brown corpus
+    sentences = brown.sents(categories=["news", "editorial", "reviews"])
+
+    texts = []
+    for _ in range(n):
+        # Generate new random length for each text
+        target_length = avg_length * random.randint(1, mult)
+
+        text = []
+        word_count = 0
+        while word_count < target_length:
+            sent = random.choice(sentences)
+            text.extend(sent)
+            word_count += len(sent)
+
+        text = " ".join(text[:target_length]).lower()
+        texts.append(text)
+
+    return texts
+
 
 ####### Tokenization ############
 
 
-def get_tokens(text: str) -> List[str]:
+def spacy_get_tokens(text: str) -> List[str]:
     """Tokenize using spaCy's pipeline, more strict with stop words"""
-    docs = nlp.pipe([text.lower()], disable=["ner"])  # Only disable NER since we don't use named entities
+    docs = nlp.pipe(
+        [text.lower()], disable=["ner"]
+    )  # Only disable NER since we don't use named entities
     res = [
         token.lemma_
         for doc in docs
         for token in doc
-        if (not token.is_stop or token.pos_ in {"VERB", "NUM", "ADJ"}) and token.is_alpha
+        if (not token.is_stop or token.pos_ in {"VERB", "NUM", "ADJ"})
+        and token.is_alpha
     ]
     return res
 
@@ -49,30 +80,61 @@ def nltk_get_pos_tag(tag: str) -> str:
     return tag_dict.get(tag[0], wordnet.NOUN)
 
 
-def nltk_get_tokens(text: str, encode: bool = False) -> List[str]:
+def nltk_get_tokens(text: str, chunk_size: int = 1) -> List[str]:
     """
     Tokenize using NLTK, less strict with stop words
     Significantly faster and less memory intensive than spaCy
-    """
-    lemmatizer = WordNetLemmatizer()
-    tokens = nltk.wordpunct_tokenize(text.lower())
-    tokens = [token for token in tokens if token.isalnum() and token not in stop_words]
-    pos_tagged_tokens = nltk.pos_tag(tokens)
 
-    result = []
-    for token, pos in pos_tagged_tokens:
-        lemmatized = lemmatizer.lemmatize(token, nltk_get_pos_tag(pos))
-        if encode:
-            result.append(lemmatized.encode("utf8"))
-        else:
-            result.append(lemmatized)
-    return result
+    Args:
+        chunk_size: Number of words to chunk together as one token
+    """
+    stop_words = set(stopwords.words("english"))
+    stop_words.update(
+        [
+            "um",
+            "uh",
+            "uhm",
+            "let",
+            "go",
+            "yeah",
+            "ok",
+            "okay",
+            "okay",
+            "stuff",
+            "really",
+            "alot",
+            "lot",
+            "thing",
+            "well",
+        ]
+    )
+
+    tokens = nltk.wordpunct_tokenize(text.lower())
+    tokens = [
+        token
+        for token in tokens
+        if token.isalnum() and len(token) > 1 and token not in stop_words
+    ]
+
+    pos_tagged_tokens = nltk.pos_tag(tokens)
+    lemmatizer = WordNetLemmatizer()
+    wordset = [
+        lemmatizer.lemmatize(token, nltk_get_pos_tag(pos))
+        for token, pos in pos_tagged_tokens
+    ]
+
+    return [
+        " ".join(wordset[i : i + chunk_size])
+        for i in range(0, len(wordset), chunk_size)
+    ]
 
 
 ####### Similarity ############################################################
 
 
-def compute_precision_from_jaccard(jaccard_similarity: float, len_a: int, len_b: int) -> float:
+def compute_precision_from_jaccard(
+    jaccard_similarity: float, len_a: int, len_b: int
+) -> float:
     shorter_string_len = min(len_a, len_b)
     intersection = jaccard_similarity * (len_a + len_b) / (1 + jaccard_similarity)
     return intersection / shorter_string_len
@@ -125,6 +187,7 @@ def get_duplicate_candidates_simple_jaccard_precision(
     Use simple Jaccard similarity to find duplicate candidates by precision
     """
     print("\nGetting duplicate candidates with simple jaccard precision")
+    similarities = []
     candidates = set()
     for i in range(len(tokenized_corpus)):
         for j in range(i + 1, len(tokenized_corpus)):
@@ -132,11 +195,12 @@ def get_duplicate_candidates_simple_jaccard_precision(
             item_j = tokenized_corpus[j]
 
             precision = compute_simple_jaccard_precision(item_i, item_j)
+            similarities.append((f"{i}/{j}", precision))
 
             if precision > 0.8:
-                print(f"Items {i}/{j} ({len(item_i)}/{len(item_j)}): Precision: {precision:.2f}")
                 candidates.add(i)
                 candidates.add(j)
+    print(similarities)
     return candidates
 
 
@@ -149,7 +213,7 @@ def get_duplicate_candidates_minhash_precision(
     """
     print("\nGetting duplicate candidates with minhash precision")
     minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=128)
-
+    similarities = []
     candidates = set()
     for i, m1 in enumerate(minhashes):
         for j in range(i + 1, len(minhashes)):
@@ -157,16 +221,16 @@ def get_duplicate_candidates_minhash_precision(
             jaccard = m1.jaccard(m2)
             item_i = tokenized_encoded_corpus[i]
             item_j = tokenized_encoded_corpus[j]
-            precision = compute_precision_from_jaccard(jaccard, len(set(item_i)), len(set(item_j)))
+            precision = compute_precision_from_jaccard(
+                jaccard, len(set(item_i)), len(set(item_j))
+            )
+            similarities.append((f"{i}/{j}", round(jaccard, 2), round(precision, 2)))
 
             if precision > 0.8:
-                print(f"Intersection: {len(set(item_i) & set(item_j))}")
-                print(
-                    f"Items {i}/{j}  ({len(set(item_i))}/{len(set(item_j))}) of ({len(item_i)}/{len(item_j)}): Jaccard: {jaccard:.2f}, Precision: {precision:.2f}"
-                )
                 candidates.add(i)
                 candidates.add(j)
 
+    print(similarities)
     return candidates
 
 
@@ -199,7 +263,9 @@ def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
 
     # noinspection PyTypeChecker
     # Calculate all pairwise similarities at once
-    distances = process.cdist(tokenized_corpus, tokenized_corpus, scorer=fuzz.partial_ratio)
+    distances = process.cdist(
+        tokenized_corpus, tokenized_corpus, scorer=fuzz.partial_ratio
+    )
     duplicates = set()
     for i in range(len(tokenized_corpus)):
         for j in range(i + 1, len(tokenized_corpus)):
@@ -208,3 +274,6 @@ def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
                 duplicates.add(j)
 
     return duplicates
+
+
+# %%
