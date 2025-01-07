@@ -194,6 +194,8 @@ def get_duplicate_candidates_cosine(tokenized_corpus: List[List[str]]) -> set[in
 
 def get_duplicate_candidates_simple_precision(
     tokenized_corpus: List[List[str]],
+    *,
+    threshold: float = 0.7,
     report: Literal["plot", "print", None] = None,
 ) -> set[int]:
     """
@@ -212,24 +214,28 @@ def get_duplicate_candidates_simple_precision(
                 jaccard = compute_simple_jaccard(item_i, item_j)
                 jaccards.append(jaccard)
 
+            precision = compute_simple_precision(item_i, item_j)
             if report:
-                precision = compute_simple_precision(item_i, item_j)
                 similarities.append(round(precision, 2))
 
-            if precision > 0.7:
+            if precision > threshold:
                 candidates.add(i)
                 candidates.add(j)
 
+    print(f"Simple Precision Comparisons: {len(similarities)}")
+    print(f"Simple Precision Candidates: {len(candidates)}")
     if report == "plot":
         plot_number_dist(similarities)
     elif report == "print":
-        print(f"Precisions: {similarities}")
-        print(f"Jaccards: {jaccards}")
+        print(f"Simple Precisions: {similarities}")
+        print(f"Simple Jaccards: {jaccards}")
     return candidates
 
 
 def get_duplicate_candidates_minhash_precision(
     tokenized_encoded_corpus: List[List[str]],
+    *,
+    threshold: float = 0.7,
     report: Literal["plot", "print", None] = None,
 ) -> set[int]:
     """
@@ -253,19 +259,23 @@ def get_duplicate_candidates_minhash_precision(
             if report:
                 similarities.append(round(precision, 2))
 
-            if precision > 0.7:
+            if precision > threshold:
                 candidates.add(i)
                 candidates.add(j)
 
+    print(f"Minhash Comparisons: {len(similarities)}")
+    print(f"Minhash Candidates: {len(candidates)}")
     if report == "plot":
         plot_number_dist(similarities)
     elif report == "print":
-        print(f"Precisions: {similarities}")
+        print(f"Minhash Precisions: {similarities}")
     return candidates
 
 
 def get_duplicate_candidates_minhash(
     tokenized_encoded_corpus: List[List[str]],
+    *,
+    threshold: float = 0.95,
 ) -> set[int]:
     """
     Use MinHashLSH to find duplicate candidates
@@ -273,7 +283,7 @@ def get_duplicate_candidates_minhash(
     """
     print("\nGetting duplicate candidates with minhash jaccard")
     minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
-    lsh = MinHashLSH(threshold=0.7, num_perm=1024)
+    lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
     candidates = set()
     for i, m in enumerate(minhashes):
@@ -284,7 +294,7 @@ def get_duplicate_candidates_minhash(
 
     return candidates
 
-
+#  needs to take two candidate sets, one is the set of subsets, the other is the set of superset
 def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
     """
     Use rapidfuzz.process.cdist to efficiently find duplicate candidates

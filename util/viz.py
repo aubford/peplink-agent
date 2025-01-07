@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-def plot_content_length_dist(df_column, title=None, bins=50, figsize=(10, 6)):
+def plot_content_length_dist(df_column, title=None, bins=500, figsize=(10, 6)):
     """
     Plot distribution of string lengths in a pandas DataFrame text column with mean and median lines.
 
@@ -22,6 +22,7 @@ def plot_content_length_dist(df_column, title=None, bins=50, figsize=(10, 6)):
 
     # Create histogram using pandas
     ax = length_series.plot(kind="hist", bins=bins, figsize=figsize, edgecolor="black")
+    ax.set_xscale('log')  # Set x-axis to log scale
 
     # Set title (use series name if title not provided)
     title = title or f"Distribution of {series.name} Lengths"
@@ -57,7 +58,7 @@ def plot_content_length_dist(df_column, title=None, bins=50, figsize=(10, 6)):
 def plot_list_length_dist(
     data: list[str] | list[list],
     title: str = None,
-    bins: int = 50,
+    bins: int = 500,
     figsize: tuple[int, int] = (10, 6),
 ) -> None:
     """
@@ -75,6 +76,7 @@ def plot_list_length_dist(
 
     # Create histogram
     ax = length_series.plot(kind="hist", bins=bins, figsize=figsize, edgecolor="black")
+    ax.set_xscale('log')  # Set x-axis to log scale
 
     # Set title and stats
     title = title or "Distribution of List Lengths"
