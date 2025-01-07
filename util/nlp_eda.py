@@ -99,7 +99,7 @@ from util.nlp import (
 
 start = time.time()
 minhash_result = filter_exact_duplicates_minhash(
-    nltk_tokenized_corpus_encoded, threshold=0.97
+    nltk_tokenized_corpus, threshold=0.97
 )
 time3 = time.time() - start
 print(f"Minhash exact time: {time3:.2f}s")
@@ -151,60 +151,3 @@ time4 = time.time() - start
 print(f"Rapidfuzz: {time4:.2f}s")
 print(result4)
 print(f"len: {len(result4)}")
-
-# #%%
-# def clean_incremental_groups(minhash_result: List[list]) -> List[list]:
-#     """Remove intermediate groups that are subsets of later groups."""
-#     cleaned_groups = []
-
-#     for i, current_group in enumerate(minhash_result):
-#         # Convert lists to sets for comparison
-#         current_set = set(current_group)
-#         # Check if this group is a subset of any later group
-#         is_intermediate = any(
-#             current_set.issubset(set(later_group)) and current_set != set(later_group)
-#             for later_group in minhash_result[i+1:]
-#         )
-
-#         if not is_intermediate:
-#             cleaned_groups.append(current_group)
-
-#     return cleaned_groups
-
-# def analyze_overlapping_groups(minhash_result):
-#     # First clean up intermediate groups
-#     cleaned_results = clean_incremental_groups(minhash_result)
-#     print(f"Reduced from {len(minhash_result)} to {len(cleaned_results)} groups")
-
-#     # Rest of the analysis remains the same
-#     number_to_groups = {}
-#     for group_idx, group in enumerate(cleaned_results):
-#         if len(group) > 1:
-#             for num in group:
-#                 if num not in number_to_groups:
-#                     number_to_groups[num] = []
-#                 number_to_groups[num].append(group_idx)
-
-#     overlapping_numbers = {
-#         num: groups for num, groups in number_to_groups.items()
-#         if len(groups) > 1
-#     }
-
-
-#     if overlapping_numbers:
-#         print("\nNumbers appearing in multiple groups:")
-#         for num, group_indices in overlapping_numbers.items():
-#             print(f"\nNumber {num} appears in {len(group_indices)} groups:")
-#             for group_idx in group_indices:
-#                 print(f"  Group {group_idx}: {cleaned_results[group_idx]}")
-#     else:
-#         print("\nNo numbers appear in multiple groups")
-
-#     return overlapping_numbers
-
-# # Call the analysis function
-# overlapping = analyze_overlapping_groups(minhash_result)
-# print(f"\nTotal numbers appearing in multiple groups: {len(overlapping)}")
-
-# cleaned_results = clean_incremental_groups(minhash_result)
-# print(cleaned_results)

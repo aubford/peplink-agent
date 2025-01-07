@@ -3,7 +3,7 @@ import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datasketch import MinHash, MinHashLSH
-from typing import List, Literal
+from typing import List, Literal, Tuple, TypeVar, NamedTuple, Set
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -232,57 +232,20 @@ def get_duplicate_candidates_simple_precision(
     return candidates
 
 
-def get_duplicate_candidates_minhash_precision(
-    tokenized_encoded_corpus: List[List[str]],
-    *,
-    threshold: float = 0.7,
-    report: Literal["plot", "print", None] = None,
-) -> set[int]:
-    """
-    Use MinHash to compute Jaccard similarities between all pairs
-    and filter based on precision threshold
-    """
-    print("\nGetting duplicate candidates with minhash precision")
-    minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
-    similarities = []
-    candidates = set()
-    for i, m1 in enumerate(minhashes):
-        for j in range(i + 1, len(minhashes)):
-            m2 = minhashes[j]
-            jaccard = m1.jaccard(m2)
-            item_i = tokenized_encoded_corpus[i]
-            item_j = tokenized_encoded_corpus[j]
-            precision = compute_precision_from_jaccard(
-                jaccard, len(set(item_i)), len(set(item_j))
-            )
 
-            if report:
-                similarities.append(round(precision, 2))
+class TokenizedDoc(NamedTuple):
+    """Associates tokenized text with original document ID"""
 
-            if precision > threshold:
-                candidates.add(i)
-                candidates.add(j)
-
-    print(f"Minhash Comparisons: {len(similarities)}")
-    print(f"Minhash Candidates: {len(candidates)}")
-    if report == "plot":
-        plot_number_dist(similarities)
-    elif report == "print":
-        print(f"Minhash Precisions: {similarities}")
-    return candidates
-
+    doc_id: str  # or int, depending on your needs
+    tokens: List[str]
 
 def filter_exact_duplicates_minhash(
-    tokenized_encoded_corpus: List[List[str]],
+    docs: List[TokenizedDoc],
     *,
     threshold: float = 0.95,
-) -> List[set[int]]:
-    """
-    Use MinHashLSH to find exact duplicate candidates
-    This is the fastest method when there are many documents
-    """
-    print("\nGetting exact duplicate for removal with minhash jaccard")
-    minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
+) -> List[TokenizedDoc]:
+    """Returns filtered corpus with exact duplicates removed"""
+    minhashes = MinHash.bulk([doc.tokens for doc in docs], num_perm=1024)
     lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
     to_remove = []
@@ -300,33 +263,66 @@ def filter_exact_duplicates_minhash(
                 # No matching set found, append new set
                 to_remove.append(result)
 
-    # Flatten all sets into a single set of indices to remove
-    flattened_indices = set()
+    # Keep one representative from each group
+    indices_to_remove = set()
     for group in to_remove:
-        group.pop()  # Remove one representative from each group
-        flattened_indices.update(group)
-    return flattened_indices
+        group.pop()  # Keep one representative
+        indices_to_remove.update(group)
+    # Return filtered corpus
+    return [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
 
-#  needs to take two candidate sets, one is the set of subsets, the other is the set of superset
-def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
-    """
-    Use rapidfuzz.process.cdist to efficiently find duplicate candidates
-    """
-    print("Deduping with rapidfuzz")
 
-    # noinspection PyTypeChecker
-    # Calculate all pairwise similarities at once
-    distances = process.cdist(
-        tokenized_corpus, tokenized_corpus, scorer=fuzz.partial_ratio
-    )
+def get_duplicate_candidates_minhash_precision(
+    docs: List[TokenizedDoc],
+    *,
+    threshold: float = 0.7,
+    report: Literal["plot", "print", None] = None,
+) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:  # Changed from Set to List
+    """Returns pairs of documents that are potential duplicates"""
+    minhashes = MinHash.bulk([doc.tokens for doc in docs], num_perm=1024)
+    candidates = []  # Changed from set() to list()
+
+    similarities = []
+    for i, m1 in enumerate(minhashes):
+        for j in range(i + 1, len(minhashes)):
+            m2 = minhashes[j]
+            jaccard = m1.jaccard(m2)
+            item_i = docs[i].tokens
+            item_j = docs[j].tokens
+            precision = compute_precision_from_jaccard(
+                jaccard, len(set(item_i)), len(set(item_j))
+            )
+
+            if report:
+                similarities.append(round(precision, 2))
+
+            if precision > threshold:
+                candidates.append((docs[i], docs[j]))  # append instead of add
+
+    print(f"Minhash Comparisons: {len(similarities)}")
+    print(f"Minhash Candidates: {len(candidates)}")
+    if report == "plot":
+        plot_number_dist(similarities)
+    elif report == "print":
+        print(f"Minhash Precisions: {similarities}")
+    return candidates
+
+
+def get_duplicates(
+    candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]]  # Changed from Set to List
+) -> Set[str]:  # Returns doc_ids to remove
+    """Returns set of document IDs that are duplicates"""
+    tokenized_docs_a, tokenized_docs_b = zip(*candidate_pairs)
+    strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
+    strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
+
+    distances = process.cpdist(strings_a, strings_b, scorer=fuzz.partial_ratio)
     duplicates = set()
-    for i in range(len(tokenized_corpus)):
-        for j in range(i + 1, len(tokenized_corpus)):
-            if distances[i][j] > 60:
-                duplicates.add(i)
-                duplicates.add(j)
+    for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
+        if distances[idx] > 90:
+            if len(doc_a.tokens) < len(doc_b.tokens):
+                duplicates.add(doc_a.doc_id)
+            else:
+                duplicates.add(doc_b.doc_id)
 
     return duplicates
-
-
-# %%
