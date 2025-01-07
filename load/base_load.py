@@ -16,6 +16,7 @@ from util.util_main import deduplicate_df_page_content
 
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
 
+
 class BaseLoad:
     """Base class for all data transformers."""
 
@@ -59,7 +60,9 @@ class BaseLoad:
         self.logger.info("Initialized Pinecone vector store")
         self.vector_store = vector_store
 
-    def staging_to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
+    def staging_to_vector_store(
+        self, namespace: str = index_namespaces.PEPWAVE
+    ) -> None:
         """Upload staged documents to Pinecone."""
 
         if self.vector_store is None:
@@ -70,7 +73,9 @@ class BaseLoad:
         docs = self.parquet_to_documents(self.staging_path)
         self._log_documents(docs)
         self.vector_store.add_documents(docs, namespace=namespace)
-        self.logger.info(f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}")
+        self.logger.info(
+            f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}"
+        )
 
     def stage_documents(self, docs: List[Document]) -> None:
         """Store documents to local parquet file."""
@@ -94,10 +99,14 @@ class BaseLoad:
         # todo: to enable namespaces, iterate over subfolders in documents_dir
 
         if not documents_dir.exists():
-            raise FileNotFoundError(f"Documents directory does not exist: {documents_dir}")
+            raise FileNotFoundError(
+                f"Documents directory does not exist: {documents_dir}"
+            )
 
         if self.staging_path.exists():
-            raise FileNotFoundError(f"Staging data file already exists at {self.staging_path}")
+            raise FileNotFoundError(
+                f"Staging data file already exists at {self.staging_path}"
+            )
 
         dfs = []
         for file_path in documents_dir.glob("*"):
@@ -116,7 +125,9 @@ class BaseLoad:
 
         # Combine all dataframes and convert to documents
         combined_df = pd.concat(dfs)
-        combined_df = deduplicate_df_page_content(combined_df, self.similarity_threshold)
+        combined_df = deduplicate_df_page_content(
+            combined_df, self.similarity_threshold
+        )
         all_documents = self.df_to_documents(combined_df)
 
         staging_docs = self.load_docs(all_documents)
@@ -139,7 +150,9 @@ class BaseLoad:
         for _, row in df.iterrows():
             metadata = row.drop(["page_content", "id"]).to_dict()
             metadata["record_id"] = row["id"]
-            doc = Document(id=row["id"], page_content=row["page_content"], metadata=metadata)
+            doc = Document(
+                id=row["id"], page_content=row["page_content"], metadata=metadata
+            )
             documents.append(doc)
         return documents
 

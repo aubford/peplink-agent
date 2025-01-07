@@ -9,10 +9,10 @@ from util.viz import (
     plot_item_frequency,
 )
 import time
-from extract.youtube.youtube_base_extractor import YouTubeBaseExtractor
+from extract.web.web_extractor import WebsiteExtractor
 
 
-youtube_dfs = YouTubeBaseExtractor.get_rawfile_dataframes()
+youtube_dfs = WebsiteExtractor.get_rawfile_dataframes()
 
 for idx, item in enumerate(youtube_dfs):
     print(f"{idx}: {item[0]}")
@@ -51,6 +51,7 @@ nltk_tokenized_corpus_encoded = [
 #############################################################################
 from itertools import chain
 import util
+
 importlib.reload(util.viz)
 from util.viz import plot_item_frequency
 
@@ -74,6 +75,7 @@ from util.nlp import (
     get_duplicates,
 )
 
+
 def get_intersection_stats(idx1, idx2):
     text1 = nltk_tokenized_corpus[idx1]
     text2 = nltk_tokenized_corpus[idx2]
@@ -89,6 +91,7 @@ def get_intersection_stats(idx1, idx2):
         [nltk_tokenized_corpus[idx1], nltk_tokenized_corpus[idx2]],
         report="print",
     )
+
 
 get_intersection_stats(723, 721)
 get_intersection_stats(25, 419)
@@ -131,14 +134,16 @@ from util.nlp import (
 # print(f"len: {len(simple_result)}")
 
 start = time.time()
-minhash_result = get_duplicate_candidates_minhash_precision(nltk_tokenized_corpus_encoded)
+minhash_result = get_duplicate_candidates_minhash_precision(
+    nltk_tokenized_corpus_encoded
+)
 time3 = time.time() - start
 print(f"Minhash precision: {time3:.2f}s")
 print(minhash_result)
 print(f"len: {len(minhash_result)}")
 
 
-#%%
+# %%
 
 # unchunked_nltk_tokens = [nltk_get_tokens(text) for text in demo_texts]
 

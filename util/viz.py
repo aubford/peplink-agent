@@ -183,7 +183,7 @@ def plot_number_dist(
     ax.hist(data, bins=bins, edgecolor="black", alpha=0.7)
 
     # Set y-axis to log scale
-    ax.set_yscale('log')
+    ax.set_yscale("log")
 
     # Add mean and median lines
     mean_val = data.mean()

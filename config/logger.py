@@ -19,7 +19,7 @@ class RotatingFileLogger(logging.Logger):
         # Create common formatter
         formatter = logging.Formatter(
             "%(asctime)s (%(name)s) %(levelname)s: %(message)s",
-            datefmt='%Y-%m-%d %H:%M:%S'  # Specify date format without subseconds
+            datefmt="%Y-%m-%d %H:%M:%S",  # Specify date format without subseconds
         )
 
         # Configure rotating file handler
@@ -38,7 +38,7 @@ class RotatingFileLogger(logging.Logger):
     def n_info(self, msg: str) -> None:
         self.info("")
         self.info(msg)
-        
+
     def br_info(self, msg: str) -> None:
         self.info("-" * 100)
         self.info(msg)

@@ -1,15 +1,17 @@
 from transform.html.langchain_splitter_fork import HTMLSemanticPreservingSplitter
 
+
 def h3_pagetitle_filter(element):
     return element.name == "h3" and "inline-pagetitle" in element.get("class", [])
+
 
 # Configure splitter
 splitter = HTMLSemanticPreservingSplitter(
     headers_to_split_on=[("h3", "Section")],
     max_chunk_size=3000,
-    elements_to_preserve=["table","ul","ol"],
-    tags_to_preserve=["table", "tr", "td", "th","li"],
-    preserve_image_metadata=True
+    elements_to_preserve=["table", "ul", "ol"],
+    tags_to_preserve=["table", "tr", "td", "th", "li"],
+    preserve_image_metadata=True,
 )
 
 # Load and split the HTML file

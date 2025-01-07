@@ -9,7 +9,9 @@ class WebLoad(BaseLoad):
         super().__init__("web")
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=100, length_function=len)
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1500, chunk_overlap=100, length_function=len
+        )
         split_docs = text_splitter.split_documents(documents)
         return split_docs
 

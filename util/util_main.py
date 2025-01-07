@@ -62,7 +62,9 @@ def similarity_ratio(a: str, b: str) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
-def group_strings_return_longest(string_list: List[str], similarity_threshold: float = 0.75) -> List[str]:
+def group_strings_return_longest(
+    string_list: List[str], similarity_threshold: float = 0.75
+) -> List[str]:
     """
     Groups similar strings and returns the longest string from each group.
     Returns a list of representative strings, one per group.
@@ -75,7 +77,10 @@ def group_strings_return_longest(string_list: List[str], similarity_threshold: f
     for s in string_list:
         found_group = False
         for group in groups:
-            if any(similarity_ratio(s, existing) > similarity_threshold for existing in group):
+            if any(
+                similarity_ratio(s, existing) > similarity_threshold
+                for existing in group
+            ):
                 group.append(s)
                 found_group = True
                 break
@@ -86,7 +91,9 @@ def group_strings_return_longest(string_list: List[str], similarity_threshold: f
     return [max(group, key=len) for group in groups]
 
 
-def deduplicate_df_page_content(df: pd.DataFrame, similarity_threshold: float = 0.85) -> pd.DataFrame:
+def deduplicate_df_page_content(
+    df: pd.DataFrame, similarity_threshold: float = 0.85
+) -> pd.DataFrame:
     """
     Deduplicate a dataframe based on the page_content column.
     Uses similarity_threshold to determine how to deduplicate.
@@ -120,7 +127,9 @@ def get_column_word_count(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return df[column].str.split().str.len().astype("Int64")
 
 
-def validate_string_column(df: pd.DataFrame, column: str, allow_empty: bool = True) -> None:
+def validate_string_column(
+    df: pd.DataFrame, column: str, allow_empty: bool = True
+) -> None:
     """
     Validate that all values in a column are non-empty strings.
     Raises ValueError for any invalid values.
@@ -153,7 +162,9 @@ def validate_string_column(df: pd.DataFrame, column: str, allow_empty: bool = Tr
             raise ValueError(f"Column '{column}' contains whitespace-only strings")
 
 
-def validate_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: bool = True) -> None:
+def validate_string_columns(
+    df: pd.DataFrame, columns: List[str], allow_empty: bool = True
+) -> None:
     """
     Validate that all values in a list of columns are non-empty strings.
     Raises ValueError for any invalid values.
@@ -162,7 +173,9 @@ def validate_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: b
         validate_string_column(df, column, allow_empty)
 
 
-def set_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: bool = True) -> None:
+def set_string_columns(
+    df: pd.DataFrame, columns: List[str], allow_empty: bool = True
+) -> None:
     """
     Set the string columns to the strict string type.
     """
@@ -170,5 +183,6 @@ def set_string_columns(df: pd.DataFrame, columns: List[str], allow_empty: bool =
     for column in columns:
         df[column] = df[column].astype("string[pyarrow]", errors="raise")
 
+
 def test():
-    print('test*************************')
+    print("test*************************")

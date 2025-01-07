@@ -4,6 +4,7 @@ from transform.base_transform import BaseTransform
 from transform.html.langchain_splitter_fork import HTMLSemanticPreservingSplitter
 from util.util_main import set_string_columns
 
+
 class HTMLTransform(BaseTransform):
     """Transform and chunk HTML documents."""
 

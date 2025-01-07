@@ -327,7 +327,7 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
 
             text = ""
 
-            if self._preserve_image_metadata and element.name == 'img':
+            if self._preserve_image_metadata and element.name == "img":
                 img_src = element.get("src", "")
                 image_list.append(img_src)
             elif element.name is not None:
@@ -391,15 +391,17 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
                     header_name = elem.get_text(strip=True)
                     current_headers = {
                         dict(self._headers_to_split_on)[elem.name]: header_name,
-                        "images": []
+                        "images": [],
                     }
                 elif elem.name in self._elements_to_preserve:
                     placeholder = f"PRESERVED_{placeholder_count}"
-                    preserved_elements[placeholder] = _get_element_text(elem, current_headers['images'])
+                    preserved_elements[placeholder] = _get_element_text(
+                        elem, current_headers["images"]
+                    )
                     current_content.append(placeholder)
                     placeholder_count += 1
                 else:
-                    content = _get_element_text(elem, current_headers['images'])
+                    content = _get_element_text(elem, current_headers["images"])
                     if content:
                         current_content.append(content)
 
@@ -455,8 +457,8 @@ class HTMLSemanticPreservingSplitter(BaseDocumentTransformer):
 
         metadata = {**headers, **self._external_metadata}
 
-        if not metadata.get('images'):
-            metadata.pop('images', None)
+        if not metadata.get("images"):
+            metadata.pop("images", None)
 
         if len(content) <= self._max_chunk_size:
             page_content = self._reinsert_preserved_elements(

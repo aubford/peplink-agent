@@ -4,6 +4,7 @@ from pathlib import Path
 from transform.base_transform import BaseTransform
 from util.util_main import set_string_columns
 
+
 class RedditTransform(BaseTransform):
     folder_name = "reddit"
 
@@ -57,12 +58,16 @@ class RedditTransform(BaseTransform):
         # validate score is integer and not NaN or None
         df["score"] = pd.to_numeric(df["score"], errors="raise").astype("int64")
 
-        set_string_columns(df, ["subreddit", "category", "title", "url", "author_name"], False)
+        set_string_columns(
+            df, ["subreddit", "category", "title", "url", "author_name"], False
+        )
 
         # Count rows with None in any author_ column
         author_columns = [col for col in df.columns if col.startswith("author_")]
         rows_without_author_count = df[author_columns].isna().any(axis=1).sum()
-        print(f"{file_path}: Found {rows_without_author_count} rows with None values in author columns")
+        print(
+            f"{file_path}: Found {rows_without_author_count} rows with None values in author columns"
+        )
 
         return df
 

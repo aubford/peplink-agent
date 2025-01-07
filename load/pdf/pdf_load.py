@@ -20,7 +20,9 @@ class PdfLoad(BaseLoad):
 
         for doc in documents:
             print(f"Page {doc.metadata.get('page')}")
-            print(f"Type: {type(doc.metadata.get('plumber_table'))}")  # Will be None if not a table
+            print(
+                f"Type: {type(doc.metadata.get('plumber_table'))}"
+            )  # Will be None if not a table
             print(f"Content: {doc.page_content[:100]}...\n")
 
         return documents

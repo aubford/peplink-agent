@@ -23,7 +23,6 @@ class BaseTransform:
         self.logger.br_info(f"DF Transformed: {file_name}\n")
         self.logger.n_info(df.info(show_counts=True))
 
-
     @property
     def config(self) -> ConfigType:
         """Get the global config singleton."""
@@ -46,14 +45,16 @@ class BaseTransform:
             if file_path.name.startswith("."):
                 continue
 
-            file_name = file_path.name.split('__T')[0]
+            file_name = file_path.name.split("__T")[0]
             self.logger.br_info(f"\n\n******Transforming file: {file_name}\n\n")
 
             try:
                 df = self.transform_file(file_path)
                 output_path = parquet_dir / f"{file_path.stem}.parquet"
                 self.log_df(df, file_name)
-                df.to_parquet(output_path, index=True, compression="snappy", engine="pyarrow")
+                df.to_parquet(
+                    output_path, index=True, compression="snappy", engine="pyarrow"
+                )
 
             except Exception as e:
                 self.logger.error(f"Error processing {file_name}")
