@@ -4,7 +4,7 @@ from util.util_main import serialize_document
 import time
 
 
-class RedditPostExtractor(BaseExtractor):
+class RedditExtractor(BaseExtractor):
     source_name = "reddit"
 
     def __init__(self, subreddit: str):

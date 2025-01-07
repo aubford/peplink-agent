@@ -9,41 +9,31 @@ from util.viz import (
     plot_item_frequency,
 )
 import time
-from extract.web.web_extractor import WebsiteExtractor
+from extract.web.web_extractor import WebExtractor
+from extract.reddit.reddit_extractor import RedditExtractor
 
 
-youtube_dfs = WebsiteExtractor.get_rawfile_dataframes()
+web_dfs = WebExtractor.get_rawfile_dataframes()
+reddit_dfs = RedditExtractor.get_rawfile_dataframes()
 
-for idx, item in enumerate(youtube_dfs):
+
+for idx, item in enumerate(web_dfs):
     print(f"{idx}: {item[0]}")
 
-mirc_df = youtube_dfs[2][1]
-df_contents = mirc_df["page_content"]
-# plot_content_length_dist(df_contents, title="Distribution of Content Lengths", bins=50)
-demo_texts = list(df_contents)
+demo_texts = []
+for df_tuple in web_dfs + reddit_dfs:
+    _, df = df_tuple  # Unpack name and dataframe
+    demo_texts.extend(df["page_content"].tolist())
 
 
 # %% ########################################################################
 ############ TOKENIZE ###################################################
 #############################################################################
-from util.viz import plot_item_frequency
 
-start = time.time()
 nltk_tokenized_corpus = [nltk_get_tokens(text, chunk_size=2) for text in demo_texts]
-tokenization_time_1 = time.time() - start
-print(f"NLTK: {tokenization_time_1:.2f}s")
 nltk_tokenized_corpus_encoded = [
     [token.encode("utf8") for token in text] for text in nltk_tokenized_corpus
 ]
-
-# start = time.time()
-# spacy_tokenized_corpus = [spacy_get_tokens(text) for text in demo_texts]
-# corpus_time_2 = time.time() - start
-# print(f"Spacy: {corpus_time_2:.2f}s")
-
-# spacy_tokenized_corpus_encoded = [
-#     [token.encode("utf8") for token in text] for text in spacy_tokenized_corpus
-# ]
 
 
 # %% ########################################################################
@@ -64,18 +54,6 @@ from util.viz import plot_item_frequency
 # %% ########################################################################
 ############ EDA TOKENIZE NLTK ##############################################
 #############################################################################
-import importlib
-import util.nlp
-
-importlib.reload(util.nlp)
-
-from util.nlp import (
-    get_duplicate_candidates_minhash_precision,
-    get_duplicate_candidates_simple_precision,
-    get_duplicates,
-)
-
-
 def get_intersection_stats(idx1, idx2):
     text1 = nltk_tokenized_corpus[idx1]
     text2 = nltk_tokenized_corpus[idx2]
@@ -96,21 +74,6 @@ def get_intersection_stats(idx1, idx2):
 get_intersection_stats(723, 721)
 get_intersection_stats(25, 419)
 
-# plot_item_frequency(nltk_tokenized_corpus[25])
-# plot_item_frequency(nltk_tokenized_corpus[419])
-# %% ########################################################################
-############ EDA TOKENIZE SPACY #############################################
-#############################################################################
-# import util
-
-# importlib.reload(util.viz)
-# from util.viz import plot_item_frequency
-
-# plot_item_frequency(spacy_tokenized_corpus[657])
-# plot_item_frequency(spacy_tokenized_corpus[89])
-# result3 = get_duplicate_candidates_minhash_precision(
-#     [spacy_tokenized_corpus_encoded[657], spacy_tokenized_corpus_encoded[89]]
-# )
 
 # %% ########################################################################
 ############ TEST ###########################################################
@@ -144,8 +107,6 @@ print(f"len: {len(minhash_result)}")
 
 
 # %%
-
-# unchunked_nltk_tokens = [nltk_get_tokens(text) for text in demo_texts]
 
 potential_duplicates = [demo_texts[i] for i in minhash_result]
 print(len(potential_duplicates))

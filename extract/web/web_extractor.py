@@ -5,7 +5,7 @@ from util.util_main import serialize_document
 import time
 
 
-class WebsiteExtractor(BaseExtractor):
+class WebExtractor(BaseExtractor):
     source_name = "web"
 
     def __init__(self, url: str, *, base_url: str = None, max_depth: int = 6):
