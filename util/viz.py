@@ -1,5 +1,8 @@
+# %%
+
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 
 def plot_content_length_dist(df_column, title=None, bins=50, figsize=(10, 6)):
@@ -101,40 +104,33 @@ def plot_list_length_dist(
     plt.show()
 
 
-def plot_word_frequency(
-    text: str | list[str], top_n: int = 300, title: str = None
-) -> None:
+def plot_item_frequency(items: list, top_n: int = 300, title: str = None) -> None:
     """
-    Plot frequency distribution of words in text data.
+    Plot frequency distribution of items in a list.
 
     Args:
-        text: String or list of strings to analyze
-        top_n: Number of most frequent words to display (default 500)
-        title: Plot title (defaults to "Word Frequency Distribution")
-        figsize: Figure dimensions (width, height)
+        items: List of hashable items to analyze
+        top_n: Number of most frequent items to display (default 300)
+        title: Plot title (defaults to "Item Frequency Distribution")
     """
-    # Convert input to string if list
-    if isinstance(text, list):
-        text = " ".join(text)
+    # Create frequency series directly from items
+    frequencies = pd.Series(items).value_counts()
 
-    # Create word frequency series
-    words = pd.Series(text.lower().split()).value_counts()
-
-    # Adjust figure height based on number of words
-    height = max(6, top_n * 0.12)  # Increased scaling factor and maximum height
+    # Adjust figure height based on number of items
+    height = max(6, top_n * 0.12)
     figsize = (12, height)
 
     # Plot horizontal bar chart
-    ax = words.head(top_n).plot(kind="barh", figsize=figsize)
+    ax = frequencies.head(top_n).plot(kind="barh", figsize=figsize)
 
-    title = title or "Word Frequency Distribution"
-    ax.set_title(f"{title}\n(Top {top_n} words)")
+    title = title or "Item Frequency Distribution"
+    ax.set_title(f"{title}\n(Top {top_n} items)")
     ax.set_xlabel("Frequency")
-    ax.set_ylabel("Word")
+    ax.set_ylabel("Item")
     ax.grid(True, alpha=0.3)
 
     # Add frequency values at end of each bar
-    for i, v in enumerate(words.head(top_n)):
+    for i, v in enumerate(frequencies.head(top_n)):
         ax.text(v, i, f" {v:,}", va="center")
 
     plt.tight_layout()
@@ -162,3 +158,58 @@ def get_word_counts(text: list[str], verbose: bool = False) -> dict[str, int]:
         for word, count in sorted_counts.items():
             print(f"{word}: {count}")
     print(f"UNIQUE WORDS: {len(word_counts)}")
+
+
+def plot_number_dist(
+    numbers: list[float],
+    title: str = "Distribution Plot",
+    bins: int = 10000,
+    figsize: tuple[int, int] = (10, 6),
+) -> None:
+    """
+    Creates a histogram of numerical values with statistics.
+
+    Args:
+        numbers: List of numbers to analyze
+        title: Plot title (default: "Distribution Plot")
+        bins: Number of histogram bins (default: 50)
+        figsize: Figure dimensions (width, height) (default: (10, 6))
+    """
+    # Convert to numpy array for efficient computation
+    data = np.array(numbers)
+
+    # Create histogram
+    ax = plt.figure(figsize=figsize).gca()
+    ax.hist(data, bins=bins, edgecolor="black", alpha=0.7)
+
+    # Set y-axis to log scale
+    ax.set_yscale('log')
+
+    # Add mean and median lines
+    mean_val = data.mean()
+    median_val = np.median(data)
+    ax.axvline(
+        mean_val,
+        color="red",
+        linestyle="--",
+        linewidth=1,
+        label=f"Mean: {mean_val:.3f}",
+    )
+    ax.axvline(
+        median_val,
+        color="green",
+        linestyle="--",
+        linewidth=1,
+        label=f"Median: {median_val:.3f}",
+    )
+
+    # Set labels and title
+    stats_text = f"\nRange: {data.min():.3f} to {data.max():.3f}"
+    ax.set_title(title + stats_text)
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Frequency")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+
+    plt.tight_layout()
+    plt.show()

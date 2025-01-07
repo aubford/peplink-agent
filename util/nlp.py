@@ -11,6 +11,7 @@ from nltk.corpus import brown
 from rapidfuzz import fuzz, process
 import spacy
 import random
+from util.viz import plot_item_frequency, plot_number_dist
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 100000000
@@ -195,12 +196,14 @@ def get_duplicate_candidates_simple_jaccard_precision(
             item_j = tokenized_corpus[j]
 
             precision = compute_simple_jaccard_precision(item_i, item_j)
-            similarities.append((f"{i}/{j}", precision))
+            similarities.append(round(precision, 2))
 
             if precision > 0.8:
                 candidates.add(i)
                 candidates.add(j)
-    print(similarities)
+
+    print(f"Num of comparisons: {len(similarities)}")
+    plot_number_dist(similarities)
     return candidates
 
 
@@ -224,13 +227,15 @@ def get_duplicate_candidates_minhash_precision(
             precision = compute_precision_from_jaccard(
                 jaccard, len(set(item_i)), len(set(item_j))
             )
-            similarities.append((f"{i}/{j}", round(jaccard, 2), round(precision, 2)))
+            # similarities.append((f"{i}/{j}", round(jaccard, 2), round(precision, 2)))
+            similarities.append(round(precision, 2))
 
             if precision > 0.8:
                 candidates.add(i)
                 candidates.add(j)
 
-    print(similarities)
+    print(f"Num of comparisons: {len(similarities)}")
+    plot_number_dist(similarities)
     return candidates
 
 
