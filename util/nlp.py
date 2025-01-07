@@ -275,32 +275,37 @@ def get_duplicate_candidates_minhash_precision(
 def filter_exact_duplicates_minhash(
     tokenized_encoded_corpus: List[List[str]],
     *,
-    threshold: float = 0.99,
+    threshold: float = 0.95,
 ) -> List[set[int]]:
     """
-    Use MinHashLSH to find duplicate candidates
+    Use MinHashLSH to find exact duplicate candidates
     This is the fastest method when there are many documents
     """
     print("\nGetting exact duplicate for removal with minhash jaccard")
     minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
     lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
-    results: List[set[int]] = []
+    to_remove = []
     for i, m in enumerate(minhashes):
         # insert lazily for speed
         lsh.insert(i, m)
         result = set(lsh.query(m))
         if len(result) > 1:
             # Check if we can merge with an existing set
-            for existing_set in results:
+            for existing_set in to_remove:
                 if result - {i} == existing_set:
                     existing_set.add(i)
                     break
             else:
                 # No matching set found, append new set
-                results.append(result)
+                to_remove.append(result)
 
-    return results
+    # Flatten all sets into a single set of indices to remove
+    flattened_indices = set()
+    for group in to_remove:
+        group.pop()  # Remove one representative from each group
+        flattened_indices.update(group)
+    return flattened_indices
 
 #  needs to take two candidate sets, one is the set of subsets, the other is the set of superset
 def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
