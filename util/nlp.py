@@ -3,7 +3,7 @@ import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datasketch import MinHash, MinHashLSH
-from typing import List
+from typing import List, Literal
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -148,7 +148,7 @@ def compute_cosine_similarity(a: str, b: str) -> float:
     return float(similarity[0, 0])
 
 
-def compute_simple_jaccard_precision(tokens_a: List[str], tokens_b: List[str]) -> float:
+def compute_simple_precision(tokens_a: List[str], tokens_b: List[str]) -> float:
     """Compute Jaccard similarity between two token lists."""
     set_a = set(tokens_a)
     set_b = set(tokens_b)
@@ -157,6 +157,17 @@ def compute_simple_jaccard_precision(tokens_a: List[str], tokens_b: List[str]) -
     if not precision_basis:
         return 0.0
     return len(intersection) / precision_basis
+
+
+def compute_simple_jaccard(tokens_a: List[str], tokens_b: List[str]) -> float:
+    """Compute Jaccard similarity between two token lists."""
+    set_a = set(tokens_a)
+    set_b = set(tokens_b)
+    intersection = set_a & set_b
+    union = set_a | set_b
+    if not union:
+        return 0.0
+    return round(len(intersection) / len(union), 2)
 
 
 ###### Dedupe ################################################################
@@ -181,13 +192,15 @@ def get_duplicate_candidates_cosine(tokenized_corpus: List[List[str]]) -> set[in
     return candidates
 
 
-def get_duplicate_candidates_simple_jaccard_precision(
+def get_duplicate_candidates_simple_precision(
     tokenized_corpus: List[List[str]],
+    report: Literal["plot", "print", None] = None,
 ) -> set[int]:
     """
-    Use simple Jaccard similarity to find duplicate candidates by precision
+    Use simple precision to find duplicate candidates
     """
-    print("\nGetting duplicate candidates with simple jaccard precision")
+    print("\nGetting duplicate candidates with simple precision")
+    jaccards = []
     similarities = []
     candidates = set()
     for i in range(len(tokenized_corpus)):
@@ -195,27 +208,36 @@ def get_duplicate_candidates_simple_jaccard_precision(
             item_i = tokenized_corpus[i]
             item_j = tokenized_corpus[j]
 
-            precision = compute_simple_jaccard_precision(item_i, item_j)
-            similarities.append(round(precision, 2))
+            if report == "print":
+                jaccard = compute_simple_jaccard(item_i, item_j)
+                jaccards.append(jaccard)
 
-            if precision > 0.8:
+            if report:
+                precision = compute_simple_precision(item_i, item_j)
+                similarities.append(round(precision, 2))
+
+            if precision > 0.7:
                 candidates.add(i)
                 candidates.add(j)
 
-    print(f"Num of comparisons: {len(similarities)}")
-    plot_number_dist(similarities)
+    if report == "plot":
+        plot_number_dist(similarities)
+    elif report == "print":
+        print(f"Precisions: {similarities}")
+        print(f"Jaccards: {jaccards}")
     return candidates
 
 
 def get_duplicate_candidates_minhash_precision(
     tokenized_encoded_corpus: List[List[str]],
+    report: Literal["plot", "print", None] = None,
 ) -> set[int]:
     """
     Use MinHash to compute Jaccard similarities between all pairs
     and filter based on precision threshold
     """
     print("\nGetting duplicate candidates with minhash precision")
-    minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=128)
+    minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
     similarities = []
     candidates = set()
     for i, m1 in enumerate(minhashes):
@@ -227,15 +249,18 @@ def get_duplicate_candidates_minhash_precision(
             precision = compute_precision_from_jaccard(
                 jaccard, len(set(item_i)), len(set(item_j))
             )
-            # similarities.append((f"{i}/{j}", round(jaccard, 2), round(precision, 2)))
-            similarities.append(round(precision, 2))
 
-            if precision > 0.8:
+            if report:
+                similarities.append(round(precision, 2))
+
+            if precision > 0.7:
                 candidates.add(i)
                 candidates.add(j)
 
-    print(f"Num of comparisons: {len(similarities)}")
-    plot_number_dist(similarities)
+    if report == "plot":
+        plot_number_dist(similarities)
+    elif report == "print":
+        print(f"Precisions: {similarities}")
     return candidates
 
 
@@ -247,8 +272,8 @@ def get_duplicate_candidates_minhash(
     This is the fastest method when there are many documents
     """
     print("\nGetting duplicate candidates with minhash jaccard")
-    minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=128)
-    lsh = MinHashLSH(threshold=0.8, num_perm=128)
+    minhashes = MinHash.bulk(tokenized_encoded_corpus, num_perm=1024)
+    lsh = MinHashLSH(threshold=0.7, num_perm=1024)
 
     candidates = set()
     for i, m in enumerate(minhashes):
@@ -274,7 +299,7 @@ def get_duplicates(tokenized_corpus: List[List[str]]) -> set[int]:
     duplicates = set()
     for i in range(len(tokenized_corpus)):
         for j in range(i + 1, len(tokenized_corpus)):
-            if distances[i][j] > 90:
+            if distances[i][j] > 60:
                 duplicates.add(i)
                 duplicates.add(j)
 
