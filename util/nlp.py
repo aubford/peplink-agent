@@ -87,13 +87,10 @@ def nltk_get_pos_tag(tag: str) -> str:
     return tag_dict.get(tag[0], wordnet.NOUN)
 
 
-def nltk_get_tokens(text: str, chunk_size: int = 1) -> List[str]:
+def nltk_get_tokens(text: str) -> List[str]:
     """
     Tokenize using NLTK, less strict with stop words
     Significantly faster and less memory intensive than spaCy
-
-    Args:
-        chunk_size: Number of words to chunk together as one token
     """
     stop_words = set(stopwords.words("english"))
     stop_words.update(
@@ -125,11 +122,14 @@ def nltk_get_tokens(text: str, chunk_size: int = 1) -> List[str]:
 
     pos_tagged_tokens = nltk.pos_tag(tokens)
     lemmatizer = WordNetLemmatizer()
-    wordset = [
+
+    return [
         lemmatizer.lemmatize(token, nltk_get_pos_tag(pos))
         for token, pos in pos_tagged_tokens
     ]
 
+
+def chunk_wordset(wordset: List[str], chunk_size: int) -> List[str]:
     return [
         " ".join(wordset[i : i + chunk_size])
         for i in range(0, len(wordset), chunk_size)
@@ -198,46 +198,6 @@ def get_duplicate_candidates_cosine(tokenized_corpus: List[List[str]]) -> set[in
     return candidates
 
 
-def get_duplicate_candidates_simple_precision(
-    tokenized_corpus: List[List[str]],
-    *,
-    threshold: float = 0.7,
-    report: Literal["plot", "print", None] = None,
-) -> set[int]:
-    """
-    Use simple precision to find duplicate candidates
-    """
-    print("\nGetting duplicate candidates with simple precision")
-    jaccards = []
-    similarities = []
-    candidates = set()
-    for i in range(len(tokenized_corpus)):
-        for j in range(i + 1, len(tokenized_corpus)):
-            item_i = tokenized_corpus[i]
-            item_j = tokenized_corpus[j]
-
-            if report == "print":
-                jaccard = compute_simple_jaccard(item_i, item_j)
-                jaccards.append(jaccard)
-
-            precision = compute_simple_precision(item_i, item_j)
-            if report:
-                similarities.append(round(precision, 2))
-
-            if precision > threshold:
-                candidates.add(i)
-                candidates.add(j)
-
-    print(f"Simple Precision Comparisons: {len(similarities)}")
-    print(f"Simple Precision Candidates: {len(candidates)}")
-    if report == "plot":
-        plot_number_dist(similarities)
-    elif report == "print":
-        print(f"Simple Precisions: {similarities}")
-        print(f"Simple Jaccards: {jaccards}")
-    return candidates
-
-
 @dataclass
 class TokenizedDoc:
     """Associates tokenized text with original document ID"""
@@ -245,22 +205,33 @@ class TokenizedDoc:
     doc_id: str
     tokens: List[str]
 
-    @cached_property
-    def encoded_tokens(self) -> List[bytes]:
-        return [token.encode("utf8") for token in self.tokens]
+
 
     def __init__(self, doc_id: str, text: str):
         self.doc_id = doc_id
         self.tokens = nltk_get_tokens(text)
+
+    def get_chunked_tokens(self, chunk_size: int = 1) -> List[str]:
+        if chunk_size == 1:
+            return self.tokens
+        return chunk_wordset(self.tokens, chunk_size)
+
+    def get_encoded_tokens(self, chunk_size: int = 1) -> List[bytes]:
+        if chunk_size == 1:
+            return [token.encode("utf8") for token in self.tokens]
+        return [token.encode("utf8") for token in self.get_chunked_tokens(chunk_size)]
 
 
 def filter_exact_duplicates_minhash(
     docs: List[TokenizedDoc],
     *,
     threshold: float = 0.98,
+    chunk_size: int = 2,
 ) -> List[TokenizedDoc]:
     """Returns filtered corpus with exact duplicates removed"""
-    minhashes = MinHash.bulk([doc.encoded_tokens for doc in docs], num_perm=1024)
+    minhashes = MinHash.bulk(
+        [doc.get_encoded_tokens(chunk_size) for doc in docs], num_perm=1024
+    )
     lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
     to_remove = []
@@ -292,6 +263,7 @@ def filter_exact_duplicates_minhash(
 def get_duplicate_candidates_simple_precision(
     docs: List[TokenizedDoc],
     *,
+    chunk_size: int = 1,
     threshold: float = 0.8,
     report: Literal["plot", "print", None] = None,
 ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
@@ -302,7 +274,10 @@ def get_duplicate_candidates_simple_precision(
     similarities = []
     for i in range(len(docs)):
         for j in range(i + 1, len(docs)):
-            precision = compute_simple_precision(docs[i].tokens, docs[j].tokens)
+            precision = compute_simple_precision(
+                docs[i].get_chunked_tokens(chunk_size),
+                docs[j].get_chunked_tokens(chunk_size),
+            )
 
             if report:
                 similarities.append(round(precision, 2))
@@ -328,7 +303,7 @@ def get_duplicate_candidates_minhash_precision(
     report: Literal["plot", "print", None] = None,
 ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
     """Returns pairs of documents that are potential duplicates"""
-    minhashes = MinHash.bulk([doc.encoded_tokens for doc in docs], num_perm=1024)
+    minhashes = MinHash.bulk([doc.get_encoded_tokens(2) for doc in docs], num_perm=1024)
 
     candidates = []
     similarities = []
@@ -361,15 +336,15 @@ def get_duplicate_candidates_minhash_precision(
 call_counter = itertools.count(1)
 
 
-def counting_scorer(s1: str, s2: str, **kwargs) -> float:
+def progress_scorer(s1: str, s2: str, **kwargs) -> float:
     current_call = next(call_counter)
     print_replace(
         f"Processed {current_call} comparisons. Next item lengths: {len(s1)}, {len(s2)}"
     )
-    print(f"\nSTR_1: {s1[:200]}")
-    print(f"\nSTR_2: {s2[:200]}")
+    # print(f"\nSTR_1: {s1[:200]}")
+    # print(f"\nSTR_2: {s2[:200]}")
     score = fuzz.partial_ratio(s1, s2)
-    print(f"\nScore: {score}\n")
+    # print(f"\nScore: {score}\n")
     return score
 
 
@@ -382,7 +357,7 @@ def get_duplicates(
     strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
     strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
 
-    distances = process.cpdist(strings_a, strings_b, scorer=counting_scorer, workers=9)
+    distances = process.cpdist(strings_a, strings_b, scorer=progress_scorer, workers=6)
     duplicates = set()
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
         if distances[idx] > 90:

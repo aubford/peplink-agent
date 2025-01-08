@@ -18,7 +18,7 @@ import pandas as pd
 web_dfs = WebTransform.get_parquet_dfs()
 youtube_dfs = YouTubeTransform.get_parquet_dfs()
 
-df = pd.concat(web_dfs)
+df = pd.concat(youtube_dfs)
 
 ################################################################
 ############ PIPELINE ##########################################
@@ -39,13 +39,12 @@ filtered_docs = filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
 filter_time = time.time() - start
 print(f"Filter complete: {filter_time:.2f}s")
 
+
 start = time.time()
-duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.95)
+duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.75, chunk_size=2)
 candidate_time = time.time() - start
 print(f"Candidates complete: {candidate_time:.2f}s")
 
-
-# %%
 
 import util.nlp
 
@@ -61,8 +60,6 @@ start = time.time()
 duplicate_doc_ids = get_duplicates(duplicate_candidates)
 dedupe_time = time.time() - start
 print(f"\nDeduplication complete: {dedupe_time:.2f}s")
-
-# %%
 
 filtered_docs_ids_deduped = [
     doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids

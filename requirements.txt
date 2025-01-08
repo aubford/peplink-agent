@@ -34,3 +34,4 @@ text-dedup==0.4.0
 datasketch==1.6.5
 spacy==3.8.3
 pytest==8.3.4
+snakeviz==2.2.2
