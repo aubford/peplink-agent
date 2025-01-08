@@ -3,7 +3,6 @@ import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
 from util.util_main import (
-    deduplicate_df_page_content,
     get_column_word_count,
     set_string_columns,
 )
@@ -50,9 +49,6 @@ class WebTransform(BaseTransform):
         # filter out pages with less than 100 words
         df = df[df["word_count"] >= 100]
         self._notify_dropped_rows(df, ">100 words")
-
-        # deduplicate pages with similar content
-        df = deduplicate_df_page_content(df, similarity_threshold=0.85)
 
         return df
 

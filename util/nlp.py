@@ -1,5 +1,6 @@
 # %%
 import nltk
+import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datasketch import MinHash, MinHashLSH
@@ -9,9 +10,14 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.corpus import brown
 from rapidfuzz import fuzz, process
+import itertools
 import spacy
 import random
+
+from util.util_main import print_replace
 from util.viz import plot_item_frequency, plot_number_dist
+from dataclasses import dataclass
+from functools import cached_property
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 100000000
@@ -232,20 +238,29 @@ def get_duplicate_candidates_simple_precision(
     return candidates
 
 
-
-class TokenizedDoc(NamedTuple):
+@dataclass
+class TokenizedDoc:
     """Associates tokenized text with original document ID"""
 
-    doc_id: str  # or int, depending on your needs
+    doc_id: str
     tokens: List[str]
+
+    @cached_property
+    def encoded_tokens(self) -> List[bytes]:
+        return [token.encode("utf8") for token in self.tokens]
+
+    def __init__(self, doc_id: str, text: str):
+        self.doc_id = doc_id
+        self.tokens = nltk_get_tokens(text)
+
 
 def filter_exact_duplicates_minhash(
     docs: List[TokenizedDoc],
     *,
-    threshold: float = 0.95,
+    threshold: float = 0.98,
 ) -> List[TokenizedDoc]:
     """Returns filtered corpus with exact duplicates removed"""
-    minhashes = MinHash.bulk([doc.tokens for doc in docs], num_perm=1024)
+    minhashes = MinHash.bulk([doc.encoded_tokens for doc in docs], num_perm=1024)
     lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
     to_remove = []
@@ -269,7 +284,41 @@ def filter_exact_duplicates_minhash(
         group.pop()  # Keep one representative
         indices_to_remove.update(group)
     # Return filtered corpus
-    return [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
+    result = [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
+    print(f"Filtered corpus length from {len(docs)} to {len(result)}")
+    return result
+
+
+def get_duplicate_candidates_simple_precision(
+    docs: List[TokenizedDoc],
+    *,
+    threshold: float = 0.8,
+    report: Literal["plot", "print", None] = None,
+) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
+    """Returns pairs of documents that are potential duplicates using simple precision."""
+    print(f"\nGetting duplicate pairs with simple precision from docs: {len(docs)}")
+
+    candidates = []
+    similarities = []
+    for i in range(len(docs)):
+        for j in range(i + 1, len(docs)):
+            precision = compute_simple_precision(docs[i].tokens, docs[j].tokens)
+
+            if report:
+                similarities.append(round(precision, 2))
+
+            if precision > threshold:
+                candidates.append((docs[i], docs[j]))
+
+    if report:
+        print(f"Simple Precision Comparisons: {len(similarities)}")
+        if report == "plot":
+            plot_number_dist(similarities)
+        elif report == "print":
+            print(f"Simple Precisions: {similarities}")
+
+    print(f"Simple Precision Candidates: {len(candidates)}")
+    return candidates
 
 
 def get_duplicate_candidates_minhash_precision(
@@ -277,11 +326,11 @@ def get_duplicate_candidates_minhash_precision(
     *,
     threshold: float = 0.7,
     report: Literal["plot", "print", None] = None,
-) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:  # Changed from Set to List
+) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
     """Returns pairs of documents that are potential duplicates"""
-    minhashes = MinHash.bulk([doc.tokens for doc in docs], num_perm=1024)
-    candidates = []  # Changed from set() to list()
+    minhashes = MinHash.bulk([doc.encoded_tokens for doc in docs], num_perm=1024)
 
+    candidates = []
     similarities = []
     for i, m1 in enumerate(minhashes):
         for j in range(i + 1, len(minhashes)):
@@ -297,26 +346,40 @@ def get_duplicate_candidates_minhash_precision(
                 similarities.append(round(precision, 2))
 
             if precision > threshold:
-                candidates.append((docs[i], docs[j]))  # append instead of add
+                candidates.append((docs[i], docs[j]))
 
-    print(f"Minhash Comparisons: {len(similarities)}")
+    if report:
+        print(f"Minhash Comparisons: {len(similarities)}")
+        if report == "plot":
+            plot_number_dist(similarities)
+        elif report == "print":
+            print(f"Minhash Precisions: {similarities}")
     print(f"Minhash Candidates: {len(candidates)}")
-    if report == "plot":
-        plot_number_dist(similarities)
-    elif report == "print":
-        print(f"Minhash Precisions: {similarities}")
     return candidates
 
 
+
+call_counter = itertools.count(1)
+
+def counting_scorer(s1: str, s2: str, **kwargs) -> float:
+    current_call = next(call_counter)
+    print_replace(f"Processed {current_call} comparisons. Next item lengths: {len(s1)}, {len(s2)}")
+    print(f"\nSTR_1: {s1[:200]}")
+    print(f"STR_2: {s2[:200]}\n")
+    return fuzz.partial_ratio(s1, s2)
+
 def get_duplicates(
-    candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]]  # Changed from Set to List
+    candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]]
 ) -> Set[str]:  # Returns doc_ids to remove
     """Returns set of document IDs that are duplicates"""
+    print(f"\nGetting duplicates. Pairs to compare: {len(candidate_pairs)}")
     tokenized_docs_a, tokenized_docs_b = zip(*candidate_pairs)
     strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
     strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
 
-    distances = process.cpdist(strings_a, strings_b, scorer=fuzz.partial_ratio)
+    distances = process.cpdist(
+        strings_a, strings_b, scorer=counting_scorer, workers=9
+    )
     duplicates = set()
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
         if distances[idx] > 90:
@@ -325,4 +388,5 @@ def get_duplicates(
             else:
                 duplicates.add(doc_b.doc_id)
 
+    print(f"Found ({len(duplicates)}) duplicates")
     return duplicates

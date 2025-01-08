@@ -107,14 +107,14 @@ class BaseTransform:
         Returns:
             List of Path objects for parquet files in this transformer's directory
         """
-        dir_path = Path("data") / cls.folder_name / "parquet"
+        dir_path = Path("data") / cls.folder_name / "documents"
         if not dir_path.exists():
             return []
 
         return sorted(p for p in dir_path.glob("*.parquet") if p.is_file())
 
     @classmethod
-    def get_parquet_dfs(cls) -> list[tuple[str, pd.DataFrame]]:
+    def get_parquet_dfs(cls) -> list[pd.DataFrame]:
         """
         Load all parquet files created by this transformer into pandas DataFrames.
 
@@ -124,10 +124,11 @@ class BaseTransform:
         files = cls.get_parquet_files()
         dataframes = []
 
-        for file_path in files:
+        for idx, file_path in enumerate(files):
             try:
                 df = pd.read_parquet(file_path)
-                dataframes.append((file_path.name, df))
+                dataframes.append(df)
+                print(f"{idx}: {file_path.name}")
             except Exception as e:
                 print(f"Failed to load DataFrame from {file_path}: {str(e)}")
 
