@@ -1,4 +1,4 @@
-from util.nlp import TokenizedDoc, get_duplicates, get_duplicate_candidates_minhash_precision
+from util.nlp import TokenizedDoc, confirm_duplicates, get_duplicate_candidates_minhash_precision
 
 def test_get_duplicate_candidates_minhash_precision():
     # Create test documents with known similarities
@@ -43,7 +43,7 @@ def test_get_duplicates():
         (docs[2], docs[3]),  # Different enough to not be duplicate
     ]
 
-    duplicates = get_duplicates(candidate_pairs)
+    duplicates = confirm_duplicates(candidate_pairs)
 
     assert duplicates == {"doc1"}  # doc1 should be marked as duplicate since it's a subset of doc2
     assert "doc3" not in duplicates  # doc3 is unique

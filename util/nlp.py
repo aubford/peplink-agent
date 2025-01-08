@@ -205,8 +205,6 @@ class TokenizedDoc:
     doc_id: str
     tokens: List[str]
 
-
-
     def __init__(self, doc_id: str, text: str):
         self.doc_id = doc_id
         self.tokens = nltk_get_tokens(text)
@@ -229,6 +227,7 @@ def filter_exact_duplicates_minhash(
     chunk_size: int = 2,
 ) -> List[TokenizedDoc]:
     """Returns filtered corpus with exact duplicates removed"""
+    print(f"\nFiltering corpus with exact duplicates. Chunk size: {chunk_size}")
     minhashes = MinHash.bulk(
         [doc.get_encoded_tokens(chunk_size) for doc in docs], num_perm=1024
     )
@@ -256,7 +255,7 @@ def filter_exact_duplicates_minhash(
         indices_to_remove.update(group)
     # Return filtered corpus
     result = [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
-    print(f"Filtered corpus length from {len(docs)} to {len(result)}")
+    print(f"\nFiltered corpus length from {len(docs)} to {len(result)}")
     return result
 
 
@@ -269,6 +268,7 @@ def get_duplicate_candidates_simple_precision(
 ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
     """Returns pairs of documents that are potential duplicates using simple precision."""
     print(f"\nGetting duplicate pairs with simple precision from docs: {len(docs)}")
+    print(f"Chunk size: {chunk_size}")
 
     candidates = []
     similarities = []
@@ -292,7 +292,7 @@ def get_duplicate_candidates_simple_precision(
         elif report == "print":
             print(f"Simple Precisions: {similarities}")
 
-    print(f"Simple Precision Candidates: {len(candidates)}")
+    print(f"Simple Precision Complete. Candidates: {len(candidates)}")
     return candidates
 
 
@@ -348,8 +348,10 @@ def progress_scorer(s1: str, s2: str, **kwargs) -> float:
     return score
 
 
-def get_duplicates(
-    candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]]
+def confirm_duplicates(
+    candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]],
+    *,
+    threshold: int = 90,
 ) -> Set[str]:  # Returns doc_ids to remove
     """Returns set of document IDs that are duplicates"""
     print(f"\nGetting duplicates. Pairs to compare: {len(candidate_pairs)}")
@@ -360,7 +362,7 @@ def get_duplicates(
     distances = process.cpdist(strings_a, strings_b, scorer=progress_scorer, workers=6)
     duplicates = set()
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
-        if distances[idx] > 90:
+        if distances[idx] > threshold:
             if len(doc_a.tokens) < len(doc_b.tokens):
                 duplicates.add(doc_a.doc_id)
             else:

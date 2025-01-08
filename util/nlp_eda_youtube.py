@@ -72,7 +72,7 @@ importlib.reload(util.nlp)
 from util.nlp import (
     get_duplicate_candidates_minhash_precision,
     get_duplicate_candidates_simple_precision,
-    get_duplicates,
+    confirm_duplicates,
 )
 
 
@@ -123,7 +123,7 @@ importlib.reload(util.nlp)
 from util.nlp import (
     get_duplicate_candidates_minhash_precision,
     get_duplicate_candidates_simple_precision,
-    get_duplicates,
+    confirm_duplicates,
 )
 
 # start = time.time()
@@ -151,7 +151,7 @@ potential_duplicates = [demo_texts[i] for i in minhash_result]
 print(len(potential_duplicates))
 
 start = time.time()
-result4 = get_duplicates(potential_duplicates)
+result4 = confirm_duplicates(potential_duplicates)
 time4 = time.time() - start
 print(f"Rapidfuzz: {time4:.2f}s")
 print(result4)

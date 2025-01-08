@@ -52,7 +52,7 @@ importlib.reload(util.nlp)
 from util.nlp import (
     get_duplicate_candidates_simple_precision,
     get_duplicate_candidates_minhash_precision,
-    get_duplicates,
+    confirm_duplicates,
     filter_exact_duplicates_minhash,
 )
 
@@ -79,18 +79,12 @@ print(f"Rows after deduplication: {len(df_deduped)}")
 tokenized_corpus = [doc.tokens for doc in filtered_docs]
 
 
-def get_intersection_stats(idx1, idx2):
-    text1 = tokenized_corpus[idx1]
-    text2 = tokenized_corpus[idx2]
+def get_intersection_stats(tokensA, tokensB):
     print("-" * 100)
-    print(f"Intersection: {len(set(text1) & set(text2))}")
-    print(f"Text[{idx1}]: {len(text1)} -> set: {len(set(text1))}")
-    print(f"Text[{idx2}]: {len(text2)} -> set: {len(set(text2))}")
-    get_duplicate_candidates_minhash_precision(
-        [tokenized_corpus[idx1], tokenized_corpus[idx2]],
-        report="print",
-    )
+    print(f"Intersection: {len(set(tokensA) & set(tokensB))}")
+    print(f"TextA: {len(tokensA)} -> set: {len(set(tokensA))}")
+    print(f"TextB: {len(tokensB)} -> set: {len(set(tokensB))}")
     get_duplicate_candidates_simple_precision(
-        [tokenized_corpus[idx1], tokenized_corpus[idx2]],
+        [tokensA, tokensB],
         report="print",
     )
