@@ -358,15 +358,20 @@ def get_duplicate_candidates_minhash_precision(
     return candidates
 
 
-
 call_counter = itertools.count(1)
+
 
 def counting_scorer(s1: str, s2: str, **kwargs) -> float:
     current_call = next(call_counter)
-    print_replace(f"Processed {current_call} comparisons. Next item lengths: {len(s1)}, {len(s2)}")
+    print_replace(
+        f"Processed {current_call} comparisons. Next item lengths: {len(s1)}, {len(s2)}"
+    )
     print(f"\nSTR_1: {s1[:200]}")
-    print(f"STR_2: {s2[:200]}\n")
-    return fuzz.partial_ratio(s1, s2)
+    print(f"\nSTR_2: {s2[:200]}")
+    score = fuzz.partial_ratio(s1, s2)
+    print(f"\nScore: {score}\n")
+    return score
+
 
 def get_duplicates(
     candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]]
@@ -377,9 +382,7 @@ def get_duplicates(
     strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
     strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
 
-    distances = process.cpdist(
-        strings_a, strings_b, scorer=counting_scorer, workers=9
-    )
+    distances = process.cpdist(strings_a, strings_b, scorer=counting_scorer, workers=9)
     duplicates = set()
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
         if distances[idx] > 90:
