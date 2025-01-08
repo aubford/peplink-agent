@@ -13,7 +13,10 @@ from rapidfuzz import fuzz, process
 import itertools
 import spacy
 import random
-
+from textwrap import dedent
+from config import RotatingFileLogWriter
+import pandas as pd
+from functools import wraps
 from util.util_main import print_replace
 from util.viz import plot_item_frequency, plot_number_dist
 from dataclasses import dataclass
@@ -28,23 +31,46 @@ nlp.max_length = 100000000
 # nltk.download('punkt_tab')
 # nltk.download('wordnet')
 
+logger = RotatingFileLogWriter("nlp")
+
+####### ANALYSIS TOOLS #########################################################
+
+
+def timer(func_name: str = None):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start = time.time()
+            result = func(*args, **kwargs)
+            elapsed = time.time() - start
+            name = func_name or func.__name__
+            print(f"{name} time: {elapsed:.2f}s")
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+def log_write_duplicate_pair(doc_a: str, doc_b: str, msg: str = "Duplicate found"):
+    logger.info(
+        dedent(
+            f"""
+            ::::{msg}::::
+            {'-' * 100}
+            {doc_a}
+            {'-' * 100}
+            {doc_b}
+        """
+        ).strip()
+    )
+
 
 def generate_random_texts(n: int, avg_length: int, mult: int = 100) -> List[str]:
-    """
-    Generate n random texts using coherent phrases from Brown corpus
-
-    Args:
-        n: Number of texts to generate
-        avg_length: Approximate number of words per text
-    """
-    # Get sentences from Brown corpus
     sentences = brown.sents(categories=["news", "editorial", "reviews"])
-
     texts = []
     for _ in range(n):
-        # Generate new random length for each text
         target_length = avg_length * random.randint(1, mult)
-
         text = []
         word_count = 0
         while word_count < target_length:
@@ -54,11 +80,10 @@ def generate_random_texts(n: int, avg_length: int, mult: int = 100) -> List[str]
 
         text = " ".join(text[:target_length]).lower()
         texts.append(text)
-
     return texts
 
 
-####### Tokenization ############
+####### Tokenization ###########################################################
 
 
 def spacy_get_tokens(text: str) -> List[str]:
@@ -183,7 +208,7 @@ def get_duplicate_candidates_cosine(tokenized_corpus: List[List[str]]) -> set[in
     """
     Use cosine similarity to find duplicate candidates
     """
-    print("\nGetting duplicate candidates with cosine similarity")
+    logger.print_header("Getting duplicate candidates with cosine similarity")
     candidates = set()
     # Join tokens back into strings for TfidfVectorizer
     texts = [" ".join(tokens) for tokens in tokenized_corpus]
@@ -205,9 +230,11 @@ class TokenizedDoc:
     doc_id: str
     tokens: List[str]
 
-    def __init__(self, doc_id: str, text: str):
-        self.doc_id = doc_id
-        self.tokens = nltk_get_tokens(text)
+    def __init__(self, df_row: pd.Series):
+        self.doc_id = df_row["id"]
+        self.original_text = df_row["page_content"]
+        self.df_row = df_row
+        self.tokens = nltk_get_tokens(self.original_text)
 
     def get_chunked_tokens(self, chunk_size: int = 1) -> List[str]:
         if chunk_size == 1:
@@ -220,6 +247,22 @@ class TokenizedDoc:
         return [token.encode("utf8") for token in self.get_chunked_tokens(chunk_size)]
 
 
+@timer("Tokenization")
+def tokenize_documents(df: pd.DataFrame) -> List[TokenizedDoc]:
+    """Tokenize all documents in the dataframe."""
+    logger.print_header(f"Tokenize {len(df)} docs")
+    tokenized_docs = []
+    for _, row in df.iterrows():
+        doc = TokenizedDoc(row)
+        tokenized_docs.append(doc)
+    logger.print(f"*Tokenization Complete: {len(tokenized_docs)}")
+    return tokenized_docs
+
+
+filter_logger = RotatingFileLogWriter("nlp-filter")
+
+
+@timer("Filter")
 def filter_exact_duplicates_minhash(
     docs: List[TokenizedDoc],
     *,
@@ -227,7 +270,8 @@ def filter_exact_duplicates_minhash(
     chunk_size: int = 2,
 ) -> List[TokenizedDoc]:
     """Returns filtered corpus with exact duplicates removed"""
-    print(f"\nFiltering corpus with exact duplicates. Chunk size: {chunk_size}")
+    logger.print_header(f"Filter exact duplicates for: {len(docs)} docs")
+    logger.print(f"Chunk size: {chunk_size}")
     minhashes = MinHash.bulk(
         [doc.get_encoded_tokens(chunk_size) for doc in docs], num_perm=1024
     )
@@ -255,10 +299,16 @@ def filter_exact_duplicates_minhash(
         indices_to_remove.update(group)
     # Return filtered corpus
     result = [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
-    print(f"\nFiltered corpus length from {len(docs)} to {len(result)}")
+
+    removed_docs = [docs[i] for i in indices_to_remove]
+    filter_logger.log_header(
+        f"Filtered corpus length from {len(docs)} to {len(result)}\n{removed_docs}"
+    )
+    logger.print(f"*Filtered corpus length from {len(docs)} to {len(result)}")
     return result
 
 
+@timer("Candidates")
 def get_duplicate_candidates_simple_precision(
     docs: List[TokenizedDoc],
     *,
@@ -267,8 +317,8 @@ def get_duplicate_candidates_simple_precision(
     report: Literal["plot", "print", None] = None,
 ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
     """Returns pairs of documents that are potential duplicates using simple precision."""
-    print(f"\nGetting duplicate pairs with simple precision from docs: {len(docs)}")
-    print(f"Chunk size: {chunk_size}")
+    logger.print_header(f"Get Candidates (precision) for: {len(docs)} docs")
+    logger.print(f"Chunk size: {chunk_size}")
 
     candidates = []
     similarities = []
@@ -283,19 +333,21 @@ def get_duplicate_candidates_simple_precision(
                 similarities.append(round(precision, 2))
 
             if precision > threshold:
+                log_write_duplicate_pair(docs[i].tokens, docs[j].tokens)
                 candidates.append((docs[i], docs[j]))
 
     if report:
-        print(f"Simple Precision Comparisons: {len(similarities)}")
+        logger.print(f"Simple Precision Comparisons: {len(similarities)}")
         if report == "plot":
             plot_number_dist(similarities)
         elif report == "print":
-            print(f"Simple Precisions: {similarities}")
+            logger.print(f"Simple Precisions: {similarities}")
 
-    print(f"Simple Precision Complete. Candidates: {len(candidates)}")
+    logger.print(f"*Simple Precision Complete. Num candidates: {len(candidates)}")
     return candidates
 
 
+@timer("Candidates Minhash")
 def get_duplicate_candidates_minhash_precision(
     docs: List[TokenizedDoc],
     *,
@@ -303,6 +355,7 @@ def get_duplicate_candidates_minhash_precision(
     report: Literal["plot", "print", None] = None,
 ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
     """Returns pairs of documents that are potential duplicates"""
+    logger.print_header(f"Get Candidates (minhash) for: {len(docs)} docs")
     minhashes = MinHash.bulk([doc.get_encoded_tokens(2) for doc in docs], num_perm=1024)
 
     candidates = []
@@ -324,49 +377,60 @@ def get_duplicate_candidates_minhash_precision(
                 candidates.append((docs[i], docs[j]))
 
     if report:
-        print(f"Minhash Comparisons: {len(similarities)}")
+        logger.print(f"Minhash Comparisons: {len(similarities)}")
         if report == "plot":
             plot_number_dist(similarities)
         elif report == "print":
-            print(f"Minhash Precisions: {similarities}")
-    print(f"Minhash Candidates: {len(candidates)}")
+            logger.print(f"Minhash Precisions: {similarities}")
+    logger.print(f"Minhash Complete. Num candidates: {len(candidates)}")
     return candidates
 
 
 call_counter = itertools.count(1)
 
 
-def progress_scorer(s1: str, s2: str, **kwargs) -> float:
+def _progress_scorer(s1: str, s2: str, **kwargs) -> float:
     current_call = next(call_counter)
     print_replace(
         f"Processed {current_call} comparisons. Next item lengths: {len(s1)}, {len(s2)}"
     )
-    # print(f"\nSTR_1: {s1[:200]}")
-    # print(f"\nSTR_2: {s2[:200]}")
+    # logger.print(f"STR_1: {s1[:200]}")
+    # logger.print(f"STR_2: {s2[:200]}")
+
+    start_time = time.time()
     score = fuzz.partial_ratio(s1, s2)
+    duration = time.time() - start_time
+
+    if duration > 3:
+        log_write_duplicate_pair(
+            s1, s2, msg=f"Slow comparison.  Lengths: {len(s1)}, {len(s2)}"
+        )
+
     # print(f"\nScore: {score}\n")
     return score
 
 
+@timer("Confirm Duplicates")
 def confirm_duplicates(
     candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]],
     *,
     threshold: int = 90,
-) -> Set[str]:  # Returns doc_ids to remove
+) -> Set[str]:
     """Returns set of document IDs that are duplicates"""
-    print(f"\nGetting duplicates. Pairs to compare: {len(candidate_pairs)}")
+    logger.print_header(f"Getting duplicates for: {len(candidate_pairs)} pairs")
     tokenized_docs_a, tokenized_docs_b = zip(*candidate_pairs)
     strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
     strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
 
-    distances = process.cpdist(strings_a, strings_b, scorer=progress_scorer, workers=6)
+    distances = process.cpdist(strings_a, strings_b, scorer=_progress_scorer, workers=6)
     duplicates = set()
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
         if distances[idx] > threshold:
+            log_write_duplicate_pair(doc_a.tokens, doc_b.tokens)
             if len(doc_a.tokens) < len(doc_b.tokens):
                 duplicates.add(doc_a.doc_id)
             else:
                 duplicates.add(doc_b.doc_id)
 
-    print(f"Found ({len(duplicates)}) duplicates")
+    logger.print(f"\n*Confirm Dupes Complete: Found ({len(duplicates)}) duplicates")
     return duplicates

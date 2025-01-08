@@ -42,3 +42,45 @@ class RotatingFileLogger(logging.Logger):
     def br_info(self, msg: str) -> None:
         self.info("-" * 100)
         self.info(msg)
+
+
+
+class RotatingFileLogWriter(logging.Logger):
+    """Logger with rotating file handling configured by default."""
+
+    def __init__(self, name: str, max_bytes: int = 20 * 1024 * 1024):
+        super().__init__(name)
+        self.setLevel(logging.DEBUG)
+
+        # Create logs directory if it doesn't exist
+        log_dir = Path("logs")
+        log_dir.mkdir(exist_ok=True)
+
+        # Create common formatter
+        self.default_formatter = logging.Formatter(
+            "%(asctime)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+
+        # Configure rotating file handler
+        self.file_handler = RotatingFileHandler(
+            os.path.join("logs", f"{name}.log"),
+            maxBytes=max_bytes,
+        )
+        self.file_handler.setFormatter(self.default_formatter)
+        self.addHandler(self.file_handler)
+
+    def print(self, msg: str) -> None:
+        # self.file_handler.setFormatter(self.simple_formatter)
+        print(msg)
+        self.info(msg)
+        # self.file_handler.setFormatter(self.default_formatter)
+
+    def log_header(self, msg: str) -> None:
+        log_msg = f"\n----------------------- {msg}"
+        self.info(log_msg)
+
+    def print_header(self, msg: str) -> None:
+        log_msg = f"\n----------------------- {msg}"
+        print(log_msg)
+        self.info(log_msg)

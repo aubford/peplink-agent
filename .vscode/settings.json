@@ -1,9 +1,9 @@
 {
     "files.exclude": {
-        ".idea": true,
-        "backup_data": true,
-        "logs": true,
-        "**/__pycache__": true
+        ".idea": false,
+        "backup_data": false,
+        "logs": false,
+        "**/__pycache__": false
     },
     "search.exclude": {
         ".vscode": true

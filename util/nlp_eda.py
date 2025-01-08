@@ -1,4 +1,7 @@
 # %% ########################################################################
+%load_ext autoreload
+%autoreload 2
+
 import importlib
 from itertools import chain
 from util.nlp import *
@@ -9,11 +12,13 @@ from util.viz import (
 )
 import time
 from typing import List
-from util.nlp import TokenizedDoc
+from util.nlp import TokenizedDoc, tokenize_documents
 from transform.web.web_transform import WebTransform
 from transform.youtube.youtube_transform import YouTubeTransform
 import pandas as pd
+from config import RotatingFileLogWriter
 
+logger = RotatingFileLogWriter("nlp")
 
 web_dfs = WebTransform.get_parquet_dfs()
 youtube_dfs = YouTubeTransform.get_parquet_dfs()
@@ -24,53 +29,36 @@ df = pd.concat(youtube_dfs)
 ############ PIPELINE ##########################################
 ################################################################
 
-print(f"\nTotal docs: {len(df)}")
+logger.print_header(f"\nTotal docs: {len(df)}")
 
-start = time.time()
-tokenized_docs = []
-for _, row in df.iterrows():
-    doc = TokenizedDoc(doc_id=str(row["id"]), text=row["page_content"])
-    tokenized_docs.append(doc)
-token_time = time.time() - start
-print(f"\nTokenized: {token_time:.2f}s")
+logger.print_header("Removing duplicate IDs")
+initial_len = len(df)
+df = df.drop_duplicates(subset=['id']).set_index("id", drop=False, verify_integrity=True)
+logger.print(f"Removed {initial_len - len(df)} duplicate IDs")
+logger.print(f"Total docs: {len(df)}")
 
-start = time.time()
+tokenized_docs = tokenize_documents(df)
 filtered_docs = filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
-filter_time = time.time() - start
-print(f"Filter complete: {filter_time:.2f}s")
-
-
-start = time.time()
 duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.75, chunk_size=2)
-candidate_time = time.time() - start
-print(f"Candidates complete: {candidate_time:.2f}s")
-
-
-import util.nlp
-
-importlib.reload(util.nlp)
-from util.nlp import (
-    get_duplicate_candidates_simple_precision,
-    get_duplicate_candidates_minhash_precision,
-    confirm_duplicates,
-    filter_exact_duplicates_minhash,
-)
-
-start = time.time()
-duplicate_doc_ids = get_duplicates(duplicate_candidates)
-dedupe_time = time.time() - start
-print(f"\nDeduplication complete: {dedupe_time:.2f}s")
-
+duplicate_doc_ids = confirm_duplicates(duplicate_candidates)
 filtered_docs_ids_deduped = [
     doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids
 ]
-print(f"\nFiltered docs after deduplication: {len(filtered_docs_ids_deduped)}")
-
+logger.print(f"\nFiltered doc ids after deduplication: {len(filtered_docs_ids_deduped)}")
 
 df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)]
-print(f"Rows after deduplication: {len(df_deduped)}")
+logger.print(f"Rows after deduplication: {len(df_deduped)}")
 
+#%%
+# ... existing code ...
 
+# Check for duplicate IDs in original df
+print("Duplicate ID counts in original df:")
+print(df["id"].value_counts().head())
+
+# Fix: Add drop_duplicates to remove duplicate rows with same ID
+df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)].drop_duplicates(subset=["id"])
+print(f"Rows after deduplication with drop_duplicates: {len(df_deduped)}")
 # %% ########################################################################
 ############ VIZ ###############################################
 #############################################################################
