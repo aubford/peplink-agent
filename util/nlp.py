@@ -32,6 +32,8 @@ nlp.max_length = 100000000
 # nltk.download('wordnet')
 
 logger = RotatingFileLogWriter("nlp")
+filter_logger = RotatingFileLogWriter("nlp-filter")
+
 
 ####### ANALYSIS TOOLS #########################################################
 
@@ -56,6 +58,7 @@ def log_write_duplicate_pair(doc_a: str, doc_b: str, msg: str = "Duplicate found
     logger.info(
         dedent(
             f"""
+            {'-' * 100}
             ::::{msg}::::
             {'-' * 100}
             {doc_a}
@@ -259,8 +262,6 @@ def tokenize_documents(df: pd.DataFrame) -> List[TokenizedDoc]:
     return tokenized_docs
 
 
-filter_logger = RotatingFileLogWriter("nlp-filter")
-
 
 @timer("Filter")
 def filter_exact_duplicates_minhash(
@@ -302,7 +303,7 @@ def filter_exact_duplicates_minhash(
 
     removed_docs = [docs[i] for i in indices_to_remove]
     filter_logger.log_header(
-        f"Filtered corpus length from {len(docs)} to {len(result)}\n{removed_docs}"
+        f"Filtered corpus length from {len(docs)} to {len(result)}\n{[doc.original_text for doc in removed_docs]}"
     )
     logger.print(f"*Filtered corpus length from {len(docs)} to {len(result)}")
     return result
@@ -333,7 +334,7 @@ def get_duplicate_candidates_simple_precision(
                 similarities.append(round(precision, 2))
 
             if precision > threshold:
-                log_write_duplicate_pair(docs[i].tokens, docs[j].tokens)
+                log_write_duplicate_pair(docs[i].original_text, docs[j].original_text)
                 candidates.append((docs[i], docs[j]))
 
     if report:
@@ -426,7 +427,7 @@ def confirm_duplicates(
     duplicates = set()
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
         if distances[idx] > threshold:
-            log_write_duplicate_pair(doc_a.tokens, doc_b.tokens)
+            log_write_duplicate_pair(doc_a.original_text, doc_b.original_text)
             if len(doc_a.tokens) < len(doc_b.tokens):
                 duplicates.add(doc_a.doc_id)
             else:

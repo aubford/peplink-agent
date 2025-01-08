@@ -25,40 +25,35 @@ youtube_dfs = YouTubeTransform.get_parquet_dfs()
 
 df = pd.concat(youtube_dfs)
 
+def dedupe_df(df: pd.DataFrame) -> pd.DataFrame:
+    logger.print_header("Removing duplicate IDs")
+    initial_len = len(df)
+    logger.print(f"\nTotal docs: {len(df)}")
+    df = df.drop_duplicates(subset=['id']).set_index("id", drop=False, verify_integrity=True)
+    logger.print(f"*Removed {initial_len - len(df)} duplicate IDs")
+    logger.print(f"Total docs: {len(df)}")
+    return df
+
 ################################################################
 ############ PIPELINE ##########################################
 ################################################################
 
-logger.print_header(f"\nTotal docs: {len(df)}")
 
-logger.print_header("Removing duplicate IDs")
-initial_len = len(df)
-df = df.drop_duplicates(subset=['id']).set_index("id", drop=False, verify_integrity=True)
-logger.print(f"Removed {initial_len - len(df)} duplicate IDs")
-logger.print(f"Total docs: {len(df)}")
-
+df = dedupe_df(df)
 tokenized_docs = tokenize_documents(df)
 filtered_docs = filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
 duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.75, chunk_size=2)
 duplicate_doc_ids = confirm_duplicates(duplicate_candidates)
+
 filtered_docs_ids_deduped = [
     doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids
 ]
-logger.print(f"\nFiltered doc ids after deduplication: {len(filtered_docs_ids_deduped)}")
+logger.print(f"Filtered doc ids after deduplication: {len(filtered_docs_ids_deduped)}")
 
 df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)]
 logger.print(f"Rows after deduplication: {len(df_deduped)}")
 
-#%%
-# ... existing code ...
 
-# Check for duplicate IDs in original df
-print("Duplicate ID counts in original df:")
-print(df["id"].value_counts().head())
-
-# Fix: Add drop_duplicates to remove duplicate rows with same ID
-df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)].drop_duplicates(subset=["id"])
-print(f"Rows after deduplication with drop_duplicates: {len(df_deduped)}")
 # %% ########################################################################
 ############ VIZ ###############################################
 #############################################################################
