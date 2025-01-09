@@ -1,6 +1,7 @@
 # %% ########################################################################
-%load_ext autoreload
-%autoreload 2
+
+# %load_ext autoreload
+# %autoreload 2
 
 import importlib
 from itertools import chain
@@ -23,7 +24,7 @@ logger = RotatingFileLogWriter("nlp")
 web_dfs = WebTransform.get_parquet_dfs()
 youtube_dfs = YouTubeTransform.get_parquet_dfs()
 
-df = pd.concat(youtube_dfs)
+df = pd.concat(web_dfs)
 
 def dedupe_df(df: pd.DataFrame) -> pd.DataFrame:
     logger.print_header("Removing duplicate IDs")
@@ -42,7 +43,7 @@ def dedupe_df(df: pd.DataFrame) -> pd.DataFrame:
 df = dedupe_df(df)
 tokenized_docs = tokenize_documents(df)
 filtered_docs = filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
-duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.75, chunk_size=2)
+duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.7, ngram=1)
 duplicate_doc_ids = confirm_duplicates(duplicate_candidates)
 
 filtered_docs_ids_deduped = [
@@ -55,19 +56,41 @@ logger.print(f"Rows after deduplication: {len(df_deduped)}")
 
 
 # %% ########################################################################
-############ VIZ ###############################################
+############ VIZ ############################################################
 #############################################################################
 
 
 tokenized_corpus = [doc.tokens for doc in filtered_docs]
 
 
-def get_intersection_stats(tokensA, tokensB):
+def get_intersection_stats(tokens_a, tokens_b):
     print("-" * 100)
-    print(f"Intersection: {len(set(tokensA) & set(tokensB))}")
-    print(f"TextA: {len(tokensA)} -> set: {len(set(tokensA))}")
-    print(f"TextB: {len(tokensB)} -> set: {len(set(tokensB))}")
+    print(f"Intersection: {len(set(tokens_a) & set(tokens_b))}")
+    print(f"TextA: {len(tokens_a)} -> set: {len(set(tokens_a))}")
+    print(f"TextB: {len(tokens_b)} -> set: {len(set(tokens_b))}")
     get_duplicate_candidates_simple_precision(
-        [tokensA, tokensB],
+        [tokens_a, tokens_b],
         report="print",
     )
+
+
+########## NOTES ############################################################
+
+# YouTube
+# Threshold=.8, ng=1 =>           candidates   /      dupes
+# Threshold=.5, ng=2 =>           candidates   /      dupes
+# Threshold=.6, ng=2 =>   25      candidates   /  23  dupes
+# Threshold=.6, ng=3 =>   7       candidates   /  6   dupes
+#
+#
+# Web
+# Threshold=.7, ng=1  =>  12423   candidates   /  14  dupes
+# Threshold=.8, ng=1  =>  3029    candidates   /  14  dupes
+# Threshold=.6, ng=2  =>  7061    candidates   /  13  dupes
+# Threshold=.7, ng=2  =>  1762    candidates   /  9   dupes
+# Threshold=.7, ng=3  =>  1228    candidates   /  5   dupes
+# Threshold=.8, ng=2  =>  234     candidates   /  3   dupes
+# Threshold=.85,ng=3  =>  1       candidates   /  0   dupes
+#
+#
+#

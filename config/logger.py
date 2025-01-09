@@ -26,6 +26,7 @@ class RotatingFileLogger(logging.Logger):
         file_handler = RotatingFileHandler(
             os.path.join("logs", f"{name}.log"),
             maxBytes=20 * 1024 * 1024,  # 20 MB
+            backupCount=2
         )
         file_handler.setFormatter(formatter)
         self.addHandler(file_handler)
@@ -58,14 +59,15 @@ class RotatingFileLogWriter(logging.Logger):
 
         # Create common formatter
         self.default_formatter = logging.Formatter(
-            "%(asctime)s: %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
+            "\n%(asctime)s: %(message)s",
+            datefmt="%m/%d %H:%M:%S",
         )
 
         # Configure rotating file handler
         self.file_handler = RotatingFileHandler(
             os.path.join("logs", f"{name}.log"),
             maxBytes=max_bytes,
+            backupCount=2,
         )
         self.file_handler.setFormatter(self.default_formatter)
         self.addHandler(self.file_handler)
