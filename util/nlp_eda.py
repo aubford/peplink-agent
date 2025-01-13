@@ -3,7 +3,7 @@
 # %autoreload 2
 
 from util.nlp import *
-from util.nlp import deduplication_pipeline
+from util.deduplication_pipeline import DeduplicationPipeline
 from transform.web.web_transform import WebTransform
 from transform.youtube.youtube_transform import YouTubeTransform
 import pandas as pd
@@ -16,12 +16,14 @@ web_df = pd.concat(web_dfs)
 youtube_dfs = YouTubeTransform.get_parquet_dfs()
 youtube_df = pd.concat(youtube_dfs)
 
+pipeline = DeduplicationPipeline("web")
+
 ##############################################################################
 ############ WEB #############################################################
 ##############################################################################
 
-ng_1 = deduplication_pipeline(web_df, precision_threshold=0.8, precision_ngram=1)
-ng_2 = deduplication_pipeline(web_df, precision_threshold=0.5, precision_ngram=2)
+ng_1 = pipeline.run(web_df, precision_threshold=0.8, precision_ngram=1)
+ng_2 = pipeline.run(web_df, precision_threshold=0.5, precision_ngram=2)
 
 # %%
 
@@ -53,7 +55,7 @@ def get_intersection_stats(tokens_a, tokens_b):
     print(f"Intersection: {len(set(tokens_a) & set(tokens_b))}")
     print(f"TextA: {len(tokens_a)} -> set: {len(set(tokens_a))}")
     print(f"TextB: {len(tokens_b)} -> set: {len(set(tokens_b))}")
-    get_duplicate_candidates_simple_precision(
+    pipeline.get_duplicate_candidates_simple_precision(
         [tokens_a, tokens_b],
         report="print",
     )

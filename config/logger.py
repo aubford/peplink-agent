@@ -49,7 +49,14 @@ class RotatingFileLogger(logging.Logger):
 class RotatingFileLogWriter(logging.Logger):
     """Logger with rotating file handling configured by default."""
 
-    def __init__(self, name: str, max_bytes: int = 100 * 1024 * 1024):
+    def __init__(
+        self,
+        name: str,
+        *,
+        jsonl=False,
+        backup_count=1,
+        max_bytes: int = 100 * 1024 * 1024,
+    ):
         super().__init__(name)
         self.setLevel(logging.DEBUG)
 
@@ -63,9 +70,12 @@ class RotatingFileLogWriter(logging.Logger):
         )
 
         self.file_handler = RotatingFileHandler(
-            os.path.join("logs", f"{name}_{time.strftime('%m-%d_%H_%M')}.log"),
+            os.path.join(
+                "logs",
+                f"{name}_{time.strftime('%m-%d_%H_%M')}.log",
+            ),
             maxBytes=max_bytes,
-            backupCount=2,
+            backupCount=backup_count,
         )
         self.file_handler.setFormatter(self.default_formatter)
         self.addHandler(self.file_handler)

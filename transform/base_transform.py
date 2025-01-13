@@ -14,10 +14,10 @@ class BaseTransform:
 
     def __init__(self):
         self.row_count = None
-        self.logger = RotatingFileLogger(self.folder_name)
+        self.logger = RotatingFileLogger(f"transform__{self.folder_name}")
 
     def set_logger(self, name: str):
-        self.logger = RotatingFileLogger(f"extract__{sanitize_filename(name)}")
+        self.logger = RotatingFileLogger(f"transform__{sanitize_filename(name)}")
 
     def log_df(self, df: pd.DataFrame, file_name: Path) -> None:
         self.logger.br_info(f"DF Transformed: {file_name}\n")

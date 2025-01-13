@@ -1,7 +1,7 @@
 from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
-from util.nlp import deduplication_pipeline
+from util.deduplication_pipeline import DeduplicationPipeline
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pandas as pd
 
@@ -13,9 +13,8 @@ class WebLoad(BaseLoad):
     def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         deduped_dfs = []
         for df in dfs:
-            deduped = deduplication_pipeline(
-                df, precision_threshold=0.80, precision_ngram=1
-            )
+            pipeline = DeduplicationPipeline("web")
+            deduped = pipeline.run(df, precision_threshold=0.80, precision_ngram=1)
             deduped_dfs.append(deduped)
         staging_df = pd.concat(deduped_dfs)
         staging_df = staging_df.set_index("id", drop=False, verify_integrity=True)
