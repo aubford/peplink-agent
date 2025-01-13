@@ -3,6 +3,7 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import sys
+import time
 
 
 class RotatingFileLogger(logging.Logger):
@@ -45,11 +46,10 @@ class RotatingFileLogger(logging.Logger):
         self.info(msg)
 
 
-
 class RotatingFileLogWriter(logging.Logger):
     """Logger with rotating file handling configured by default."""
 
-    def __init__(self, name: str, max_bytes: int = 20 * 1024 * 1024):
+    def __init__(self, name: str, max_bytes: int = 100 * 1024 * 1024):
         super().__init__(name)
         self.setLevel(logging.DEBUG)
 
@@ -57,15 +57,13 @@ class RotatingFileLogWriter(logging.Logger):
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
 
-        # Create common formatter
         self.default_formatter = logging.Formatter(
             "\n%(asctime)s: %(message)s",
-            datefmt="%m/%d %H:%M:%S",
+            datefmt="%H:%M:%S",
         )
 
-        # Configure rotating file handler
         self.file_handler = RotatingFileHandler(
-            os.path.join("logs", f"{name}.log"),
+            os.path.join("logs", f"{name}_{time.strftime('%m-%d_%H_%M')}.log"),
             maxBytes=max_bytes,
             backupCount=2,
         )
@@ -73,10 +71,8 @@ class RotatingFileLogWriter(logging.Logger):
         self.addHandler(self.file_handler)
 
     def print(self, msg: str) -> None:
-        # self.file_handler.setFormatter(self.simple_formatter)
         print(msg)
         self.info(msg)
-        # self.file_handler.setFormatter(self.default_formatter)
 
     def log_header(self, msg: str) -> None:
         log_msg = f"\n----------------------- {msg}"

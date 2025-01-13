@@ -95,8 +95,6 @@ class YouTubeTransform(BaseTransform):
             .astype("int64")
         )
 
-        # todo: remove the word "uh" from the page_content
-
         return df
 
     def _filter_for_pep(self, df: pd.DataFrame, file_path: Path) -> pd.DataFrame:

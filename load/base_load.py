@@ -12,8 +12,6 @@ from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
 from uuid import uuid4
 
-from util.util_main import deduplicate_df_page_content
-
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
 
 
@@ -32,6 +30,10 @@ class BaseLoad:
     def config(self) -> ConfigType:
         """Get the global config singleton."""
         return global_config
+
+    @abstractmethod
+    def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+        pass
 
     @abstractmethod
     def load_docs(self, documents: List[Document]) -> List[Document]:
@@ -115,7 +117,7 @@ class BaseLoad:
                 continue
 
             try:
-                print(f"--------------- Loading file: {file_path}---------\n\n")
+                self.logger.info(f"Loading file: {file_path}")
                 df = self.parquet_to_df(file_path)
                 dfs.append(df)
 
@@ -124,12 +126,8 @@ class BaseLoad:
                 raise e
 
         # Combine all dataframes and convert to documents
-        combined_df = pd.concat(dfs)
-        combined_df = deduplicate_df_page_content(
-            combined_df, self.similarity_threshold
-        )
-        all_documents = self.df_to_documents(combined_df)
-
+        staging_df = self.create_staging_df(dfs)
+        all_documents = self.df_to_documents(staging_df)
         staging_docs = self.load_docs(all_documents)
         self.stage_documents(staging_docs)
 
@@ -162,9 +160,11 @@ class BaseLoad:
 
     def _log_documents(self, docs: List[Document]) -> None:
         doc = docs[0]
-        print(f"Storing {len(docs)} documents.")
-        print(f"First document:")
+        self.logger.info("=" * 100)
+        self.logger.info(f"\n\nFinal documents: {len(docs)}")
+        self.logger.info(f"First document:")
         self.logger.info(f"Doc.id: {doc.id}")
         self.logger.info(f"Metadata: \n{doc.metadata}\n")
         self.logger.info(f"Content: \n{doc.page_content}")
         self.logger.info("\n\n-----------")
+        self.logger.info("=" * 100)

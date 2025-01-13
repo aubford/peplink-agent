@@ -1,12 +1,16 @@
 {
-    "files.exclude": {
-        ".idea": false,
-        "backup_data": false,
-        "logs": false,
-        "**/__pycache__": false
-    },
-    "search.exclude": {
-        ".vscode": true
-    },
-    "editor.wordWrapColumn": 120
+  "files.exclude": {
+    ".idea": false,
+    "backup_data": false,
+    "logs": false,
+    "**/__pycache__": false
+  },
+  "search.exclude": {
+    ".vscode": true
+  },
+  "editor.wordWrapColumn": 120,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  }
 }

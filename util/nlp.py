@@ -18,7 +18,7 @@ from config import RotatingFileLogWriter
 import pandas as pd
 from functools import wraps
 from util.util_main import print_replace
-from util.viz import  plot_number_dist
+from util.viz import plot_number_dist
 from dataclasses import dataclass
 
 nlp = spacy.load("en_core_web_sm")
@@ -52,14 +52,13 @@ def timer(func_name: str = None):
     return decorator
 
 
-def log_write_pair(doc_a: str, doc_b: str, msg: str = "Duplicate found"):
+def get_write_pair_log_text(doc_a: str, doc_b: str, msg: str = "Duplicate found"):
     return dedent(
-        f"""
-        ::::{msg}::::
+        f"""::::{msg}::::
         {doc_a.replace('\n', ' ').replace('\r', '')}
         {'-' * 100}
         {doc_b.replace('\n', ' ').replace('\r', '')}
-    """
+        """
     )
 
 
@@ -152,10 +151,7 @@ def nltk_get_tokens(text: str) -> List[str]:
 
 
 def chunk_wordset(wordset: List[str], ngram: int) -> List[str]:
-    return [
-        " ".join(wordset[i : i + ngram])
-        for i in range(0, len(wordset), ngram)
-    ]
+    return [" ".join(wordset[i : i + ngram]) for i in range(0, len(wordset), ngram)]
 
 
 ####### Similarity ############################################################
@@ -257,6 +253,17 @@ def tokenize_documents(df: pd.DataFrame) -> List[TokenizedDoc]:
 
 
 filter_logger = RotatingFileLogWriter("nlp-filter")
+
+
+def log_duplicate_group(group: List[int], docs: List[TokenizedDoc]) -> None:
+    group_docs = [docs[i] for i in group]
+    filter_logger.info(
+        f"Group:\n{'\n'.join([
+            doc.original_text.replace('\n', ' ').strip() for doc in group_docs
+        ])}"
+    )
+
+
 @timer("Filter")
 def filter_exact_duplicates_minhash(
     docs: List[TokenizedDoc],
@@ -266,7 +273,7 @@ def filter_exact_duplicates_minhash(
 ) -> List[TokenizedDoc]:
     """Returns filtered corpus with exact duplicates removed"""
     logger.print_header(f"Filter exact duplicates for: {len(docs)} docs")
-    logger.print(f"N-Gram: {ngram}")
+    logger.print(f"N-Gram: {ngram}, Threshold: {threshold}")
     minhashes = MinHash.bulk(
         [doc.get_encoded_tokens(ngram) for doc in docs], num_perm=1024
     )
@@ -290,22 +297,19 @@ def filter_exact_duplicates_minhash(
     # Keep one representative from each group
     indices_to_remove = set()
     for group in to_remove:
+        log_duplicate_group(group, docs)
         group.pop()  # Keep one representative
         indices_to_remove.update(group)
     # Return filtered corpus
     result = [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
 
-    removed_docs = [docs[i] for i in indices_to_remove]
-    filter_logger.info("=" * 100)
-    filter_logger.log_header(
-        f"Filtered corpus length from {len(docs)} to {len(result)}. Removed Items:\n{"\n".join([doc.original_text.strip() for doc in removed_docs])}"
-    )
     logger.print(f"*Filtered corpus from {len(docs)} to {len(result)}")
     return result
 
 
-
 candidate_logger = RotatingFileLogWriter("nlp-candidate")
+
+
 @timer("Candidates")
 def get_duplicate_candidates_simple_precision(
     docs: List[TokenizedDoc],
@@ -316,7 +320,7 @@ def get_duplicate_candidates_simple_precision(
 ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
     """Returns pairs of documents that are potential duplicates using simple precision."""
     logger.print_header(f"Get Candidates (precision) for: {len(docs)} docs")
-    logger.print(f"N-Gram: {ngram}")
+    logger.print(f"N-Gram: {ngram}, Threshold: {threshold}")
 
     candidates = []
     similarities = []
@@ -332,7 +336,7 @@ def get_duplicate_candidates_simple_precision(
 
             if precision > threshold:
                 candidate_logger.info(
-                    log_write_pair(
+                    get_write_pair_log_text(
                         docs[i].original_text, docs[j].original_text, "Candidate Found"
                     )
                 )
@@ -389,6 +393,8 @@ def get_duplicate_candidates_minhash_precision(
 
 
 duplicate_logger = RotatingFileLogWriter("nlp-duplicates")
+
+
 @timer("Confirm Duplicates")
 def confirm_duplicates(
     candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]],
@@ -396,7 +402,11 @@ def confirm_duplicates(
     threshold: int = 90,
 ) -> Set[str]:
     """Returns set of document IDs that are duplicates"""
+
+    if not candidate_pairs:
+        return set()
     call_counter = itertools.count(1)
+    highscores_counter = itertools.count(1)
     high_scores = 0
 
     def _progress_scorer(s1: str, s2: str, **kwargs) -> float:
@@ -412,19 +422,21 @@ def confirm_duplicates(
 
         if score > 90:
             high_scores += 1
+            print(f"High score: {next(highscores_counter)}")
 
-        if duration > 3:
-            duplicate_logger.info(
-                log_write_pair(
-                    s1,
-                    s2,
-                    msg=f"Slow comparison ({duration:.2f}s).  Lengths: {len(s1)}, {len(s2)}",
-                )
-            )
+        # if duration > 25:
+        #     duplicate_logger.info(
+        #         log_write_pair(
+        #             s1,
+        #             s2,
+        #             msg=f"Slow comparison ({duration:.2f}s).  Lengths: {len(s1)}, {len(s2)}",
+        #         )
+        #     )
 
         return score
 
     logger.print_header(f"Getting duplicates for: {len(candidate_pairs)} pairs")
+    logger.print(f"Threshold: {threshold}")
     tokenized_docs_a, tokenized_docs_b = zip(*candidate_pairs)
     strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
     strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
@@ -434,14 +446,58 @@ def confirm_duplicates(
     for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
         if distances[idx] > threshold:
             duplicate_logger.info(
-                log_write_pair(doc_a.original_text, doc_b.original_text)
+                get_write_pair_log_text(doc_a.original_text, doc_b.original_text)
             )
             if len(doc_a.tokens) < len(doc_b.tokens):
                 duplicates.add(doc_a.doc_id)
             else:
                 duplicates.add(doc_b.doc_id)
 
-    logger.print(f"\n*Confirm Dupes Complete: Found ({len(duplicates)}) duplicates")
+    logger.print(
+        f"\n*Confirm Duplicates Complete: Found ({len(duplicates)}) duplicates"
+    )
     return duplicates
 
-# %%
+
+def dedupe_df_ids(df: pd.DataFrame) -> pd.DataFrame:
+    logger.print_header("Removing duplicate IDs")
+    initial_len = len(df)
+    logger.print(f"\nTotal docs: {len(df)}")
+    df = df.drop_duplicates(subset=["id"]).set_index(
+        "id", drop=False, verify_integrity=True
+    )
+    logger.print(f"*Removed {initial_len - len(df)} duplicate IDs")
+    logger.print(f"Total docs: {len(df)}")
+    return df
+
+
+def deduplication_pipeline(
+    df: pd.DataFrame,
+    *,
+    precision_threshold: float = 0.7,
+    precision_ngram: int = 2,
+    duplicate_threshold: float = 0.95,
+    report_candidates: Literal["plot", "print", None] = None,
+) -> pd.DataFrame:
+    tokenized_docs = tokenize_documents(df)
+    filtered_docs = filter_exact_duplicates_minhash(tokenized_docs, threshold=0.98)
+    duplicate_candidates = get_duplicate_candidates_simple_precision(
+        filtered_docs,
+        threshold=precision_threshold,
+        ngram=precision_ngram,
+        report=report_candidates,
+    )
+    duplicate_doc_ids = confirm_duplicates(
+        duplicate_candidates, threshold=duplicate_threshold
+    )
+
+    filtered_docs_ids_deduped = [
+        doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids
+    ]
+    logger.print(
+        f"Filtered doc ids after deduplication: {len(filtered_docs_ids_deduped)}"
+    )
+
+    df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)]
+    logger.print(f"Rows after deduplication: {len(df_deduped)}")
+    return df_deduped

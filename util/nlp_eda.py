@@ -1,19 +1,9 @@
 # %% ########################################################################
-
 # %load_ext autoreload
 # %autoreload 2
 
-import importlib
-from itertools import chain
 from util.nlp import *
-from util.viz import (
-    plot_list_length_dist,
-    get_word_counts,
-    plot_item_frequency,
-)
-import time
-from typing import List
-from util.nlp import TokenizedDoc, tokenize_documents
+from util.nlp import deduplication_pipeline
 from transform.web.web_transform import WebTransform
 from transform.youtube.youtube_transform import YouTubeTransform
 import pandas as pd
@@ -22,37 +12,32 @@ from config import RotatingFileLogWriter
 logger = RotatingFileLogWriter("nlp")
 
 web_dfs = WebTransform.get_parquet_dfs()
+web_df = pd.concat(web_dfs)
 youtube_dfs = YouTubeTransform.get_parquet_dfs()
+youtube_df = pd.concat(youtube_dfs)
 
-df = pd.concat(web_dfs)
+##############################################################################
+############ WEB #############################################################
+##############################################################################
 
-def dedupe_df(df: pd.DataFrame) -> pd.DataFrame:
-    logger.print_header("Removing duplicate IDs")
-    initial_len = len(df)
-    logger.print(f"\nTotal docs: {len(df)}")
-    df = df.drop_duplicates(subset=['id']).set_index("id", drop=False, verify_integrity=True)
-    logger.print(f"*Removed {initial_len - len(df)} duplicate IDs")
-    logger.print(f"Total docs: {len(df)}")
-    return df
+ng_1 = deduplication_pipeline(web_df, precision_threshold=0.8, precision_ngram=1)
+ng_2 = deduplication_pipeline(web_df, precision_threshold=0.5, precision_ngram=2)
 
-################################################################
-############ PIPELINE ##########################################
-################################################################
+# %%
 
+# Find rows in ng_1 that are not in ng_2
+ng_1_not_in_ng_2 = ng_1[~ng_1["id"].isin(ng_2["id"])]
+print(f"\nRows in ng_1 but not ng_2: {len(ng_1_not_in_ng_2)}")
+print(f"Total rows ng_1: {len(ng_1)}")
+print(f"Total rows ng_2: {len(ng_2)}")
 
-df = dedupe_df(df)
-tokenized_docs = tokenize_documents(df)
-filtered_docs = filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
-duplicate_candidates = get_duplicate_candidates_simple_precision(filtered_docs, threshold=0.7, ngram=1)
-duplicate_doc_ids = confirm_duplicates(duplicate_candidates)
+# %%
+import json
 
-filtered_docs_ids_deduped = [
-    doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids
-]
-logger.print(f"Filtered doc ids after deduplication: {len(filtered_docs_ids_deduped)}")
-
-df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)]
-logger.print(f"Rows after deduplication: {len(df_deduped)}")
+# Output discrepancies to jsonl file
+with open("discrepancy_content.jsonl", "w") as f:
+    for content in ng_1_not_in_ng_2["page_content"]:
+        f.write(f'{{"content": {json.dumps(content)}}}\n')
 
 
 # %% ########################################################################
@@ -60,7 +45,7 @@ logger.print(f"Rows after deduplication: {len(df_deduped)}")
 #############################################################################
 
 
-tokenized_corpus = [doc.tokens for doc in filtered_docs]
+# tokenized_corpus = [doc.tokens for doc in filtered_docs]
 
 
 def get_intersection_stats(tokens_a, tokens_b):
@@ -77,14 +62,17 @@ def get_intersection_stats(tokens_a, tokens_b):
 ########## NOTES ############################################################
 
 # YouTube
-# Threshold=.8, ng=1 =>           candidates   /      dupes
-# Threshold=.5, ng=2 =>           candidates   /      dupes
-# Threshold=.6, ng=2 =>   25      candidates   /  23  dupes
-# Threshold=.6, ng=3 =>   7       candidates   /  6   dupes
+# Threshold=.6, ng=1  =>   16778   candidates   /  ?    dupes
+# Threshold=.75,ng=1  =>   2140    candidates   /  54   dupes
+# Thr=.2,ng=2,cdt=95 =>    91      candidates   /  45   dupes
+# Threshold=.2, ng=2  =>   91      candidates   /  48   dupes
+# Threshold=.5, ng=2  =>   34      candidates   /  31   dupes
+# Threshold=.6, ng=2  =>   25      candidates   /  23   dupes
+# Threshold=.6, ng=3  =>   7       candidates   /  6    dupes
 #
 #
 # Web
-# Threshold=.7, ng=1  =>  12423   candidates   /  14  dupes
+# Threshold=.7, ng=1  =>  12423   candidates   /  16  dupes  3.5 hours
 # Threshold=.8, ng=1  =>  3029    candidates   /  14  dupes
 # Threshold=.6, ng=2  =>  7061    candidates   /  13  dupes
 # Threshold=.7, ng=2  =>  1762    candidates   /  9   dupes
