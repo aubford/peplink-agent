@@ -64,7 +64,7 @@ def get_intersection_stats(tokens_a, tokens_b):
 ########## NOTES ############################################################
 
 # YouTube
-# Threshold=.6, ng=1  =>   16778   candidates   /  ?    dupes
+# Threshold=.6, ng=1  =>   16778   candidates   /  54    dupes
 # Threshold=.75,ng=1  =>   2140    candidates   /  54   dupes
 # Thr=.2,ng=2,cdt=95 =>    91      candidates   /  45   dupes
 # Threshold=.2, ng=2  =>   91      candidates   /  48   dupes

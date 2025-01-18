@@ -9,12 +9,12 @@ import pandas as pd
 class WebLoad(BaseLoad):
     def __init__(self):
         super().__init__("web")
+        self.d_pipeline = DeduplicationPipeline("web")
 
     def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         deduped_dfs = []
         for df in dfs:
-            pipeline = DeduplicationPipeline("web")
-            deduped = pipeline.run(df, precision_threshold=0.80, precision_ngram=1)
+            deduped = self.d_pipeline.run(df, precision_threshold=0.8, precision_ngram=1)
             deduped_dfs.append(deduped)
         staging_df = pd.concat(deduped_dfs)
         staging_df = staging_df.set_index("id", drop=False, verify_integrity=True)

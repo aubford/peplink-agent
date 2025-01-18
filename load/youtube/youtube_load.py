@@ -10,12 +10,13 @@ import pandas as pd
 class YoutubeLoad(BaseLoad):
     def __init__(self):
         super().__init__("youtube")
+        self.d_pipeline = DeduplicationPipeline("youtube")
 
     def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         combined_df = pd.concat(dfs)
         combined_df = dedupe_df_ids(combined_df)
-        pipeline = DeduplicationPipeline("youtube")
-        return pipeline.run(combined_df, precision_threshold=0.75, precision_ngram=1)
+        deduped = self.d_pipeline.run(combined_df, precision_threshold=0.75, precision_ngram=1)
+        return deduped
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
         text_splitter = RecursiveCharacterTextSplitter(

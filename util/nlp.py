@@ -46,11 +46,11 @@ def timer(func_name: str = None):
 
 def get_write_pair_log_text(doc_a: str, doc_b: str, msg: str = "Duplicate found"):
     return dedent(
-        f"""::::{msg}::::
+        f"""
+        ::::{msg}::::
         {doc_a.replace('\n', ' ').replace('\r', '')}
         {'-' * 100}
-        {doc_b.replace('\n', ' ').replace('\r', '')}
-        """
+        {doc_b.replace('\n', ' ').replace('\r', '')}"""
     )
 
 
@@ -76,15 +76,12 @@ def generate_random_texts(n: int, avg_length: int, mult: int = 100) -> List[str]
 
 def spacy_get_tokens(text: str) -> List[str]:
     """Tokenize using spaCy's pipeline, more strict with stop words"""
-    docs = nlp.pipe(
-        [text.lower()], disable=["ner"]
-    )  # Only disable NER since we don't use named entities
+    docs = nlp.pipe([text.lower()], disable=["ner"])  # Only disable NER since we don't use named entities
     res = [
         token.lemma_
         for doc in docs
         for token in doc
-        if (not token.is_stop or token.pos_ in {"VERB", "NUM", "ADJ"})
-        and token.is_alpha
+        if (not token.is_stop or token.pos_ in {"VERB", "NUM", "ADJ"}) and token.is_alpha
     ]
     return res
 
@@ -127,19 +124,12 @@ def nltk_get_lemmatized_tokens(text: str) -> List[str]:
     )
 
     tokens = nltk.wordpunct_tokenize(text.lower())
-    tokens = [
-        token
-        for token in tokens
-        if token.isalnum() and len(token) > 1 and token not in stop_words
-    ]
+    tokens = [token for token in tokens if token.isalnum() and len(token) > 1 and token not in stop_words]
 
     pos_tagged_tokens = nltk.pos_tag(tokens)
     lemmatizer = WordNetLemmatizer()
 
-    return [
-        lemmatizer.lemmatize(token, nltk_get_pos_tag(pos))
-        for token, pos in pos_tagged_tokens
-    ]
+    return [lemmatizer.lemmatize(token, nltk_get_pos_tag(pos)) for token, pos in pos_tagged_tokens]
 
 
 def chunk_wordset(wordset: List[str], ngram: int) -> List[str]:
@@ -149,9 +139,7 @@ def chunk_wordset(wordset: List[str], ngram: int) -> List[str]:
 ####### Similarity ############################################################
 
 
-def compute_precision_from_jaccard(
-    jaccard_similarity: float, len_a: int, len_b: int
-) -> float:
+def compute_precision_from_jaccard(jaccard_similarity: float, len_a: int, len_b: int) -> float:
     shorter_string_len = min(len_a, len_b)
     intersection = jaccard_similarity * (len_a + len_b) / (1 + jaccard_similarity)
     return intersection / shorter_string_len
@@ -249,9 +237,7 @@ def get_duplicate_candidates_minhash_precision(
             jaccard = m1.jaccard(m2)
             item_i = docs[i].tokens
             item_j = docs[j].tokens
-            precision = compute_precision_from_jaccard(
-                jaccard, len(set(item_i)), len(set(item_j))
-            )
+            precision = compute_precision_from_jaccard(jaccard, len(set(item_i)), len(set(item_j)))
 
             if report:
                 similarities.append(round(precision, 2))
@@ -262,6 +248,4 @@ def get_duplicate_candidates_minhash_precision(
 
 
 def dedupe_df_ids(df: pd.DataFrame) -> pd.DataFrame:
-    return df.drop_duplicates(subset=["id"]).set_index(
-        "id", drop=False, verify_integrity=True
-    )
+    return df.drop_duplicates(subset=["id"]).set_index("id", drop=False, verify_integrity=True)

@@ -53,9 +53,8 @@ class RotatingFileLogWriter(logging.Logger):
         self,
         name: str,
         *,
-        jsonl=False,
         backup_count=1,
-        max_bytes: int = 100 * 1024 * 1024,
+        max_bytes: int = 75 * 1024 * 1024,
     ):
         super().__init__(name)
         self.setLevel(logging.DEBUG)
@@ -64,10 +63,10 @@ class RotatingFileLogWriter(logging.Logger):
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
 
-        self.default_formatter = logging.Formatter(
-            "\n%(asctime)s: %(message)s",
-            datefmt="%H:%M:%S",
-        )
+        # self.default_formatter = logging.Formatter(
+        #     "\n%(asctime)s: %(message)s",
+        #     datefmt="%H:%M:%S",
+        # )
 
         self.file_handler = RotatingFileHandler(
             os.path.join(
@@ -77,10 +76,10 @@ class RotatingFileLogWriter(logging.Logger):
             maxBytes=max_bytes,
             backupCount=backup_count,
         )
-        self.file_handler.setFormatter(self.default_formatter)
+        # self.file_handler.setFormatter(self.default_formatter)
         self.addHandler(self.file_handler)
 
-    def print(self, msg: str) -> None:
+    def log_and_print(self, msg: str) -> None:
         print(msg)
         self.info(msg)
 
@@ -88,7 +87,7 @@ class RotatingFileLogWriter(logging.Logger):
         log_msg = f"\n----------------------- {msg}"
         self.info(log_msg)
 
-    def print_header(self, msg: str) -> None:
+    def log_and_print_header(self, msg: str) -> None:
         log_msg = f"\n----------------------- {msg}"
         print(log_msg)
         self.info(log_msg)
