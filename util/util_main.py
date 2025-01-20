@@ -114,3 +114,42 @@ def set_string_columns(
     validate_string_columns(df, columns, allow_empty)
     for column in columns:
         df[column] = df[column].astype("string[pyarrow]", errors="raise")
+
+
+def load_parquet_files(files: List[Path]) -> List[pd.DataFrame]:
+    """
+    Load multiple parquet files into pandas DataFrames.
+
+    Args:
+        files: List of Path objects pointing to parquet files
+
+    Returns:
+        List of DataFrames, one for each successfully loaded parquet file
+    """
+    dataframes = []
+
+    for idx, file_path in enumerate(files):
+        try:
+            df = pd.read_parquet(file_path)
+            dataframes.append(df)
+            print(f"{idx}: {file_path.name}")
+        except Exception as e:
+            print(f"Failed to load DataFrame from {file_path}: {str(e)}")
+
+    return dataframes
+
+
+def get_all_parquet_in_dir(dir_path: Path) -> List[Path]:
+    """
+    Get all parquet files in a directory.
+
+    Args:
+        dir_path: Path to directory to search
+
+    Returns:
+        List of Path objects for parquet files in the directory
+    """
+    if not dir_path.exists():
+        return []
+
+    return sorted(p for p in dir_path.glob("*.parquet") if p.is_file())

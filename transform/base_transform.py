@@ -4,7 +4,12 @@ from typing import Any, Dict
 from config import global_config, ConfigType, RotatingFileLogger
 import pandas as pd
 from pathlib import Path
-from util.util_main import set_string_columns, sanitize_filename
+from util.util_main import (
+    set_string_columns,
+    sanitize_filename,
+    load_parquet_files,
+    get_all_parquet_in_dir,
+)
 
 
 class BaseTransform:
@@ -108,10 +113,7 @@ class BaseTransform:
             List of Path objects for parquet files in this transformer's directory
         """
         dir_path = Path("data") / cls.folder_name / "documents"
-        if not dir_path.exists():
-            return []
-
-        return sorted(p for p in dir_path.glob("*.parquet") if p.is_file())
+        return get_all_parquet_in_dir(dir_path)
 
     @classmethod
     def get_parquet_dfs(cls) -> list[pd.DataFrame]:
@@ -119,17 +121,7 @@ class BaseTransform:
         Load all parquet files created by this transformer into pandas DataFrames.
 
         Returns:
-            List of tuples containing (filename, DataFrame) for each parquet file
+            List of DataFrames, one for each successfully loaded parquet file
         """
         files = cls.get_parquet_files()
-        dataframes = []
-
-        for idx, file_path in enumerate(files):
-            try:
-                df = pd.read_parquet(file_path)
-                dataframes.append(df)
-                print(f"{idx}: {file_path.name}")
-            except Exception as e:
-                print(f"Failed to load DataFrame from {file_path}: {str(e)}")
-
-        return dataframes
+        return load_parquet_files(files)
