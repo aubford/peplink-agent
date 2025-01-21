@@ -18,7 +18,7 @@ class RedditTransform(BaseTransform):
                 data = json.loads(line)
                 meta = data["metadata"]
                 author = meta["post_author"]
-                post = self._add_required_columns(
+                post = self.add_required_columns(
                     columns={
                         # Post metadata
                         "subreddit": meta["post_subreddit"],
@@ -33,9 +33,7 @@ class RedditTransform(BaseTransform):
                         "author_is_mod": author.get("is_mod", None),
                         "author_is_gold": author.get("is_gold", None),
                         "author_verified": author.get("verified", None),
-                        "author_has_verified_email": author.get(
-                            "has_verified_email", None
-                        ),
+                        "author_has_verified_email": author.get("has_verified_email", None),
                         "author_hide_from_robots": author.get("hide_from_robots", None),
                         "author_is_blocked": author.get("is_blocked", None),
                         "author_accept_followers": author.get("accept_followers", None),
@@ -53,7 +51,7 @@ class RedditTransform(BaseTransform):
                 )
 
                 posts.append(post)
-        df = self._make_df(posts)
+        df = self.make_df(posts)
 
         # validate score is integer and not NaN or None
         df["score"] = pd.to_numeric(df["score"], errors="raise").astype("int64")

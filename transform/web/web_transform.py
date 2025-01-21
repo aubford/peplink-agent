@@ -30,17 +30,17 @@ class WebTransform(BaseTransform):
             for line in f:
                 data = json.loads(line)
                 meta = data["metadata"]
-                page = self._add_required_columns(
+                page = self.add_required_columns(
                     columns={"url": meta["source"], "title": meta.get("title", "")},
                     page_content=data["page_content"],
                     file_path=file_path,
                 )
                 pages.append(page)
-        df = self._make_df(pages)
+        df = self.make_df(pages)
 
         # filter out pages with empty title
         df = df[df["title"].str.strip().str.len() > 0]
-        self._notify_dropped_rows(df, "empty title")
+        self.notify_dropped_rows(df, "empty title")
 
         set_string_columns(df, ["url", "title"], False)
 
@@ -48,7 +48,7 @@ class WebTransform(BaseTransform):
 
         # filter out pages with less than 100 words
         df = df[df["word_count"] >= 100]
-        self._notify_dropped_rows(df, ">100 words")
+        self.notify_dropped_rows(df, ">100 words")
 
         return df
 

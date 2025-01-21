@@ -18,13 +18,12 @@ index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
 class BaseLoad:
     """Base class for all data transformers."""
 
-    def __init__(self, folder_name: str, similarity_threshold: float = 0.95):
+    def __init__(self, folder_name: str):
         self.folder_name = folder_name
         self.index_namespaces = index_namespaces
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
         self.vector_store: VectorStore | None = None
         self.staging_path = Path("load") / self.folder_name / "staging.parquet"
-        self.similarity_threshold = similarity_threshold
 
     @property
     def config(self) -> ConfigType:
@@ -88,6 +87,7 @@ class BaseLoad:
             record = {
                 "id": str(uuid4()),
                 "page_content": doc.page_content,
+                "type": self.folder_name,
                 **doc.metadata,
             }
             records.append(record)

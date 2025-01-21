@@ -40,7 +40,7 @@ class BaseTransform:
     def transform(self) -> None:
         """Process all files in raw directory and save to documents."""
         raw_dir = Path("data") / self.folder_name / "raw"
-        parquet_dir = self._ensure_dir()
+        parquet_dir = self.ensure_dir()
 
         if not raw_dir.exists():
             raise FileNotFoundError(f"Raw directory does not exist: {raw_dir}")
@@ -65,13 +65,13 @@ class BaseTransform:
                 self.logger.error(f"Error processing {file_name}")
                 raise e
 
-    def _ensure_dir(self) -> Path:
+    def ensure_dir(self) -> Path:
         """Create and return path to documents directory."""
         dir_path = Path("data") / self.folder_name / "documents"
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
 
-    def _add_required_columns(
+    def add_required_columns(
         self,
         columns: dict,
         page_content: str,
@@ -88,7 +88,7 @@ class BaseTransform:
         """Get the stem of a file path."""
         return Path(file_path.name).stem
 
-    def _make_df(self, data: list[dict]) -> pd.DataFrame:
+    def make_df(self, data: list[dict]) -> pd.DataFrame:
         """Make a DataFrame from a list of dictionaries."""
         df = pd.DataFrame(data).set_index("id", verify_integrity=True, drop=False)
         set_string_columns(df, ["page_content"])
@@ -97,7 +97,7 @@ class BaseTransform:
         self.logger.info(f"Initial length: {self.row_count}\n")
         return df
 
-    def _notify_dropped_rows(self, df: pd.DataFrame, operation_name: str) -> None:
+    def notify_dropped_rows(self, df: pd.DataFrame, operation_name: str) -> None:
         """Get the number of rows dropped during a given operation."""
         new_count = df.shape[0]
         dropped_rows = self.row_count - new_count

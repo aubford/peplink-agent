@@ -37,12 +37,10 @@ class YouTubeTransform(BaseTransform):
                 content_details = metadata["contentDetails"]
                 statistics = metadata["statistics"]
 
-                video = self._add_required_columns(
+                video = self.add_required_columns(
                     columns={
                         # Snippet information
-                        "date": datetime.strptime(
-                            snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
-                        ).date(),
+                        "date": datetime.strptime(snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ").date(),
                         "channel_id": snippet["channelId"],
                         "title": snippet["title"],
                         "description": snippet["description"],
@@ -62,7 +60,7 @@ class YouTubeTransform(BaseTransform):
                 if any(v["id"] == video["id"] for v in videos):
                     continue
                 videos.append(video)
-        df = self._make_df(videos)
+        df = self.make_df(videos)
 
         set_string_columns(df, ["description"])
         set_string_columns(
@@ -74,7 +72,7 @@ class YouTubeTransform(BaseTransform):
         # filter out videos less than 3 minutes and word count less than 300
         df["duration"] = pd.to_timedelta(df["duration"])
         df = df[(df["duration"] >= pd.Timedelta(minutes=3)) & (df["word_count"] >= 300)]
-        self._notify_dropped_rows(df, ">3 min and >300 words")
+        self.notify_dropped_rows(df, ">3 min and >300 words")
 
         # Filter for "pep" content unless from allowed sources
         df = self._filter_for_pep(df, file_path)
@@ -108,7 +106,7 @@ class YouTubeTransform(BaseTransform):
         ]
         if any(source.lower() in file_name for source in sources_to_filter):
             df = df[df["page_content"].str.lower().str.contains("pep")]
-            self._notify_dropped_rows(df, "contains 'pep'")
+            self.notify_dropped_rows(df, "contains 'pep'")
 
         return df
 

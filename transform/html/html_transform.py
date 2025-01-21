@@ -13,7 +13,7 @@ class HTMLTransform(BaseTransform):
     def __init__(self):
         super().__init__()
         self.splitter = HTMLSemanticPreservingSplitter(
-            headers_to_split_on=[("h3", "section")],
+            headers_to_split_on=[("h3", "section"), ("h2", "section")],
             max_chunk_size=3000,
             elements_to_preserve=["table", "ul", "ol"],
             tags_to_preserve=["table", "tr", "td", "th", "li"],
@@ -28,16 +28,16 @@ class HTMLTransform(BaseTransform):
 
         documents = []
         for chunk in chunks:
-            doc = self._add_required_columns(
+            doc = self.add_required_columns(
                 columns={
-                    "section": chunk.metadata.get("section", ""),
+                    "section": chunk.metadata.get("section", "").rstrip("#"),
                     "images": chunk.metadata.get("images", []),
                 },
                 page_content=chunk.page_content,
                 file_path=file_path,
             )
             documents.append(doc)
-        df = self._make_df(documents)
+        df = self.make_df(documents)
         set_string_columns(df, ["section"], False)
         return df
 
