@@ -1,13 +1,9 @@
-# simply merge the parquet files in data/html/documents into a staging.parquet??
-# maybe we just skip staging.parquet and just upload the parquet files in data/html/documents straight to vectorstore
-
 # %%
 
 from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
 import pandas as pd
-import sys
 
 
 class HtmlLoad(BaseLoad):
@@ -19,12 +15,18 @@ class HtmlLoad(BaseLoad):
         # Add section as header in page_content.  Do this here instead of transform so we can experiment.
         mask = df["section"].str.strip().astype(bool)
         df.loc[mask, "page_content"] = df.loc[mask, "section"] + " \n " + df.loc[mask, "page_content"]
+        df["images"] = df["images"].apply(list)
         return df
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
         return documents
+loader = HtmlLoad()
 
 
-if __name__ == "__main__":
-    loader = HtmlLoad()
-    loader.load()
+# %%
+
+loader.load()
+
+# %%
+
+loader.staging_to_vector_store()

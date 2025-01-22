@@ -1,3 +1,4 @@
+# %%
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
@@ -31,7 +32,7 @@ class HTMLTransform(BaseTransform):
             doc = self.add_required_columns(
                 columns={
                     "section": chunk.metadata.get("section", "").rstrip("#"),
-                    "images": chunk.metadata.get("images", []),
+                    "images": list(chunk.metadata.get("images", [])),
                 },
                 page_content=chunk.page_content,
                 file_path=file_path,
@@ -42,6 +43,5 @@ class HTMLTransform(BaseTransform):
         return df
 
 
-if __name__ == "__main__":
-    transformer = HTMLTransform()
-    transformer.transform()
+transformer = HTMLTransform()
+transformer.transform()

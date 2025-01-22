@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Any, Dict
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
@@ -11,6 +11,9 @@ from config.logger import RotatingFileLogger
 from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
 from uuid import uuid4
+from util.deduplication_pipeline import DeduplicationPipeline
+import numpy as np
+
 
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
 
@@ -24,6 +27,7 @@ class BaseLoad:
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
         self.vector_store: VectorStore | None = None
         self.staging_path = Path("load") / self.folder_name / "staging.parquet"
+        self.deduplication_pipeline = DeduplicationPipeline(self.folder_name)
 
     @property
     def config(self) -> ConfigType:
@@ -37,6 +41,9 @@ class BaseLoad:
     @abstractmethod
     def load_docs(self, documents: List[Document]) -> List[Document]:
         pass
+
+    def simple_dedupe(self, df: pd.DataFrame) -> None:
+        df.drop_duplicates(subset=["page_content"], keep="first", inplace=True)
 
     def initialize_pinecone_index(self) -> None:
         """Initialize or create Pinecone index for pepwave namespace."""
@@ -61,9 +68,7 @@ class BaseLoad:
         self.logger.info("Initialized Pinecone vector store")
         self.vector_store = vector_store
 
-    def staging_to_vector_store(
-        self, namespace: str = index_namespaces.PEPWAVE
-    ) -> None:
+    def staging_to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
         """Upload staged documents to Pinecone."""
 
         if self.vector_store is None:
@@ -74,9 +79,7 @@ class BaseLoad:
         docs = self.parquet_to_documents(self.staging_path)
         self._log_documents(docs)
         self.vector_store.add_documents(docs, namespace=namespace)
-        self.logger.info(
-            f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}"
-        )
+        self.logger.info(f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}")
 
     def stage_documents(self, docs: List[Document]) -> None:
         """Store documents to local parquet file."""
@@ -101,14 +104,10 @@ class BaseLoad:
         # todo: to enable namespaces, iterate over subfolders in documents_dir
 
         if not documents_dir.exists():
-            raise FileNotFoundError(
-                f"Documents directory does not exist: {documents_dir}"
-            )
+            raise FileNotFoundError(f"Documents directory does not exist: {documents_dir}")
 
         if self.staging_path.exists():
-            raise FileNotFoundError(
-                f"Staging data file already exists at {self.staging_path}"
-            )
+            raise FileNotFoundError(f"Staging data file already exists at {self.staging_path}")
 
         dfs = []
         for file_path in documents_dir.glob("*"):
@@ -127,6 +126,7 @@ class BaseLoad:
 
         # Combine all dataframes and convert to documents
         staging_df = self.create_staging_df(dfs)
+        self.simple_dedupe(staging_df)
         all_documents = self.df_to_documents(staging_df)
         staging_docs = self.load_docs(all_documents)
         self.stage_documents(staging_docs)
@@ -148,9 +148,8 @@ class BaseLoad:
         for _, row in df.iterrows():
             metadata = row.drop(["page_content", "id"]).to_dict()
             metadata["record_id"] = row["id"]
-            doc = Document(
-                id=row["id"], page_content=row["page_content"], metadata=metadata
-            )
+            metadata = self.sanitize_metadata(metadata)
+            doc = Document(id=row["id"], page_content=row["page_content"], metadata=metadata)
             documents.append(doc)
         return documents
 
@@ -168,3 +167,14 @@ class BaseLoad:
         self.logger.info(f"Content: \n{doc.page_content}")
         self.logger.info("\n\n-----------")
         self.logger.info("=" * 100)
+
+    @staticmethod
+    def sanitize_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert numpy arrays to lists in metadata dictionary."""
+        sanitized = {}
+        for key, value in metadata.items():
+            if isinstance(value, np.ndarray):
+                sanitized[key] = value.tolist()
+            else:
+                sanitized[key] = value
+        return sanitized

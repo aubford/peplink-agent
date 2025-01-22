@@ -2,7 +2,6 @@
   "files.exclude": {
     ".idea": false,
     "backup_data": false,
-    "logs": false,
     "**/__pycache__": false
   },
   "search.exclude": {

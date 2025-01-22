@@ -55,33 +55,46 @@ class DeduplicationPipeline:
         *,
         threshold: float = 0.98,
         ngram: int = 2,
+        min_unique_tokens: int = 30,
     ) -> List[TokenizedDoc]:
-        """Returns filtered corpus with exact duplicates removed"""
+        """Returns filtered corpus with exact duplicates removed. This is a set comparison, so word order/count is irrelevant."""
         self.logger.log_and_print_header(f"Filter exact duplicates for: {len(docs)} docs")
         self.logger.log_and_print(f"N-Gram: {ngram}, Threshold: {threshold}")
-        minhashes = MinHash.bulk([doc.get_encoded_tokens(ngram) for doc in docs], num_perm=1024)
+
+        # Ignore docs with too few unique tokens
+        valid_docs = []
+        valid_indices = []
+        for i, doc in enumerate(docs):
+            # Convert to set to count unique tokens
+            if len(set(doc.tokens)) >= min_unique_tokens:
+                valid_docs.append(doc)
+                valid_indices.append(i)
+
+        # Process only valid docs with MinHash
+        minhashes = MinHash.bulk([doc.get_encoded_tokens(ngram) for doc in valid_docs], num_perm=1024)
         lsh = MinHashLSH(threshold=threshold, num_perm=1024)
 
         to_remove = []
         for i, m in enumerate(minhashes):
-            lsh.insert(i, m)  # insert lazily for speed
+            lsh.insert(i, m)
             result = set(lsh.query(m))
             if len(result) > 1:
-                # Check if we can merge with an existing set
                 for existing_set in to_remove:
                     if result - {i} == existing_set:
                         existing_set.add(i)
                         break
                 else:
-                    # No matching set found, append new set
                     to_remove.append(result)
 
-        # Keep one representative from each group
+        # Map back to original indices for removal
         indices_to_remove = set()
         for group in to_remove:
-            self.log_duplicate_group(group, docs)
-            group.pop()  # Keep one representative
-            indices_to_remove.update(group)
+            # Convert group indices back to original doc indices
+            original_group = {valid_indices[i] for i in group}
+            self.log_duplicate_group(original_group, docs)
+            original_group.pop()  # Keep one representative
+            indices_to_remove.update(original_group)
+
         # Return filtered corpus
         result = [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
 
@@ -97,7 +110,7 @@ class DeduplicationPipeline:
         threshold: float = 0.8,
         report: Literal["plot", "print", None] = None,
     ) -> List[Tuple[TokenizedDoc, TokenizedDoc]]:
-        """Returns pairs of documents that are potential duplicates using simple precision."""
+        """Returns pairs of documents that are potential duplicates using simple precision. This is a set comparison, so word order is irrelevant."""
         self.logger.log_and_print_header(f"Get Candidates (precision) for: {len(docs)} docs")
         self.logger.log_and_print(f"N-Gram: {ngram}, Threshold: {threshold}")
 
@@ -215,17 +228,16 @@ class DeduplicationPipeline:
         self.logger.log_and_print(f"Final docs: {len(deduped_df)}")
         return deduped_df
 
-    def run(
+    def _apply_deduplication(
         self,
         df: pd.DataFrame,
+        filtered_docs: List[TokenizedDoc],
         *,
         precision_threshold: float = 0.7,
         precision_ngram: int = 2,
         duplicate_threshold: int = 95,
         report_candidates: Literal["plot", "print", None] = None,
     ) -> pd.DataFrame:
-        tokenized_docs = self.tokenize_documents(df)
-        filtered_docs = self.filter_exact_duplicates_minhash(tokenized_docs, threshold=0.98)
         duplicate_candidates = self.get_duplicate_candidates_simple_precision(
             filtered_docs,
             threshold=precision_threshold,
@@ -240,3 +252,44 @@ class DeduplicationPipeline:
         df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)]
         self.logger.log_and_print(f"Rows after deduplication: {len(df_deduped)}")
         return df_deduped
+
+    def run(
+        self,
+        df: pd.DataFrame,
+        *,
+        precision_threshold: float = 0.7,
+        precision_ngram: int = 2,
+        duplicate_threshold: int = 95,
+        report_candidates: Literal["plot", "print", None] = None,
+    ) -> pd.DataFrame:
+        df = df.drop_duplicates(subset=["page_content"], keep="first")
+        tokenized_docs = self.tokenize_documents(df)
+        filtered_docs = self.filter_exact_duplicates_minhash(tokenized_docs, threshold=0.98)
+        return self._apply_deduplication(
+            df,
+            filtered_docs,
+            precision_threshold=precision_threshold,
+            precision_ngram=precision_ngram,
+            duplicate_threshold=duplicate_threshold,
+            report_candidates=report_candidates,
+        )
+
+    def run_dedupe_chunks(
+        self,
+        df: pd.DataFrame,
+        *,
+        precision_threshold: float = 0.95,
+        precision_ngram: int = 1,
+        duplicate_threshold: int = 95,
+        report_candidates: Literal["plot", "print", None] = None,
+    ) -> pd.DataFrame:
+        df = df.drop_duplicates(subset=["page_content"], keep="first")
+        tokenized_docs = self.tokenize_documents(df)
+        return self._apply_deduplication(
+            df,
+            tokenized_docs,
+            precision_threshold=precision_threshold,
+            precision_ngram=precision_ngram,
+            duplicate_threshold=duplicate_threshold,
+            report_candidates=report_candidates,
+        )

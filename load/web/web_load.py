@@ -1,3 +1,4 @@
+# %%
 from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
@@ -9,12 +10,11 @@ import pandas as pd
 class WebLoad(BaseLoad):
     def __init__(self):
         super().__init__("web")
-        self.d_pipeline = DeduplicationPipeline("web")
 
     def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         deduped_dfs = []
         for df in dfs:
-            deduped = self.d_pipeline.run(df, precision_threshold=0.8, precision_ngram=1)
+            deduped = self.deduplication_pipeline.run(df, precision_threshold=0.8, precision_ngram=1)
             deduped_dfs.append(deduped)
         staging_df = pd.concat(deduped_dfs)
         staging_df = staging_df.set_index("id", drop=False, verify_integrity=True)
@@ -27,7 +27,12 @@ class WebLoad(BaseLoad):
         split_docs = text_splitter.split_documents(documents)
         return split_docs
 
+loader = WebLoad()
 
-if __name__ == "__main__":
-    youtube_load = WebLoad()
-    youtube_load.load()
+# %%
+
+loader.load()
+
+# %%
+
+loader.staging_to_vector_store()
