@@ -1,0 +1,21 @@
+# langChain-pepwave RAG Application
+
+## Context
+
+This repository contains a LangChain RAG application.
+The applications is designed to answer questions about Peplink's Pepwave line of products.
+It uses Pinecone as its vector store and LangChain as its framework.
+
+## Directories
+
+- `data/` contains the raw and processed data used for the application. You don't need to be concerned with this folder except to know that its contents are structured such that `[DATASOURCE_NAME]/raw` contains the raw data and `[DATASOURCE_NAME]/documents` contains the prepared data.
+- `langchain_docs/` contains the LangChain documentation. If you are asked a question about LangChain,
+retrieve the files from this directory to get more context.
+- `langchain_pepwave_env/` is the project's virtual environment. If you are asked a question
+about a dependency of the project, retrieve the files from this directory.
+- `extract/`,`transform/` and `load/` contain the code for the ETL pipeline that scrapes, processes, and loads the data into the vector store.
+- `utils/` contains utility code.
+
+## Rules
+
+When suggesting the use of a library method always check the library code and/or documentation located in `langchain_pepwave_env/lib/python3.12/site-packages` to ensure you are referencing the correct code and library version.

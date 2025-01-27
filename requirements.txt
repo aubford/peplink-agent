@@ -45,4 +45,4 @@ numpy~=1.26.4
 langchain-core~=0.3.28
 beautifulsoup4~=4.12.3
 typing_extensions~=4.12.2
-langchain-text-splitters~=0.3.4
+langchain-text-splitters~=0.3.4debugpy==1.8.12

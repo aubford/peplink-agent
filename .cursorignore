@@ -3,7 +3,7 @@
 __pycache__/
 .idea/
 backup_data/
-data/**/documents/
-data/pdf/
+data/
+logs/
 !langchain_pepwave_env/*
 !langchain_pepwave_env/lib/**/*
