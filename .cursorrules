@@ -11,6 +11,7 @@ It uses Pinecone as its vector store and LangChain as its framework.
 - `data/` contains the raw and processed data used for the application. You don't need to be concerned with this folder except to know that its contents are structured such that `[DATASOURCE_NAME]/raw` contains the raw data and `[DATASOURCE_NAME]/documents` contains the prepared data.
 - `langchain_docs/` contains the LangChain documentation. If you are asked a question about LangChain,
 retrieve the files from this directory to get more context.
+- `langchain_docs/cookbook/` contains the LangChain "cookbook". This is a library of demo code that is helpful for learning how to use LangChain and best practices. Search for examples that may be related to the user question in this directory.
 - `langchain_pepwave_env/` is the project's virtual environment. If you are asked a question
 about a dependency of the project, retrieve the files from this directory.
 - `extract/`,`transform/` and `load/` contain the code for the ETL pipeline that scrapes, processes, and loads the data into the vector store.

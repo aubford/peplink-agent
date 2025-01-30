@@ -1,0 +1,36 @@
+import os
+import shutil
+
+print("Also consider updating langchain via `pip install --upgrade -r requirements.txt`")
+
+
+def copy_folders(src_dir, dest_dir, folders):
+    for folder in folders:
+        src_folder = os.path.join(src_dir, folder)
+        dest_folder = os.path.join(dest_dir, folder)
+
+        if os.path.exists(src_folder):
+            print(f"Copying folder: {folder}")
+            if os.path.exists(dest_folder):
+                shutil.rmtree(dest_folder)  # Remove existing folder
+            shutil.copytree(src_folder, dest_folder)
+        else:
+            print(f"Folder not found: {folder}")
+
+
+source_dir = "/Users/aubrey/workspace/_tutorials/langchain/docs/docs"
+destination_dir = "/Users/aubrey/workspace/langchain-pepwave/langchain_docs"
+folders_to_copy = ["concepts", "cookbook", "how_to", "integrations", "troubleshooting", "tutorials", "versions"]
+
+copy_folders(source_dir, destination_dir, folders_to_copy)
+
+cookbook_src = "/Users/aubrey/workspace/_tutorials/langchain/cookbook"
+cookbook_dest = "/Users/aubrey/workspace/langchain-pepwave/langchain_docs/cookbook"
+
+if os.path.exists(cookbook_src):
+    print("Copying cookbook folder")
+    if os.path.exists(cookbook_dest):
+        shutil.rmtree(cookbook_dest)  # Remove existing cookbook folder
+    shutil.copytree(cookbook_src, cookbook_dest)
+else:
+    print("Cookbook folder not found")
