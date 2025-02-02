@@ -1,4 +1,3 @@
-from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -8,7 +7,7 @@ from langchain import hub
 from pinecone import Pinecone
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from inference.history_aware_retrieval_query import history_aware_retrieval_query
-
+from langchain_core.runnables.passthrough import RunnablePassthrough
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
@@ -21,28 +20,18 @@ vector_store = PineconeVectorStore(index=index, embedding=embeddings, text_key="
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
 prompt = hub.pull("aubford/retrieval-qa-chat")
 
-
-contextualize_q_llm = ChatOpenAI(model="o1-mini")
-contextualize_q_system_prompt = (
-    "Given the following chat history and the latest user question "
-    "which might reference context in the chat history, "
-    "formulate a standalone question which can be understood "
-    "without the chat history. Do NOT answer the question, just "
-    "reformulate it if needed and otherwise return it as is."
-)
-contextualize_q_prompt = ChatPromptTemplate.from_messages(
-    [
-        ("human", contextualize_q_system_prompt),
-        MessagesPlaceholder("chat_history"),
-        ("human", "{input}"),
-    ]
+retriever = (lambda x: x["retrieval_query"]) | vector_store.as_retriever(
+    search_type="mmr", search_kwargs={"k": 20, "fetch_k": 50}
 )
 
-retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={"k": 10, "fetch_k": 40})
-history_aware_retriever = history_aware_retrieval_query() | retriever
+retrieval_chain = (
+    RunnablePassthrough.assign(retrieval_query=history_aware_retrieval_query())
+    .assign(
+        context=retriever.with_config(run_name="retrieve_documents"),
+    )
+    .assign(answer=create_stuff_documents_chain(llm, prompt))
+).with_config(run_name="rag_inference")
 
-document_chain = create_stuff_documents_chain(llm, prompt)
-retrieval_chain = create_retrieval_chain(history_aware_retriever, document_chain)
 
 chat_history = []
 while True:
