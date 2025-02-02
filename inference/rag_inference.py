@@ -1,13 +1,11 @@
-from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from config import global_config
 from langchain import hub
 from pinecone import Pinecone
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from inference.history_aware_retrieval_query import history_aware_retrieval_query
 from langchain_core.runnables.passthrough import RunnablePassthrough
+from inference.history_aware_retrieval_query import history_aware_retrieval_query
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting

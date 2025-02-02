@@ -11,7 +11,9 @@
             "${file}"
         ],
         "presentation": {
-            "reveal": "never"
+            "reveal": "never",
+            "echo": false,
+            "showReuseMessage": false
         },
         "problemMatcher": []
     }
