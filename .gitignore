@@ -4,8 +4,7 @@ data/*
 backup_data
 !backup_data/**/*.py
 *.parquet
-langchain_pepwave_env/*
-# langchain_docs/
+langchain_pepwave_env*/*
 
 ### VisualStudioCode template
 !.vscode/settings.json
@@ -157,12 +156,6 @@ cover/
 # Translations
 *.mo
 *.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
 # Flask stuff:
 instance/
