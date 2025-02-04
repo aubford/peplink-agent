@@ -7,9 +7,8 @@ from pathlib import Path
 from util.util_main import (
     set_string_columns,
     sanitize_filename,
-    load_parquet_files,
-    get_all_parquet_in_dir,
 )
+from util.document_utils import load_parquet_files, get_all_parquet_in_dir
 
 
 class BaseTransform:
@@ -105,7 +104,7 @@ class BaseTransform:
         self.logger.info(f"Dropped {dropped_rows} rows for rule: {operation_name}")
 
     @classmethod
-    def get_parquet_files(cls) -> list[Path]:
+    def get_artifact_file_paths(cls) -> list[Path]:
         """
         Get all parquet files created by this transformer.
 
@@ -116,12 +115,12 @@ class BaseTransform:
         return get_all_parquet_in_dir(dir_path)
 
     @classmethod
-    def get_parquet_dfs(cls) -> list[pd.DataFrame]:
+    def get_artifacts(cls) -> list[pd.DataFrame]:
         """
         Load all parquet files created by this transformer into pandas DataFrames.
 
         Returns:
             List of DataFrames, one for each successfully loaded parquet file
         """
-        files = cls.get_parquet_files()
+        files = cls.get_artifact_file_paths()
         return load_parquet_files(files)

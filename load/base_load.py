@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Any, Dict
+from typing import List
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
@@ -12,7 +12,7 @@ from langchain.vectorstores import VectorStore
 from types import SimpleNamespace
 from uuid import uuid4
 from util.deduplication_pipeline import DeduplicationPipeline
-import numpy as np
+from util.document_utils import df_to_documents
 
 
 index_namespaces = SimpleNamespace(PEPWAVE="pepwave", NETWORKING="networking")
@@ -135,7 +135,7 @@ class BaseLoad:
         # Combine all dataframes and convert to documents
         staging_df = self.create_staging_df(dfs)
         self.simple_dedupe(staging_df)
-        all_documents = self.df_to_documents(staging_df)
+        all_documents = df_to_documents(staging_df)
         staging_docs = self.load_docs(all_documents)
         self.stage_documents(staging_docs)
 
@@ -151,21 +151,9 @@ class BaseLoad:
 
         return df
 
-    def df_to_documents(self, df: pd.DataFrame) -> List[Document]:
-        documents = []
-        for _, row in df.iterrows():
-            metadata = row.drop(["page_content", "id"]).to_dict()
-            metadata["record_id"] = row["id"]
-            metadata = self.sanitize_metadata(metadata)
-            doc = Document(
-                id=row["id"], page_content=row["page_content"], metadata=metadata
-            )
-            documents.append(doc)
-        return documents
-
     def parquet_to_documents(self, file_path: Path) -> List[Document]:
         df = self.parquet_to_df(file_path)
-        return self.df_to_documents(df)
+        return df_to_documents(df)
 
     def _log_documents(self, docs: List[Document]) -> None:
         doc = docs[0]
@@ -177,14 +165,3 @@ class BaseLoad:
         self.logger.info(f"Content: \n{doc.page_content}")
         self.logger.info("\n\n-----------")
         self.logger.info("=" * 100)
-
-    @staticmethod
-    def sanitize_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
-        """Convert numpy arrays to lists in metadata dictionary."""
-        sanitized = {}
-        for key, value in metadata.items():
-            if isinstance(value, np.ndarray):
-                sanitized[key] = value.tolist()
-            else:
-                sanitized[key] = value
-        return sanitized

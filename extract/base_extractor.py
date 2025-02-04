@@ -147,7 +147,7 @@ class BaseExtractor(ABC):
             self.end_stream(stream_key)
 
     @classmethod
-    def get_rawfiles(cls) -> list[Path]:
+    def get_artifact_file_paths(cls) -> list[Path]:
         """
         Get all files created by this extractor in the specified directory type.
 
@@ -156,19 +156,19 @@ class BaseExtractor(ABC):
         """
         dir_path = Path("data") / cls.source_name / "raw"
         if not dir_path.exists():
-            return []
+            raise FileNotFoundError(f"Raw data directory {dir_path} does not exist")
 
         return sorted(p for p in dir_path.glob(f"{cls.source_name}_*") if p.is_file())
 
     @classmethod
-    def get_rawfile_dataframes(cls) -> list[tuple[str, DataFrame]]:
+    def get_artifacts(cls) -> list[tuple[str, DataFrame]]:
         """
         Load all files created by this extractor into pandas DataFrames.
 
         Returns:
             List of tuples containing (filename, DataFrame) for each file
         """
-        files = cls.get_rawfiles()
+        files = cls.get_artifact_file_paths()
         dataframes = []
 
         for file_path in files:

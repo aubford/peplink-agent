@@ -6,7 +6,7 @@ from util.nlp import *
 from util.deduplication_pipeline import DeduplicationPipeline
 from transform.web.web_transform import WebTransform
 from transform.youtube.youtube_transform import YouTubeTransform
-from util.util_main import get_all_parquet_in_dir, load_parquet_files
+from util.document_utils import get_all_parquet_in_dir, load_parquet_files
 import pandas as pd
 from config import RotatingFileLogWriter
 from pathlib import Path
@@ -18,9 +18,9 @@ web_compare_dir = Path("data") / "web" / "documents_compare_dedupe"
 web_compare_parquet_filenames = get_all_parquet_in_dir(web_compare_dir)
 web_compare_dfs = load_parquet_files(web_compare_parquet_filenames)
 
-web_dfs = WebTransform.get_parquet_dfs()
+web_dfs = WebTransform.get_artifacts()
 web_df = pd.concat(web_dfs)
-youtube_dfs = YouTubeTransform.get_parquet_dfs()
+youtube_dfs = YouTubeTransform.get_artifacts()
 youtube_df = pd.concat(youtube_dfs)
 
 # %%

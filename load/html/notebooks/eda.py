@@ -3,7 +3,7 @@
 from transform.html.html_transform import HTMLTransform
 from IPython.display import display
 
-dfs = HTMLTransform.get_parquet_dfs()
+dfs = HTMLTransform.get_artifacts()
 df = dfs[0]
 
 display(df.shape)
