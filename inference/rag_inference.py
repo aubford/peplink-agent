@@ -11,8 +11,10 @@ from inference.history_aware_retrieval_query import history_aware_retrieval_quer
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
 
 pinecone = Pinecone(api_key=global_config.get("PINECONE_API_KEY"))
+# don't forget to update index to new version
 index = pinecone.Index("pepwave")
 embeddings = OpenAIEmbeddings()
+# note: will need to remove the namespace for future indexes
 vector_store = PineconeVectorStore(
     index=index, embedding=embeddings, text_key="text", namespace="pepwave"
 )
