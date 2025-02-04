@@ -22,7 +22,7 @@ def plot_content_length_dist(df_column, title=None, bins=500, figsize=(10, 6)):
 
     # Create histogram using pandas
     ax = length_series.plot(kind="hist", bins=bins, figsize=figsize, edgecolor="black")
-    ax.set_xscale('log')  # Set x-axis to log scale
+    ax.set_xscale("log")  # Set x-axis to log scale
 
     # Set title (use series name if title not provided)
     title = title or f"Distribution of {series.name} Lengths"
@@ -76,7 +76,7 @@ def plot_list_length_dist(
 
     # Create histogram
     ax = length_series.plot(kind="hist", bins=bins, figsize=figsize, edgecolor="black")
-    ax.set_xscale('log')  # Set x-axis to log scale
+    ax.set_xscale("log")  # Set x-axis to log scale
 
     # Set title and stats
     title = title or "Distribution of List Lengths"

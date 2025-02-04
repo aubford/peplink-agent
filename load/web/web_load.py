@@ -14,7 +14,9 @@ class WebLoad(BaseLoad):
     def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         deduped_dfs = []
         for df in dfs:
-            deduped = self.deduplication_pipeline.run(df, precision_threshold=0.8, precision_ngram=1)
+            deduped = self.deduplication_pipeline.run(
+                df, precision_threshold=0.8, precision_ngram=1
+            )
             deduped_dfs.append(deduped)
         staging_df = pd.concat(deduped_dfs)
         staging_df = staging_df.set_index("id", drop=False, verify_integrity=True)
@@ -26,6 +28,7 @@ class WebLoad(BaseLoad):
         )
         split_docs = text_splitter.split_documents(documents)
         return split_docs
+
 
 loader = WebLoad()
 

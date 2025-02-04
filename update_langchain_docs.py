@@ -1,7 +1,9 @@
 import os
 import shutil
 
-print("Also consider updating langchain via `pip install --upgrade -r requirements.txt`")
+print(
+    "Also consider updating langchain via `pip install --upgrade -r requirements.txt`"
+)
 
 
 def copy_folders(src_dir, dest_dir, folders):
@@ -20,7 +22,15 @@ def copy_folders(src_dir, dest_dir, folders):
 
 source_dir = "/Users/aubrey/workspace/_tutorials/langchain/docs/docs"
 destination_dir = "/Users/aubrey/workspace/langchain-pepwave/langchain_docs"
-folders_to_copy = ["concepts", "cookbook", "how_to", "integrations", "troubleshooting", "tutorials", "versions"]
+folders_to_copy = [
+    "concepts",
+    "cookbook",
+    "how_to",
+    "integrations",
+    "troubleshooting",
+    "tutorials",
+    "versions",
+]
 
 copy_folders(source_dir, destination_dir, folders_to_copy)
 

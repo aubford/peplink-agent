@@ -15,7 +15,9 @@ class YoutubeLoad(BaseLoad):
     def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         combined_df = pd.concat(dfs)
         combined_df = dedupe_df_ids(combined_df)
-        deduped = self.deduplication_pipeline.run(combined_df, precision_threshold=0.75, precision_ngram=1)
+        deduped = self.deduplication_pipeline.run(
+            combined_df, precision_threshold=0.75, precision_ngram=1
+        )
         return deduped
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
@@ -24,6 +26,8 @@ class YoutubeLoad(BaseLoad):
         )
         split_docs = text_splitter.split_documents(documents)
         return split_docs
+
+
 loader = YoutubeLoad()
 
 # %%

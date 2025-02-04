@@ -156,4 +156,6 @@ def get_all_parquet_in_dir(dir_path: Path) -> List[Path]:
 
 
 def dedupe_df_ids(df: pd.DataFrame) -> pd.DataFrame:
-    return df.drop_duplicates(subset=["id"]).set_index("id", drop=False, verify_integrity=True)
+    return df.drop_duplicates(subset=["id"]).set_index(
+        "id", drop=False, verify_integrity=True
+    )

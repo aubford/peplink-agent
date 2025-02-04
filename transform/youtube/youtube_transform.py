@@ -40,7 +40,9 @@ class YouTubeTransform(BaseTransform):
                 video = self.add_required_columns(
                     columns={
                         # Snippet information
-                        "date": datetime.strptime(snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ").date(),
+                        "date": datetime.strptime(
+                            snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
+                        ).date(),
                         "channel_id": snippet["channelId"],
                         "title": snippet["title"],
                         "description": snippet["description"],

@@ -25,9 +25,13 @@ from util.deduplication_pipeline import DeduplicationPipeline
 
 dedup_pipeline = DeduplicationPipeline("web_staging_eda")
 
-deduped = dedup_pipeline.run(duplicated_content, precision_threshold=0.8, precision_ngram=1)
+deduped = dedup_pipeline.run(
+    duplicated_content, precision_threshold=0.8, precision_ngram=1
+)
 
 
 # %%
-num_peplink_com = len(df[df["source_file"].str.contains("web_ldoc_peplink_com__T_20241228_213623")])
+num_peplink_com = len(
+    df[df["source_file"].str.contains("web_ldoc_peplink_com__T_20241228_213623")]
+)
 print(f"Number of peplink.com pages: {num_peplink_com}")

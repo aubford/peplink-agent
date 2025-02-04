@@ -25,7 +25,9 @@ if mask.any():
 # %%
 
 # Find duplicate page content and show counts
-duplicates_df = df[df.duplicated(subset=["page_content"], keep=False)].sort_values("page_content")
+duplicates_df = df[df.duplicated(subset=["page_content"], keep=False)].sort_values(
+    "page_content"
+)
 print(f"\nNumber of rows with duplicate content: {len(duplicates_df)}")
 print("\nBreakdown of duplicates:")
 print(duplicates_df["page_content"].value_counts())
@@ -52,7 +54,9 @@ def is_product_list(text: str) -> bool:
     if text.count("(CAT-") < 3:
         return False
 
-    if len([m for m in re.findall(r"BR.", text)]) < 3:  # Multiple occurrences of BR product codes
+    if (
+        len([m for m in re.findall(r"BR.", text)]) < 3
+    ):  # Multiple occurrences of BR product codes
         return False
 
     # Check for many uppercase words (typical in product names)

@@ -1,4 +1,9 @@
-from util.nlp import TokenizedDoc, confirm_duplicates, get_duplicate_candidates_minhash_precision
+from util.nlp import (
+    TokenizedDoc,
+    confirm_duplicates,
+    get_duplicate_candidates_minhash_precision,
+)
+
 
 def test_get_duplicate_candidates_minhash_precision():
     # Create test documents with known similarities
@@ -7,9 +12,13 @@ def test_get_duplicate_candidates_minhash_precision():
     # doc3 completely different
     docs = [
         TokenizedDoc("doc1", ["hello", "world", "test"]),
-        TokenizedDoc("doc2", ["hello", "world", "test", "python"]),  # Jaccard with doc1 = 3/4 = 0.75
+        TokenizedDoc(
+            "doc2", ["hello", "world", "test", "python"]
+        ),  # Jaccard with doc1 = 3/4 = 0.75
         TokenizedDoc("doc3", ["completely", "different", "text", "here"]),  # No overlap
-        TokenizedDoc("doc4", ["hello", "different", "code", "example", "here"]),  # Jaccard with doc1 = 1/7 ≈ 0.14
+        TokenizedDoc(
+            "doc4", ["hello", "different", "code", "example", "here"]
+        ),  # Jaccard with doc1 = 1/7 ≈ 0.14
     ]
 
     # Test with threshold=0.8 - should catch no pairs since highest Jaccard is 0.75
@@ -24,8 +33,13 @@ def test_get_duplicate_candidates_minhash_precision():
     # Test with threshold=0.1 - should catch doc1-doc4 pair (Jaccard ≈ 0.14) but not doc3 pairs
     candidates_loose = get_duplicate_candidates_minhash_precision(docs, threshold=0.1)
     assert len(candidates_loose) >= 2
-    assert any(docs[0] in pair for pair in candidates_loose)  # doc1 should be in some pairs
-    assert not any(docs[2] in pair for pair in candidates_loose)  # doc3 should not be in any pairs
+    assert any(
+        docs[0] in pair for pair in candidates_loose
+    )  # doc1 should be in some pairs
+    assert not any(
+        docs[2] in pair for pair in candidates_loose
+    )  # doc3 should not be in any pairs
+
 
 def test_get_duplicates():
     # Create test documents with known duplicates
@@ -33,7 +47,9 @@ def test_get_duplicates():
         TokenizedDoc("doc1", ["hello", "world", "test"]),
         TokenizedDoc("doc2", ["hello", "world", "test", "extra"]),  # Superset of doc1
         TokenizedDoc("doc3", ["completely", "different", "text"]),
-        TokenizedDoc("doc4", ["hello", "world", "different", "test"]),  # Similar to doc1/2
+        TokenizedDoc(
+            "doc4", ["hello", "world", "different", "test"]
+        ),  # Similar to doc1/2
     ]
 
     # Create candidate pairs to test - using list instead of set
@@ -45,6 +61,8 @@ def test_get_duplicates():
 
     duplicates = confirm_duplicates(candidate_pairs)
 
-    assert duplicates == {"doc1"}  # doc1 should be marked as duplicate since it's a subset of doc2
+    assert duplicates == {
+        "doc1"
+    }  # doc1 should be marked as duplicate since it's a subset of doc2
     assert "doc3" not in duplicates  # doc3 is unique
     assert "doc4" not in duplicates  # doc4 is different enough

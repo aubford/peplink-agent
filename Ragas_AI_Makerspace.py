@@ -18,11 +18,11 @@
 # ## Dependencies and API Keys:
 
 # %%
-!pip install -qU ragas==0.2.10
+# !pip install -qU ragas==0.2.10
 
 
 # %%
-!pip install -qU langchain-community==0.3.14 langchain-openai==0.2.14 unstructured==0.16.12 langgraph==0.2.61 langchain-qdrant==0.2.0
+# !pip install -qU langchain-community==0.3.14 langchain-openai==0.2.14 unstructured==0.16.12 langgraph==0.2.61 langchain-qdrant==0.2.0
 
 
 # %% [markdown]
@@ -65,15 +65,15 @@ os.environ["RAGAS_APP_TOKEN"] = getpass("Please enter your Ragas API key!")
 # Let's start by collecting our data into a useful pile!
 
 # %%
-!mkdir data
+# !mkdir data
 
 
 # %%
-!curl https://simonwillison.net/2023/Dec/31/ai-in-2023/ -o data/2023_llms.html
+# !curl https://simonwillison.net/2023/Dec/31/ai-in-2023/ -o data/2023_llms.html
 
 
 # %%
-!curl https://simonwillison.net/2024/Dec/31/llms-in-2024/ -o data/2024_llms.html
+# !curl https://simonwillison.net/2024/Dec/31/llms-in-2024/ -o data/2024_llms.html
 
 
 # %% [markdown]
@@ -455,7 +455,7 @@ os.environ["COHERE_API_KEY"] = getpass("Please enter your Cohere API key!")
 
 
 # %%
-!pip install -qU cohere langchain_cohere
+# !pip install -qU cohere langchain_cohere
 
 
 # %%

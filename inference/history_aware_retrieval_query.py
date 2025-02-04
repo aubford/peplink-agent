@@ -42,7 +42,9 @@ prompt = (
 
 
 def normalize_messages(
-    messages: list[tuple[str, str]], human_prefix: str = "User", ai_prefix: str = "Assistant"
+    messages: list[tuple[str, str]],
+    human_prefix: str = "User",
+    ai_prefix: str = "Assistant",
 ) -> list[tuple[str, str]]:
     chat_messages = []
     for m in convert_to_messages(messages):
@@ -64,9 +66,16 @@ def normalize_messages(
     return chat_messages
 
 
-def format_messages(messages: list[tuple[str, str]], human_prefix: str = "User", ai_prefix: str = "Assistant") -> str:
+def format_messages(
+    messages: list[tuple[str, str]],
+    human_prefix: str = "User",
+    ai_prefix: str = "Assistant",
+) -> str:
     return "\n\n".join(
-        [f"""<{role}>{message}</{role}>""" for role, message in normalize_messages(messages, human_prefix, ai_prefix)]
+        [
+            f"""<{role}>{message}</{role}>"""
+            for role, message in normalize_messages(messages, human_prefix, ai_prefix)
+        ]
     )
 
 

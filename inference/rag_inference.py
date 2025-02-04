@@ -13,7 +13,9 @@ from inference.history_aware_retrieval_query import history_aware_retrieval_quer
 pinecone = Pinecone(api_key=global_config.get("PINECONE_API_KEY"))
 index = pinecone.Index("pepwave")
 embeddings = OpenAIEmbeddings()
-vector_store = PineconeVectorStore(index=index, embedding=embeddings, text_key="text", namespace="pepwave")
+vector_store = PineconeVectorStore(
+    index=index, embedding=embeddings, text_key="text", namespace="pepwave"
+)
 
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
 prompt = hub.pull("aubford/retrieval-qa-chat")

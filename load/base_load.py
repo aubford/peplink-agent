@@ -68,7 +68,9 @@ class BaseLoad:
         self.logger.info("Initialized Pinecone vector store")
         self.vector_store = vector_store
 
-    def staging_to_vector_store(self, namespace: str = index_namespaces.PEPWAVE) -> None:
+    def staging_to_vector_store(
+        self, namespace: str = index_namespaces.PEPWAVE
+    ) -> None:
         """Upload staged documents to Pinecone."""
 
         if self.vector_store is None:
@@ -79,7 +81,9 @@ class BaseLoad:
         docs = self.parquet_to_documents(self.staging_path)
         self._log_documents(docs)
         self.vector_store.add_documents(docs, namespace=namespace)
-        self.logger.info(f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}")
+        self.logger.info(
+            f"Uploaded {len(docs)} documents to Pinecone namespace: {namespace}"
+        )
 
     def stage_documents(self, docs: List[Document]) -> None:
         """Store documents to local parquet file."""
@@ -104,10 +108,14 @@ class BaseLoad:
         # todo: to enable namespaces, iterate over subfolders in documents_dir
 
         if not documents_dir.exists():
-            raise FileNotFoundError(f"Documents directory does not exist: {documents_dir}")
+            raise FileNotFoundError(
+                f"Documents directory does not exist: {documents_dir}"
+            )
 
         if self.staging_path.exists():
-            raise FileNotFoundError(f"Staging data file already exists at {self.staging_path}")
+            raise FileNotFoundError(
+                f"Staging data file already exists at {self.staging_path}"
+            )
 
         dfs = []
         for file_path in documents_dir.glob("*"):
@@ -149,7 +157,9 @@ class BaseLoad:
             metadata = row.drop(["page_content", "id"]).to_dict()
             metadata["record_id"] = row["id"]
             metadata = self.sanitize_metadata(metadata)
-            doc = Document(id=row["id"], page_content=row["page_content"], metadata=metadata)
+            doc = Document(
+                id=row["id"], page_content=row["page_content"], metadata=metadata
+            )
             documents.append(doc)
         return documents
 
