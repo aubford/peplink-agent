@@ -4,11 +4,10 @@ import pandas as pd
 from datasketch import MinHash, MinHashLSH
 from rapidfuzz import fuzz, process
 from config import RotatingFileLogWriter
-from util.util_main import print_replace
+from util.util_main import dedupe_df_ids, print_replace
 from util.viz import plot_number_dist
 from util.nlp import (
     compute_simple_precision,
-    dedupe_df_ids,
     get_write_pair_log_text,
     timer,
     TokenizedDoc,
@@ -210,7 +209,9 @@ class DeduplicationPipeline:
             if distances[idx] > threshold:
                 self.duplicate_logger.info(get_write_pair_log_text(doc_a.original_text, doc_b.original_text))
                 self.log_sequence_matches(doc_a.original_text, doc_b.original_text)
-                self.duplicate_logger.info(get_write_pair_log_text(" ".join(doc_a.tokens), " ".join(doc_b.tokens), "Tokenized:"))
+                self.duplicate_logger.info(
+                    get_write_pair_log_text(" ".join(doc_a.tokens), " ".join(doc_b.tokens), "Tokenized:")
+                )
                 self.log_sequence_matches(" ".join(doc_a.tokens), " ".join(doc_b.tokens))
 
                 if len(doc_a.tokens) < len(doc_b.tokens):

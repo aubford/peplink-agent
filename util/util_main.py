@@ -153,3 +153,7 @@ def get_all_parquet_in_dir(dir_path: Path) -> List[Path]:
         return []
 
     return sorted(p for p in dir_path.glob("*.parquet") if p.is_file())
+
+
+def dedupe_df_ids(df: pd.DataFrame) -> pd.DataFrame:
+    return df.drop_duplicates(subset=["id"]).set_index("id", drop=False, verify_integrity=True)

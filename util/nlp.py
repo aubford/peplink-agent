@@ -247,5 +247,3 @@ def get_duplicate_candidates_minhash_precision(
     return candidates
 
 
-def dedupe_df_ids(df: pd.DataFrame) -> pd.DataFrame:
-    return df.drop_duplicates(subset=["id"]).set_index("id", drop=False, verify_integrity=True)
