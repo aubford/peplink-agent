@@ -43,5 +43,6 @@ class HTMLTransform(BaseTransform):
         return df
 
 
-transformer = HTMLTransform()
-transformer.transform()
+if __name__ == "__main__":
+    transformer = HTMLTransform()
+    transformer.transform()

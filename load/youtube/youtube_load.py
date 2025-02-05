@@ -3,7 +3,6 @@ from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from util.deduplication_pipeline import DeduplicationPipeline
 from util.util_main import dedupe_df_ids
 import pandas as pd
 

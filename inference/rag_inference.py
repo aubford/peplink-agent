@@ -19,7 +19,7 @@ vector_store = PineconeVectorStore(
     index=index, embedding=embeddings, text_key="text", namespace="pepwave"
 )
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
 prompt = hub.pull("aubford/retrieval-qa-chat")
 
 retriever = (lambda x: x["retrieval_query"]) | vector_store.as_retriever(
@@ -35,16 +35,17 @@ retrieval_chain = (
 ).with_config(run_name="rag_inference")
 
 
-chat_history = []
-while True:
-    # Get user input
-    query = input("\n\n*** Enter a query (or 'exit' to exit): ")
+if __name__ == "__main__":
+    chat_history = []
+    while True:
+        # Get user input
+        query = input("\n\n*** Enter a query (or 'exit' to exit): ")
 
-    # Check for exit condition
-    if query.lower() == "exit":
-        break
+        # Check for exit condition
+        if query.lower() == "exit":
+            break
 
-    result = retrieval_chain.invoke({"input": query, "chat_history": chat_history})
-    print(f"\n\nAssistant: {result['answer']}\n")
-    chat_history.append(("human", query))
-    chat_history.append(("assistant", result["answer"]))
+        result = retrieval_chain.invoke({"input": query, "chat_history": chat_history})
+        print(f"\n\nAssistant: {result['answer']}\n")
+        chat_history.append(("human", query))
+        chat_history.append(("assistant", result["answer"]))

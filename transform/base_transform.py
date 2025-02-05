@@ -56,9 +56,7 @@ class BaseTransform:
                 df = self.transform_file(file_path)
                 output_path = parquet_dir / f"{file_path.stem}.parquet"
                 self.log_df(df, file_name)
-                df.to_parquet(
-                    output_path, index=True, compression="snappy", engine="pyarrow"
-                )
+                df.to_parquet(output_path, index=True, compression="snappy", engine="pyarrow")
 
             except Exception as e:
                 self.logger.error(f"Error processing {file_name}")

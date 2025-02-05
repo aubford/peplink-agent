@@ -29,7 +29,7 @@ class DeduplicationPipeline:
         self.candidate_logger = RotatingFileLogWriter(f"dedupe-candidates-{name}")
         self.duplicate_logger = RotatingFileLogWriter(f"dedupe-duplicates-{name}")
 
-    def tokenize_documents(self, df: pd.DataFrame) -> List[TokenizedDoc]:
+    def _tokenize_documents(self, df: pd.DataFrame) -> List[TokenizedDoc]:
         """Tokenize all documents in the dataframe."""
         self.logger.log_and_print_header(f"Tokenize {len(df)} docs")
         tokenized_docs = []
@@ -39,7 +39,7 @@ class DeduplicationPipeline:
         self.logger.log_and_print(f"*Tokenization Complete: {len(tokenized_docs)}")
         return tokenized_docs
 
-    def log_duplicate_group(self, group: List[int], docs: List[TokenizedDoc]) -> None:
+    def _log_duplicate_group(self, group: List[int], docs: List[TokenizedDoc]) -> None:
         group_docs = [docs[i] for i in group]
         self.filter_logger.info(
             f"Group:\n{'\n'.join([
@@ -48,7 +48,7 @@ class DeduplicationPipeline:
         )
 
     @timer("Filter exact duplicates")
-    def filter_exact_duplicates_minhash(
+    def _filter_exact_duplicates_minhash(
         self,
         docs: List[TokenizedDoc],
         *,
@@ -94,7 +94,7 @@ class DeduplicationPipeline:
         for group in to_remove:
             # Convert group indices back to original doc indices
             original_group = {valid_indices[i] for i in group}
-            self.log_duplicate_group(original_group, docs)
+            self._log_duplicate_group(original_group, docs)
             original_group.pop()  # Keep one representative
             indices_to_remove.update(original_group)
 
@@ -155,7 +155,7 @@ class DeduplicationPipeline:
         )
         return candidates
 
-    def log_sequence_matches(self, str1: str, str2: str) -> None:
+    def _log_sequence_matches(self, str1: str, str2: str) -> None:
         # str1 = prep_str_for_matching(str1)
         # str2 = prep_str_for_matching(str2)
         matcher = SequenceMatcher(None, str1, str2)
@@ -169,7 +169,7 @@ class DeduplicationPipeline:
         self.duplicate_logger.info(f"Matches: [ {joined_matches} ]")
 
     @timer("Confirm duplicates")
-    def confirm_duplicates(
+    def _confirm_duplicates(
         self,
         candidate_pairs: List[Tuple[TokenizedDoc, TokenizedDoc]],
         *,
@@ -224,15 +224,13 @@ class DeduplicationPipeline:
                 self.duplicate_logger.info(
                     get_write_pair_log_text(doc_a.original_text, doc_b.original_text)
                 )
-                self.log_sequence_matches(doc_a.original_text, doc_b.original_text)
+                self._log_sequence_matches(doc_a.original_text, doc_b.original_text)
                 self.duplicate_logger.info(
                     get_write_pair_log_text(
                         " ".join(doc_a.tokens), " ".join(doc_b.tokens), "Tokenized:"
                     )
                 )
-                self.log_sequence_matches(
-                    " ".join(doc_a.tokens), " ".join(doc_b.tokens)
-                )
+                self._log_sequence_matches(" ".join(doc_a.tokens), " ".join(doc_b.tokens))
 
                 if len(doc_a.tokens) < len(doc_b.tokens):
                     duplicates.add(doc_a.doc_id)
@@ -244,7 +242,7 @@ class DeduplicationPipeline:
         )
         return duplicates
 
-    def dedupe_df_ids(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _dedupe_df_ids(self, df: pd.DataFrame) -> pd.DataFrame:
         self.logger.log_and_print_header("Removing duplicate IDs")
         self.logger.log_and_print(f"\nStarting docs: {len(df)}")
         deduped_df = dedupe_df_ids(df)
@@ -267,9 +265,7 @@ class DeduplicationPipeline:
             ngram=precision_ngram,
             report=report_candidates,
         )
-        duplicate_doc_ids = self.confirm_duplicates(
-            duplicate_candidates, threshold=duplicate_threshold
-        )
+        duplicate_doc_ids = self._confirm_duplicates(duplicate_candidates, threshold=duplicate_threshold)
 
         filtered_docs_ids_deduped = [
             doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids
@@ -292,10 +288,8 @@ class DeduplicationPipeline:
         report_candidates: Literal["plot", "print", None] = None,
     ) -> pd.DataFrame:
         df = df.drop_duplicates(subset=["page_content"], keep="first")
-        tokenized_docs = self.tokenize_documents(df)
-        filtered_docs = self.filter_exact_duplicates_minhash(
-            tokenized_docs, threshold=0.98
-        )
+        tokenized_docs = self._tokenize_documents(df)
+        filtered_docs = self._filter_exact_duplicates_minhash(tokenized_docs, threshold=0.98)
         return self._apply_deduplication(
             df,
             filtered_docs,
@@ -315,7 +309,7 @@ class DeduplicationPipeline:
         report_candidates: Literal["plot", "print", None] = None,
     ) -> pd.DataFrame:
         df = df.drop_duplicates(subset=["page_content"], keep="first")
-        tokenized_docs = self.tokenize_documents(df)
+        tokenized_docs = self._tokenize_documents(df)
         return self._apply_deduplication(
             df,
             tokenized_docs,

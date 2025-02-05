@@ -2,20 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
-        "label": "Open in Jetbrains Python",
-        "type": "process",
-        "command": "dataspell",
-        "args": [
-            "--line",
-            "${lineNumber}",
-            "${file}"
-        ],
-        "presentation": {
-            "reveal": "never",
-            "echo": false,
-            "showReuseMessage": false
-        },
-        "problemMatcher": []
+      "label": "Open in Jetbrains Python",
+      "command": "dataspell",
+      "args": ["--line", "${lineNumber}", "${file}"],
+      "presentation": {
+        "reveal": "silent",
+        "showReuseMessage": false,
+        "close": true,
+        "focus": false,
+        "revealProblems": "never",
+        "echo": false
+      }
     }
-]
+  ]
 }
