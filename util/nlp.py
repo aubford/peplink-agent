@@ -19,11 +19,11 @@ from dataclasses import dataclass
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 100000000
 
-# nltk.download('brown')
-# nltk.download('stopwords')
-# nltk.download('punkt')
-# nltk.download('punkt_tab')
-# nltk.download('wordnet')
+# nltk.download("brown")
+# nltk.download("stopwords")
+# nltk.download("punkt")
+# nltk.download("punkt_tab")
+# nltk.download("wordnet")
 
 ####### ANALYSIS TOOLS #########################################################
 
@@ -234,6 +234,7 @@ class TokenizedDoc:
         return [token.encode("utf8") for token in self.get_chunked_tokens(ngram, shift)]
 
 
+# currently unused
 @timer("Candidates Minhash")
 def get_duplicate_candidates_minhash_precision(
     docs: List[TokenizedDoc],
