@@ -13,7 +13,7 @@ from ragas.testset.synthesizers import (
 LLM_MODEL = "gpt-4o"
 TESTSET_SIZE = 2
 
-kg = KnowledgeGraph.load("staged_knowledge_graph.json")
+kg = KnowledgeGraph.load("evals/staged_knowledge_graph.json")
 
 generator_llm = LangchainLLMWrapper(ChatOpenAI(model_name=LLM_MODEL))
 generator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
@@ -35,4 +35,4 @@ dataset = generator.generate(
 # upload to ragas app
 dataset.upload()
 df = dataset.to_pandas()
-df.to_csv("ragas_testset.csv", index=False)
+df.to_csv("evals/ragas_testset.csv", index=False)

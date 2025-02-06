@@ -220,15 +220,18 @@ class TokenizedDoc:
         self.df_row = df_row
         self.tokens = nltk_get_lemmatized_tokens(self.original_text)
 
-    def get_chunked_tokens(self, ngram: int = 1) -> List[str]:
+    def get_chunked_tokens(self, ngram: int = 1, shift: int = None) -> List[str]:
         if ngram == 1:
             return self.tokens
-        return chunk_wordset(self.tokens, ngram)
+        tokens = self.tokens
+        if shift:
+            tokens = tokens[shift:]
+        return chunk_wordset(tokens, ngram)
 
-    def get_encoded_tokens(self, ngram: int = 1) -> List[bytes]:
+    def get_encoded_tokens(self, ngram: int = 1, shift: int = None) -> List[bytes]:
         if ngram == 1:
             return [token.encode("utf8") for token in self.tokens]
-        return [token.encode("utf8") for token in self.get_chunked_tokens(ngram)]
+        return [token.encode("utf8") for token in self.get_chunked_tokens(ngram, shift)]
 
 
 @timer("Candidates Minhash")
