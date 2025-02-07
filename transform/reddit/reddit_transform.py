@@ -201,6 +201,22 @@ class RedditTransform(BaseTransform):
         xml += "</comment>"
         return xml
 
+    def create_page_content(self, post: dict) -> str:
+        """
+        Create a page content string from a reddit post dict with this format:
+
+        {post["title"]}
+
+        {post["page_content"]}
+
+        {
+            List of comments using self.transform_comment in post["comments"]
+        }
+
+        """
+        comments = [self.transform_comment(comment) for comment in post["comments"]]
+        return f"## Reddit Post: {post['title']}\n\n{post['page_content']}\n\n## Comments:\n\n{'\n\n'.join(comments)}"
+
 
 if __name__ == "__main__":
     transformer = RedditTransform()

@@ -160,3 +160,51 @@ class TestRedditTransform:
 
         actual_xml = transformer.transform_comment(comment_with_good_descendants)
         assert actual_xml == expected_xml
+
+    def test_create_page_content(self):
+        transformer = RedditTransform()
+
+        post = {
+            "title": "Test Post Title",
+            "page_content": "This is the main post content.",
+            "comments": [
+                {
+                    "id": "comment1",
+                    "parent_id": "t1_post1",
+                    "body": "This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
+                    "score": 10,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "total_karma": 500,
+                        "is_gold": False,
+                    },
+                    "replies": [
+                        {
+                            "id": "reply1",
+                            "parent_id": "t1_comment1",
+                            "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
+                            "score": 5,
+                            "comment_author": {
+                                "is_blocked": False,
+                                "total_karma": 200,
+                                "is_gold": False,
+                            },
+                            "replies": []
+                        }
+                    ]
+                }
+            ]
+        }
+
+        expected_content = """## Reddit Post: Test Post Title
+
+This is the main post content.
+
+## Comments:
+
+<comment> This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.
+  <reply> This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply. </reply>
+</comment>""".strip()
+
+        actual_content = transformer.create_page_content(post)
+        assert actual_content.strip() == expected_content
