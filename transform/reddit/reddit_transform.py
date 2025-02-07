@@ -9,15 +9,10 @@ from typing import List, Optional, Union, TypedDict
 # skipping fields:
 # author_hide_from_robots
 # author_accept_followers
-# author_has_subscribed
-# author_has_verified_email
-# author_verified
-# author_is_employee
 # author_awarder_karma:  ignoring the karma constituents in favor of total karma
 # author_awardee_karma
 # author_link_karma
 # author_comment_karma
-# distinguished:  apparently this represents something marked as special by moderators but not clear enough to be useful
 
 
 class RedditAuthor(TypedDict):
@@ -70,26 +65,33 @@ class RedditTransform(BaseTransform):
                 data = json.loads(line)
                 meta = data["metadata"]
                 author = meta["post_author"]
-                comments = data["comments"]
+                if not author:
+                    print("No Author: Skipping")
+                    continue
+
                 post = self.add_required_columns(
                     columns={
                         # Post metadata
-                        "subreddit": meta["post_subreddit"],
-                        "category": meta["post_category"],
-                        "title": meta["post_title"],
-                        "score": meta["post_score"],
-                        "url": meta["post_url"],
+                        "subreddit": meta["subreddit"],
+                        "category": meta["category"],
+                        "title": meta["title"],
+                        "score": meta["score"],
+                        "url": meta["url"],
                         # Author metadata
                         "author_name": author["name"],
-                        "author_id": author.get("id", None),
-                        "author_is_mod": author.get("is_mod", None),
-                        "author_is_gold": author.get("is_gold", None),
-                        "author_is_blocked": author.get("is_blocked", None),
-                        "author_total_karma": author.get("total_karma", None),
+                        "author_id": author["id"],
+                        "author_is_mod": author["is_mod"],
+                        "author_is_gold": author["is_gold"],
+                        "author_is_blocked": author["is_blocked"],
+                        "author_total_karma": author["total_karma"],
+                        "author_verified": author["verified"],
+                        "author_has_verified_email": author["has_verified_email"],
+                        "author_has_subscribed": author["has_subscribed"],
+                        "author_is_employee": author["is_employee"],
                     },
-                    page_content=data["page_content"],
+                    page_content=self.create_page_content(data),
                     file_path=file_path,
-                    doc_id=data["metadata"]["post_id"],
+                    doc_id=meta["id"],
                 )
 
                 # filter out if no comments survive transform_comments
@@ -109,15 +111,17 @@ class RedditTransform(BaseTransform):
 
         return df
 
-    def is_quality_comment(self, comment: RedditComment, min_karma: int = 40, min_score: int = 2) -> bool:
+    @staticmethod
+    def is_quality_comment(comment: RedditComment, min_karma: int = 40, min_score: int = 2) -> bool:
         author = comment["comment_author"]
         score = comment["score"]
         return (
             len(comment["body"]) > 100
-            and not author["is_blocked"]
+            # if there is no is_blocked key that means author was deleted so we can consider them blocked
+            and not author.get("is_blocked", True)
             and (
                 (author["total_karma"] > min_karma and score >= min_score)
-                or (score >= min_score + 1 or author["is_gold"] or author["total_karma"] > 500)
+                or (score >= min_score + 1 or author.get("is_gold", False) or author["total_karma"] > 500)
             )
         )
 
@@ -140,7 +144,7 @@ class RedditTransform(BaseTransform):
 
         return [comment for comment in replies if self.is_quality_comment(comment, min_karma, min_score)]
 
-    def transform_comment(self, comment: RedditComment) -> str:
+    def transform_comment(self, comment: RedditComment) -> str | None:
         """
         Turn the comment's replies hierarchy into a string xml representation of a conversation that an LLM can understand.
         Start with the comment body and then follow the "replies" field recursively to build the conversation.
@@ -168,18 +172,22 @@ class RedditTransform(BaseTransform):
                 return None
 
         # recursively prune the reply tree to only include high quality replies and their ancestors
-        def is_quality_node(comment: RedditComment) -> bool:
-            return comment in high_quality_replies or any(is_quality_node(r) for r in comment["replies"])
+        def is_quality_node(node: RedditComment) -> bool:
+            return node in high_quality_replies or any(is_quality_node(r) for r in node["replies"])
 
         # check if the reply is a direct child of the comment to build a reply tree instead of forest
-        def is_child_node(comment: RedditComment, reply: RedditComment) -> bool:
-            return comment["id"] in reply["parent_id"]
+        def is_child_node(comment_or_reply: RedditComment, reply: RedditComment) -> bool:
+            return comment_or_reply["id"] in reply["parent_id"]
 
         # turn reply forest into a tree of high quality replies
-        def prune_reply_tree(comment: RedditComment) -> RedditComment:
+        def prune_reply_tree(comment_or_reply: RedditComment) -> dict:
             return {
-                "body": comment["body"],
-                "replies": [prune_reply_tree(r) for r in comment["replies"] if is_quality_node(r) and is_child_node(comment, r)],
+                "body": comment_or_reply["body"],
+                "replies": [
+                    prune_reply_tree(r)
+                    for r in comment_or_reply["replies"]
+                    if is_quality_node(r) and is_child_node(comment_or_reply, r)
+                ],
             }
 
         pruned_comment = prune_reply_tree(comment)
@@ -188,18 +196,18 @@ class RedditTransform(BaseTransform):
             xml = f"{'  ' * depth}<reply> {reply_comment['body']}"
             if reply_comment["replies"]:
                 xml += "\n"
-                for reply in reply_comment["replies"]:
-                    xml += build_xml(reply, depth + 1)
+                for r in reply_comment["replies"]:
+                    xml += build_xml(r, depth + 1)
                 xml += f"{'  ' * depth}</reply>\n"
             else:
                 xml += " </reply>\n"
             return xml
 
-        xml = f"<comment> {pruned_comment['body']}\n"
+        xml_str = f"<comment> {pruned_comment['body']}\n"
         for reply in pruned_comment["replies"]:
-            xml += build_xml(reply, depth=1)
-        xml += "</comment>"
-        return xml
+            xml_str += build_xml(reply, depth=1)
+        xml_str += "</comment>"
+        return xml_str
 
     def create_page_content(self, post: dict) -> str:
         """
@@ -214,8 +222,11 @@ class RedditTransform(BaseTransform):
         }
 
         """
-        comments = [self.transform_comment(comment) for comment in post["comments"]]
-        return f"## Reddit Post: {post['title']}\n\n{post['page_content']}\n\n## Comments:\n\n{'\n\n'.join(comments)}"
+
+        meta = post["metadata"]
+        # Filter out None values from comments
+        comments = list(filter(None, map(self.transform_comment, meta["comments"])))
+        return f"## Reddit Post: {meta['title']}\n\n{post['page_content']}\n\n## Comments:\n\n{'\n\n'.join(comments)}"
 
 
 if __name__ == "__main__":
