@@ -171,10 +171,15 @@ class RedditTransform(BaseTransform):
         def is_quality_node(comment: RedditComment) -> bool:
             return comment in high_quality_replies or any(is_quality_node(r) for r in comment["replies"])
 
+        # check if the reply is a direct child of the comment to build a reply tree instead of forest
+        def is_child_node(comment: RedditComment, reply: RedditComment) -> bool:
+            return comment["id"] in reply["parent_id"]
+
+        # turn reply forest into a tree of high quality replies
         def prune_reply_tree(comment: RedditComment) -> RedditComment:
             return {
                 "body": comment["body"],
-                "replies": [prune_reply_tree(r) for r in comment["replies"] if is_quality_node(r)],
+                "replies": [prune_reply_tree(r) for r in comment["replies"] if is_quality_node(r) and is_child_node(comment, r)],
             }
 
         pruned_comment = prune_reply_tree(comment)

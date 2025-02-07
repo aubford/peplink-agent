@@ -8,7 +8,48 @@ class TestRedditTransform:
     def test_transform_comment(self):
         transformer = RedditTransform()
 
+        high_quality_reply = {
+            "id": "abc123",
+            "parent_id": "t1_def456",
+            "body": "This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement.",
+            "score": 3,
+            "comment_author": {
+                "is_blocked": False,
+                "total_karma": 200,
+                "is_gold": False,
+            },
+            "replies": [],
+        }
+
+        low_quality_blocked_reply = {
+            "id": "ghi789",
+            "parent_id": "t1_def456",
+            "body": "Low quality reply",
+            "score": 1,
+            "comment_author": {
+                "is_blocked": True,
+                "total_karma": 100000,
+                "is_gold": False,
+            },
+            "replies": [],
+        }
+
+        low_quality_reply = {
+            "id": "jkl012",
+            "parent_id": "t1_def456",
+            "body": "Another low quality reply",
+            "score": 0,
+            "comment_author": {
+                "is_blocked": False,
+                "total_karma": 5,
+                "is_gold": False,
+            },
+            "replies": [],
+        }
+
         comment: RedditComment = {
+            "id": "mno345",
+            "parent_id": "t1_pqr678",  # parent is a submission
             "body": "This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
             "score": 10,
             "comment_author": {
@@ -18,6 +59,8 @@ class TestRedditTransform:
             },
             "replies": [
                 {
+                    "id": "def456",
+                    "parent_id": "t1_mno345",
                     "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
                     "score": 1,
                     "comment_author": {
@@ -26,68 +69,14 @@ class TestRedditTransform:
                         "is_gold": True,
                     },
                     "replies": [
-                        {
-                            "body": "This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement.",
-                            "score": 3,
-                            "comment_author": {
-                                "is_blocked": False,
-                                "total_karma": 200,
-                                "is_gold": False,
-                            },
-                            "replies": [],
-                        },
-                        {
-                            "body": "Low quality reply",
-                            "score": 1,
-                            "comment_author": {
-                                "is_blocked": True,
-                                "total_karma": 10,
-                                "is_gold": False,
-                            },
-                            "replies": [],
-                        },
-                        {
-                            "body": "Another low quality reply",
-                            "score": 0,
-                            "comment_author": {
-                                "is_blocked": False,
-                                "total_karma": 5,
-                                "is_gold": False,
-                            },
-                            "replies": [],
-                        },
+                        high_quality_reply,
+                        low_quality_blocked_reply,
+                        low_quality_reply,
                     ],
                 },
-                {
-                    "body": "This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement.",
-                    "score": 3,
-                    "comment_author": {
-                        "is_blocked": False,
-                        "total_karma": 200,
-                        "is_gold": False,
-                    },
-                    "replies": [],
-                },
-                {
-                    "body": "Low quality reply",
-                    "score": 1,
-                    "comment_author": {
-                        "is_blocked": True,
-                        "total_karma": 10,
-                        "is_gold": False,
-                    },
-                    "replies": [],
-                },
-                {
-                    "body": "Another low quality reply",
-                    "score": 0,
-                    "comment_author": {
-                        "is_blocked": False,
-                        "total_karma": 5,
-                        "is_gold": False,
-                    },
-                    "replies": [],
-                },
+                high_quality_reply,
+                low_quality_blocked_reply,
+                low_quality_reply,
             ],
         }
 
@@ -106,6 +95,8 @@ class TestRedditTransform:
         transformer = RedditTransform()
 
         bad_comment: RedditComment = {
+            "id": "stu901",
+            "parent_id": "t1_vwx234",
             "body": "Bad comment",
             "score": 0,
             "comment_author": {
@@ -115,6 +106,8 @@ class TestRedditTransform:
             },
             "replies": [
                 {
+                    "id": "yz789a",
+                    "parent_id": "t1_stu901",
                     "body": "Another bad reply",
                     "score": 0,
                     "comment_author": {
@@ -134,6 +127,8 @@ class TestRedditTransform:
         transformer = RedditTransform()
 
         comment_with_good_descendants: RedditComment = {
+            "id": "bcd123",
+            "parent_id": "t1_efg456",
             "body": "Bad quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
             "score": 0,
             "comment_author": {
@@ -143,6 +138,8 @@ class TestRedditTransform:
             },
             "replies": [
                 {
+                    "id": "hij789",
+                    "parent_id": "t1_bcd123",
                     "body": "Good quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
                     "score": 3,
                     "comment_author": {
