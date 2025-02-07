@@ -7,6 +7,16 @@
             "request": "launch",
             "program": "${file}",
             "justMyCode": false
+        },
+        {
+            "name": "Pytest Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${file}"
+            ],
+            "justMyCode": false
         }
     ]
 }

@@ -1,0 +1,165 @@
+import pytest
+from transform.reddit.reddit_transform import RedditTransform, RedditComment
+
+
+# noinspection PyTypeChecker
+class TestRedditTransform:
+
+    def test_transform_comment(self):
+        transformer = RedditTransform()
+
+        comment: RedditComment = {
+            "body": "This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
+            "score": 10,
+            "comment_author": {
+                "is_blocked": False,
+                "total_karma": 500,
+                "is_gold": False,
+            },
+            "replies": [
+                {
+                    "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
+                    "score": 1,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "total_karma": 1000,
+                        "is_gold": True,
+                    },
+                    "replies": [
+                        {
+                            "body": "This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement.",
+                            "score": 3,
+                            "comment_author": {
+                                "is_blocked": False,
+                                "total_karma": 200,
+                                "is_gold": False,
+                            },
+                            "replies": [],
+                        },
+                        {
+                            "body": "Low quality reply",
+                            "score": 1,
+                            "comment_author": {
+                                "is_blocked": True,
+                                "total_karma": 10,
+                                "is_gold": False,
+                            },
+                            "replies": [],
+                        },
+                        {
+                            "body": "Another low quality reply",
+                            "score": 0,
+                            "comment_author": {
+                                "is_blocked": False,
+                                "total_karma": 5,
+                                "is_gold": False,
+                            },
+                            "replies": [],
+                        },
+                    ],
+                },
+                {
+                    "body": "This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement.",
+                    "score": 3,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "total_karma": 200,
+                        "is_gold": False,
+                    },
+                    "replies": [],
+                },
+                {
+                    "body": "Low quality reply",
+                    "score": 1,
+                    "comment_author": {
+                        "is_blocked": True,
+                        "total_karma": 10,
+                        "is_gold": False,
+                    },
+                    "replies": [],
+                },
+                {
+                    "body": "Another low quality reply",
+                    "score": 0,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "total_karma": 5,
+                        "is_gold": False,
+                    },
+                    "replies": [],
+                },
+            ],
+        }
+
+        expected_xml = """
+<comment> This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.
+  <reply> This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.
+    <reply> This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement. </reply>
+  </reply>
+</comment>
+        """.strip()
+
+        actual_xml = transformer.transform_comment(comment)
+        assert actual_xml == expected_xml
+
+    def test_transform_comment_returns_none_for_bad_comments(self):
+        transformer = RedditTransform()
+
+        bad_comment: RedditComment = {
+            "body": "Bad comment",
+            "score": 0,
+            "comment_author": {
+                "is_blocked": True,
+                "total_karma": 5,
+                "is_gold": False,
+            },
+            "replies": [
+                {
+                    "body": "Another bad reply",
+                    "score": 0,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "total_karma": 5,
+                        "is_gold": False,
+                    },
+                    "replies": [],
+                }
+            ],
+        }
+
+        actual_xml = transformer.transform_comment(bad_comment)
+        assert actual_xml is None
+
+    def test_transform_comment_keeps_good_descendants(self):
+        transformer = RedditTransform()
+
+        comment_with_good_descendants: RedditComment = {
+            "body": "Bad quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
+            "score": 0,
+            "comment_author": {
+                "is_blocked": False,
+                "total_karma": 5,
+                "is_gold": False,
+            },
+            "replies": [
+                {
+                    "body": "Good quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
+                    "score": 3,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "total_karma": 200,
+                        "is_gold": False,
+                    },
+                    "replies": [],
+                }
+            ],
+        }
+
+        expected_xml = """
+<comment> Bad quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.
+  <reply> Good quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply. </reply>
+</comment>
+        """.strip()
+
+        actual_xml = transformer.transform_comment(comment_with_good_descendants)
+        assert actual_xml == expected_xml

@@ -23,11 +23,11 @@ def prep_str_for_matching(s: str) -> str:
 
 
 class DeduplicationPipeline:
-    def __init__(self, name: str):
-        self.logger = RotatingFileLogWriter(f"deduplication_pipeline-{name}")
-        self.filter_logger = RotatingFileLogger(f"dedupe-filter-{name}")
-        self.candidate_logger = RotatingFileLogger(f"dedupe-candidates-{name}")
-        self.duplicate_logger = RotatingFileLogger(f"dedupe-duplicates-{name}")
+    def __init__(self, name: str, silent: bool = False):
+        self.logger = RotatingFileLogWriter(f"deduplication_pipeline-{name}", silent=silent)
+        self.filter_logger = RotatingFileLogger(f"dedupe-filter-{name}", silent=silent)
+        self.candidate_logger = RotatingFileLogger(f"dedupe-candidates-{name}", silent=silent)
+        self.duplicate_logger = RotatingFileLogger(f"dedupe-duplicates-{name}", silent=silent)
 
     @timer("Tokenize documents")
     def _tokenize_documents(self, df: pd.DataFrame) -> List[TokenizedDoc]:
