@@ -35,4 +35,4 @@ loader.load()
 
 # %%
 
-loader.staging_to_vector_store()
+# loader.staging_to_vector_store()

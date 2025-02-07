@@ -2,7 +2,6 @@
 from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
-from util.deduplication_pipeline import DeduplicationPipeline
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pandas as pd
 
@@ -38,4 +37,4 @@ loader.load()
 
 # %%
 
-loader.staging_to_vector_store()
+# loader.staging_to_vector_store()

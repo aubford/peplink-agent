@@ -3,8 +3,6 @@ from util.nlp import TokenizedDoc
 from util.deduplication_pipeline import DeduplicationPipeline
 import pandas as pd
 
-pipeline = DeduplicationPipeline("test")
-
 documents = [
     # 0
     {
@@ -56,6 +54,7 @@ def assert_ids_equal(docs: list[TokenizedDoc], expected_ids: list[str]):
 
 
 def test_filter_exact_duplicates_minhash():
+    pipeline = DeduplicationPipeline("test")
     tokenized_docs = pipeline._tokenize_documents(pd.DataFrame(documents))
     print("-" * 20)
     for doc in tokenized_docs:
@@ -70,6 +69,7 @@ def test_filter_exact_duplicates_minhash():
 
 
 def test_confirm_duplicates():
+    pipeline = DeduplicationPipeline("test")
     tokenized_docs = pipeline._tokenize_documents(pd.DataFrame(documents))
     candidates = pipeline.get_duplicate_candidates_simple_precision(tokenized_docs)
     duplicates = pipeline._confirm_duplicates(candidates)

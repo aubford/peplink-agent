@@ -3,7 +3,7 @@ from typing import List, Literal, Set, Tuple
 import pandas as pd
 from datasketch import MinHash, MinHashLSH
 from rapidfuzz import fuzz, process
-from config import RotatingFileLogWriter
+from config.logger import RotatingFileLogger, RotatingFileLogWriter
 from util.util_main import dedupe_df_ids, print_replace
 from util.viz import plot_number_dist
 from util.nlp import (
@@ -25,10 +25,11 @@ def prep_str_for_matching(s: str) -> str:
 class DeduplicationPipeline:
     def __init__(self, name: str):
         self.logger = RotatingFileLogWriter(f"deduplication_pipeline-{name}")
-        self.filter_logger = RotatingFileLogWriter(f"dedupe-filter-{name}")
-        self.candidate_logger = RotatingFileLogWriter(f"dedupe-candidates-{name}")
-        self.duplicate_logger = RotatingFileLogWriter(f"dedupe-duplicates-{name}")
+        self.filter_logger = RotatingFileLogger(f"dedupe-filter-{name}")
+        self.candidate_logger = RotatingFileLogger(f"dedupe-candidates-{name}")
+        self.duplicate_logger = RotatingFileLogger(f"dedupe-duplicates-{name}")
 
+    @timer("Tokenize documents")
     def _tokenize_documents(self, df: pd.DataFrame) -> List[TokenizedDoc]:
         """Tokenize all documents in the dataframe."""
         self.logger.log_and_print_header(f"Tokenize {len(df)} docs")
@@ -53,7 +54,7 @@ class DeduplicationPipeline:
         docs: List[TokenizedDoc],
         *,
         threshold: float = 0.98,
-        min_unique_tokens: int = 30,
+        min_unique_tokens: int = 50,
     ) -> List[TokenizedDoc]:
         """
         Returns filtered corpus with exact duplicates removed.
@@ -290,7 +291,7 @@ class DeduplicationPipeline:
     ) -> pd.DataFrame:
         df = df.drop_duplicates(subset=["page_content"], keep="first")
         tokenized_docs = self._tokenize_documents(df)
-        filtered_docs = self.filter_exact_duplicates_minhash(tokenized_docs, threshold=0.98)
+        filtered_docs = self.filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
         return self._apply_deduplication(
             df,
             filtered_docs,

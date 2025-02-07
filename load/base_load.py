@@ -100,7 +100,7 @@ class BaseLoad:
             }
             records.append(record)
 
-        df = pd.DataFrame(records).set_index("id", drop=False)
+        df = pd.DataFrame(records).set_index("id", drop=False, verify_integrity=True)
         df.to_parquet(self.staging_path)
         self.logger.info(f"Saved {len(docs)} documents to {self.staging_path}")
 

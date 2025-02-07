@@ -27,7 +27,7 @@ class RotatingFileLogger(logging.Logger):
         file_handler = RotatingFileHandler(
             os.path.join("logs", f"{name}.log"),
             maxBytes=20 * 1024 * 1024,  # 20 MB
-            backupCount=2,
+            backupCount=1,
         )
         file_handler.setFormatter(formatter)
         self.addHandler(file_handler)
