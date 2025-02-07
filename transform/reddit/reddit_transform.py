@@ -6,14 +6,6 @@ from transform.base_transform import BaseTransform
 from util.util_main import set_string_columns
 from typing import List, Optional, Union, TypedDict
 
-# skipping fields:
-# author_hide_from_robots
-# author_accept_followers
-# author_awarder_karma:  ignoring the karma constituents in favor of total karma
-# author_awardee_karma
-# author_link_karma
-# author_comment_karma
-
 
 class RedditAuthor(TypedDict):
     id: str
@@ -27,7 +19,7 @@ class RedditAuthor(TypedDict):
     comment_karma: int
     total_karma: int
     link_karma: int
-    is_suspended: Optional[bool] = None
+    is_suspended: Optional[bool]
     is_blocked: bool
     is_employee: bool
     is_gold: bool
@@ -59,45 +51,17 @@ class RedditTransform(BaseTransform):
         super().__init__()
 
     def transform_file(self, file_path: Path) -> pd.DataFrame:
-        posts = []
+        post_and_comments = []
         with open(file_path, "r") as f:
             for line in f:
                 data = json.loads(line)
-                meta = data["metadata"]
-                author = meta["post_author"]
+                author = data["metadata"]["post_author"]
                 if not author:
                     print("No Author: Skipping")
                     continue
 
-                post = self.add_required_columns(
-                    columns={
-                        # Post metadata
-                        "subreddit": meta["subreddit"],
-                        "category": meta["category"],
-                        "title": meta["title"],
-                        "score": meta["score"],
-                        "url": meta["url"],
-                        # Author metadata
-                        "author_name": author["name"],
-                        "author_id": author["id"],
-                        "author_is_mod": author["is_mod"],
-                        "author_is_gold": author["is_gold"],
-                        "author_is_blocked": author["is_blocked"],
-                        "author_total_karma": author["total_karma"],
-                        "author_verified": author["verified"],
-                        "author_has_verified_email": author["has_verified_email"],
-                        "author_has_subscribed": author["has_subscribed"],
-                        "author_is_employee": author["is_employee"],
-                    },
-                    page_content=self.create_page_content(data),
-                    file_path=file_path,
-                    doc_id=meta["id"],
-                )
-
-                # filter out if no comments survive transform_comments
-
-                posts.append(post)
-        df = self.make_df(posts)
+                post_and_comments.extend(self.transform_post_into_post_comments(data, file_path))
+        df = self.make_df(post_and_comments)
 
         # validate score is integer and not NaN or None
         df["score"] = pd.to_numeric(df["score"], errors="raise").astype("int64")
@@ -112,15 +76,15 @@ class RedditTransform(BaseTransform):
         return df
 
     @staticmethod
-    def is_quality_comment(comment: RedditComment, min_karma: int = 40, min_score: int = 2) -> bool:
+    def is_quality_comment_or_reply(comment: RedditComment, min_karma: int = 40, min_score: int = 2, min_length: int = 100) -> bool:
         author = comment["comment_author"]
         score = comment["score"]
         return (
-            len(comment["body"]) > 100
+            len(comment["body"]) > min_length
             # if there is no is_blocked key that means author was deleted so we can consider them blocked
             and not author.get("is_blocked", True)
             and (
-                (author["total_karma"] > min_karma and score >= min_score)
+                (author["total_karma"] >= min_karma and score >= min_score)
                 or (score >= min_score + 1 or author.get("is_gold", False) or author["total_karma"] > 500)
             )
         )
@@ -128,21 +92,7 @@ class RedditTransform(BaseTransform):
     def select_high_quality_replies(
         self, replies: list[RedditComment], min_karma: int = 40, min_score: int = 2
     ) -> list[RedditComment]:
-        """
-        Given a list of comments/replies, return comments that meet the following criteria.
-
-        - Comment.body is longer than 100 characters.
-        - comment.author.is_blocked = False
-        - comment.author.total_karma > min_karma
-        - Comment.score greater than min_score.
-
-        and one of the following are true:
-        - Comment.score greater than min_score + 1.
-        - comment.author.is_gold = True
-        - comment.author.total_karma > 500
-        """
-
-        return [comment for comment in replies if self.is_quality_comment(comment, min_karma, min_score)]
+        return [comment for comment in replies if self.is_quality_comment_or_reply(comment, min_karma, min_score)]
 
     def transform_comment(self, comment: RedditComment) -> str | None:
         """
@@ -164,9 +114,12 @@ class RedditTransform(BaseTransform):
 
         high_quality_replies = self.select_high_quality_replies(comment["replies"])
 
-        # if there are no high quality replies and the comment is not itself high quality, return None
+        # If there are no high quality replies and the comment is not itself high quality, return None to be filtered out.
+        # If a comment doesn't have quality replies, it needs to have enough content itself to potentially
+        # have any information value, so we check that the comment body is at least 400 characters.
+        # We filter for karma and score in transform_post_into_post_comments so we set those to init here.
         if not high_quality_replies:
-            if self.is_quality_comment(comment, min_karma=10, min_score=1):
+            if self.is_quality_comment_or_reply(comment, min_karma=0, min_score=1, min_length=400):
                 return f"<comment> {comment['body']} </comment>"
             else:
                 return None
@@ -176,8 +129,8 @@ class RedditTransform(BaseTransform):
             return node in high_quality_replies or any(is_quality_node(r) for r in node["replies"])
 
         # check if the reply is a direct child of the comment to build a reply tree instead of forest
-        def is_child_node(comment_or_reply: RedditComment, reply: RedditComment) -> bool:
-            return comment_or_reply["id"] in reply["parent_id"]
+        def is_child_node(parent: RedditComment, descendant: RedditComment) -> bool:
+            return parent["id"] in descendant["parent_id"]
 
         # turn reply forest into a tree of high quality replies
         def prune_reply_tree(comment_or_reply: RedditComment) -> dict:
@@ -209,24 +162,98 @@ class RedditTransform(BaseTransform):
         xml_str += "</comment>"
         return xml_str
 
-    def create_page_content(self, post: dict) -> str:
+    @staticmethod
+    def create_page_content(title: str, page_content: str, comment: str) -> str:
         """
         Create a page content string from a reddit post dict with this format:
+        """
+        return f"## Reddit Post: {title}\n\n{page_content}\n\n## Response:\n\n{comment}"
+
+
+    def filter_comments(self, comments: list[RedditComment]) -> list[RedditComment]:
+        """Select the most upvoted comments with selectivity scaled by post engagement and score distribution.
+
+        Post engagment can be determined by the total number of upvotes for all comments.
+        Since scores are initialized at 1, an upvote is (score - 1) for each comment.
+        In a low engagement environment, we don't have enough data to apply a score-based heuristic.
+        If score distribution is narrow, we should be less strict with our score requirements.
+        If there is high engagement and a wide score distribution, we should be very strict without our score requirements
+        with max selectivity being the top 20% of comments.
+        """
+        # first filter out any that have been downvoted
+        comments = [c for c in comments if c["score"] > 0]
+        comment_score_distribution = set(c["score"] for c in comments)
+
+    def transform_post_into_post_comments(self, post: dict, file_path: Path) -> list[dict]:
+        """
+        For each comment in the post, create a document with the page content string with this format:
 
         {post["title"]}
 
         {post["page_content"]}
 
-        {
-            List of comments using self.transform_comment in post["comments"]
-        }
+        {Single comment and its replies from output of self.transform_comment}
 
+        We use the comment as the first class citizen instead of the post since we are looking for answers to
+        questions as opposed to questions themselves. Each comment documents a conversation about a given answer.
+        We vet the reliability of comments and replies to comments by ensuring that they are from a reputable user or have been upvoted.
+        If none of the comments have been upvoted, this is likely due to the post having little engagement, which doesn't necessarily mean
+        we should skip it.
         """
 
         meta = post["metadata"]
-        # Filter out None values from comments
-        comments = list(filter(None, map(self.transform_comment, meta["comments"])))
-        return f"## Reddit Post: {meta['title']}\n\n{post['page_content']}\n\n## Comments:\n\n{'\n\n'.join(comments)}"
+        author = meta["post_author"]
+        comments = meta["comments"]
+
+        # main comment filter
+
+        post_comments = []
+        for comment in comments:
+            transformed_comment_str = self.transform_comment(comment)
+            if not transformed_comment_str:
+                continue
+
+            comment_author = comment["comment_author"]
+            if not comment_author:
+                print("No comment author: Skipping")
+                continue
+
+            transformed_post = self.add_required_columns(
+                columns={
+                    # Post metadata
+                    "subreddit": meta["subreddit"],
+                    "category": meta["category"],
+                    "title": meta["title"],
+                    "score": meta["score"],
+                    "url": meta["url"],
+                    # Author metadata
+                    "post_author_name": author["name"],
+                    "post_author_id": author["id"],
+                    "post_author_is_mod": author["is_mod"],
+                    "post_author_is_gold": author["is_gold"],
+                    "post_author_is_blocked": author["is_blocked"],
+                    "post_author_total_karma": author["total_karma"],
+                    "post_author_verified": author["verified"],
+                    "post_author_has_verified_email": author["has_verified_email"],
+                    "post_author_has_subscribed": author["has_subscribed"],
+                    "post_author_is_employee": author["is_employee"],
+                    "comment_author_name": comment_author["name"],
+                    "comment_author_id": comment_author["id"],
+                    "comment_author_is_mod": comment_author["is_mod"],
+                    "comment_author_is_gold": comment_author["is_gold"],
+                    "comment_author_is_blocked": comment_author["is_blocked"],
+                    "comment_author_total_karma": comment_author["total_karma"],
+                    "comment_author_verified": comment_author["verified"],
+                    "comment_author_has_verified_email": comment_author["has_verified_email"],
+                    "comment_author_has_subscribed": comment_author["has_subscribed"],
+                    "comment_author_is_employee": comment_author["is_employee"],
+                },
+                page_content=self.create_page_content(meta["title"], post["page_content"], transformed_comment_str),
+                file_path=file_path,
+                doc_id=meta["id"],
+            )
+            post_comments.append(transformed_post)
+        return post_comments
 
 
 if __name__ == "__main__":

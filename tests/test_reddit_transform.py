@@ -161,12 +161,13 @@ class TestRedditTransform:
         actual_xml = transformer.transform_comment(comment_with_good_descendants)
         assert actual_xml == expected_xml
 
-    def test_create_page_content(self):
+    def test_transform_post_into_post_comments(self):
         transformer = RedditTransform()
 
         document = {
             "page_content": "This is the main post content.",
             "metadata": {
+                "id": "post1",
                 "title": "Test Post Title",
                 "comments": [
                     {
@@ -193,6 +194,30 @@ class TestRedditTransform:
                                 "replies": [],
                             }
                         ],
+                    },
+                    {
+                        "id": "comment2",
+                        "parent_id": "t1_post1",
+                        "body": "This is a low quality comment with less than 100 characters.",
+                        "score": 0,
+                        "comment_author": {
+                            "is_blocked": False,
+                            "total_karma": 5,
+                            "is_gold": False,
+                        },
+                        "replies": [],
+                    },
+                    {
+                        "id": "comment3",
+                        "parent_id": "t1_comment1",
+                        "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality comment.",
+                        "score": 10,
+                        "comment_author": {
+                            "is_blocked": False,
+                            "total_karma": 5000,
+                            "is_gold": False,
+                        },
+                        "replies": [],
                     }
                 ],
             },
@@ -210,5 +235,6 @@ class TestRedditTransform:
             "</comment>"
         )
 
-        actual_content = transformer.create_page_content(document)
-        assert actual_content.strip() == expected_content
+        actual_content = transformer.transform_post_into_post_comments(document)
+        assert actual_content[0].page_content.strip() == expected_content
+        assert len(actual_content) == 2

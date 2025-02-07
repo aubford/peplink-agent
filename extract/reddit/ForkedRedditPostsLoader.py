@@ -1,10 +1,12 @@
 from __future__ import annotations
 from collections.abc import Iterator
+from time import sleep
 from typing import Any, Iterable, List, Sequence
 from langchain_core.documents import Document
 from langchain_community.document_loaders.base import BaseLoader
 from toolz import keyfilter
 import praw
+from praw.exceptions import APIException
 
 
 class ForkedRedditPostsLoader(BaseLoader):
@@ -103,8 +105,22 @@ class ForkedRedditPostsLoader(BaseLoader):
                 metadata=metadata,
             )
 
-    def _get_comments(self, post_comments: Any, roots_only: bool = False) -> List[dict]:
-        post_comments.replace_more(limit=None)  # Replace all MoreComments objects
+    def handle_replace_more(self, post_comments: praw.models.CommentForest) -> praw.models.CommentForest:
+        pause_coeff = 1
+        while True:
+            try:
+                post_comments.replace_more(limit=None)
+                break
+            except Exception:
+                print("Handling replace_more exception, retrying...")
+                sleep(10 * pause_coeff)
+                pause_coeff += 2 * pause_coeff
+                if pause_coeff > 16:
+                    raise Exception("Failed to replace more comments after 5 retries")
+
+
+    def _get_comments(self, post_comments: praw.models.CommentForest, roots_only: bool = False) -> List[dict]:
+        self.handle_replace_more(post_comments)
         comments = []
         for comment in post_comments.list():
             if comment.author is None or (roots_only and not comment.is_root):
