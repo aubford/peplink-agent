@@ -161,14 +161,3 @@ print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1])
 print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1])
 print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 1, 1, 1])
 print_cutoff_percent([50, 50, 50, 50, 1, 50, 50, 50, 50, 50])
-
-
-# %%
-
-space = np.linspace(1e-8, 1)
-plt.plot(space, np.power(space, 1 / 5), label="1/5")
-plt.plot(space, np.power(space, 1 / 4), label="1/4")
-plt.plot(space, np.power(space, 1 / 3), label="1/3")
-plt.plot(space, np.power(space, 1 / 2), label="1/2")
-plt.legend()
-plt.show()
