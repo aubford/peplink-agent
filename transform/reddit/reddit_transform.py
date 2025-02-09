@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
@@ -76,7 +77,9 @@ class RedditTransform(BaseTransform):
         return df
 
     @staticmethod
-    def is_quality_comment_or_reply(comment: RedditComment, min_karma: int = 40, min_score: int = 2, min_length: int = 100) -> bool:
+    def is_quality_comment_or_reply(
+        comment: RedditComment, min_karma: int = 40, min_score: int = 2, min_length: int = 100
+    ) -> bool:
         author = comment["comment_author"]
         score = comment["score"]
         return (
@@ -169,7 +172,6 @@ class RedditTransform(BaseTransform):
         """
         return f"## Reddit Post: {title}\n\n{page_content}\n\n## Response:\n\n{comment}"
 
-
     def filter_comments(self, comments: list[RedditComment]) -> list[RedditComment]:
         """Select the most upvoted comments with selectivity scaled by post engagement and score distribution.
 
@@ -180,9 +182,20 @@ class RedditTransform(BaseTransform):
         If there is high engagement and a wide score distribution, we should be very strict without our score requirements
         with max selectivity being the top 20% of comments.
         """
+
+        if not comments:
+            return []
+
         # first filter out any that have been downvoted
         comments = [c for c in comments if c["score"] > 0]
-        comment_score_distribution = set(c["score"] for c in comments)
+        cutoff_percent = self.get_score_cutoff_percent([c["score"] for c in comments])
+
+        # Sort comments by score descending
+        sorted_comments = sorted(comments, key=lambda x: x["score"], reverse=True)
+
+        # Apply dynamic cutoff
+        cutoff_index = max(int(len(sorted_comments) * cutoff_percent), 1)
+        return sorted_comments[:cutoff_index]
 
     def transform_post_into_post_comments(self, post: dict, file_path: Path) -> list[dict]:
         """
@@ -204,8 +217,7 @@ class RedditTransform(BaseTransform):
         meta = post["metadata"]
         author = meta["post_author"]
         comments = meta["comments"]
-
-        # main comment filter
+        comments = self.filter_comments(comments)
 
         post_comments = []
         for comment in comments:

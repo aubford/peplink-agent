@@ -238,3 +238,17 @@ class TestRedditTransform:
         actual_content = transformer.transform_post_into_post_comments(document)
         assert actual_content[0].page_content.strip() == expected_content
         assert len(actual_content) == 2
+
+    def test_get_score_cutoff_percent(self):
+        transformer = RedditTransform()
+
+        assert transformer.get_score_cutoff_percent([1, 1, 1, 1]) == pytest.approx(1.0)
+        assert transformer.get_score_cutoff_percent([1, 1, 7, 1]) == pytest.approx(0.41, rel=1e-2)
+        assert transformer.get_score_cutoff_percent([1, 2, 3, 4, 5, 6, 7]) == pytest.approx(0.2)
+        assert transformer.get_score_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1]) == pytest.approx(0.8)
+        assert transformer.get_score_cutoff_percent([1, 1, 1, 1, 2, 2, 1, 1, 1, 1]) == pytest.approx(0.8)
+        assert transformer.get_score_cutoff_percent([1, 2, 2]) == pytest.approx(0.5)
+        assert transformer.get_score_cutoff_percent([7, 15, 64]) == pytest.approx(0.2)
+        assert transformer.get_score_cutoff_percent([66, 66, 66]) == pytest.approx(0.2)
+        assert transformer.get_score_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]) == pytest.approx(0.8)
+        assert transformer.get_score_cutoff_percent([1, 5, 2, 1, 2, 3, 2, 2, 2, 1]) == pytest.approx(0.5)
