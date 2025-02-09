@@ -6,6 +6,7 @@ from pathlib import Path
 from transform.base_transform import BaseTransform
 from util.util_main import set_string_columns
 from typing import List, Optional, Union, TypedDict
+from transform.reddit.get_score_cutoff import get_score_cutoff_percentile
 
 
 class RedditAuthor(TypedDict):
@@ -188,13 +189,13 @@ class RedditTransform(BaseTransform):
 
         # first filter out any that have been downvoted
         comments = [c for c in comments if c["score"] > 0]
-        cutoff_percent = self.get_score_cutoff_percent([c["score"] for c in comments])
+        cutoff_percent = get_score_cutoff_percentile([c["score"] for c in comments])
 
         # Sort comments by score descending
         sorted_comments = sorted(comments, key=lambda x: x["score"], reverse=True)
 
         # Apply dynamic cutoff
-        cutoff_index = max(int(len(sorted_comments) * cutoff_percent), 1)
+        cutoff_index = int(len(sorted_comments) * cutoff_percent)
         return sorted_comments[:cutoff_index]
 
     def transform_post_into_post_comments(self, post: dict, file_path: Path) -> list[dict]:

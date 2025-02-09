@@ -4,40 +4,65 @@ import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
 
 
-def print_cutoff_percent(scores: list[int]):
-    print(f"Preserve Percentile: {round(get_score_cutoff_percentile(scores) * 100)}%")
+def log_score_cutoff_percentile():
+    def print_cutoff_percent(scores: list[int]):
+        print(f"Preserve Percentile: {round(get_score_cutoff_percentile(scores) * 100)}%")
+
+    print_cutoff_percent([1, 2, 2])
+    print_cutoff_percent([1, 1, 1, 1])
+    print_cutoff_percent([7, 15, 64])
+    print_cutoff_percent([1, 1, 7, 1])
+
+    print_cutoff_percent([1, 2, 3, 4, 5])
+    print_cutoff_percent([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 3, 5])
+    print_cutoff_percent([1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5])
+    print_cutoff_percent([1, 2, 3, 4, 5, 6, 7, 18, 27])
+    print_cutoff_percent([1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1])
+    print_cutoff_percent([66, 66, 66])
+    print_cutoff_percent([1, 1, 1, 1, 1, 500000, 1, 1, 1, 1, 1])
+    print_cutoff_percent([1, 500000])
+
+    print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1])
+    print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1])
+    print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1])
+    print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 1, 1, 1])
+    print_cutoff_percent([50, 50, 50, 50, 1, 50, 50, 50, 50, 50])
 
 
-def get_engagement_norm(engagement: int) -> float:
-    """
-    Engagement normalization within 0-1 range
-    If engagement is 0, return 0
-    Engagement normalization should ramp up quickly to about 0.5 when engagement values are
-    in the range of 0-5 and then start to taper off.
-    """
-    # if engagement < 1:
-    #     return 0
+def log_distribution_factor(cv: float) -> float:
+    cv_test_dist = np.linspace(0, 3)
+    plt.plot(cv_test_dist, get_distribution_factor(cv_test_dist), label="Distribution Factor")
+    plt.legend()
+    plt.show()
 
-    return engagement / (engagement + 5)
+    print(f"get_distribution_factor(0): {round(get_distribution_factor(0), 3)}")
+    print(f"get_distribution_factor(1): {round(get_distribution_factor(1), 3)}")
+    print(f"get_distribution_factor(2): {round(get_distribution_factor(2), 3)}")
+    print(f"get_distribution_factor(3): {round(get_distribution_factor(3), 3)}")
 
 
-plt.plot(np.linspace(0, 100), get_engagement_norm(np.linspace(0, 100)))
-plt.show()
+def log_engagement_norm(engagement: int) -> float:
+    plt.plot(np.linspace(0, 100), get_engagement_norm(np.linspace(0, 100)))
+    plt.show()
 
-print(f"get_engagement_norm(0): {get_engagement_norm(0)}")
-print(f"get_engagement_norm(1): {get_engagement_norm(1)}")
-print(f"get_engagement_norm(2): {get_engagement_norm(2)}")
-print(f"get_engagement_norm(3): {get_engagement_norm(3)}")
-print(f"get_engagement_norm(4): {get_engagement_norm(4)}")
-print(f"get_engagement_norm(5): {get_engagement_norm(5)}")
-print(f"get_engagement_norm(6): {get_engagement_norm(6)}")
-print(f"get_engagement_norm(7): {get_engagement_norm(7)}")
-print(f"get_engagement_norm(8): {get_engagement_norm(8)}")
-print(f"get_engagement_norm(9): {get_engagement_norm(9)}")
-print(f"get_engagement_norm(10): {get_engagement_norm(10)}")
-print(f"get_engagement_norm(20): {get_engagement_norm(20)}")
-print(f"get_engagement_norm(30): {get_engagement_norm(30)}")
-print(f"get_engagement_norm(100): {get_engagement_norm(100)}")
+    print(f"get_engagement_norm(0): {get_engagement_norm(0)}")
+    print(f"get_engagement_norm(1): {get_engagement_norm(1)}")
+    print(f"get_engagement_norm(2): {get_engagement_norm(2)}")
+    print(f"get_engagement_norm(3): {get_engagement_norm(3)}")
+    print(f"get_engagement_norm(4): {get_engagement_norm(4)}")
+    print(f"get_engagement_norm(5): {get_engagement_norm(5)}")
+    print(f"get_engagement_norm(6): {get_engagement_norm(6)}")
+    print(f"get_engagement_norm(7): {get_engagement_norm(7)}")
+    print(f"get_engagement_norm(8): {get_engagement_norm(8)}")
+    print(f"get_engagement_norm(9): {get_engagement_norm(9)}")
+    print(f"get_engagement_norm(10): {get_engagement_norm(10)}")
+    print(f"get_engagement_norm(20): {get_engagement_norm(20)}")
+    print(f"get_engagement_norm(30): {get_engagement_norm(30)}")
+    print(f"get_engagement_norm(100): {get_engagement_norm(100)}")
+
+
 # %%
 # space = np.linspace(0, 100)
 # plt.plot(space, get_engagement_norm(space), label="engagement_norm")
@@ -72,8 +97,11 @@ def get_distribution_factor(cv: float) -> float:
     Single logistic-type formula satisfying:
       f(0) ≈ 0.01,
       f(1) ≈ 0.75,
+      f(2) ≈ 0.90,
       f(3) ≈ 0.99,
-    rising gently from near 0 to near 1.
+    rising gently from 1 -> 3.
+
+    Use SciPy least_squares to fit the parameters.
     """
 
     def _target_equations(params: np.ndarray) -> np.ndarray:
@@ -94,15 +122,17 @@ def get_distribution_factor(cv: float) -> float:
     return _logistic_function(cv, B_fit, M_fit, nu_fit) - 0.025
 
 
-cv_test_dist = np.linspace(0, 3)
-plt.plot(cv_test_dist, get_distribution_factor(cv_test_dist), label="Distribution Factor")
-plt.legend()
-plt.show()
+def get_engagement_norm(engagement: int) -> float:
+    """
+    Engagement normalization to 0-1 range
+    If engagement is 0, return 0
+    Engagement normalization should ramp up quickly to about 0.5 when engagement values are
+    in the range of 0-5 and then start to taper off.
+    """
+    # if engagement < 1:
+    #     return 0
 
-print(f"get_distribution_factor(0): {round(get_distribution_factor(0), 3)}")
-print(f"get_distribution_factor(1): {round(get_distribution_factor(1), 3)}")
-print(f"get_distribution_factor(2): {round(get_distribution_factor(2), 3)}")
-print(f"get_distribution_factor(3): {round(get_distribution_factor(3), 3)}")
+    return engagement / (engagement + 5)
 
 
 def get_score_cutoff_percentile(scores: list[int]) -> float:
@@ -138,26 +168,3 @@ def get_score_cutoff_percentile(scores: list[int]) -> float:
 
     cutoff_percentile = max_cutoff - (max_cutoff - base_cutoff) * e_d
     return cutoff_percentile
-
-
-print_cutoff_percent([1, 2, 2])
-print_cutoff_percent([1, 1, 1, 1])
-print_cutoff_percent([7, 15, 64])
-print_cutoff_percent([1, 1, 7, 1])
-
-print_cutoff_percent([1, 2, 3, 4, 5])
-print_cutoff_percent([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 3, 5])
-print_cutoff_percent([1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5])
-print_cutoff_percent([1, 2, 3, 4, 5, 6, 7, 18, 27])
-print_cutoff_percent([1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1])
-print_cutoff_percent([66, 66, 66])
-print_cutoff_percent([1, 1, 1, 1, 1, 500000, 1, 1, 1, 1, 1])
-print_cutoff_percent([1, 500000])
-
-print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1])
-print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1])
-print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1])
-print_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 1, 1, 1])
-print_cutoff_percent([50, 50, 50, 50, 1, 50, 50, 50, 50, 50])
