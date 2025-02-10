@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 from pathlib import Path
-from transform.base_transform import BaseTransform
+from transform.base_transform import BaseTransform, SubjectMatter
 from datetime import datetime
 from util.util_main import get_column_word_count, set_string_columns
 
@@ -10,6 +10,8 @@ class YouTubeTransform(BaseTransform):
     """Transform YouTube video data from JSONL files into a structured DataFrame."""
 
     folder_name = "youtube"
+    # All videos should most-likely be related to Pepwave since we filter for the word "pep" in the page content (obviously could be improved)
+    subject_matter = SubjectMatter.PEPWAVE
 
     def __init__(self):
         super().__init__()
@@ -86,7 +88,6 @@ class YouTubeTransform(BaseTransform):
         return df
 
     def _filter_for_pep(self, df: pd.DataFrame, file_path: Path) -> pd.DataFrame:
-        file_name = str(file_path).lower()
         sources_to_filter = [
             "Frontierus",
             "MobileInternetResourceCenter",
@@ -94,6 +95,7 @@ class YouTubeTransform(BaseTransform):
             "MobileMustHave",
             "5Gstore",
         ]
+        file_name = str(file_path).lower()
         if any(source.lower() in file_name for source in sources_to_filter):
             df = df[df["page_content"].str.lower().str.contains("pep")]
             self.notify_dropped_rows(df, "contains 'pep'")

@@ -10,6 +10,7 @@ class HTMLTransform(BaseTransform):
     """Transform and chunk HTML documents."""
 
     folder_name = "html"
+    subject_matter = "pepwave"
 
     def __init__(self):
         super().__init__()

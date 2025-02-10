@@ -9,12 +9,20 @@ from util.util_main import (
     sanitize_filename,
 )
 from util.document_utils import load_parquet_files, get_all_parquet_in_dir
+from enum import StrEnum
+
+
+class SubjectMatter(StrEnum):
+    PEPWAVE = "PEPWAVE"
+    IT_NETWORKING = "IT_NETWORKING"
+    MOBILE_INTERNET = "MOBILE_INTERNET"
 
 
 class BaseTransform:
     """Base class for all data transformers."""
 
     folder_name: str = NotImplemented
+    subject_matter: SubjectMatter = NotImplemented
 
     def __init__(self):
         self.row_count = None
@@ -71,6 +79,7 @@ class BaseTransform:
     def add_required_columns(
         self,
         columns: dict,
+        *,
         page_content: str,
         file_path: Path,
         doc_id: str | uuid.UUID | None = None,
@@ -78,6 +87,7 @@ class BaseTransform:
         columns["id"] = str(uuid.uuid4()) if doc_id is None else doc_id
         columns["source_file"] = self.get_stem(file_path)
         columns["page_content"] = page_content
+        columns["subject_matter"] = self.subject_matter
         return columns
 
     @staticmethod

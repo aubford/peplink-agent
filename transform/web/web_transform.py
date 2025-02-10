@@ -1,17 +1,17 @@
 import json
 import pandas as pd
 from pathlib import Path
-from transform.base_transform import BaseTransform
+from transform.base_transform import BaseTransform, SubjectMatter
 from util.util_main import (
     get_column_word_count,
     set_string_columns,
 )
 
-
 class WebTransform(BaseTransform):
     """Transform web page data from JSONL files into a structured DataFrame."""
 
     folder_name = "web"
+    subject_matter = SubjectMatter.PEPWAVE
 
     def __init__(self):
         super().__init__()
