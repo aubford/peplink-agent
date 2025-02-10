@@ -35,7 +35,6 @@ def log_distribution_factor(cv: float) -> float:
     cv_test_dist = np.linspace(0, 3)
     plt.plot(cv_test_dist, get_distribution_factor(cv_test_dist), label="Distribution Factor")
     plt.legend()
-    plt.show()
 
     print(f"get_distribution_factor(0): {round(get_distribution_factor(0), 3)}")
     print(f"get_distribution_factor(1): {round(get_distribution_factor(1), 3)}")
@@ -43,9 +42,13 @@ def log_distribution_factor(cv: float) -> float:
     print(f"get_distribution_factor(3): {round(get_distribution_factor(3), 3)}")
 
 
-def log_engagement_norm(engagement: int) -> float:
-    plt.plot(np.linspace(0, 100), get_engagement_norm(np.linspace(0, 100)))
-    plt.show()
+def log_engagement_norm() -> float:
+    plt.plot(np.linspace(0, 100, 1000), get_engagement_norm(np.linspace(0, 100, 1000)))
+    plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+    plt.minorticks_on()
+    plt.grid(True, which='minor', linestyle=':', linewidth=0.2)
+    plt.yticks(np.arange(0, 1.1, 0.1))
+    plt.legend()
 
     print(f"get_engagement_norm(0): {get_engagement_norm(0)}")
     print(f"get_engagement_norm(1): {get_engagement_norm(1)}")
@@ -61,9 +64,10 @@ def log_engagement_norm(engagement: int) -> float:
     print(f"get_engagement_norm(20): {get_engagement_norm(20)}")
     print(f"get_engagement_norm(30): {get_engagement_norm(30)}")
     print(f"get_engagement_norm(100): {get_engagement_norm(100)}")
+    print(f"get_engagement_norm(1000): {get_engagement_norm(1000)}")
+    print(f"get_engagement_norm(100000): {get_engagement_norm(10000000)}")
 
 
-# %%
 # space = np.linspace(0, 100)
 # plt.plot(space, get_engagement_norm(space), label="engagement_norm")
 # plt.legend()
@@ -122,17 +126,32 @@ def get_distribution_factor(cv: float) -> float:
     return _logistic_function(cv, B_fit, M_fit, nu_fit) - 0.025
 
 
+def _stretched_exponential(x: float, a: float, p: float, log_base: float = 2.2) -> float:
+    """Automatically satisfies f(a)=0.5 and f(0)=0"""
+    k = (np.log(log_base) / (a ** p)) ** (1 / p)
+    return 1 - np.exp(-((k * x) ** p))
+
 def get_engagement_norm(engagement: int) -> float:
     """
     Engagement normalization to 0-1 range
-    If engagement is 0, return 0
-    Engagement normalization should ramp up quickly to about 0.5 when engagement values are
-    in the range of 0-5 and then start to taper off.
+    It should satisfy these constraints for engagement values:
+    f(0)=0
+    f(5)≈0.5
+    f(100)≈0.95
     """
-    # if engagement < 1:
-    #     return 0
+    # k = -1/5 * np.log(0.5)
+    # return 1 - np.exp(-k * engagement)
+    return _stretched_exponential(engagement, 4, 0.57, 2)
 
-    return engagement / (engagement + 5)
+# log_engagement_norm()
+
+
+def scale_distribution_factor(dist: float, p: float = 0.5, k: float = 2.0) -> float:
+    """
+    Scale the distribution factor by polynomial and power functions.
+    """
+    poly = k * dist - np.power(dist, k)
+    return (np.power(dist, p) + poly) / 2
 
 
 def get_score_cutoff_percentile(scores: list[int]) -> float:
@@ -146,25 +165,21 @@ def get_score_cutoff_percentile(scores: list[int]) -> float:
     with max selectivity being only the 20% best comments.
     """
     scores_array = np.array(scores)
-    print(f"\n\nscores: {scores_array}")
+    print(f"\n\nscores: {np.array2string(scores_array, separator=', ')}")
     engagement = np.sum(scores_array - 1)  # Total upvotes (excluding initial 1 point)
     mean = np.mean(scores_array)
     std_dev = np.std(scores_array)
-    # print(f"std_dev: {std_dev}")
     cv = std_dev / (mean + 1e-8)
-    print(f"cv: {round(cv, 4)}")
 
     engagement_norm = get_engagement_norm(engagement)
     print(f"engagement_norm: {round(engagement_norm, 4)}")
 
     distribution_factor = get_distribution_factor(cv)
+    print(f"cv: {round(cv, 4)}")
     print(f"distribution_factor: {round(distribution_factor, 4)}")
+    scaled_distribution_factor = scale_distribution_factor(distribution_factor)
+    print(f"scaled_distribution_factor: {round(scaled_distribution_factor, 4)}")
 
-    e_d = engagement_norm * distribution_factor
-    print(f"e_d: {round(e_d, 4)}")
-
-    base_cutoff = 0.2
-    max_cutoff = 1.0
-
-    cutoff_percentile = max_cutoff - (max_cutoff - base_cutoff) * e_d
-    return cutoff_percentile
+    cutoff_percentile = engagement_norm * scaled_distribution_factor
+    print(f"cutoff_percentile: {round(cutoff_percentile, 4)}")
+    return 1 - cutoff_percentile

@@ -195,11 +195,24 @@ class RedditTransform(BaseTransform):
         comments = [c for c in comments if c["score"] > 0]
         cutoff_percent = get_score_cutoff_percentile([c["score"] for c in comments])
 
-        # Sort comments by score descending
-        sorted_comments = sorted(comments, key=lambda x: x["score"], reverse=True)
+        # Sort comments by score with fallbacks for ties:
+        # 1. score (highest first)
+        # 2. author's comment karma (highest first)
+        # 3. author's gold status (True first)
+        # 4. comment length (longest first)
+        sorted_comments = sorted(
+            comments,
+            key=lambda x: (
+                x["score"],
+                x["comment_author"].get("comment_karma", 0),
+                x["comment_author"].get("is_gold", False),
+                len(x["body"]),
+            ),
+            reverse=True,
+        )
 
-        # Apply dynamic cutoff
-        cutoff_index = int(len(sorted_comments) * cutoff_percent)
+        cutoff_index = max(1, round(len(sorted_comments) * cutoff_percent))
+        print(f"cutoff_index: {cutoff_index}")
         return sorted_comments[:cutoff_index]
 
     def transform_post_into_post_comments(self, post: dict, file_path: Path) -> list[dict]:

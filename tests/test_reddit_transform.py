@@ -1,6 +1,8 @@
 import pytest
 from transform.reddit.reddit_transform import RedditTransform, RedditComment
 from pathlib import Path
+import sys
+from random import randint
 
 
 # noinspection PyTypeChecker
@@ -292,3 +294,58 @@ class TestRedditTransform:
         assert actual_content[0]["page_content"].strip() == expected_content
         assert actual_content[1]["page_content"].strip() == expected_content_no_replies
         assert actual_content[2]["page_content"].strip() == expected_content_no_replies
+
+    def test_filter_comments(self):
+        t = RedditTransform()
+
+        failures = []
+        def assert_score_set(scores: list[int], num_comments: int):
+            filtered_comments = t.filter_comments([self.comment_or_reply(score=s) for s in scores])
+            if len(filtered_comments) != num_comments:
+                filtered_scores = [c["score"] for c in filtered_comments]
+                fail_str = f"\n**Failed**: {scores}\nlength: {len(scores)}\nexpected: {num_comments}\nactual: {len(filtered_comments)}\nres: {filtered_scores}"
+                print(fail_str, file=sys.stdout)
+                failures.append(fail_str)
+
+        assert_score_set([1, 1, 1], 3)
+        assert_score_set([2, 1, 1], 3)
+        assert_score_set([2, 2, 1], 3)
+        assert_score_set([7, 15, 64], 1)
+        assert_score_set([1, 1, 7, 1], 2)
+
+        assert_score_set([1, 2, 3, 4, 5], 3)
+        assert_score_set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 3, 5], 4) # 5
+        assert_score_set([1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5], 7)
+        assert_score_set([1, 2, 3, 4, 5, 6, 7, 18, 27], 2)
+        assert_score_set([1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1], 10)
+        assert_score_set([66, 66, 66], 3)
+        assert_score_set([1, 1, 1, 1, 1, 500000, 1, 1, 1, 1, 1], 1)
+        assert_score_set([1, 500000], 1)
+
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1], 10)
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1], 9)
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1], 4) # 5
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 1, 1, 1], 1)
+        assert_score_set([50, 50, 50, 50, 1, 50, 50, 50, 50, 50], 6)
+
+        if failures:
+            pytest.fail("\n".join(failures))
+
+
+    def test_filter_comments_with_karma(self):
+        t = RedditTransform()
+
+        comments = [
+            self.comment_or_reply(score=1, karma=65),
+            self.comment_or_reply(score=1, karma=57),
+            self.comment_or_reply(score=1, karma=50),
+            self.comment_or_reply(score=1, karma=51),
+            self.comment_or_reply(score=1, karma=94),
+        ]
+
+        filtered_comments = t.filter_comments(comments)
+        assert len(filtered_comments) == 3
+        assert filtered_comments[0]["comment_author"]["comment_karma"] == 94
+        assert filtered_comments[1]["comment_author"]["comment_karma"] == 65
+        assert filtered_comments[2]["comment_author"]["comment_karma"] == 57
