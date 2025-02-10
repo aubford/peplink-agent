@@ -141,9 +141,7 @@ def get_engagement_norm(engagement: int) -> float:
     """
     # k = -1/5 * np.log(0.5)
     # return 1 - np.exp(-k * engagement)
-    return _stretched_exponential(engagement, 4, 0.57, 2)
-
-# log_engagement_norm()
+    return _stretched_exponential(engagement, 4.1, 0.52, 2)
 
 
 def scale_distribution_factor(dist: float, p: float = 0.5, k: float = 2.0) -> float:

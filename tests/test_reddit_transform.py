@@ -315,7 +315,7 @@ class TestRedditTransform:
 
         assert_score_set([1, 2, 3, 4, 5], 3)
         assert_score_set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)
-        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 3, 5], 4) # 5
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 3, 5], 5)
         assert_score_set([1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5], 7)
         assert_score_set([1, 2, 3, 4, 5, 6, 7, 18, 27], 2)
         assert_score_set([1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1], 10)
@@ -325,7 +325,7 @@ class TestRedditTransform:
 
         assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1], 10)
         assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1], 9)
-        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1], 4) # 5
+        assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1], 5)
         assert_score_set([1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 1, 1, 1], 1)
         assert_score_set([50, 50, 50, 50, 1, 50, 50, 50, 50, 50], 6)
 
