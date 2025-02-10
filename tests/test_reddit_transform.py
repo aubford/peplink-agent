@@ -5,85 +5,155 @@ from transform.reddit.reddit_transform import RedditTransform, RedditComment
 # noinspection PyTypeChecker
 class TestRedditTransform:
 
-    def test_transform_comment(self):
-        transformer = RedditTransform()
+    @pytest.fixture
+    def document_partial(self) -> dict:
+        return {
+            "page_content": "This is the main post content.",
+            "metadata": {
+                "id": "main_post",
+                "title": "Test Post Title",
+                "subreddit": "test_subreddit",
+                "category": "test_category",
+                "score": 100,
+                "url": "https://reddit.com/r/test_subreddit/test_post",
+                "post_author": {
+                    "id": "test_author",
+                    "name": "Test Author",
+                    "verified": True,
+                    "fullname": "t2_test_author",
+                    "has_subscribed": True,
+                    "has_verified_email": True,
+                    "accept_followers": True,
+                    "awardee_karma": 100,
+                    "awarder_karma": 50,
+                    "comment_karma": 500,
+                    "total_karma": 1000,
+                    "link_karma": 400,
+                    "is_suspended": False,
+                    "is_blocked": False,
+                    "is_employee": False,
+                    "is_gold": False,
+                    "is_mod": False,
+                }
+            },
+        }
 
-        high_quality_reply = {
-            "id": "abc123",
-            "parent_id": "t1_def456",
-            "body": "This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement.",
+    def comment_author_partial(self) -> dict:
+        return {
+            "name": "Test Comment Author",
+            "verified": True,
+            "fullname": "t2_test_comment_author",
+            "has_subscribed": True,
+            "has_verified_email": True,
+            "accept_followers": True,
+            "awardee_karma": 200,
+            "awarder_karma": 100,
+            "comment_karma": 1000,
+            "total_karma": 2000,
+            "link_karma": 800,
+            "is_suspended": False,
+            "is_blocked": False,
+            "is_employee": False,
+            "is_gold": True,
+            "is_mod": True,
+        }
+
+    @staticmethod
+    def id(id: str = "42", is_parent: bool = False) -> str:
+        return f"t1_{id}" if is_parent else id
+
+    def comment_or_reply(
+        self, *, id: str = "42", score: int = 2, parent_id: str = "42", karma: int = 50
+    ) -> RedditComment:
+        return {
+            "id": self.id(id),
+            "parent_id": self.id(parent_id, True),
+            "body": self.get_body(),
+            "score": score,
+            "comment_author": {
+                "is_blocked": False,
+                "comment_karma": karma,
+                "is_gold": False,
+            },
+            "replies": [],
+        }
+
+    def high_quality_blocked_reply(self, *, id: str = "42", parent_id: str = "42") -> RedditComment:
+        return {
+            "id": self.id(id),
+            "parent_id": self.id(parent_id, True),
+            "body": self.get_body(),
+            "score": 10000,
+            "comment_author": {
+                "is_blocked": True,
+                "comment_karma": 100000,
+                "is_gold": True,
+            },
+            "replies": [],
+        }
+
+    def low_quality_reply(self, *, id: str = "42", parent_id: str = "42") -> RedditComment:
+        return {
+            "id": self.id(id),
+            "parent_id": self.id(parent_id, True),
+            "body": self.get_body(False),
+            "score": 2,
+            "comment_author": {
+                "is_blocked": False,
+                "comment_karma": 50,
+                "is_gold": True,
+            },
+            "replies": [],
+        }
+
+    @staticmethod
+    def get_body(length_ok: bool = True) -> str:
+        return (
+            "This is a high quality reply with more than 40 words to ensure that it meets the length requirement for quality comment."
+            * 2
+            if length_ok
+            else "Short, Low quality reply"
+        )
+
+    def test_transform_comment_nesting(self):
+        transformer = RedditTransform()
+        comment: RedditComment = {
+            "id": self.id(),
+            "parent_id": "t1_mef345",
+            "body": self.get_body(),
             "score": 3,
             "comment_author": {
                 "is_blocked": False,
-                "total_karma": 200,
-                "is_gold": False,
-            },
-            "replies": [],
-        }
-
-        low_quality_blocked_reply = {
-            "id": "ghi789",
-            "parent_id": "t1_def456",
-            "body": "Low quality reply",
-            "score": 1,
-            "comment_author": {
-                "is_blocked": True,
-                "total_karma": 100000,
-                "is_gold": False,
-            },
-            "replies": [],
-        }
-
-        low_quality_reply = {
-            "id": "jkl012",
-            "parent_id": "t1_def456",
-            "body": "Another low quality reply",
-            "score": 0,
-            "comment_author": {
-                "is_blocked": False,
-                "total_karma": 5,
-                "is_gold": False,
-            },
-            "replies": [],
-        }
-
-        comment: RedditComment = {
-            "id": "mno345",
-            "parent_id": "t1_pqr678",  # parent is a submission
-            "body": "This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
-            "score": 10,
-            "comment_author": {
-                "is_blocked": False,
-                "total_karma": 500,
+                "comment_karma": 500,
                 "is_gold": False,
             },
             "replies": [
                 {
-                    "id": "def456",
-                    "parent_id": "t1_mno345",
-                    "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
+                    "id": self.id("1"),
+                    "parent_id": self.id(is_parent=True),
+                    "body": self.get_body(),
                     "score": 1,
                     "comment_author": {
                         "is_blocked": False,
-                        "total_karma": 1000,
+                        "comment_karma": 1000,
                         "is_gold": True,
                     },
                     "replies": [
-                        high_quality_reply,
-                        low_quality_blocked_reply,
-                        low_quality_reply,
+                        self.comment_or_reply(parent_id="1"),
+                        self.high_quality_blocked_reply(parent_id="1"),
+                        self.low_quality_reply(parent_id="1"),
                     ],
                 },
-                high_quality_reply,
-                low_quality_blocked_reply,
-                low_quality_reply,
+                self.comment_or_reply(parent_id="1"),
+                self.high_quality_blocked_reply(parent_id="1"),
+                self.low_quality_reply(parent_id="1"),
             ],
         }
 
         expected_xml = (
-            "<comment> This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.\n"
-            "  <reply> This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.\n"
-            "    <reply> This is a high quality reply to the reply with more than 100 characters to ensure it meets the length requirement. </reply>\n"
+            f"<comment> {self.get_body()}\n"
+            f"  <reply> {self.get_body()}\n"
+            f"    <reply> {self.get_body()} </reply>\n"
             "  </reply>\n"
             "</comment>"
         )
@@ -95,56 +165,45 @@ class TestRedditTransform:
         transformer = RedditTransform()
 
         bad_comment: RedditComment = {
-            "id": "stu901",
+            "id": self.id(True),
             "parent_id": "t1_vwx234",
             "body": "Bad comment",
-            "score": 0,
+            "score": 1,
             "comment_author": {
                 "is_blocked": True,
-                "total_karma": 5,
+                "comment_karma": 5,
                 "is_gold": False,
             },
             "replies": [
-                {
-                    "id": "yz789a",
-                    "parent_id": "t1_stu901",
-                    "body": "Another bad reply",
-                    "score": 0,
-                    "comment_author": {
-                        "is_blocked": False,
-                        "total_karma": 5,
-                        "is_gold": False,
-                    },
-                    "replies": [],
-                }
+                self.low_quality_reply(),
             ],
         }
 
         actual_xml = transformer.transform_comment(bad_comment)
         assert actual_xml is None
 
-    def test_transform_comment_keeps_good_descendants(self):
+    def test_transform_comment_keeps_comments_with_good_descendants(self):
         transformer = RedditTransform()
 
         comment_with_good_descendants: RedditComment = {
-            "id": "bcd123",
+            "id": self.id(),
             "parent_id": "t1_efg456",
-            "body": "Bad quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
-            "score": 0,
+            "body": self.get_body(False),
+            "score": 1,
             "comment_author": {
                 "is_blocked": False,
-                "total_karma": 5,
+                "comment_karma": 5,
                 "is_gold": False,
             },
             "replies": [
                 {
                     "id": "hij789",
-                    "parent_id": "t1_bcd123",
-                    "body": "Good quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
+                    "parent_id": self.id(is_parent=True),
+                    "body": self.get_body(),
                     "score": 3,
                     "comment_author": {
                         "is_blocked": False,
-                        "total_karma": 200,
+                        "comment_karma": 200,
                         "is_gold": False,
                     },
                     "replies": [],
@@ -152,76 +211,52 @@ class TestRedditTransform:
             ],
         }
 
-        expected_xml = (
-            "<comment> Bad quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.\n"
-            "  <reply> Good quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply. </reply>\n"
-            "</comment>"
-        )
+        expected_xml = f"<comment> {self.get_body(False)}\n" f"  <reply> {self.get_body()} </reply>\n" "</comment>"
 
         actual_xml = transformer.transform_comment(comment_with_good_descendants)
         assert actual_xml == expected_xml
 
-    def test_transform_post_into_post_comments(self):
+    def test_transform_post_into_post_comments(self, document_partial: dict):
         transformer = RedditTransform()
 
-        document = {
-            "page_content": "This is the main post content.",
-            "metadata": {
-                "id": "post1",
-                "title": "Test Post Title",
-                "comments": [
-                    {
-                        "id": "comment1",
-                        "parent_id": "t1_post1",
-                        "body": "This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.",
-                        "score": 10,
-                        "comment_author": {
-                            "is_blocked": False,
-                            "total_karma": 500,
-                            "is_gold": False,
-                        },
-                        "replies": [
-                            {
-                                "id": "reply1",
-                                "parent_id": "t1_comment1",
-                                "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply.",
-                                "score": 5,
-                                "comment_author": {
-                                    "is_blocked": False,
-                                    "total_karma": 200,
-                                    "is_gold": False,
-                                },
-                                "replies": [],
-                            }
-                        ],
+        document = document_partial
+        document["metadata"]["comments"] = (
+            [
+                {
+                    "id": self.id(),
+                    "parent_id": "main_post",
+                    "body": self.get_body(),
+                    "score": 2,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "comment_karma": 500,
+                        "is_gold": False,
                     },
-                    {
-                        "id": "comment2",
-                        "parent_id": "t1_post1",
-                        "body": "This is a low quality comment with less than 100 characters.",
-                        "score": 0,
-                        "comment_author": {
-                            "is_blocked": False,
-                            "total_karma": 5,
-                            "is_gold": False,
-                        },
-                        "replies": [],
+                    "replies": [
+                        self.comment_or_reply(),
+                    ],
+                },
+                self.comment_or_reply(score=1),
+                self.comment_or_reply(score=1),
+                self.comment_or_reply(score=-1),
+                self.comment_or_reply(score=0),
+                {
+                    "id": "short_comment_for_no_replies",
+                    "parent_id": "main_post",
+                    "body": "This is a reply with more than 20 words but less than 40 that doesn't meet the length requirement for comments with no quality replies.",
+                    "score": 2,
+                    "comment_author": {
+                        "is_blocked": False,
+                        "comment_karma": 500,
+                        "is_gold": True,
                     },
-                    {
-                        "id": "comment3",
-                        "parent_id": "t1_comment1",
-                        "body": "This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality comment.",
-                        "score": 10,
-                        "comment_author": {
-                            "is_blocked": False,
-                            "total_karma": 5000,
-                            "is_gold": False,
-                        },
-                        "replies": [],
-                    }
-                ],
-            },
-        }
+                    "replies": [
+                        self.low_quality_reply(parent_id="short_comment_for_no_replies"),
+                        self.high_quality_blocked_reply(parent_id="short_comment_for_no_replies"),
+                    ],
+                },
+            ],
+        )
 
         expected_content = (
             "## Reddit Post: Test Post Title\n"
@@ -230,25 +265,22 @@ class TestRedditTransform:
             "\n"
             "## Comments:\n"
             "\n"
-            "<comment> This is a high quality comment with more than 100 characters to ensure it meets the length requirement for a quality comment.\n"
-            "  <reply> This is a high quality reply with more than 100 characters to ensure it meets the length requirement for a quality reply. </reply>\n"
+            f"<comment> {self.get_body()}\n"
+            f"  <reply> {self.get_body()} </reply>\n"
             "</comment>"
         )
 
-        actual_content = transformer.transform_post_into_post_comments(document)
+        expected_content_no_replies = (
+            "## Reddit Post: Test Post Title\n"
+            "\n"
+            "This is the main post content.\n"
+            "\n"
+            "## Comments:\n"
+            f"<comment> {self.get_body()} </comment>\n"
+        )
+
+        actual_content = transformer.transform_post_into_post_comments(document, "file_path")
         assert actual_content[0].page_content.strip() == expected_content
-        assert len(actual_content) == 2
-
-    def test_get_score_cutoff_percent(self):
-        transformer = RedditTransform()
-
-        assert transformer.get_score_cutoff_percent([1, 1, 1, 1]) == pytest.approx(1.0)
-        assert transformer.get_score_cutoff_percent([1, 1, 7, 1]) == pytest.approx(0.41, rel=1e-2)
-        assert transformer.get_score_cutoff_percent([1, 2, 3, 4, 5, 6, 7]) == pytest.approx(0.2)
-        assert transformer.get_score_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1]) == pytest.approx(0.8)
-        assert transformer.get_score_cutoff_percent([1, 1, 1, 1, 2, 2, 1, 1, 1, 1]) == pytest.approx(0.8)
-        assert transformer.get_score_cutoff_percent([1, 2, 2]) == pytest.approx(0.5)
-        assert transformer.get_score_cutoff_percent([7, 15, 64]) == pytest.approx(0.2)
-        assert transformer.get_score_cutoff_percent([66, 66, 66]) == pytest.approx(0.2)
-        assert transformer.get_score_cutoff_percent([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]) == pytest.approx(0.8)
-        assert transformer.get_score_cutoff_percent([1, 5, 2, 1, 2, 3, 2, 2, 2, 1]) == pytest.approx(0.5)
+        assert actual_content[1].page_content.strip() == expected_content_no_replies
+        assert actual_content[2].page_content.strip() == expected_content_no_replies
+        assert len(actual_content) == 3

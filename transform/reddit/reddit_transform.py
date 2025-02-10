@@ -1,6 +1,5 @@
 from __future__ import annotations
 import json
-import numpy as np
 import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform
@@ -79,29 +78,42 @@ class RedditTransform(BaseTransform):
 
     @staticmethod
     def is_quality_comment_or_reply(
-        comment: RedditComment, min_karma: int = 40, min_score: int = 2, min_length: int = 100
+        comment: RedditComment, min_karma: int = 50, min_score: int = 2, min_length: int = 20
     ) -> bool:
+        """
+        Check if a comment or reply is of high quality. High quality comments and replies are either: (defaults)
+        - Post length meets min length (20 words)
+            AND
+        - User is not blocked
+            AND
+        - Meets min karma (50) and either meets min score (2) or post length is long (190 words)
+            OR
+        - Is gold, has min score + 1 (3) or very high karma (>1000)
+
+        Note: Studies have shown that 25% of commenters have 2 or fewer karma points, 50% have 8 or fewer,
+        and 75% have 86 or fewer. The mean karma was found to be 633, suggesting that the top 25% of users
+        average well above 3,000 karma points.
+        """
         author = comment["comment_author"]
         score = comment["score"]
+        word_count = len(comment["body"].split())
         return (
-            len(comment["body"]) > min_length
+            word_count >= min_length
             # if there is no is_blocked key that means author was deleted so we can consider them blocked
             and not author.get("is_blocked", True)
             and (
-                (author["total_karma"] >= min_karma and score >= min_score)
-                or (score >= min_score + 1 or author.get("is_gold", False) or author["total_karma"] > 500)
+                (author["comment_karma"] >= min_karma and (score >= min_score or word_count >= (min_length * 3) + 100))
+                or author.get("is_gold", False)
+                or score >= min_score + 1
+                or author["comment_karma"] > 1000
             )
         )
 
-    def select_high_quality_replies(
-        self, replies: list[RedditComment], min_karma: int = 40, min_score: int = 2
-    ) -> list[RedditComment]:
-        return [comment for comment in replies if self.is_quality_comment_or_reply(comment, min_karma, min_score)]
-
     def transform_comment(self, comment: RedditComment) -> str | None:
         """
-        Turn the comment's replies hierarchy into a string xml representation of a conversation that an LLM can understand.
-        Start with the comment body and then follow the "replies" field recursively to build the conversation.
+        Turn the comment's reply hierarchy into a string xml representation of a conversation that an LLM can understand.
+        Start with the comment body and then follow the "replies" field recursively to build the conversation, filtering
+        out low quality content along the way.
 
         Each comment is represented as a string with the following format:
 
@@ -116,14 +128,13 @@ class RedditTransform(BaseTransform):
             str: A string in XML format representing the conversation in the comment section of the post.
         """
 
-        high_quality_replies = self.select_high_quality_replies(comment["replies"])
+        high_quality_replies = [comment for comment in comment["replies"] if self.is_quality_comment_or_reply(comment)]
 
         # If there are no high quality replies and the comment is not itself high quality, return None to be filtered out.
         # If a comment doesn't have quality replies, it needs to have enough content itself to potentially
-        # have any information value, so we check that the comment body is at least 400 characters.
-        # We filter for karma and score in transform_post_into_post_comments so we set those to init here.
+        # have any information value, so we up the min length.
         if not high_quality_replies:
-            if self.is_quality_comment_or_reply(comment, min_karma=0, min_score=1, min_length=400):
+            if self.is_quality_comment_or_reply(comment, min_karma=0, min_score=1, min_length=40):
                 return f"<comment> {comment['body']} </comment>"
             else:
                 return None
@@ -174,15 +185,7 @@ class RedditTransform(BaseTransform):
         return f"## Reddit Post: {title}\n\n{page_content}\n\n## Response:\n\n{comment}"
 
     def filter_comments(self, comments: list[RedditComment]) -> list[RedditComment]:
-        """Select the most upvoted comments with selectivity scaled by post engagement and score distribution.
-
-        Post engagment can be determined by the total number of upvotes for all comments.
-        Since scores are initialized at 1, an upvote is (score - 1) for each comment.
-        In a low engagement environment, we don't have enough data to apply a score-based heuristic.
-        If score distribution is narrow, we should be less strict with our score requirements.
-        If there is high engagement and a wide score distribution, we should be very strict without our score requirements
-        with max selectivity being the top 20% of comments.
-        """
+        """Select the most upvoted comments with selectivity scaled by post engagement and score distribution."""
 
         if not comments:
             return []
@@ -246,6 +249,8 @@ class RedditTransform(BaseTransform):
                     "post_author_is_gold": author["is_gold"],
                     "post_author_is_blocked": author["is_blocked"],
                     "post_author_total_karma": author["total_karma"],
+                    "post_author_comment_karma": author["comment_karma"],
+                    "post_author_link_karma": author["link_karma"],
                     "post_author_verified": author["verified"],
                     "post_author_has_verified_email": author["has_verified_email"],
                     "post_author_has_subscribed": author["has_subscribed"],
@@ -256,6 +261,8 @@ class RedditTransform(BaseTransform):
                     "comment_author_is_gold": comment_author["is_gold"],
                     "comment_author_is_blocked": comment_author["is_blocked"],
                     "comment_author_total_karma": comment_author["total_karma"],
+                    "comment_author_comment_karma": comment_author["comment_karma"],
+                    "comment_author_link_karma": comment_author["link_karma"],
                     "comment_author_verified": comment_author["verified"],
                     "comment_author_has_verified_email": comment_author["has_verified_email"],
                     "comment_author_has_subscribed": comment_author["has_subscribed"],
