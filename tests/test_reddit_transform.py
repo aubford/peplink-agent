@@ -299,6 +299,7 @@ class TestRedditTransform:
         t = RedditTransform()
 
         failures = []
+
         def assert_score_set(scores: list[int], num_comments: int):
             filtered_comments = t.filter_comments([self.comment_or_reply(score=s) for s in scores])
             if len(filtered_comments) != num_comments:
@@ -312,6 +313,7 @@ class TestRedditTransform:
         assert_score_set([2, 2, 1], 3)
         assert_score_set([7, 15, 64], 1)
         assert_score_set([1, 1, 7, 1], 2)
+        assert_score_set([1, 1, 7, 7, 7, 7, 7, 7], 4)
 
         assert_score_set([1, 2, 3, 4, 5], 3)
         assert_score_set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)
@@ -332,16 +334,15 @@ class TestRedditTransform:
         if failures:
             pytest.fail("\n".join(failures))
 
-
     def test_filter_comments_with_karma(self):
         t = RedditTransform()
 
         comments = [
-            self.comment_or_reply(score=1, karma=65),
-            self.comment_or_reply(score=1, karma=57),
+            self.comment_or_reply(score=4, karma=65),
+            self.comment_or_reply(score=4, karma=57),
             self.comment_or_reply(score=1, karma=50),
             self.comment_or_reply(score=1, karma=51),
-            self.comment_or_reply(score=1, karma=94),
+            self.comment_or_reply(score=4, karma=94),
         ]
 
         filtered_comments = t.filter_comments(comments)

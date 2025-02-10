@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 space = np.linspace(0, 1, 200)
-p = 0.5
+p = 0.65
 pwr = np.power(space, p)
 plt.plot(space, pwr, label="pwr")
 plt.plot(space, np.sin(space * np.pi / 2), label="sin")
