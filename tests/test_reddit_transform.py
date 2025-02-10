@@ -1,5 +1,6 @@
 import pytest
 from transform.reddit.reddit_transform import RedditTransform, RedditComment
+from pathlib import Path
 
 
 # noinspection PyTypeChecker
@@ -34,12 +35,14 @@ class TestRedditTransform:
                     "is_employee": False,
                     "is_gold": False,
                     "is_mod": False,
-                }
+                },
             },
         }
 
-    def comment_author_partial(self) -> dict:
+    @staticmethod
+    def comment_author_partial() -> dict:
         return {
+            "id": "test_comment_author",
             "name": "Test Comment Author",
             "verified": True,
             "fullname": "t2_test_comment_author",
@@ -59,18 +62,19 @@ class TestRedditTransform:
         }
 
     @staticmethod
-    def id(id: str = "42", is_parent: bool = False) -> str:
+    def _id(id: str = "42", is_parent: bool = False) -> str:
         return f"t1_{id}" if is_parent else id
 
     def comment_or_reply(
         self, *, id: str = "42", score: int = 2, parent_id: str = "42", karma: int = 50
     ) -> RedditComment:
         return {
-            "id": self.id(id),
-            "parent_id": self.id(parent_id, True),
+            "id": self._id(id),
+            "parent_id": self._id(parent_id, True),
             "body": self.get_body(),
             "score": score,
             "comment_author": {
+                **self.comment_author_partial(),
                 "is_blocked": False,
                 "comment_karma": karma,
                 "is_gold": False,
@@ -80,8 +84,8 @@ class TestRedditTransform:
 
     def high_quality_blocked_reply(self, *, id: str = "42", parent_id: str = "42") -> RedditComment:
         return {
-            "id": self.id(id),
-            "parent_id": self.id(parent_id, True),
+            "id": self._id(id),
+            "parent_id": self._id(parent_id, True),
             "body": self.get_body(),
             "score": 10000,
             "comment_author": {
@@ -94,8 +98,8 @@ class TestRedditTransform:
 
     def low_quality_reply(self, *, id: str = "42", parent_id: str = "42") -> RedditComment:
         return {
-            "id": self.id(id),
-            "parent_id": self.id(parent_id, True),
+            "id": self._id(id),
+            "parent_id": self._id(parent_id, True),
             "body": self.get_body(False),
             "score": 2,
             "comment_author": {
@@ -118,19 +122,20 @@ class TestRedditTransform:
     def test_transform_comment_nesting(self):
         transformer = RedditTransform()
         comment: RedditComment = {
-            "id": self.id(),
+            "id": self._id(),
             "parent_id": "t1_mef345",
             "body": self.get_body(),
             "score": 3,
             "comment_author": {
+                **self.comment_author_partial(),
                 "is_blocked": False,
                 "comment_karma": 500,
                 "is_gold": False,
             },
             "replies": [
                 {
-                    "id": self.id("1"),
-                    "parent_id": self.id(is_parent=True),
+                    "id": self._id("1"),
+                    "parent_id": self._id(is_parent=True),
                     "body": self.get_body(),
                     "score": 1,
                     "comment_author": {
@@ -165,11 +170,12 @@ class TestRedditTransform:
         transformer = RedditTransform()
 
         bad_comment: RedditComment = {
-            "id": self.id(True),
+            "id": self._id(True),
             "parent_id": "t1_vwx234",
             "body": "Bad comment",
             "score": 1,
             "comment_author": {
+                **self.comment_author_partial(),
                 "is_blocked": True,
                 "comment_karma": 5,
                 "is_gold": False,
@@ -186,11 +192,12 @@ class TestRedditTransform:
         transformer = RedditTransform()
 
         comment_with_good_descendants: RedditComment = {
-            "id": self.id(),
+            "id": self._id(),
             "parent_id": "t1_efg456",
             "body": self.get_body(False),
             "score": 1,
             "comment_author": {
+                **self.comment_author_partial(),
                 "is_blocked": False,
                 "comment_karma": 5,
                 "is_gold": False,
@@ -198,7 +205,7 @@ class TestRedditTransform:
             "replies": [
                 {
                     "id": "hij789",
-                    "parent_id": self.id(is_parent=True),
+                    "parent_id": self._id(is_parent=True),
                     "body": self.get_body(),
                     "score": 3,
                     "comment_author": {
@@ -220,43 +227,43 @@ class TestRedditTransform:
         transformer = RedditTransform()
 
         document = document_partial
-        document["metadata"]["comments"] = (
-            [
-                {
-                    "id": self.id(),
-                    "parent_id": "main_post",
-                    "body": self.get_body(),
-                    "score": 2,
-                    "comment_author": {
-                        "is_blocked": False,
-                        "comment_karma": 500,
-                        "is_gold": False,
-                    },
-                    "replies": [
-                        self.comment_or_reply(),
-                    ],
+        document["metadata"]["comments"] = [
+            {
+                "id": self._id(),
+                "parent_id": "main_post",
+                "body": self.get_body(),
+                "score": 2,
+                "comment_author": {
+                    **self.comment_author_partial(),
+                    "is_blocked": False,
+                    "comment_karma": 500,
+                    "is_gold": False,
                 },
-                self.comment_or_reply(score=1),
-                self.comment_or_reply(score=1),
-                self.comment_or_reply(score=-1),
-                self.comment_or_reply(score=0),
-                {
-                    "id": "short_comment_for_no_replies",
-                    "parent_id": "main_post",
-                    "body": "This is a reply with more than 20 words but less than 40 that doesn't meet the length requirement for comments with no quality replies.",
-                    "score": 2,
-                    "comment_author": {
-                        "is_blocked": False,
-                        "comment_karma": 500,
-                        "is_gold": True,
-                    },
-                    "replies": [
-                        self.low_quality_reply(parent_id="short_comment_for_no_replies"),
-                        self.high_quality_blocked_reply(parent_id="short_comment_for_no_replies"),
-                    ],
+                "replies": [
+                    self.comment_or_reply(),
+                ],
+            },
+            self.comment_or_reply(score=2),
+            self.comment_or_reply(score=2),
+            self.comment_or_reply(score=-1),
+            self.comment_or_reply(score=0),
+            {
+                "id": "short_comment_for_no_replies",
+                "parent_id": "main_post",
+                "body": "This is a reply with more than 20 words but less than 40 that doesn't meet the length requirement for comments with no quality replies.",
+                "score": 2,
+                "comment_author": {
+                    **self.comment_author_partial(),
+                    "is_blocked": False,
+                    "comment_karma": 500,
+                    "is_gold": True,
                 },
-            ],
-        )
+                "replies": [
+                    self.low_quality_reply(parent_id="short_comment_for_no_replies"),
+                    self.high_quality_blocked_reply(parent_id="short_comment_for_no_replies"),
+                ],
+            },
+        ]
 
         expected_content = (
             "## Reddit Post: Test Post Title\n"
@@ -276,11 +283,12 @@ class TestRedditTransform:
             "This is the main post content.\n"
             "\n"
             "## Comments:\n"
-            f"<comment> {self.get_body()} </comment>\n"
+            "\n"
+            f"<comment> {self.get_body()} </comment>"
         )
 
-        actual_content = transformer.transform_post_into_post_comments(document, "file_path")
-        assert actual_content[0].page_content.strip() == expected_content
-        assert actual_content[1].page_content.strip() == expected_content_no_replies
-        assert actual_content[2].page_content.strip() == expected_content_no_replies
+        actual_content = transformer.transform_post_into_post_comments(document, Path("file_path"))
         assert len(actual_content) == 3
+        assert actual_content[0]["page_content"].strip() == expected_content
+        assert actual_content[1]["page_content"].strip() == expected_content_no_replies
+        assert actual_content[2]["page_content"].strip() == expected_content_no_replies
