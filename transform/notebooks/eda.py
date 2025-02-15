@@ -2,21 +2,17 @@
 
 from pathlib import Path
 from transform.reddit.reddit_transform import RedditTransform
+from transform.mongo.mongo_pepwave_transform import MongoPepwaveTransform
 import pandas as pd
 from IPython.display import display
 
 pd.set_option("display.max_columns", None)
 
-# Initialize transformer
-transformer = RedditTransform()
 
-raw_dir = Path("data") / "reddit" / "raw"
+mongo_artifacts = MongoPepwaveTransform.get_artifacts()
+df = mongo_artifacts[0]
 
-dfs = []
-for file_path in raw_dir.glob("*.jsonl"):
-    dfs.append(transformer.transform_file(file_path))
-
-df = pd.concat(dfs, ignore_index=True)
+df.info()
 
 
 # %%

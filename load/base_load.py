@@ -13,9 +13,10 @@ from langchain.vectorstores import VectorStore
 from uuid import uuid4
 from util.deduplication_pipeline import DeduplicationPipeline
 from util.document_utils import df_to_documents
+from abc import ABC, abstractmethod
 
 
-class BaseLoad:
+class BaseLoad(ABC):
     """Base class for all data transformers."""
 
     def __init__(self, folder_name: str):

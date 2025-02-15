@@ -1,6 +1,7 @@
 import uuid
-from abc import abstractmethod
-from typing import Any, Dict
+from abc import ABC, abstractmethod
+from typing import override
+
 from config import global_config, ConfigType, RotatingFileLogger
 import pandas as pd
 from pathlib import Path
@@ -10,7 +11,7 @@ from util.util_main import (
 )
 from util.document_utils import load_parquet_files, get_all_parquet_in_dir
 from enum import StrEnum
-
+import pymongo
 
 class SubjectMatter(StrEnum):
     PEPWAVE = "PEPWAVE"
@@ -18,7 +19,7 @@ class SubjectMatter(StrEnum):
     MOBILE_INTERNET = "MOBILE_INTERNET"
 
 
-class BaseTransform:
+class BaseTransform(ABC):
     """Base class for all data transformers."""
 
     folder_name: str = NotImplemented
@@ -31,9 +32,9 @@ class BaseTransform:
     def set_logger(self, name: str):
         self.logger = RotatingFileLogger(f"transform__{sanitize_filename(name)}")
 
-    def log_df(self, df: pd.DataFrame, file_name: Path) -> None:
+    def log_df(self, df: pd.DataFrame, file_name: Path | str) -> None:
         self.logger.br_info(f"DF Transformed: {file_name}\n")
-        self.logger.n_info(df.info(show_counts=True))
+        df.info(show_counts=True)
 
     @property
     def config(self) -> ConfigType:
@@ -41,7 +42,8 @@ class BaseTransform:
         return global_config
 
     @abstractmethod
-    def transform_file(self, data: Dict[str, Any]) -> pd.DataFrame:
+    def transform_file(self, file_path: Path) -> pd.DataFrame:
+        """Transform a single file into a pandas DataFrame."""
         pass
 
     def transform(self) -> None:
@@ -81,11 +83,14 @@ class BaseTransform:
         columns: dict,
         *,
         page_content: str,
-        file_path: Path,
+        file_path: Path | str,
         doc_id: str | uuid.UUID | None = None,
     ) -> dict:
+        if isinstance(file_path, Path):
+            file_path = self.get_stem(file_path)
+
         columns["id"] = str(uuid.uuid4()) if doc_id is None else doc_id
-        columns["source_file"] = self.get_stem(file_path)
+        columns["source_file"] = file_path
         columns["page_content"] = page_content
         columns["subject_matter"] = self.subject_matter
         return columns
@@ -101,7 +106,7 @@ class BaseTransform:
         set_string_columns(df, ["page_content"])
         set_string_columns(df, ["id", "source_file"], False)
         self.row_count = df.shape[0]
-        self.logger.info(f"Initial length: {self.row_count}\n")
+        self.logger.info(f"DataFrame length: {self.row_count}\n")
         return df
 
     def notify_dropped_rows(self, df: pd.DataFrame, operation_name: str) -> None:
@@ -132,3 +137,35 @@ class BaseTransform:
         """
         files = cls.get_artifact_file_paths()
         return load_parquet_files(files)
+
+class BaseMongoTransform(BaseTransform, ABC):
+    """Base class for transformers that retrieve data from MongoDB."""
+
+
+    def __init__(self, db_uri: str, db_name: str):
+        super().__init__()
+        self.client = pymongo.MongoClient(db_uri)
+        self.db_name = db_name
+        self.db = self.client[db_name]
+
+    transform_file = NotImplemented
+    @abstractmethod
+    def transform_db(self) -> pd.DataFrame:
+        """Retrieve data from MongoDB, transform, and save to parquet files."""
+        pass
+
+    @override
+    def transform(self) -> None:
+        """Retrieve data from MongoDB, transform, and save to parquet files."""
+        parquet_dir = self.ensure_dir()
+
+        try:
+            df = self.transform_db()
+            self.log_df(df, f"{self.folder_name}_{self.subject_matter}")
+
+            output_path = parquet_dir / f"{self.folder_name}_{self.db_name}.parquet"
+            df.to_parquet(output_path, index=True, compression="snappy", engine="pyarrow")
+
+        except Exception as e:
+            self.logger.error(f"Error processing MongoDB data for {self.folder_name}")
+            raise e

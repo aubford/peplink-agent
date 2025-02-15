@@ -5,6 +5,11 @@
       "label": "Open in Jetbrains Python",
       "command": "dataspell",
       "args": ["--line", "${lineNumber}", "${file}"],
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "isBackground": true,
+      "type": "shell",
       "presentation": {
         "reveal": "silent",
         "showReuseMessage": false,
