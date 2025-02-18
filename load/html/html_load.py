@@ -5,8 +5,10 @@ import pandas as pd
 
 
 class HtmlLoad(BaseLoad):
+    folder_name = "html"
+
     def __init__(self):
-        super().__init__("html")
+        super().__init__()
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         df = pd.concat(dfs)

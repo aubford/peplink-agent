@@ -15,12 +15,17 @@ from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
 DEFAULT_TEXT_SPLITTER_SEPARATORS = ("\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", "")
-    
+
 class BaseLoad:
     """Base class for all data transformers."""
 
-    def __init__(self, folder_name: str):
-        self.folder_name = folder_name
+    folder_name: str = NotImplemented
+
+    def __init__(self):
+        if not isinstance(self.folder_name, str):
+            raise TypeError(
+                f"folder_name must be defined as a string in the subclass, got {type(self.folder_name)}"
+            )
         self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
         self.vector_store: VectorStore | None = None
@@ -200,3 +205,20 @@ class BaseLoad:
         self.logger.info(f"Content: \n{doc.page_content}")
         self.logger.info("\n\n-----------")
         self.logger.info("=" * 100)
+
+    @classmethod
+    def get_artifact(cls, select_merged: bool = False) -> pd.DataFrame:
+        """
+        Load the staging.parquet file for this loader into a pandas DataFrame.
+
+        Returns:
+            DataFrame containing the staged documents
+
+        Raises:
+            FileNotFoundError: If staging.parquet does not exist
+        """
+        filename = "merged.parquet" if select_merged else "staging.parquet"
+        staging_path = Path("load") / cls.folder_name / filename
+        if not staging_path.exists():
+            raise FileNotFoundError(f"No staging file found at {staging_path}")
+        return pd.read_parquet(staging_path)

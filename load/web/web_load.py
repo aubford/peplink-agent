@@ -6,8 +6,10 @@ import pandas as pd
 
 
 class WebLoad(BaseLoad):
+    folder_name = "web"
+
     def __init__(self):
-        super().__init__("web")
+        super().__init__()
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         deduped_dfs = []
@@ -24,11 +26,3 @@ class WebLoad(BaseLoad):
         text_splitter = self._get_default_text_splitter()
         split_docs = self._split_docs(documents, text_splitter)
         return split_docs
-
-
-loader = WebLoad()
-loader.load_from_merged()
-
-# %%
-
-# loader.staging_to_vector_store()

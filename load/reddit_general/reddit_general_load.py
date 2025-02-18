@@ -1,9 +1,9 @@
 # %%
 from load.base_load import BaseLoad
 
-loader = BaseLoad("reddit_general")
-loader.load()
 
-# %%
+class RedditGeneralLoad(BaseLoad):
+    folder_name = "reddit_general"
 
-# loader.staging_to_vector_store()
+    def __init__(self):
+        super().__init__()

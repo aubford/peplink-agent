@@ -8,8 +8,10 @@ import pandas as pd
 
 
 class YoutubeLoad(BaseLoad):
+    folder_name = "youtube"
+
     def __init__(self):
-        super().__init__("youtube")
+        super().__init__()
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         combined_df = pd.concat(dfs)
@@ -25,11 +27,3 @@ class YoutubeLoad(BaseLoad):
         )
         split_docs = self._split_docs(documents, text_splitter)
         return split_docs
-
-
-loader = YoutubeLoad()
-loader.load_from_merged()
-
-# %%
-
-# loader.staging_to_vector_store()

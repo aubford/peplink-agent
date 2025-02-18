@@ -5,7 +5,10 @@
     "**/__pycache__": false
   },
   "search.exclude": {
-    ".vscode": true
+    ".vscode": true,
+    "data": true,
+    "langchain_pepwave_env": true,
+    "*.parquet": true
   },
   "editor.wordWrapColumn": 120,
   "[python]": {

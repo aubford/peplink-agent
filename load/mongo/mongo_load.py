@@ -7,8 +7,10 @@ import pandas as pd
 
 
 class MongoLoad(BaseLoad):
+    folder_name = "mongo"
+
     def __init__(self):
-        super().__init__("mongo")
+        super().__init__()
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         df = pd.concat(dfs)
@@ -22,11 +24,3 @@ class MongoLoad(BaseLoad):
             doc.metadata.pop("topic_tags", None)
             doc.metadata.pop("topic_category_id", None)
         return documents
-
-
-loader = MongoLoad()
-loader.load()
-
-# %%
-
-# loader.staging_to_vector_store()
