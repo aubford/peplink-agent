@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # ## Tool Use with Anthropic API for structured outputs
-# 
+#
 # Anthropic API recently added tool use.
-# 
+#
 # This is very useful for structured output.
 
 # In[ ]:
 
 
-get_ipython().system(' pip install -U langchain-anthropic')
+get_ipython().system(" pip install -U langchain-anthropic")
 
 
 # In[ ]:
@@ -18,18 +18,19 @@ get_ipython().system(' pip install -U langchain-anthropic')
 
 # Optional
 import os
+
 # os.environ['LANGSMITH_TRACING'] = 'true' # enables tracing
 # os.environ['LANGSMITH_API_KEY'] = <your-api-key>
 
 
 # `How can we use tools to produce structured output?`
-# 
+#
 # Function call / tool use just generates a payload.
-# 
+#
 # Payload often a JSON string, which can be pass to an API or, in this case, a parser to produce structured output.
-# 
+#
 # LangChain has `llm.with_structured_output(schema)` to make it very easy to produce structured output that matches `schema`.
-# 
+#
 # ![Screenshot 2024-04-03 at 10.16.57 PM.png](attachment:83c97bfe-b9b2-48ef-95cf-06faeebaa048.png)
 
 # In[ ]:
@@ -117,9 +118,9 @@ parsed_result.code
 
 
 # ## More challenging example
-# 
+#
 # Motivating example for tool use / structured outputs.
-# 
+#
 # ![code-gen.png](attachment:bb6c7126-7667-433f-ba50-56107b0341bd.png)
 
 # Here are some docs that we want to answer code questions about.
@@ -146,13 +147,13 @@ concatenated_content = "\n\n\n --- \n\n\n".join(
 
 
 # Problem:
-# 
+#
 # `What if we want to enforce tool use?`
-# 
+#
 # We can use fallbacks.
-# 
+#
 # Let's select a code gen prompt that -- from some of my testing -- does not correctly invoke the tool.
-# 
+#
 # We can see if we can correct from this.
 
 # In[12]:
@@ -303,11 +304,7 @@ parsed_result_lcel.code
 
 
 # Example trace catching an error and correcting:
-# 
+#
 # https://smith.langchain.com/public/f06e62cb-2fac-46ae-80cd-0470b3155eae/r
 
 # In[ ]:
-
-
-
-

@@ -2,32 +2,32 @@
 # coding: utf-8
 
 # # How to parse XML output
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
 # - [Output parsers](/docs/concepts/output_parsers)
 # - [Prompt templates](/docs/concepts/prompt_templates)
 # - [Structured output](/docs/how_to/structured_output)
 # - [Chaining runnables together](/docs/how_to/sequence/)
-# 
+#
 # :::
-# 
+#
 # LLMs from different providers often have different strengths depending on the specific data they are trained on. This also means that some may be "better" and more reliable at generating output in formats other than JSON.
-# 
+#
 # This guide shows you how to use the [`XMLOutputParser`](https://python.langchain.com/api_reference/core/output_parsers/langchain_core.output_parsers.xml.XMLOutputParser.html) to prompt models for XML output, then and [parse](/docs/concepts/output_parsers/) that output into a usable format.
-# 
+#
 # :::note
 # Keep in mind that large language models are leaky abstractions! You'll have to use an LLM with sufficient capacity to generate well-formed XML.
 # :::
-# 
+#
 # In the following examples, we use Anthropic's Claude-2 model (https://docs.anthropic.com/claude/docs), which is one such model that is optimized for XML tags.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain langchain-anthropic')
+get_ipython().run_line_magic("pip", "install -qU langchain langchain-anthropic")
 
 import os
 from getpass import getpass
@@ -121,5 +121,5 @@ for s in chain.stream({"query": actor_query}):
 
 
 # ## Next steps
-# 
+#
 # You've now learned how to prompt a model to return XML. Next, check out the [broader guide on obtaining structured output](/docs/how_to/structured_output) for other related techniques.

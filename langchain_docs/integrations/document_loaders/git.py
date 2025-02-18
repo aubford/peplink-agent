@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Git
-# 
+#
 # >[Git](https://en.wikipedia.org/wiki/Git) is a distributed version control system that tracks changes in any set of computer files, usually used for coordinating work among programmers collaboratively developing source code during software development.
-# 
+#
 # This notebook shows how to load text files from `Git` repository.
 
 # ## Load existing repository from disk
@@ -12,7 +12,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  GitPython')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  GitPython")
 
 
 # In[2]:
@@ -101,7 +101,3 @@ loader = GitLoader(
 
 
 # In[ ]:
-
-
-
-

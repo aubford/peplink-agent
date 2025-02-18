@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # scikit-learn
-# 
+#
 # >[scikit-learn](https://scikit-learn.org/stable/) is an open-source collection of machine learning algorithms, including some implementations of the [k nearest neighbors](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.NearestNeighbors.html). `SKLearnVectorStore` wraps this implementation and adds the possibility to persist the vector store in json, bson (binary json) or Apache Parquet format.
-# 
+#
 # This notebook shows how to use the `SKLearnVectorStore` vector database.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  scikit-learn')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  scikit-learn")
 
 # # if you plan to use bson serialization, install also:
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  bson')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  bson")
 
 # # if you plan to use parquet serialization, install also:
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pandas pyarrow')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pandas pyarrow")
 
 
 # To use OpenAI embeddings, you will need an OpenAI key. You can get one at https://platform.openai.com/account/api-keys or feel free to use any other embeddings.
@@ -34,7 +34,7 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Basic usage
-# 
+#
 # ### Load a sample document corpus
 
 # In[3]:
@@ -104,4 +104,3 @@ print(docs[0].page_content)
 
 
 os.remove(persist_path)
-

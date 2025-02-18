@@ -2,28 +2,28 @@
 # coding: utf-8
 
 # ## Needle Retriever
-# [Needle](https://needle-ai.com) makes it easy to create your RAG pipelines with minimal effort. 
-# 
+# [Needle](https://needle-ai.com) makes it easy to create your RAG pipelines with minimal effort.
+#
 # For more details, refer to our [API documentation](https://docs.needle-ai.com/docs/api-reference/needle-api)
 
 # ## Overview
 # The Needle Document Loader is a utility for integrating Needle collections with LangChain. It enables seamless storage, retrieval, and utilization of documents for Retrieval-Augmented Generation (RAG) workflows.
-# 
+#
 # This example demonstrates:
-# 
+#
 # * Storing documents into a Needle collection.
 # * Setting up a retriever to fetch documents.
 # * Building a Retrieval-Augmented Generation (RAG) pipeline.
 
 # ### Setup
 # Before starting, ensure you have the following environment variables set:
-# 
+#
 # * NEEDLE_API_KEY: Your API key for authenticating with Needle.
 # * OPENAI_API_KEY: Your OpenAI API key for language model operations.
 
 # ## Initialization
 # To initialize the NeedleLoader, you need the following parameters:
-# 
+#
 # * needle_api_key: Your Needle API key (or set it as an environment variable).
 # * collection_id: The ID of the Needle collection to work with.
 
@@ -130,5 +130,5 @@ response
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all `Needle` features and configurations head to the API reference: https://docs.needle-ai.com

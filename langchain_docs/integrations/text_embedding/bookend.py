@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Bookend AI
-# 
+#
 # Let's load the Bookend AI Embeddings class.
 
 # In[ ]:
@@ -37,4 +37,3 @@ query_result = embeddings.embed_query(text)
 
 
 doc_result = embeddings.embed_documents([text])
-

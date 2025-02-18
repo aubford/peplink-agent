@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # How to use a time-weighted vector store retriever
-# 
+#
 # This [retriever](/docs/concepts/retrievers/) uses a combination of semantic [similarity](/docs/concepts/embedding_models/#measure-similarity) and a time decay.
-# 
+#
 # The algorithm for scoring them is:
-# 
+#
 # ```
 # semantic_similarity + (1.0 - decay_rate) ^ hours_passed
 # ```
-# 
+#
 # Notably, `hours_passed` refers to the hours passed since the object in the retriever **was last accessed**, not since it was created. This means that frequently accessed objects remain "fresh".
-# 
+#
 
 # In[1]:
 
@@ -28,9 +28,9 @@ from langchain_openai import OpenAIEmbeddings
 
 
 # ## Low decay rate
-# 
+#
 # A low `decay rate` (in this, to be extreme, we will set it close to 0) means memories will be "remembered" for longer. A `decay rate` of 0 means memories never be forgotten, making this retriever equivalent to the vector lookup.
-# 
+#
 
 # In[2]:
 
@@ -64,10 +64,10 @@ retriever.invoke("hello world")
 
 
 # ## High decay rate
-# 
+#
 # With a high `decay rate` (e.g., several 9's), the `recency score` quickly goes to 0! If you set this all the way to 1, `recency` is 0 for all objects, once again making this equivalent to a vector lookup.
-# 
-# 
+#
+#
 
 # In[5]:
 
@@ -101,9 +101,9 @@ retriever.invoke("hello world")
 
 
 # ## Virtual time
-# 
+#
 # Using some utils in LangChain, you can mock out the time component.
-# 
+#
 
 # In[8]:
 
@@ -123,7 +123,3 @@ with mock_now(tomorrow):
 
 
 # In[ ]:
-
-
-
-

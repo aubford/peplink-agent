@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # Shared memory across agents and tools
-# 
+#
 # This notebook goes over adding memory to **both** an Agent and its tools. Before going through this notebook, please walk through the following notebooks, as this will build on top of both of them:
-# 
+#
 # - [Adding memory to an LLM Chain](/docs/modules/memory/integrations/adding_memory)
 # - [Custom Agents](/docs/modules/agents/how_to/custom_agent)
-# 
+#
 # We are going to create a custom Agent. The agent has access to a conversation memory, search tool, and a summarization tool. The summarization tool also needs access to the conversation memory.
 
 # In[1]:
@@ -107,7 +107,7 @@ agent_executor.invoke(
 print(agent_executor.memory.buffer)
 
 
-# 
+#
 
 # For comparison, below is a bad example that uses the same memory for both the Agent and the tool.
 
@@ -178,4 +178,3 @@ agent_executor.invoke(
 
 
 print(agent_executor.memory.buffer)
-

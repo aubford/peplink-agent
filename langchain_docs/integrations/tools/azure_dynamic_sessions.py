@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Azure Container Apps dynamic sessions
-# 
+#
 # Azure Container Apps dynamic sessions provides a secure and scalable way to run a Python code interpreter in Hyper-V isolated sandboxes. This allows your agents to run potentially untrusted code in a secure environment. The code interpreter environment includes many popular Python packages, such as NumPy, pandas, and scikit-learn. See the [Azure Container App docs](https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter) for more info on how sessions work.
-# 
+#
 # ## Setup
-# 
+#
 # By default, the `SessionsPythonREPLTool` tool uses `DefaultAzureCredential` to authenticate with Azure. Locally, it'll use your credentials from the Azure CLI or VS Code. Install the Azure CLI and log in with `az login` to authenticate.
-# 
+#
 # To use the code interpreter you'll also need to create a session pool, which you can do by following the instructions [here](https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter?tabs=azure-cli#create-a-session-pool-with-azure-cli). Once that's done you should have a pool management session endpoint, which you'll need to set below:
 
 # In[1]:
@@ -24,11 +24,14 @@ POOL_MANAGEMENT_ENDPOINT = getpass.getpass()
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-azure-dynamic-sessions langchain-openai langchainhub langchain langchain-community')
+get_ipython().run_line_magic(
+    "pip",
+    "install -qU langchain-azure-dynamic-sessions langchain-openai langchainhub langchain langchain-community",
+)
 
 
 # ## Use tool
-# 
+#
 # Instantiate and use tool:
 
 # In[2]:
@@ -49,7 +52,7 @@ tool.execute("6 * 7")
 
 
 # ## Upload data
-# 
+#
 # If we want to perform computation over specific data, we can use the `upload_file()` functionality to upload data to our session. You can upload data either via the `data: BinaryIO` arg or via the `local_file_path: str` arg (which points to a local file on your system). The data is automatically uploaded to the "/mnt/data/" directory in the sessions container. You can get the full file path via the upload metadata returned by `upload_file()`.
 
 # In[31]:
@@ -77,7 +80,7 @@ tool.execute(code)
 
 
 # ## Handling image results
-# 
+#
 # Dynamic sessions results can include image outputs as base64 encoded strings. In these cases the value of 'result' will be a dictionary with keys "type" (which will be "image"), "format (the format of the image), and "base64_data".
 
 # In[9]:
@@ -158,11 +161,7 @@ response = agent_executor.invoke(
 
 
 # ## LangGraph data analyst agent
-# 
+#
 # For a more complex agent example check out the LangGraph data analyst example https://github.com/langchain-ai/langchain/blob/master/cookbook/azure_container_apps_dynamic_sessions_data_analyst.ipynb
 
 # In[ ]:
-
-
-
-

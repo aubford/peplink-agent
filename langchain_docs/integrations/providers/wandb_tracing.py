@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # Weights & Biases tracing
-# 
+#
 # There are two recommended ways to trace your LangChains:
-# 
+#
 # 1. Setting the `LANGCHAIN_WANDB_TRACING` environment variable to "true".
 # 1. Using a context manager with tracing_enabled() to trace a particular block of code.
-# 
+#
 # **Note** if the environment variable is set, all code will be traced, regardless of whether or not it's within the context manager.
 
 # In[1]:
@@ -62,4 +62,3 @@ with wandb_tracing_enabled():
     agent.run("What is 5 raised to .123243 power?")  # this should be traced
 
 agent.run("What is 2 raised to .123243 power?")  # this should not be traced
-

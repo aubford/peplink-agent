@@ -8,17 +8,17 @@
 # ## Overview
 
 # The MongoDB Document Loader returns a list of Langchain Documents from a MongoDB database.
-# 
+#
 # The Loader requires the following parameters:
-# 
+#
 # *   MongoDB connection string
 # *   MongoDB database name
 # *   MongoDB collection name
 # *   (Optional) Content Filter dictionary
 # *   (Optional) List of field names to include in the output
-# 
+#
 # The output takes the following format:
-# 
+#
 # - pageContent= Mongo Document
 # - metadata=\{'database': '[database_name]', 'collection': '[collection_name]'\}
 
@@ -63,4 +63,3 @@ len(docs)
 
 
 docs[0]
-

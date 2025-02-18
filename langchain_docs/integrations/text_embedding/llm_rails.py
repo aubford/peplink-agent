@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # LLMRails
-# 
+#
 # Let's load the LLMRails Embeddings class.
-# 
+#
 # To use LLMRails embedding you need to pass api key by argument or set it in environment with `LLM_RAILS_API_KEY` key.
 # To gey API Key you need to sign up in https://console.llmrails.com/signup and then go to https://console.llmrails.com/api-keys and copy key from there after creating one key in platform.
 
@@ -40,4 +40,3 @@ query_result[:5]
 
 doc_result = embeddings.embed_documents([text])
 doc_result[0][:5]
-

@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # #  Baidu VectorDB
-# 
+#
 # >[Baidu VectorDB](https://cloud.baidu.com/product/vdb.html) is a robust, enterprise-level distributed database service, meticulously developed and fully managed by Baidu Intelligent Cloud. It stands out for its exceptional ability to store, retrieve, and analyze multi-dimensional vector data. At its core, VectorDB operates on Baidu's proprietary "Mochow" vector database kernel, which ensures high performance, availability, and security, alongside remarkable scalability and user-friendliness.
-# 
+#
 # >This database service supports a diverse range of index types and similarity calculation methods, catering to various use cases. A standout feature of VectorDB is its capacity to manage an immense vector scale of up to 10 billion, while maintaining impressive query performance, supporting millions of queries per second (QPS) with millisecond-level query latency.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
-# This notebook shows how to use functionality related to the Baidu VectorDB. 
-# 
+#
+# This notebook shows how to use functionality related to the Baidu VectorDB.
+#
 # To run, you should have a [Database instance.](https://cloud.baidu.com/doc/VDB/s/hlrsoazuf).
 
 # In[ ]:
 
 
-get_ipython().system('pip3 install pymochow')
+get_ipython().system("pip3 install pymochow")
 
 
 # In[ ]:
@@ -67,4 +67,3 @@ vector_db.add_texts(["Ankush went to Princeton"])
 query = "Where did Ankush go to college?"
 docs = vector_db.max_marginal_relevance_search(query)
 docs[0].page_content
-

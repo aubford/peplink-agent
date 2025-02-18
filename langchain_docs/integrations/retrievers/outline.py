@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Outline
-# 
+#
 # >[Outline](https://www.getoutline.com/) is an open-source collaborative knowledge base platform designed for team information sharing.
-# 
+#
 # This notebook shows how to retrieve documents from your Outline instance into the Document format that is used downstream.
 
 # ## Setup
@@ -12,7 +12,9 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain langchain-openai')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet langchain langchain-openai"
+)
 
 
 # You first need to [create an api key](https://www.getoutline.com/developers#section/Authentication) for your Outline instance. Then you need to set the following environment variables:
@@ -30,7 +32,7 @@ os.environ["OUTLINE_INSTANCE_URL"] = "https://app.getoutline.com"
 # - optional `top_k_results`: default=3. Use it to limit number of documents retrieved.
 # - optional `load_all_available_meta`: default=False. By default only the most important fields retrieved: `title`, `source` (the url of the document). If True, other fields also retrieved.
 # - optional `doc_content_chars_max` default=4000. Use it to limit the number of characters for each document retrieved.
-# 
+#
 # `get_relevant_documents()` has one argument, `query`: free text which used to find documents in your Outline instance.
 
 # ## Examples
@@ -81,4 +83,3 @@ qa = ConversationalRetrievalChain.from_llm(model, retriever=retriever)
 
 
 qa({"question": "what is langchain?", "chat_history": {}})
-

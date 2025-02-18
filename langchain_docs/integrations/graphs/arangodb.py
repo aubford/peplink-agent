@@ -2,29 +2,33 @@
 # coding: utf-8
 
 # # ArangoDB
-# 
+#
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/arangodb/interactive_tutorials/blob/master/notebooks/Langchain.ipynb)
-# 
+#
 # >[ArangoDB](https://github.com/arangodb/arangodb) is a scalable graph database system to drive value from
 # >connected data, faster. Native graphs, an integrated search engine, and JSON support, via
 # >a single query language. `ArangoDB` runs on-prem or in the cloud.
-# 
+#
 # This notebook shows how to use LLMs to provide a natural language interface to an [ArangoDB](https://github.com/arangodb/arangodb#readme) database.
 
 # ## Setting up
-# 
-# You can get a local `ArangoDB` instance running via the [ArangoDB Docker image](https://hub.docker.com/_/arangodb):  
-# 
+#
+# You can get a local `ArangoDB` instance running via the [ArangoDB Docker image](https://hub.docker.com/_/arangodb):
+#
 # ```
 # docker run -p 8529:8529 -e ARANGO_ROOT_PASSWORD= arangodb/arangodb
 # ```
-# 
+#
 # An alternative is to use the [ArangoDB Cloud Connector package](https://github.com/arangodb/adb-cloud-connector#readme) to get a temporary cloud instance running:
 
 # In[1]:
 
 
-get_ipython().run_cell_magic('capture', '', '%pip install --upgrade --quiet  python-arango # The ArangoDB Python Driver\n%pip install --upgrade --quiet  adb-cloud-connector # The ArangoDB Cloud Instance provisioner\n%pip install --upgrade --quiet  langchain-openai\n%pip install --upgrade --quiet  langchain\n')
+get_ipython().run_cell_magic(
+    "capture",
+    "",
+    "%pip install --upgrade --quiet  python-arango # The ArangoDB Python Driver\n%pip install --upgrade --quiet  adb-cloud-connector # The ArangoDB Cloud Instance provisioner\n%pip install --upgrade --quiet  langchain-openai\n%pip install --upgrade --quiet  langchain\n",
+)
 
 
 # In[2]:
@@ -55,7 +59,7 @@ graph = ArangoGraph(db)
 
 
 # ## Populating database
-# 
+#
 # We will rely on the `Python Driver` to import our [GameOfThrones](https://github.com/arangodb/example-datasets/tree/master/GameOfThrones) data into our database.
 
 # In[4]:
@@ -122,7 +126,7 @@ db.collection("ChildOf").import_bulk(edges)
 
 
 # ## Getting and setting the ArangoDB schema
-# 
+#
 # An initial `ArangoDB Schema` is generated upon instantiating the `ArangoDBGraph` object. Below are the schema's getter & setter methods should you be interested in viewing or modifying the schema:
 
 # In[5]:
@@ -153,7 +157,7 @@ print(json.dumps(graph.schema, indent=4))
 
 
 # ## Querying the ArangoDB database
-# 
+#
 # We can now use the `ArangoDB Graph` QA Chain to inquire about our data
 
 # In[ ]:
@@ -202,7 +206,7 @@ chain.run("Does Arya Stark have a dead parent?")
 # ## Chain modifiers
 
 # You can alter the values of the following `ArangoDBGraphQAChain` class variables to modify the behaviour of your chain results
-# 
+#
 
 # In[14]:
 
@@ -245,4 +249,3 @@ chain.run("Is Ned Stark alive?")
 
 
 chain.run("Is Bran Stark the child of Ned Stark?")
-

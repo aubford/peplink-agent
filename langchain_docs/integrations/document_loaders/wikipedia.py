@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # Wikipedia
-# 
+#
 # >[Wikipedia](https://wikipedia.org/) is a multilingual free online encyclopedia written and maintained by a community of volunteers, known as Wikipedians, through open collaboration and using a wiki-based editing system called MediaWiki. `Wikipedia` is the largest and most-read reference work in history.
-# 
+#
 # This notebook shows how to load wiki pages from `wikipedia.org` into the Document format that we use downstream.
 
 # ## Installation
-# 
+#
 # First, you need to install the `langchain_community` and `wikipedia` packages.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_community wikipedia')
+get_ipython().run_line_magic("pip", "install -qU langchain_community wikipedia")
 
 
 # ## Parameters
-# 
+#
 # `WikipediaLoader` has the following arguments:
 # - `query`: the free text which used to find documents in Wikipedia
 # - `lang` (optional): default="en". Use it to search in a specific language part of Wikipedia
@@ -51,4 +51,3 @@ docs[0].metadata  # metadata of the first document
 
 
 docs[0].page_content[:400]  # a part of the page content
-

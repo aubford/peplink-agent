@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # How to use multimodal prompts
-# 
-# Here we demonstrate how to use prompt templates to format [multimodal](/docs/concepts/multimodality/) inputs to models. 
-# 
+#
+# Here we demonstrate how to use prompt templates to format [multimodal](/docs/concepts/multimodality/) inputs to models.
+#
 # In this example we will ask a [model](/docs/concepts/chat_models/#multimodality) to describe an image.
 
 # In[7]:
@@ -98,7 +98,3 @@ print(response.content)
 
 
 # In[ ]:
-
-
-
-

@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # Amazon Document DB
-# 
+#
 # >[Amazon DocumentDB (with MongoDB Compatibility)](https://docs.aws.amazon.com/documentdb/) makes it easy to set up, operate, and scale MongoDB-compatible databases in the cloud.
 # > With Amazon DocumentDB, you can run the same application code and use the same drivers and tools that you use with MongoDB.
 # > Vector search for Amazon DocumentDB combines the flexibility and rich querying capability of a JSON-based document database with the power of vector search.
-# 
-# 
+#
+#
 # This notebook shows you how to use [Amazon Document DB Vector Search](https://docs.aws.amazon.com/documentdb/latest/developerguide/vector-search.html) to store documents in collections, create indicies and perform vector search queries using approximate nearest neighbor algorithms such "cosine", "euclidean", and "dotProduct". By default, DocumentDB creates Hierarchical Navigable Small World (HNSW) indexes. To learn about other supported vector index types, please refer to the document linked above.
-# 
+#
 # To use DocumentDB, you must first deploy a cluster. Please refer to the [Developer Guide](https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html) for more details.
-# 
+#
 # [Sign Up](https://aws.amazon.com/free/) for free to get started today.
-#         
+#
 
 # In[2]:
 
 
-get_ipython().system('pip install pymongo')
+get_ipython().system("pip install pymongo")
 
 
 # In[4]:
@@ -35,7 +35,7 @@ NAMESPACE = "izzy_test_db.izzy_test_collection"
 DB_NAME, COLLECTION_NAME = NAMESPACE.split(".")
 
 
-# We want to use `OpenAIEmbeddings` so we need to set up our OpenAI environment variables. 
+# We want to use `OpenAIEmbeddings` so we need to set up our OpenAI environment variables.
 
 # In[5]:
 
@@ -53,7 +53,7 @@ os.environ["OPENAI_EMBEDDINGS_MODEL_NAME"] = "text-embedding-ada-002"  # the mod
 
 
 # Now, we will load the documents into the collection, create the index, and then perform queries against the index.
-# 
+#
 # Please refer to the [documentation](https://docs.aws.amazon.com/documentdb/latest/developerguide/vector-search.html) if you have questions about certain parameters
 
 # In[7]:
@@ -216,4 +216,3 @@ docs = qa({"query": "gpt-4 compute requirements"})
 
 print(docs["result"])
 print(docs["source_documents"])
-

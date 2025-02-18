@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Typesense
-# 
+#
 # > [Typesense](https://typesense.org) is an open-source, in-memory search engine, that you can either [self-host](https://typesense.org/docs/guide/install-typesense#option-2-local-machine-self-hosting) or run on [Typesense Cloud](https://cloud.typesense.org/).
 # >
 # > Typesense focuses on performance by storing the entire index in RAM (with a backup on disk) and also focuses on providing an out-of-the-box developer experience by simplifying available options and setting good defaults.
@@ -16,7 +16,10 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  typesense openapi-schema-pydantic langchain-openai langchain-community tiktoken')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  typesense openapi-schema-pydantic langchain-openai langchain-community tiktoken",
+)
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -85,7 +88,7 @@ print(found_docs[0].page_content)
 
 
 # ## Typesense as a Retriever
-# 
+#
 # Typesense, as all the other vector stores, is a LangChain Retriever, by using cosine similarity.
 
 # In[ ]:
@@ -100,4 +103,3 @@ retriever
 
 query = "What did the president say about Ketanji Brown Jackson"
 retriever.invoke(query)[0]
-

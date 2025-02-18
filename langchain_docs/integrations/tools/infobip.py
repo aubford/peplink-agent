@@ -3,19 +3,19 @@
 
 # # Infobip
 # This notebook that shows how to use [Infobip](https://www.infobip.com/) API wrapper to send SMS messages, emails.
-# 
+#
 # Infobip provides many services, but this notebook will focus on SMS and Email services. You can find more information about the API and other channels [here](https://www.infobip.com/docs/api).
 
 # ## Setup
-# 
+#
 # To use this tool you need to have an Infobip account. You can create [free trial account](https://www.infobip.com/docs/essentials/free-trial).
-# 
-# 
+#
+#
 # `InfobipAPIWrapper` uses name parameters where you can provide credentials:
-# 
+#
 # - `infobip_api_key` - [API Key](https://www.infobip.com/docs/essentials/api-authentication#api-key-header) that you can find in your [developer tools](https://portal.infobip.com/dev/api-keys)
 # - `infobip_base_url` - [Base url](https://www.infobip.com/docs/essentials/base-url) for Infobip API. You can use the default value `https://api.infobip.com/`.
-# 
+#
 # You can also provide `infobip_api_key` and `infobip_base_url` as environment variables `INFOBIP_API_KEY` and `INFOBIP_BASE_URL`.
 
 # ## Sending a SMS
@@ -53,7 +53,7 @@ infobip.run(
 )
 
 
-# # How to use it inside an Agent 
+# # How to use it inside an Agent
 
 # In[ ]:
 
@@ -106,11 +106,11 @@ agent_executor.invoke(
 
 # ```bash
 # > Entering new AgentExecutor chain...
-# 
+#
 # Invoking: `infobip_email` with `{'body': 'Hi,\n\nHere is a simple example of a recursive function in Python:\n\n```\ndef factorial(n):\n    if n == 1:\n        return 1\n    else:\n        return n * factorial(n-1)\n```\n\nThis function calculates the factorial of a number. The factorial of a number is the product of all positive integers less than or equal to that number. The function calls itself with a smaller argument until it reaches the base case where n equals 1.\n\nBest,\nCoding Teacher', 'to': 'email@example.com', 'sender': 'validemail@example.com', 'subject': 'Python Recursion Example', 'channel': 'email'}`
-# 
-# 
+#
+#
 # I have sent an example of Python recursion to your email. Please check your inbox.
-# 
+#
 # > Finished chain.
 # ```

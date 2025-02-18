@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Mojeek Search
-# 
+#
 # The following notebook will explain how to get results using Mojeek Search. Please visit [Mojeek Website](https://www.mojeek.com/services/search/web-search-api/) to obtain an API key.
 
 # In[ ]:
@@ -29,4 +29,3 @@ search = MojeekSearch.config(api_key=api_key, search_kwargs={"t": 10})
 
 
 search.run("mojeek")
-

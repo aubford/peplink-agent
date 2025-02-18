@@ -2,27 +2,29 @@
 # coding: utf-8
 
 # # Redis Chat Message History
-# 
+#
 # >[Redis (Remote Dictionary Server)](https://en.wikipedia.org/wiki/Redis) is an open-source in-memory storage, used as a distributed, in-memory key–value database, cache and message broker, with optional durability. `Redis` offers low-latency reads and writes. Redis is the most popular NoSQL database, and one of the most popular databases overall.
-# 
+#
 # This notebook demonstrates how to use the `RedisChatMessageHistory` class from the langchain-redis package to store and manage chat message history using Redis.
 
 # ## Setup
-# 
+#
 # First, we need to install the required dependencies and ensure we have a Redis instance running.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-redis langchain-openai redis')
+get_ipython().run_line_magic(
+    "pip", "install -qU langchain-redis langchain-openai redis"
+)
 
 
 # Make sure you have a Redis server running. You can start one using Docker with the following command:
-# 
+#
 # ```
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
 # ```
-# 
+#
 # Or install and run Redis locally according to the instructions for your operating system.
 
 # In[2]:
@@ -180,5 +182,5 @@ print("Messages after clearing:", history.messages)
 
 
 # ## Conclusion
-# 
+#
 # This notebook demonstrated the key features of `RedisChatMessageHistory` from the langchain-redis package. It showed how to initialize and use the chat history, integrate it with language models, and utilize advanced features like custom configurations and message searching. Redis provides a fast and scalable solution for managing chat history in AI applications.

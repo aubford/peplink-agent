@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # PDFMiner
-# 
+#
 # ## Overview
 # ### Integration details
-# 
-# 
+#
+#
 # | Class | Package | Local | Serializable | JS support|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | [PDFMinerLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PDFMinerLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ | 
+# | [PDFMinerLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PDFMinerLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ |
 # ### Loader features
 # | Source | Document Lazy Loading | Native Async Support
-# | :---: | :---: | :---: | 
-# | PDFMinerLoader | ✅ | ❌ | 
-# 
-# 
+# | :---: | :---: | :---: |
+# | PDFMinerLoader | ✅ | ❌ |
+#
+#
 # ## Setup
-# 
+#
 # ### Credentials
-# 
+#
 # No credentials are needed for this loader.
 
 # If you want to get automated best in-class tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
@@ -32,17 +32,17 @@
 
 
 # ### Installation
-# 
+#
 # Install **langchain_community**.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_community')
+get_ipython().run_line_magic("pip", "install -qU langchain_community")
 
 
 # ## Initialization
-# 
+#
 # Now we can instantiate our model object and load documents:
 
 # In[1]:
@@ -85,7 +85,7 @@ for doc in loader.lazy_load():
 
 
 # ## Using PDFMiner to generate HTML text
-# 
+#
 # This can be helpful for chunking texts semantically into sections as the output html content can be parsed via `BeautifulSoup` to get more structured and rich information about font size, page numbers, PDF headers/footers, etc.
 
 # In[ ]:
@@ -183,5 +183,5 @@ print(semantic_snippets[4])
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all PDFMinerLoader features and configurations head to the API reference: https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PDFMinerLoader.html

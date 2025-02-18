@@ -2,15 +2,17 @@
 # coding: utf-8
 
 # # ArXiv
-# 
-# This notebook goes over how to use the `arxiv` tool with an agent. 
-# 
+#
+# This notebook goes over how to use the `arxiv` tool with an agent.
+#
 # First, you need to install the `arxiv` python package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community arxiv')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain-community arxiv"
+)
 
 
 # In[2]:
@@ -41,7 +43,7 @@ agent_executor.invoke(
 
 
 # ## The ArXiv API Wrapper
-# 
+#
 # The tool uses the `API Wrapper`. Below, we explore some of the features it provides.
 
 # In[4]:
@@ -51,14 +53,14 @@ from langchain_community.utilities import ArxivAPIWrapper
 
 
 # You can use the ArxivAPIWrapper to get information about a scientific article or articles. The query text is limited to 300 characters.
-# 
+#
 # The ArxivAPIWrapper returns these article fields:
 # - Publishing date
 # - Title
 # - Authors
 # - Summary
-# 
-# The following query returns information about one article with the arxiv ID "1605.08386". 
+#
+# The following query returns information about one article with the arxiv ID "1605.08386".
 
 # In[5]:
 
@@ -69,7 +71,7 @@ docs
 
 
 # Now, we want to get information about one author, `Caprice Stanley`.
-# 
+#
 # This query returns information about three articles. By default, the query returns information only about three top articles.
 
 # In[6]:
@@ -86,4 +88,3 @@ docs
 
 docs = arxiv.run("1605.08386WWW")
 docs
-

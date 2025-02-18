@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # AWS DynamoDB
-# 
+#
 # >[Amazon AWS DynamoDB](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/dynamodb/index.html) is a fully managed `NoSQL` database service that provides fast and predictable performance with seamless scalability.
-# 
+#
 # This notebook goes over how to use `DynamoDB` to store chat message history with `DynamoDBChatMessageHistory` class.
 
 # ## Setup
-# 
+#
 # First make sure you have correctly configured the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). Then make sure you have installed the `langchain-community` package, so we need to install that. We also need to install the `boto3` package.
-# 
+#
 # ```bash
 # pip install -U langchain-community boto3
 # ```
@@ -33,7 +33,7 @@ from langchain_community.chat_message_histories import (
 
 
 # ## Create Table
-# 
+#
 # Now, create the `DynamoDB` Table where we will be storing messages:
 
 # In[10]:
@@ -78,7 +78,7 @@ history.messages
 
 
 # ## DynamoDBChatMessageHistory with Custom Endpoint URL
-# 
+#
 # Sometimes it is useful to specify the URL to the AWS endpoint to connect to. For instance, when you are running locally against [Localstack](https://localstack.cloud/). For those cases you can specify the URL via the `endpoint_url` parameter in the constructor.
 
 # In[13]:
@@ -93,16 +93,16 @@ history = DynamoDBChatMessageHistory(
 
 # ## DynamoDBChatMessageHistory With Composite Keys
 # The default key for DynamoDBChatMessageHistory is ```{"SessionId": self.session_id}```, but you can modify this to match your table design.
-# 
+#
 # ### Primary Key Name
 # You may modify the primary key by passing in a primary_key_name value in the constructor, resulting in the following:
 # ```{self.primary_key_name: self.session_id}```
-# 
+#
 # ### Composite Keys
 # When using an existing DynamoDB table, you may need to modify the key structure from the default of to something including a Sort Key. To do this you may use the ```key``` parameter.
-# 
+#
 # Passing a value for key will override the primary_key parameter, and the resulting key structure will be the passed value.
-# 
+#
 
 # In[14]:
 
@@ -148,9 +148,9 @@ composite_key_history.messages
 
 
 # ## Chaining
-# 
+#
 # We can easily combine this message history class with [LCEL Runnables](/docs/how_to/message_history)
-# 
+#
 # To do this we will want to use OpenAI, so we need to install that
 
 # In[ ]:
@@ -205,4 +205,3 @@ chain_with_history.invoke({"question": "Hi! I'm bob"}, config=config)
 
 
 chain_with_history.invoke({"question": "Whats my name"}, config=config)
-

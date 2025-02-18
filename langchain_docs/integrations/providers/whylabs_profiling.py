@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # WhyLabs
-# 
+#
 # >[WhyLabs](https://docs.whylabs.ai/docs/) is an observability platform designed to monitor data pipelines and ML applications for data quality regressions, data drift, and model performance degradation. Built on top of an open-source package called `whylogs`, the platform enables Data Scientists and Engineers to:
 # >- Set up in minutes: Begin generating statistical profiles of any dataset using whylogs, the lightweight open-source library.
 # >- Upload dataset profiles to the WhyLabs platform for centralized and customizable monitoring/alerting of dataset features as well as model inputs, outputs, and performance.
@@ -16,27 +16,29 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langkit langchain-openai langchain')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langkit langchain-openai langchain"
+)
 
 
 # Make sure to set the required API keys and config required to send telemetry to WhyLabs:
-# 
+#
 # * WhyLabs API Key: https://whylabs.ai/whylabs-free-sign-up
 # * Org and Dataset [https://docs.whylabs.ai/docs/whylabs-onboarding](https://docs.whylabs.ai/docs/whylabs-onboarding#upload-a-profile-to-a-whylabs-project)
 # * OpenAI: https://platform.openai.com/account/api-keys
-# 
+#
 # Then you can set them like this:
-# 
+#
 # ```python
 # import os
-# 
+#
 # os.environ["OPENAI_API_KEY"] = ""
 # os.environ["WHYLABS_DEFAULT_ORG_ID"] = ""
 # os.environ["WHYLABS_DEFAULT_DATASET_ID"] = ""
 # os.environ["WHYLABS_API_KEY"] = ""
 # ```
 # > *Note*: the callback supports directly passing in these variables to the callback, when no auth is directly passed in it will default to the environment. Passing in auth directly allows for writing profiles to multiple projects or organizations in WhyLabs.
-# 
+#
 
 # ## Callbacks
 
@@ -73,4 +75,3 @@ result = llm.generate(
 print(result)
 # you don't need to call close to write profiles to WhyLabs, upload will occur periodically, but to demo let's not wait.
 whylabs.close()
-

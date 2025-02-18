@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # DuckDB
-# 
+#
 # >[DuckDB](https://duckdb.org/) is an in-process SQL OLAP database management system.
-# 
+#
 # Load a `DuckDB` query with one document per row.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  duckdb')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  duckdb")
 
 
 # In[2]:
@@ -22,7 +22,9 @@ from langchain_community.document_loaders import DuckDBLoader
 # In[3]:
 
 
-get_ipython().run_cell_magic('file', 'example.csv', 'Team,Payroll\nNationals,81.34\nReds,82.20\n')
+get_ipython().run_cell_magic(
+    "file", "example.csv", "Team,Payroll\nNationals,81.34\nReds,82.20\n"
+)
 
 
 # In[4]:
@@ -79,7 +81,3 @@ print(data)
 
 
 # In[ ]:
-
-
-
-

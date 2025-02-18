@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Tair
-# 
-# >[Tair](https://www.alibabacloud.com/help/en/tair/latest/what-is-tair) is a cloud native in-memory database service developed by `Alibaba Cloud`. 
+#
+# >[Tair](https://www.alibabacloud.com/help/en/tair/latest/what-is-tair) is a cloud native in-memory database service developed by `Alibaba Cloud`.
 # It provides rich data models and enterprise-grade capabilities to support your real-time online scenarios while maintaining full compatibility with open-source `Redis`. `Tair` also introduces persistent memory-optimized instances that are based on the new non-volatile memory (NVM) storage medium.
-# 
+#
 # This notebook shows how to use functionality related to the `Tair` vector database.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # To run, you should have a `Tair` instance up and running.
 
 # In[ ]:
@@ -33,13 +33,13 @@ docs = text_splitter.split_documents(documents)
 embeddings = FakeEmbeddings(size=128)
 
 
-# Connect to Tair using the `TAIR_URL` environment variable 
+# Connect to Tair using the `TAIR_URL` environment variable
 # ```
 # export TAIR_URL="redis://{username}:{password}@{tair_address}:{tair_port}"
 # ```
-# 
+#
 # or the keyword argument `tair_url`.
-# 
+#
 # Then store documents and embeddings into Tair.
 
 # In[ ]:
@@ -86,4 +86,3 @@ query = "What did the president say about Ketanji Brown Jackson"
 kwargs = {"TEXT": query, "hybrid_ratio": 0.5}
 docs = vector_store.similarity_search(query, **kwargs)
 docs[0]
-

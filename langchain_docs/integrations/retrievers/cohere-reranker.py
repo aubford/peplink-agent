@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Cohere reranker
-# 
+#
 # >[Cohere](https://cohere.ai/about) is a Canadian startup that provides natural language processing models that help companies improve human-machine interactions.
-# 
+#
 # This notebook shows how to use [Cohere's rerank endpoint](https://docs.cohere.com/docs/reranking) in a retriever. This builds on top of ideas in the [ContextualCompressionRetriever](/docs/how_to/contextual_compression).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  cohere')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  cohere")
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss-cpu")
 
 
 # In[13]:
@@ -115,4 +115,3 @@ chain = RetrievalQA.from_chain_type(
 
 
 chain({"query": query})
-

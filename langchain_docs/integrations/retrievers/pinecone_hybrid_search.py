@@ -2,20 +2,22 @@
 # coding: utf-8
 
 # # Pinecone Hybrid Search
-# 
+#
 # >[Pinecone](https://docs.pinecone.io/docs/overview) is a vector database with broad functionality.
-# 
+#
 # This notebook goes over how to use a retriever that under the hood uses Pinecone and Hybrid Search.
-# 
+#
 # The logic of this retriever is taken from [this documentation](https://docs.pinecone.io/docs/hybrid-search)
-# 
-# To use Pinecone, you must have an API key and an Environment. 
+#
+# To use Pinecone, you must have an API key and an Environment.
 # Here are the [installation instructions](https://docs.pinecone.io/docs/quickstart).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pinecone pinecone-text pinecone-notebooks')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  pinecone pinecone-text pinecone-notebooks"
+)
 
 
 # In[ ]:
@@ -85,7 +87,7 @@ index = pc.Index(index_name)
 
 
 # ## Get embeddings and sparse encoders
-# 
+#
 # Embeddings are used for the dense vectors, tokenizer is used for the sparse vector
 
 # In[79]:
@@ -97,7 +99,7 @@ embeddings = OpenAIEmbeddings()
 
 
 # To encode the text to sparse values you can either choose SPLADE or BM25. For out of domain tasks we recommend using BM25.
-# 
+#
 # For more information about the sparse encoders you can checkout pinecone-text library [docs](https://pinecone-io.github.io/pinecone-text/pinecone_text.html).
 
 # In[80]:
@@ -112,22 +114,22 @@ bm25_encoder = BM25Encoder().default()
 
 
 # The above code is using default tfids values. It's highly recommended to fit the tf-idf values to your own corpus. You can do it as follow:
-# 
+#
 # ```python
 # corpus = ["foo", "bar", "world", "hello"]
-# 
+#
 # # fit tf-idf values on your corpus
 # bm25_encoder.fit(corpus)
-# 
+#
 # # store the values to a json file
 # bm25_encoder.dump("bm25_values.json")
-# 
+#
 # # load to your BM25Encoder object
 # bm25_encoder = BM25Encoder().load("bm25_values.json")
 # ```
 
 # ## Load Retriever
-# 
+#
 # We can now construct the retriever!
 
 # In[81]:
@@ -139,7 +141,7 @@ retriever = PineconeHybridSearchRetriever(
 
 
 # ## Add texts (if necessary)
-# 
+#
 # We can optionally add texts to the retriever (if they aren't already in there)
 
 # In[82]:
@@ -149,7 +151,7 @@ retriever.add_texts(["foo", "bar", "world", "hello"])
 
 
 # ## Use Retriever
-# 
+#
 # We can now use the retriever!
 
 # In[83]:
@@ -162,4 +164,3 @@ result = retriever.invoke("foo")
 
 
 result[0]
-

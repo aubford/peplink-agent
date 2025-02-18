@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Comet Tracing
-# 
+#
 # There are two ways to trace your LangChains executions with Comet:
-# 
+#
 # 1. Setting the `LANGCHAIN_COMET_TRACING` environment variable to "true". This is the recommended way.
 # 2. Import the `CometTracer` manually and pass it explicitely.
 
@@ -72,4 +72,3 @@ agent = initialize_agent(
 agent.run(
     "What is 2 raised to .123243 power?", callbacks=[tracer]
 )  # this should be traced
-

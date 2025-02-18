@@ -8,9 +8,9 @@
 # ## Overview
 
 # The AstraDB Document Loader returns a list of Langchain Documents from an AstraDB database.
-# 
+#
 # The Loader takes the following parameters:
-# 
+#
 # * `api_endpoint`: AstraDB API endpoint. Looks like `https://01234567-89ab-cdef-0123-456789abcdef-us-east1.apps.astra.datastax.com`
 # * `token`: AstraDB token. Looks like `AstraCS:6gBhNmsk135....`
 # * `collection_name` : AstraDB collection name
@@ -20,14 +20,14 @@
 # * `find_options`: (Optional) Options used in the find query
 # * `nb_prefetched`: (Optional) Number of documents pre-fetched by the loader
 # * `extraction_function`: (Optional) A function to convert the AstraDB document to the LangChain `page_content` string. Defaults to `json.dumps`
-# 
+#
 # The following metadata is set to the LangChain Documents metadata output:
-# 
+#
 # ```python
 # {
 #     metadata : {
-#         "namespace": "...", 
-#         "api_endpoint": "...", 
+#         "namespace": "...",
+#         "api_endpoint": "...",
 #         "collection": "..."
 #     }
 # }
@@ -72,4 +72,3 @@ docs = loader.load()
 
 
 docs[0]
-

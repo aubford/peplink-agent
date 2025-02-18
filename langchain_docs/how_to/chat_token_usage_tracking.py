@@ -2,36 +2,36 @@
 # coding: utf-8
 
 # # How to track token usage in ChatModels
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
-# 
+#
 # :::
-# 
+#
 # Tracking [token](/docs/concepts/tokens/) usage to calculate cost is an important part of putting your app in production. This guide goes over how to obtain this information from your LangChain model calls.
-# 
+#
 # This guide requires `langchain-anthropic` and `langchain-openai >= 0.1.9`.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-anthropic langchain-openai')
+get_ipython().run_line_magic("pip", "install -qU langchain-anthropic langchain-openai")
 
 
 # ## Using LangSmith
-# 
+#
 # You can use [LangSmith](https://www.langchain.com/langsmith) to help track token usage in your LLM application. See the [LangSmith quick start guide](https://docs.smith.langchain.com/).
-# 
+#
 # ## Using AIMessage.usage_metadata
-# 
+#
 # A number of model providers return token usage information as part of the chat generation response. When available, this information will be included on the `AIMessage` objects produced by the corresponding model.
-# 
+#
 # LangChain `AIMessage` objects include a [usage_metadata](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessage.html#langchain_core.messages.ai.AIMessage.usage_metadata) attribute. When populated, this attribute will be a [UsageMetadata](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.UsageMetadata.html) dictionary with standard keys (e.g., `"input_tokens"` and `"output_tokens"`).
-# 
+#
 # Examples:
-# 
+#
 # **OpenAI**:
 
 # In[1]:
@@ -57,7 +57,7 @@ anthropic_response.usage_metadata
 
 
 # ### Using AIMessage.response_metadata
-# 
+#
 # Metadata from the model response is also included in the AIMessage [response_metadata](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessage.html#langchain_core.messages.ai.AIMessage.response_metadata) attribute. These data are typically not standardized. Note that different providers adopt different conventions for representing token counts:
 
 # In[3]:
@@ -68,17 +68,17 @@ print(f'Anthropic: {anthropic_response.response_metadata["usage"]}')
 
 
 # ### Streaming
-# 
+#
 # Some providers support token count metadata in a streaming context.
-# 
+#
 # #### OpenAI
-# 
+#
 # For example, OpenAI will return a message [chunk](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessageChunk.html) at the end of a stream with token usage information. This behavior is supported by `langchain-openai >= 0.1.9` and can be enabled by setting `stream_usage=True`. This attribute can also be set when `ChatOpenAI` is instantiated.
-# 
+#
 # :::note
 # By default, the last message chunk in a stream will include a `"finish_reason"` in the message's `response_metadata` attribute. If we include token usage in streaming mode, an additional chunk containing usage metadata will be added to the end of the stream, such that `"finish_reason"` appears on the second to last message chunk.
 # :::
-# 
+#
 
 # In[4]:
 
@@ -111,7 +111,7 @@ for chunk in llm.stream("hello"):
 
 
 # You can also enable streaming token usage by setting `stream_usage` when instantiating the chat model. This can be useful when incorporating chat models into LangChain [chains](/docs/concepts/lcel): usage metadata can be monitored when [streaming intermediate steps](/docs/how_to/streaming#using-stream-events) or using tracing software such as [LangSmith](https://docs.smith.langchain.com/).
-# 
+#
 # See the below example, where we return output structured to a desired schema, but can still observe token usage streamed from intermediate steps.
 
 # In[8]:
@@ -147,17 +147,17 @@ async for event in structured_llm.astream_events("Tell me a joke", version="v2")
 # Token usage is also visible in the corresponding [LangSmith trace](https://smith.langchain.com/public/fe6513d5-7212-4045-82e0-fefa28bc7656/r) in the payload from the chat model.
 
 # ## Using callbacks
-# 
+#
 # There are also some API-specific callback context managers that allow you to track token usage across multiple calls. They are currently only implemented for the OpenAI API and Bedrock Anthropic API, and are available in `langchain-community`:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # ### OpenAI
-# 
+#
 # Let's first look at an extremely simple example of tracking token usage for a single Chat model call.
 
 # In[9]:
@@ -201,7 +201,7 @@ with get_openai_callback() as cb:
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain langchain-aws wikipedia')
+get_ipython().run_line_magic("pip", "install -qU langchain langchain-aws wikipedia")
 
 
 # In[12]:
@@ -238,7 +238,7 @@ with get_openai_callback() as cb:
 
 
 # ### Bedrock Anthropic
-# 
+#
 # The `get_bedrock_anthropic_callback` works very similarly:
 
 # In[12]:
@@ -256,13 +256,9 @@ with get_bedrock_anthropic_callback() as cb:
 
 
 # ## Next steps
-# 
+#
 # You've now seen a few examples of how to track token usage for supported providers.
-# 
+#
 # Next, check out the other how-to guides chat models in this section, like [how to get a model to return structured output](/docs/how_to/structured_output) or [how to add caching to your chat models](/docs/how_to/chat_model_caching).
 
 # In[ ]:
-
-
-
-

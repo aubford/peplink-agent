@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # Requests Toolkit
-# 
+#
 # We can use the Requests [toolkit](/docs/concepts/tools/#toolkits) to construct agents that generate HTTP requests.
-# 
+#
 # For detailed documentation of all API toolkit features and configurations head to the API reference for [RequestsToolkit](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.openapi.toolkit.RequestsToolkit.html).
-# 
+#
 # ## ⚠️ Security note ⚠️
 # There are inherent risks in giving models discretion to execute real-world actions. Take precautions to mitigate these risks:
-# 
+#
 # - Make sure that permissions associated with the tools are narrowly-scoped (e.g., for database operations or API requests);
 # - When desired, make use of human-in-the-loop workflows.
 
 # ## Setup
-# 
+#
 # ### Installation
-# 
+#
 # This toolkit lives in the `langchain-community` package:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # Note that if you want to get automated tracing from runs of individual tools, you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
@@ -35,9 +35,9 @@ get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # ## Instantiation
-# 
+#
 # First we will demonstrate a minimal example.
-# 
+#
 # **NOTE**: There are inherent risks in giving models discretion to execute real-world actions. We must "opt-in" to these risks by setting `allow_dangerous_request=True` to use these tools.
 # **This can be dangerous for calling unwanted requests**. Please make sure your custom OpenAPI spec (yaml) is safe and that permissions associated with the tools are narrowly-scoped.
 
@@ -48,7 +48,7 @@ ALLOW_DANGEROUS_REQUEST = True
 
 
 # We can use the [JSONPlaceholder](https://jsonplaceholder.typicode.com) API as a testing ground.
-# 
+#
 # Let's create (a subset of) its API spec:
 
 # In[2]:
@@ -129,7 +129,7 @@ toolkit = RequestsToolkit(
 
 
 # ## Tools
-# 
+#
 # View available tools:
 
 # In[4]:
@@ -160,7 +160,9 @@ system_message = """
 You have access to an API to help answer user queries.
 Here is documentation on the API:
 {api_spec}
-""".format(api_spec=api_spec)
+""".format(
+    api_spec=api_spec
+)
 
 agent_executor = create_react_agent(llm, tools, prompt=system_message)
 
@@ -179,5 +181,5 @@ for event in events:
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all API toolkit features and configurations head to the API reference for [RequestsToolkit](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.openapi.toolkit.RequestsToolkit.html).

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # SparkLLM Chat
-# 
+#
 # SparkLLM chat models API by iFlyTek. For more information, see [iFlyTek Open Platform](https://www.xfyun.cn/).
 
 # ## Basic use
@@ -56,4 +56,3 @@ chat = ChatSparkLLM(
 )
 message = HumanMessage(content="Hello")
 chat([message])
-

@@ -2,31 +2,31 @@
 # coding: utf-8
 
 # # How to parse YAML output
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
 # - [Output parsers](/docs/concepts/output_parsers)
 # - [Prompt templates](/docs/concepts/prompt_templates)
 # - [Structured output](/docs/how_to/structured_output)
 # - [Chaining runnables together](/docs/how_to/sequence/)
-# 
+#
 # :::
-# 
+#
 # LLMs from different providers often have different strengths depending on the specific data they are trained on. This also means that some may be "better" and more reliable at generating output in formats other than JSON.
-# 
+#
 # This output parser allows users to specify an arbitrary schema and query LLMs for outputs that conform to that schema, using YAML to format their response.
-# 
+#
 # :::note
 # Keep in mind that large language models are leaky abstractions! You'll have to use an LLM with sufficient capacity to generate well-formed YAML.
 # :::
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain langchain-openai')
+get_ipython().run_line_magic("pip", "install -qU langchain langchain-openai")
 
 import os
 from getpass import getpass
@@ -80,13 +80,9 @@ parser.get_format_instructions()
 
 
 # You can and should experiment with adding your own formatting hints in the other parts of your prompt to either augment or replace the default instructions.
-# 
+#
 # ## Next steps
-# 
+#
 # You've now learned how to prompt a model to return YAML. Next, check out the [broader guide on obtaining structured output](/docs/how_to/structured_output) for other related techniques.
 
 # In[ ]:
-
-
-
-

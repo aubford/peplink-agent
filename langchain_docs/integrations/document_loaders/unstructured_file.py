@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # Unstructured
-# 
+#
 # This notebook covers how to use `Unstructured` [document loader](https://python.langchain.com/docs/concepts/document_loaders) to load files of many types. `Unstructured` currently supports loading of text files, powerpoints, html, pdfs, images, and more.
-# 
+#
 # Please see [this guide](../../integrations/providers/unstructured.mdx) for more instructions on setting up Unstructured locally, including setting up required system dependencies.
-# 
+#
 # ## Overview
 # ### Integration details
-# 
+#
 # | Class | Package | Local | Serializable | [JS support](https://js.langchain.com/docs/integrations/document_loaders/file_loaders/unstructured/)|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | [UnstructuredLoader](https://python.langchain.com/api_reference/unstructured/document_loaders/langchain_unstructured.document_loaders.UnstructuredLoader.html) | [langchain_unstructured](https://python.langchain.com/api_reference/unstructured/index.html) | ✅ | ❌ | ✅ | 
+# | [UnstructuredLoader](https://python.langchain.com/api_reference/unstructured/document_loaders/langchain_unstructured.document_loaders.UnstructuredLoader.html) | [langchain_unstructured](https://python.langchain.com/api_reference/unstructured/index.html) | ✅ | ❌ | ✅ |
 # ### Loader features
 # | Source | Document Lazy Loading | Native Async Support
-# | :---: | :---: | :---: | 
-# | UnstructuredLoader | ✅ | ❌ | 
-# 
+# | :---: | :---: | :---: |
+# | UnstructuredLoader | ✅ | ❌ |
+#
 # ## Setup
-# 
+#
 # ### Credentials
-# 
+#
 # By default, `langchain-unstructured` installs a smaller footprint that requires offloading of the partitioning logic to the Unstructured API, which requires an API key. If you use the local installation, you do not need an API key. To get your API key, head over to [this site](https://unstructured.io) and get an API key, and then set it in the cell below:
 
 # In[1]:
@@ -37,40 +37,43 @@ if "UNSTRUCTURED_API_KEY" not in os.environ:
 
 
 # ### Installation
-# 
+#
 # #### Normal Installation
-# 
+#
 # The following packages are required to run the rest of this notebook.
 
 # In[ ]:
 
 
 # Install package, compatible with API partitioning
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-unstructured unstructured-client unstructured "unstructured[pdf]" python-magic')
+get_ipython().run_line_magic(
+    "pip",
+    'install --upgrade --quiet langchain-unstructured unstructured-client unstructured "unstructured[pdf]" python-magic',
+)
 
 
 # #### Installation for Local
-# 
+#
 # If you would like to run the partitioning logic locally, you will need to install a combination of system dependencies, as outlined in the [Unstructured documentation here](https://docs.unstructured.io/open-source/installation/full-installation).
-# 
+#
 # For example, on Macs you can install the required dependencies with:
-# 
+#
 # ```bash
 # # base dependencies
 # brew install libmagic poppler tesseract
-# 
+#
 # # If parsing xml / html documents:
 # brew install libxml2 libxslt
 # ```
-# 
+#
 # You can install the required `pip` dependencies needed for local with:
-# 
+#
 # ```bash
 # pip install "langchain-unstructured[local]"
 # ```
 
 # ## Initialization
-# 
+#
 # The `UnstructuredLoader` allows loading from a variety of different file types. To read all about the `unstructured` package please refer to their [documentation](https://docs.unstructured.io/open-source/introduction/overview)/. In this example, we show loading from both a text file and a PDF file.
 
 # In[3]:
@@ -116,7 +119,7 @@ pages[0]
 
 
 # ## Post Processing
-# 
+#
 # If you need to post process the `unstructured` elements after extraction, you can pass in a list of
 # `str` -> `str` functions to the `post_processors` kwarg when you instantiate the `UnstructuredLoader`. This applies to other Unstructured loaders as well. Below is an example.
 
@@ -137,16 +140,16 @@ docs[5:10]
 
 
 # ## Unstructured API
-# 
+#
 # If you want to get up and running with smaller packages and get the most up-to-date partitioning you can `pip install
 # unstructured-client` and `pip install langchain-unstructured`. For
 # more information about the `UnstructuredLoader`, refer to the
 # [Unstructured provider page](https://python.langchain.com/v0.1/docs/integrations/document_loaders/unstructured_file/).
-# 
+#
 # The loader will process your document using the hosted Unstructured serverless API when you pass in
 # your `api_key` and set `partition_via_api=True`. You can generate a free
 # Unstructured API key [here](https://unstructured.io/api-key/).
-# 
+#
 # Check out the instructions [here](https://github.com/Unstructured-IO/unstructured-api#dizzy-instructions-for-using-the-docker-image)
 # if you’d like to self-host the Unstructured API or run it locally.
 
@@ -183,10 +186,10 @@ print(docs[-1].metadata["filename"], ": ", docs[-1].page_content[:100])
 
 
 # ### Unstructured SDK Client
-# 
+#
 # Partitioning with the Unstructured API relies on the [Unstructured SDK
 # Client](https://docs.unstructured.io/api-reference/api-services/accessing-unstructured-api).
-# 
+#
 # If you want to customize the client, you will have to pass an `UnstructuredClient` instance to the `UnstructuredLoader`. Below is an example showing how you can customize features of the client such as using your own `requests.Session()`, passing an alternative `server_url`, and customizing the `RetryConfig` object. For more information about customizing the client or what additional parameters the sdk client accepts, refer to the [Unstructured Python SDK](https://docs.unstructured.io/api-reference/api-services/sdk-python) docs and the client section of the [API Parameters](https://docs.unstructured.io/api-reference/api-services/api-parameters) docs. Note that all API Parameters should be passed to the `UnstructuredLoader`.
 
 # <div class="alert alert-block alert-warning"><b>Warning:</b> The example below may not use the latest version of the UnstructuredClient and there could be breaking changes in future releases. For the latest examples, refer to the <a href="https://docs.unstructured.io/api-reference/api-services/sdk-python">Unstructured Python SDK</a> docs.</div>
@@ -231,7 +234,7 @@ print(docs[0].metadata["filename"], ": ", docs[0].page_content[:100])
 
 
 # ## Chunking
-# 
+#
 # The `UnstructuredLoader` does not support `mode` as parameter for grouping text like the older
 # loader `UnstructuredFileLoader` and others did. It instead supports "chunking". Chunking in
 # unstructured differs from other chunking mechanisms you may be familiar with that form chunks based
@@ -242,7 +245,7 @@ print(docs[0].metadata["filename"], ": ", docs[0].page_content[:100])
 # chunking combines consecutive elements to form chunks as large as possible without exceeding the
 # maximum chunk size. Chunking produces a sequence of CompositeElement, Table, or TableChunk elements.
 # Each “chunk” is an instance of one of these three types.
-# 
+#
 # See this [page](https://docs.unstructured.io/open-source/core-functionality/chunking) for more
 # details about chunking options, but to reproduce the same behavior as `mode="single"`, you can set
 # `chunking_strategy="basic"`, `max_characters=<some-really-big-number>`, and `include_orig_elements=False`.
@@ -266,9 +269,9 @@ print("Length of text in the document:", len(docs[0].page_content))
 
 
 # ## Loading web pages
-# 
+#
 # `UnstructuredLoader` accepts a `web_url` kwarg when run locally that populates the `url` parameter of the underlying Unstructured [partition](https://docs.unstructured.io/open-source/core-functionality/partitioning). This allows for the parsing of remotely hosted documents, such as HTML web pages.
-# 
+#
 # Example usage:
 
 # In[6]:
@@ -284,5 +287,5 @@ for doc in docs:
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all `UnstructuredLoader` features and configurations head to the API reference: https://python.langchain.com/api_reference/unstructured/document_loaders/langchain_unstructured.document_loaders.UnstructuredLoader.html

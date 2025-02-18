@@ -5,9 +5,9 @@
 # Oracle AI Vector Search is designed for Artificial Intelligence (AI) workloads that allows you to query data based on semantics, rather than keywords.
 # One of the biggest benefits of Oracle AI Vector Search is that semantic search on unstructured data can be combined with relational search on business data in one single system.
 # This is not only powerful but also significantly more effective because you don't need to add a specialized vector database, eliminating the pain of data fragmentation between multiple systems.
-# 
+#
 # In addition, your vectors can benefit from all of Oracle Database’s most powerful features, like the following:
-# 
+#
 #  * [Partitioning Support](https://www.oracle.com/database/technologies/partitioning.html)
 #  * [Real Application Clusters scalability](https://www.oracle.com/database/real-application-clusters/)
 #  * [Exadata smart scans](https://www.oracle.com/database/technologies/exadata/software/smartscan/)
@@ -21,15 +21,15 @@
 #  * [Oracle Spatial and Graph](https://www.oracle.com/database/spatial/)
 #  * [Oracle Blockchain](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_blockchain_table.html#GUID-B469E277-978E-4378-A8C1-26D3FF96C9A6)
 #  * [JSON](https://docs.oracle.com/en/database/oracle/oracle-database/23/adjsn/json-in-oracle-database.html)
-# 
-# 
+#
+#
 # The guide demonstrates how to use Document Processing Capabilities within Oracle AI Vector Search to load and chunk documents using OracleDocLoader and OracleTextSplitter respectively.
 
 # If you are just starting with Oracle Database, consider exploring the [free Oracle 23 AI](https://www.oracle.com/database/free/#resources) which provides a great introduction to setting up your database environment. While working with the database, it is often advisable to avoid using the system user by default; instead, you can create your own user for enhanced security and customization. For detailed steps on user creation, refer to our [end-to-end guide](https://github.com/langchain-ai/langchain/blob/master/cookbook/oracleai_demo.ipynb) which also shows how to set up a user in Oracle. Additionally, understanding user privileges is crucial for managing database security effectively. You can learn more about this topic in the official [Oracle guide](https://docs.oracle.com/en/database/oracle/oracle-database/19/admqs/administering-user-accounts-and-security.html#GUID-36B21D72-1BBB-46C9-A0C9-F0D2A8591B8D) on administering user accounts and security.
 
 # ### Prerequisites
-# 
-# Please install Oracle Python Client driver to use Langchain with Oracle AI Vector Search. 
+#
+# Please install Oracle Python Client driver to use Langchain with Oracle AI Vector Search.
 
 # In[ ]:
 
@@ -103,11 +103,11 @@ except Exception as e:
 
 
 # ### Load Documents
-# 
+#
 # Users have the flexibility to load documents from either the Oracle Database, a file system, or both, by appropriately configuring the loader parameters. For comprehensive details on these parameters, please consult the [Oracle AI Vector Search Guide](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_vector_chain1.html#GUID-73397E89-92FB-48ED-94BB-1AD960C4EA1F).
-# 
+#
 # A significant advantage of utilizing OracleDocLoader is its capability to process over 150 distinct file formats, eliminating the need for multiple loaders for different document types. For a complete list of the supported formats, please refer to the [Oracle Text Supported Document Formats](https://docs.oracle.com/en/database/oracle/oracle-database/23/ccref/oracle-text-supported-document-formats.html).
-# 
+#
 # Below is a sample code snippet that demonstrates how to use OracleDocLoader
 
 # In[ ]:
@@ -144,7 +144,7 @@ print(f"Number of docs loaded: {len(docs)}")
 
 # ### Split Documents
 # The documents may vary in size, ranging from small to very large. Users often prefer to chunk their documents into smaller sections to facilitate the generation of embeddings. A wide array of customization options is available for this splitting process. For comprehensive details regarding these parameters, please consult the [Oracle AI Vector Search Guide](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_vector_chain1.html#GUID-4E145629-7098-4C7C-804F-FC85D1F24240).
-# 
+#
 # Below is a sample code illustrating how to implement this:
 
 # In[ ]:
@@ -183,4 +183,4 @@ print(f"Number of Chunks: {len(list_chunks)}")
 
 # ### End to End Demo
 # Please refer to our complete demo guide [Oracle AI Vector Search End-to-End Demo Guide](https://github.com/langchain-ai/langchain/tree/master/cookbook/oracleai_demo.ipynb) to build an end to end RAG pipeline with the help of Oracle AI Vector Search.
-# 
+#

@@ -2,27 +2,30 @@
 # coding: utf-8
 
 # # Migrating from RetrievalQA
-# 
+#
 # The [`RetrievalQA` chain](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.retrieval_qa.base.RetrievalQA.html) performed natural-language question answering over a data source using retrieval-augmented generation.
-# 
+#
 # Some advantages of switching to the LCEL implementation are:
-# 
+#
 # - Easier customizability. Details such as the prompt and how documents are formatted are only configurable via specific parameters in the `RetrievalQA` chain.
 # - More easily return source documents.
 # - Support for runnable methods like streaming and async operations.
-# 
+#
 # Now let's look at them side-by-side. We'll use the following ingestion code to load a [blog post by Lilian Weng](https://lilianweng.github.io/posts/2023-06-23-agent/) on autonomous agents into a local vector store:
-# 
+#
 # ## Shared setup
-# 
+#
 # For both versions, we'll need to load the data with the `WebBaseLoader` document loader, split it with `RecursiveCharacterTextSplitter`, and add it to an in-memory `FAISS` vector store.
-# 
+#
 # We will also instantiate a chat model to use.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community langchain langchain-openai faiss-cpu beautifulsoup4')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet langchain-community langchain langchain-openai faiss-cpu beautifulsoup4",
+)
 
 
 # In[2]:
@@ -60,7 +63,7 @@ llm = ChatOpenAI()
 
 
 # ## Legacy
-# 
+#
 # <details open>
 
 # In[4]:
@@ -80,9 +83,9 @@ qa_chain("What are autonomous agents?")
 
 
 # </details>
-# 
+#
 # ## LCEL
-# 
+#
 # <details open>
 
 # In[5]:
@@ -132,7 +135,7 @@ rag_chain.invoke({"input": "What are autonomous agents?"})
 
 
 # </details>
-# 
+#
 # ## Next steps
-# 
+#
 # Check out the [LCEL conceptual docs](/docs/concepts/lcel) for more background information on the LangChain expression language.

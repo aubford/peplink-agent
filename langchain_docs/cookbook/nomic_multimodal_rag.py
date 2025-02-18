@@ -2,79 +2,83 @@
 # coding: utf-8
 
 # ## Nomic multi-modal RAG
-# 
-# Many documents contain a mixture of content types, including text and images. 
-# 
+#
+# Many documents contain a mixture of content types, including text and images.
+#
 # Yet, information captured in images is lost in most RAG applications.
-# 
+#
 # With the emergence of multimodal LLMs, like [GPT-4V](https://openai.com/research/gpt-4v-system-card), it is worth considering how to utilize images in RAG:
-# 
+#
 # In this demo we
-# 
+#
 # * Use multimodal embeddings from Nomic Embed [Vision](https://huggingface.co/nomic-ai/nomic-embed-vision-v1.5) and [Text](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5) to embed images and text
 # * Retrieve both using similarity search
-# * Pass raw images and text chunks to a multimodal LLM for answer synthesis 
-# 
+# * Pass raw images and text chunks to a multimodal LLM for answer synthesis
+#
 # ## Signup
-# 
+#
 # Get your API token, then run:
 # ```
 # ! nomic login
 # ```
-# 
-# Then run with your generated API token 
+#
+# Then run with your generated API token
 # ```
-# ! nomic login < token > 
+# ! nomic login < token >
 # ```
-# 
+#
 # ## Packages
-# 
+#
 # For `unstructured`, you will also need `poppler` ([installation instructions](https://pdf2image.readthedocs.io/en/latest/installation.html)) and `tesseract` ([installation instructions](https://tesseract-ocr.github.io/tessdoc/Installation.html)) in your system.
 
 # In[ ]:
 
 
-get_ipython().system(' nomic login token')
+get_ipython().system(" nomic login token")
 
 
 # In[ ]:
 
 
-get_ipython().system(' pip install -U langchain-nomic langchain-chroma langchain-community tiktoken langchain-openai langchain # (newest versions required for multi-modal)')
+get_ipython().system(
+    " pip install -U langchain-nomic langchain-chroma langchain-community tiktoken langchain-openai langchain # (newest versions required for multi-modal)"
+)
 
 
 # In[ ]:
 
 
 # lock to 0.10.19 due to a persistent bug in more recent versions
-get_ipython().system(' pip install "unstructured[all-docs]==0.10.19" pillow pydantic lxml pillow matplotlib tiktoken')
+get_ipython().system(
+    ' pip install "unstructured[all-docs]==0.10.19" pillow pydantic lxml pillow matplotlib tiktoken'
+)
 
 
 # ## Data Loading
-# 
+#
 # ### Partition PDF text and images
-#   
+#
 # Let's look at an example pdfs containing interesting images.
-# 
+#
 # 1/ Art from the J Paul Getty museum:
-# 
-#  * Here is a [zip file](https://drive.google.com/file/d/18kRKbq2dqAhhJ3DfZRnYcTBEUfYxe1YR/view?usp=sharing) with the PDF and the already extracted images. 
+#
+#  * Here is a [zip file](https://drive.google.com/file/d/18kRKbq2dqAhhJ3DfZRnYcTBEUfYxe1YR/view?usp=sharing) with the PDF and the already extracted images.
 # * https://www.getty.edu/publications/resources/virtuallibrary/0892360224.pdf
-# 
+#
 # 2/ Famous photographs from library of congress:
-# 
+#
 # * https://www.loc.gov/lcm/pdf/LCM_2020_1112.pdf
 # * We'll use this as an example below
-# 
+#
 # We can use `partition_pdf` below from [Unstructured](https://unstructured-io.github.io/unstructured/introduction.html#key-concepts) to extract text and images.
-# 
+#
 # To supply this to extract the images:
 # ```
 # extract_images_in_pdf=True
 # ```
-# 
-# 
-# 
+#
+#
+#
 # If using this zip file, then you can simply process the text only with:
 # ```
 # extract_images_in_pdf=False
@@ -128,8 +132,8 @@ for element in raw_pdf_elements:
 
 
 # ## Multi-modal embeddings with our document
-# 
-# We will use [nomic-embed-vision-v1.5](https://huggingface.co/nomic-ai/nomic-embed-vision-v1.5) embeddings. This model is aligned 
+#
+# We will use [nomic-embed-vision-v1.5](https://huggingface.co/nomic-ai/nomic-embed-vision-v1.5) embeddings. This model is aligned
 # to [nomic-embed-text-v1.5](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5) allowing for multimodal semantic search and Multimodal RAG!
 
 # In[ ]:
@@ -179,9 +183,9 @@ text_retriever = text_vectorstore.as_retriever()
 
 
 # ## RAG
-# 
+#
 # `vectorstore.add_images` will store / retrieve images as base64 encoded strings.
-# 
+#
 # These can be passed to [GPT-4V](https://platform.openai.com/docs/guides/vision).
 
 # In[ ]:
@@ -246,11 +250,11 @@ def split_image_text_types(docs):
 
 
 # Currently, we format the inputs using a `RunnableLambda` while we add image support to `ChatPromptTemplates`.
-# 
-# Our runnable follows the classic RAG flow - 
-# 
-# * We first compute the context (both "texts" and "images" in this case) and the question (just a RunnablePassthrough here) 
-# * Then we pass this into our prompt template, which is a custom function that formats the message for the gpt-4-vision-preview model. 
+#
+# Our runnable follows the classic RAG flow -
+#
+# * We first compute the context (both "texts" and "images" in this case) and the question (just a RunnablePassthrough here)
+# * Then we pass this into our prompt template, which is a custom function that formats the message for the gpt-4-vision-preview model.
 # * And finally we parse the output as a string.
 
 # In[ ]:
@@ -367,5 +371,5 @@ chain.invoke("Women with children")
 
 
 # We can see the images retrieved in the LangSmith trace:
-# 
+#
 # LangSmith [trace](https://smith.langchain.com/public/69c558a5-49dc-4c60-a49b-3adbb70f74c5/r/e872c2c8-528c-468f-aefd-8b5cd730a673).

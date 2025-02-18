@@ -8,7 +8,7 @@
 # In[1]:
 
 
-get_ipython().system('pip install --upgrade langchain langchain-google-vertexai')
+get_ipython().system("pip install --upgrade langchain langchain-google-vertexai")
 
 
 # ### Running the model
@@ -95,13 +95,13 @@ print(answer2)
 # In[7]:
 
 
-get_ipython().system('mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/kaggle.json')
+get_ipython().system("mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/kaggle.json")
 
 
 # In[11]:
 
 
-get_ipython().system('pip install keras>=3 keras_nlp')
+get_ipython().system("pip install keras>=3 keras_nlp")
 
 
 # ### Usage
@@ -259,7 +259,3 @@ print(answer2)
 
 
 # In[ ]:
-
-
-
-

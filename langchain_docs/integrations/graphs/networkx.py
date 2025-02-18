@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # NetworkX
-# 
+#
 # >[NetworkX](https://networkx.org/) is a Python package for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks.
-# 
+#
 # This notebook goes over how to do question answering over a graph data structure.
 
 # ## Setting up
-# 
+#
 # We have to install a Python package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  networkx')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  networkx")
 
 
 # ## Create the graph
-# 
+#
 # In this section, we construct an example graph. At the moment, this works best for small pieces of text.
 
 # In[1]:
@@ -169,4 +169,3 @@ loaded_graph.clear_edges()
 
 
 loaded_graph.clear()
-

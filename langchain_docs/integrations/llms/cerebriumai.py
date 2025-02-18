@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # CerebriumAI
-# 
+#
 # `Cerebrium` is an AWS Sagemaker alternative. It also provides API access to [several LLM models](https://docs.cerebrium.ai/cerebrium/prebuilt-models/deployment).
-# 
+#
 # This notebook goes over how to use Langchain with [CerebriumAI](https://docs.cerebrium.ai/introduction).
 
 # ## Install cerebrium
@@ -14,7 +14,7 @@
 
 
 # Install the package
-get_ipython().system('pip3 install cerebrium')
+get_ipython().system("pip3 install cerebrium")
 
 
 # ## Imports
@@ -77,4 +77,3 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.run(question)
-

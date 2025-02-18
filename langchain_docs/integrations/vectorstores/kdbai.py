@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # KDB.AI
-# 
+#
 # > [KDB.AI](https://kdb.ai/) is a powerful knowledge-based vector database and search engine that allows you to build scalable, reliable AI applications, using real-time data, by providing advanced search, recommendation and personalization.
-# 
+#
 # [This example](https://github.com/KxSystems/kdbai-samples/blob/main/document_search/document_search.ipynb) demonstrates how to use KDB.AI to run semantic search on unstructured text documents.
-# 
+#
 # To access your end point and API keys, [sign up to KDB.AI here](https://kdb.ai/get-started/).
-# 
+#
 # To set up your development environment, follow the instructions on the [KDB.AI pre-requisites page](https://code.kx.com/kdbai/pre-requisites.html).
-# 
+#
 # The following examples demonstrate some of the ways you can interact with KDB.AI through LangChain.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # ## Import required packages
 
 # In[1]:
@@ -83,7 +83,11 @@ table = session.create_table("documents", schema)
 # In[6]:
 
 
-get_ipython().run_cell_magic('time', '', 'URL = "https://www.conseil-constitutionnel.fr/node/3850/pdf"\nPDF = "Déclaration_des_droits_de_l_homme_et_du_citoyen.pdf"\nopen(PDF, "wb").write(requests.get(URL).content)\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'URL = "https://www.conseil-constitutionnel.fr/node/3850/pdf"\nPDF = "Déclaration_des_droits_de_l_homme_et_du_citoyen.pdf"\nopen(PDF, "wb").write(requests.get(URL).content)\n',
+)
 
 
 # ## Read a PDF
@@ -91,7 +95,11 @@ get_ipython().run_cell_magic('time', '', 'URL = "https://www.conseil-constitutio
 # In[7]:
 
 
-get_ipython().run_cell_magic('time', '', 'print("Read a PDF...")\nloader = PyPDFLoader(PDF)\npages = loader.load_and_split()\nlen(pages)\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'print("Read a PDF...")\nloader = PyPDFLoader(PDF)\npages = loader.load_and_split()\nlen(pages)\n',
+)
 
 
 # ## Create a Vector Database from PDF Text
@@ -99,7 +107,11 @@ get_ipython().run_cell_magic('time', '', 'print("Read a PDF...")\nloader = PyPDF
 # In[8]:
 
 
-get_ipython().run_cell_magic('time', '', 'print("Create a Vector Database from PDF text...")\nembeddings = OpenAIEmbeddings(model="text-embedding-ada-002")\ntexts = [p.page_content for p in pages]\nmetadata = pd.DataFrame(index=list(range(len(texts))))\nmetadata["tag"] = "law"\nmetadata["title"] = "Déclaration des Droits de l\'Homme et du Citoyen de 1789".encode(\n    "utf-8"\n)\nvectordb = KDBAI(table, embeddings)\nvectordb.add_texts(texts=texts, metadatas=metadata)\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'print("Create a Vector Database from PDF text...")\nembeddings = OpenAIEmbeddings(model="text-embedding-ada-002")\ntexts = [p.page_content for p in pages]\nmetadata = pd.DataFrame(index=list(range(len(texts))))\nmetadata["tag"] = "law"\nmetadata["title"] = "Déclaration des Droits de l\'Homme et du Citoyen de 1789".encode(\n    "utf-8"\n)\nvectordb = KDBAI(table, embeddings)\nvectordb.add_texts(texts=texts, metadatas=metadata)\n',
+)
 
 
 # ## Create LangChain Pipeline
@@ -107,7 +119,11 @@ get_ipython().run_cell_magic('time', '', 'print("Create a Vector Database from P
 # In[9]:
 
 
-get_ipython().run_cell_magic('time', '', 'print("Create LangChain Pipeline...")\nqabot = RetrievalQA.from_chain_type(\n    chain_type="stuff",\n    llm=ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=TEMP),\n    retriever=vectordb.as_retriever(search_kwargs=dict(k=K)),\n    return_source_documents=True,\n)\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'print("Create LangChain Pipeline...")\nqabot = RetrievalQA.from_chain_type(\n    chain_type="stuff",\n    llm=ChatOpenAI(model="gpt-3.5-turbo-16k", temperature=TEMP),\n    retriever=vectordb.as_retriever(search_kwargs=dict(k=K)),\n    return_source_documents=True,\n)\n',
+)
 
 
 # ## Summarize the document in English
@@ -115,7 +131,11 @@ get_ipython().run_cell_magic('time', '', 'print("Create LangChain Pipeline...")\
 # In[10]:
 
 
-get_ipython().run_cell_magic('time', '', 'Q = "Summarize the document in English:"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'Q = "Summarize the document in English:"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n',
+)
 
 
 # ## Query the Data
@@ -123,19 +143,31 @@ get_ipython().run_cell_magic('time', '', 'Q = "Summarize the document in English
 # In[11]:
 
 
-get_ipython().run_cell_magic('time', '', 'Q = "Is it a fair law and why ?"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'Q = "Is it a fair law and why ?"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n',
+)
 
 
 # In[12]:
 
 
-get_ipython().run_cell_magic('time', '', 'Q = "What are the rights and duties of the man, the citizen and the society ?"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'Q = "What are the rights and duties of the man, the citizen and the society ?"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n',
+)
 
 
 # In[13]:
 
 
-get_ipython().run_cell_magic('time', '', 'Q = "Is this law practical ?"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'Q = "Is this law practical ?"\nprint(f"\\n\\n{Q}\\n")\nprint(qabot.invoke(dict(query=Q))["result"])\n',
+)
 
 
 # ## Clean up the Documents table
@@ -149,7 +181,3 @@ session.table("documents").drop()
 
 
 # In[ ]:
-
-
-
-

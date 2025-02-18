@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # <a href="https://colab.research.google.com/github/langchain-ai/langchain/blob/master/docs/docs/integrations/chat/maritalk.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-# 
+#
 # # Maritalk
-# 
+#
 # ## Introduction
-# 
+#
 # MariTalk is an assistant developed by the Brazilian company [Maritaca AI](https://www.maritaca.ai).
 # MariTalk is based on language models that have been specially trained to understand Portuguese well.
-# 
+#
 # This notebook demonstrates how to use MariTalk with LangChain through two examples:
-# 
+#
 # 1. A simple example of how to use MariTalk to perform a task.
 # 2. LLM + RAG: The second example shows how to answer a question whose answer is found in a long document that does not fit within the token limit of MariTalk. For this, we will use a simple searcher (BM25) to first search the document for the most relevant sections and then feed them to MariTalk for answering.
 
@@ -21,15 +21,15 @@
 # In[ ]:
 
 
-get_ipython().system('pip install langchain langchain-core langchain-community httpx')
+get_ipython().system("pip install langchain langchain-core langchain-community httpx")
 
 
 # ## API Key
 # You will need an API key that can be obtained from chat.maritaca.ai ("Chaves da API" section).
 
-# 
+#
 # ### Example 1 - Pet Name Suggestions
-# 
+#
 # Let's define our language model, ChatMaritalk, and configure it with your API key.
 
 # In[ ]:
@@ -65,9 +65,9 @@ print(response)  # should answer something like "1. Max\n2. Bella\n3. Charlie\n4
 
 
 # ### Stream Generation
-# 
+#
 # For tasks involving the generation of long text, such as creating an extensive article or translating a large document, it can be advantageous to receive the response in parts, as the text is generated, instead of waiting for the complete text. This makes the application more responsive and efficient, especially when the generated text is extensive. We offer two approaches to meet this need: one synchronous and another asynchronous.
-# 
+#
 # #### Synchronous:
 
 # In[ ]:
@@ -104,11 +104,13 @@ await async_invoke_chain("dog")
 # In[ ]:
 
 
-get_ipython().system('pip install unstructured rank_bm25 pdf2image pdfminer-six pikepdf pypdf unstructured_inference fastapi kaleido uvicorn "pillow<10.1.0" pillow_heif -q')
+get_ipython().system(
+    'pip install unstructured rank_bm25 pdf2image pdfminer-six pikepdf pypdf unstructured_inference fastapi kaleido uvicorn "pillow<10.1.0" pillow_heif -q'
+)
 
 
 # #### Loading the database
-# 
+#
 # The first step is to create a database with the information from the notice. For this, we will download the notice from the COMVEST website and segment the extracted text into 500-character windows.
 
 # In[ ]:
@@ -166,4 +168,3 @@ docs = retriever.invoke(query)
 chain.invoke(
     {"input_documents": docs, "query": query}
 )  # Should output something like: "O tempo máximo para realização da prova é de 5 horas."
-

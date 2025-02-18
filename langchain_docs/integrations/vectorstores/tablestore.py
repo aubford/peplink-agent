@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Tablestore
-# 
+#
 # [Tablestore](https://www.aliyun.com/product/ots) is a fully managed NoSQL cloud database service.
-# 
+#
 # Tablestore enables storage of a massive amount of structured and semi-structured data.
-# 
+#
 # This notebook shows how to use functionality related to the `Tablestore` vector database.
-# 
+#
 # To use Tablestore, you must create an instance.
 # Here are the [creating instance instructions](https://help.aliyun.com/zh/tablestore/getting-started/manage-the-wide-column-model-in-the-tablestore-console).
 
@@ -17,7 +17,9 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community tablestore')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain-community tablestore"
+)
 
 
 # ## Initialization
@@ -34,7 +36,7 @@ os.environ["access_key_id"] = getpass.getpass("Tablestore access_key_id:")
 os.environ["access_key_secret"] = getpass.getpass("Tablestore access_key_secret:")
 
 
-# Create vector store. 
+# Create vector store.
 
 # In[2]:
 
@@ -129,7 +131,7 @@ store.get_by_ids(["1", "3", "5"])
 store.similarity_search(query="hello world", k=2)
 
 
-# Similarity search with filters. 
+# Similarity search with filters.
 
 # In[8]:
 
@@ -146,14 +148,14 @@ store.similarity_search(
 
 
 # ## Usage for retrieval-augmented generation
-# 
+#
 # For guides on how to use this vector store for retrieval-augmented generation (RAG), see the following sections:
-# 
+#
 # - [Tutorials](/docs/tutorials/)
 # - [How-to: Question and answer with RAG](https://python.langchain.com/docs/how_to/#qa-with-rag)
 # - [Retrieval conceptual docs](https://python.langchain.com/docs/concepts/retrieval)
 
 # ## API reference
-# 
+#
 # For detailed documentation of all `TablestoreVectorStore` features and configurations head to the API reference:
 #  https://python.langchain.com/api_reference/community/vectorstores/langchain_community.vectorstores.tablestore.TablestoreVectorStore.html

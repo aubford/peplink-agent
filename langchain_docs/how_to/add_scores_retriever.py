@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # How to add scores to retriever results
-# 
+#
 # [Retrievers](/docs/concepts/retrievers/) will return sequences of [Document](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html) objects, which by default include no information about the process that retrieved them (e.g., a similarity score against a query). Here we demonstrate how to add retrieval scores to the `.metadata` of documents:
 # 1. From [vectorstore retrievers](/docs/how_to/vectorstore_retriever);
 # 2. From higher-order LangChain retrievers, such as [SelfQueryRetriever](/docs/how_to/self_query) or [MultiVectorRetriever](/docs/how_to/multi_vector).
-# 
+#
 # For (1), we will implement a short wrapper function around the corresponding [vector store](/docs/concepts/vectorstores/). For (2), we will update a method of the corresponding class.
-# 
+#
 # ## Create vector store
-# 
+#
 # First we populate a vector store with some data. We will use a [PineconeVectorStore](https://python.langchain.com/api_reference/pinecone/vectorstores/langchain_pinecone.vectorstores.PineconeVectorStore.html), but this guide is compatible with any LangChain vector store that implements a `.similarity_search_with_score` method.
 
 # In[2]:
@@ -58,9 +58,9 @@ vectorstore = PineconeVectorStore.from_documents(
 
 
 # ## Retriever
-# 
+#
 # To obtain scores from a vector store retriever, we wrap the underlying vector store's `.similarity_search_with_score` method in a short function that packages scores into the associated document's metadata.
-# 
+#
 # We add a `@chain` decorator to the function to create a [Runnable](/docs/concepts/lcel) that can be used similarly to a typical retriever.
 
 # In[3]:
@@ -91,11 +91,11 @@ result
 # Note that similarity scores from the retrieval step are included in the metadata of the above documents.
 
 # ## SelfQueryRetriever
-# 
+#
 # `SelfQueryRetriever` will use a LLM to generate a query that is potentially structured-- for example, it can construct filters for the retrieval on top of the usual semantic-similarity driven selection. See [this guide](/docs/how_to/self_query) for more detail.
-# 
+#
 # `SelfQueryRetriever` includes a short (1 - 2 line) method `_get_docs_with_query` that executes the `vectorstore` search. We can subclass `SelfQueryRetriever` and override this method to propagate similarity scores.
-# 
+#
 # First, following the [how-to guide](/docs/how_to/self_query), we will need to establish some metadata on which to filter:
 
 # In[5]:
@@ -129,7 +129,7 @@ document_content_description = "Brief summary of a movie"
 llm = ChatOpenAI(temperature=0)
 
 
-# We then override the `_get_docs_with_query` to use the `similarity_search_with_score` method of the underlying vector store: 
+# We then override the `_get_docs_with_query` to use the `similarity_search_with_score` method of the underlying vector store:
 
 # In[6]:
 
@@ -169,11 +169,11 @@ result
 
 
 # ## MultiVectorRetriever
-# 
+#
 # `MultiVectorRetriever` allows you to associate multiple vectors with a single document. This can be useful in a number of applications. For example, we can index small chunks of a larger document and run the retrieval on the chunks, but return the larger "parent" document when invoking the retriever. [ParentDocumentRetriever](/docs/how_to/parent_document_retriever/), a subclass of `MultiVectorRetriever`, includes convenience methods for populating a vector store to support this. Further applications are detailed in this [how-to guide](/docs/how_to/multi_vector/).
-# 
+#
 # To propagate similarity scores through this retriever, we can again subclass `MultiVectorRetriever` and override a method. This time we will override `_get_relevant_documents`.
-# 
+#
 # First, we prepare some fake data. We generate fake "whole documents" and store them in a document store; here we will use a simple [InMemoryStore](https://python.langchain.com/api_reference/core/stores/langchain_core.stores.InMemoryBaseStore.html).
 
 # In[8]:
@@ -215,7 +215,7 @@ vectorstore.add_documents(docs)
 
 
 # To propagate the scores, we subclass `MultiVectorRetriever` and override its `_get_relevant_documents` method. Here we will make two changes:
-# 
+#
 # 1. We will add similarity scores to the metadata of the corresponding "sub-documents" using the `similarity_search_with_score` method of the underlying vector store as above;
 # 2. We will include a list of these sub-documents in the metadata of the retrieved parent document. This surfaces what snippets of text were identified by the retrieval, together with their corresponding similarity scores.
 
@@ -271,4 +271,3 @@ class CustomMultiVectorRetriever(MultiVectorRetriever):
 retriever = CustomMultiVectorRetriever(vectorstore=vectorstore, docstore=docstore)
 
 retriever.invoke("cat")
-

@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Databricks Unity Catalog (UC)
-# 
+#
 # This notebook shows how to use UC functions as LangChain tools, with both LangChain and LangGraph agent APIs.
-# 
+#
 # See Databricks documentation ([AWS](https://docs.databricks.com/en/sql/language-manual/sql-ref-syntax-ddl-create-sql-function.html)|[Azure](https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/sql-ref-syntax-ddl-create-sql-function)|[GCP](https://docs.gcp.databricks.com/en/sql/language-manual/sql-ref-syntax-ddl-create-sql-function.html)) to learn how to create SQL or Python functions in UC. Do not skip function and parameter comments, which are critical for LLMs to call functions properly.
-# 
+#
 # In this example notebook, we create a simple Python function that executes arbitrary code and use it as a LangChain tool:
-# 
+#
 # ```sql
 # CREATE FUNCTION main.tools.python_exec (
 #   code STRING COMMENT 'Python code to execute. Remember to print the final result to stdout.'
@@ -25,13 +25,16 @@
 #   return stdout.getvalue()
 # $$
 # ```
-# 
+#
 # It runs in a secure and isolated environment within a Databricks SQL warehouse.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet databricks-sdk langchain-community databricks-langchain langgraph mlflow')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet databricks-sdk langchain-community databricks-langchain langgraph mlflow",
+)
 
 
 # In[ ]:
@@ -116,4 +119,3 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 agent_executor.invoke({"input": "36939 * 8922.4"})
-

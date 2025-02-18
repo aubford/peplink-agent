@@ -4,11 +4,11 @@
 # # Multi-modal outputs: Image & Text
 
 # This notebook shows how non-text producing tools can be used to create multi-modal agents.
-# 
-# This example is limited to text and image outputs and uses UUIDs to transfer content across tools and agents. 
-# 
-# This example uses Steamship to generate and store generated images. Generated are auth protected by default. 
-# 
+#
+# This example is limited to text and image outputs and uses UUIDs to transfer content across tools and agents.
+#
+# This example uses Steamship to generate and store generated images. Generated are auth protected by default.
+#
 # You can get your Steamship api key here: https://steamship.com/account/api
 
 # In[ ]:
@@ -34,7 +34,7 @@ from langchain_openai import OpenAI
 llm = OpenAI(temperature=0)
 
 
-# ## Dall-E 
+# ## Dall-E
 
 # In[ ]:
 
@@ -78,7 +78,7 @@ def show_output(output):
             print(output, end="\n\n")
 
 
-# ## StableDiffusion 
+# ## StableDiffusion
 
 # In[ ]:
 
@@ -98,4 +98,3 @@ mrkl = initialize_agent(
 
 
 output = mrkl.run("How would you visualize a parot playing soccer?")
-

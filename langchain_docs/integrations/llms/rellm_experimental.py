@@ -2,22 +2,24 @@
 # coding: utf-8
 
 # # RELLM
-# 
+#
 # [RELLM](https://github.com/r2d4/rellm) is a library that wraps local Hugging Face pipeline models for structured decoding.
-# 
+#
 # It works by generating tokens one at a time. At each step, it masks tokens that don't conform to the provided partial regular expression.
-# 
-# 
+#
+#
 # **Warning - this module is still experimental**
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  rellm langchain-huggingface > /dev/null')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  rellm langchain-huggingface > /dev/null"
+)
 
 
 # ### Hugging Face Baseline
-# 
+#
 # First, let's establish a qualitative baseline by checking the output of the model without structured decoding.
 
 # In[2]:
@@ -64,7 +66,7 @@ print(generated)
 # ***That's not so impressive, is it? It didn't answer the question and it didn't follow the JSON format at all! Let's try with the structured decoder.***
 
 # ## RELLM LLM Wrapper
-# 
+#
 # Let's try that again, now providing a regex to match the JSON structured format.
 
 # In[4]:
@@ -96,7 +98,3 @@ print(generated)
 # **Voila! Free of parsing errors.**
 
 # In[ ]:
-
-
-
-

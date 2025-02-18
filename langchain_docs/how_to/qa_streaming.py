@@ -2,42 +2,45 @@
 # coding: utf-8
 
 # # How to stream results from your RAG application
-# 
+#
 # This guide explains how to stream results from a [RAG](/docs/concepts/rag/) application. It covers streaming tokens from the final output as well as intermediate steps of a chain (e.g., from query re-writing).
-# 
+#
 # We'll work off of the Q&A app with sources we built over the [LLM Powered Autonomous Agents](https://lilianweng.github.io/posts/2023-06-23-agent/) blog post by Lilian Weng in the [RAG tutorial](/docs/tutorials/rag).
 
 # ## Setup
-# 
+#
 # ### Dependencies
-# 
+#
 # We'll use the following packages:
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-community langchainhub beautifulsoup4')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  langchain langchain-community langchainhub beautifulsoup4",
+)
 
 
 # ### LangSmith
-# 
+#
 # Many of the applications you build with LangChain will contain multiple steps with multiple invocations of LLM calls. As these applications get more and more complex, it becomes crucial to be able to inspect what exactly is going on inside your chain or agent. The best way to do this is with [LangSmith](https://smith.langchain.com).
-# 
+#
 # Note that LangSmith is not needed, but it is helpful. If you do want to use LangSmith, after you sign up at the link above, make sure to set your environment variables to start logging traces:
-# 
+#
 # ```python
 # os.environ["LANGSMITH_TRACING"] = "true"
 # os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
 # ```
 
 # ### Components
-# 
+#
 # We will need to select three components from LangChain's suite of integrations.
-# 
+#
 # A [chat model](/docs/integrations/chat/):
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
 
 # In[2]:
@@ -52,9 +55,9 @@ llm = ChatOpenAI(model="gpt-4o-mini")
 
 
 # An [embedding model](/docs/integrations/text_embedding/):
-# 
+#
 # import EmbeddingTabs from "@theme/EmbeddingTabs";
-# 
+#
 # <EmbeddingTabs/>
 
 # In[3]:
@@ -69,9 +72,9 @@ embeddings = OpenAIEmbeddings()
 
 
 # And a [vector store](/docs/integrations/vectorstores/):
-# 
+#
 # import VectorStoreTabs from "@theme/VectorStoreTabs";
-# 
+#
 # <VectorStoreTabs/>
 
 # In[4]:
@@ -88,7 +91,7 @@ vector_store = InMemoryVectorStore(embeddings)
 # ## RAG application
 
 # Let's reconstruct the Q&A app with sources we built over the [LLM Powered Autonomous Agents](https://lilianweng.github.io/posts/2023-06-23-agent/) blog post by Lilian Weng in the [RAG tutorial](/docs/tutorials/rag).
-# 
+#
 # First we index our documents:
 
 # In[6]:
@@ -172,9 +175,9 @@ display(Image(graph.get_graph().draw_mermaid_png()))
 
 
 # ## Streaming final outputs
-# 
+#
 # LangGraph supports several [streaming modes](https://langchain-ai.github.io/langgraph/how-tos/#streaming), which can be controlled by specifying the `stream_mode` parameter. Setting `stream_mode="messages"` allows us to stream tokens from chat model invocations.
-# 
+#
 # In general there can be multiple chat model invocations in an application (although here there is just one). Below, we filter to only the last step using the name of the corresponding node:
 
 # In[10]:
@@ -192,7 +195,7 @@ for message, metadata in graph.stream(
 
 
 # ## Streaming intermediate steps
-# 
+#
 # Other streaming modes will generally stream steps from our invocation-- i.e., state updates from individual nodes. In this case, each node is just appending a new key to the state:
 
 # In[11]:

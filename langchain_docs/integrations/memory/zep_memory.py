@@ -3,26 +3,26 @@
 
 # # Zep Open Source Memory
 # > Recall, understand, and extract data from chat histories. Power personalized AI experiences.
-# 
+#
 # >[Zep](https://www.getzep.com) is a long-term memory service for AI Assistant apps.
 # > With Zep, you can provide AI assistants with the ability to recall past conversations, no matter how distant,
 # > while also reducing hallucinations, latency, and cost.
-# 
+#
 # > Interested in Zep Cloud? See [Zep Cloud Installation Guide](https://help.getzep.com/sdks) and [Zep Cloud Memory Example](https://help.getzep.com/langchain/examples/messagehistory-example)
-# 
+#
 # ## Open Source Installation and Setup
-# 
+#
 # > Zep Open Source project: [https://github.com/getzep/zep](https://github.com/getzep/zep)
 # >
 # > Zep Open Source Docs: [https://docs.getzep.com/](https://docs.getzep.com/)
-# 
+#
 # ## Example
-# 
+#
 # This notebook demonstrates how to use [Zep](https://www.getzep.com/) as memory for your chatbot.
 # REACT Agent Chat Message History with Zep - A long-term memory store for LLM applications.
-# 
+#
 # We'll demonstrate:
-# 
+#
 # 1. Adding conversation history to Zep.
 # 2. Running an agent and having message automatically added to the store.
 # 3. Viewing the enriched messages.
@@ -65,7 +65,7 @@ zep_api_key = getpass.getpass()
 
 
 # ### Initialize the Zep Chat Message History Class and initialize the Agent
-# 
+#
 
 # In[4]:
 
@@ -102,7 +102,7 @@ agent_chain = initialize_agent(
 
 
 # ### Add some history data
-# 
+#
 
 # In[5]:
 
@@ -180,9 +180,9 @@ for msg in test_history:
 
 
 # ### Run the agent
-# 
+#
 # Doing so will automatically add the input and response to the Zep memory.
-# 
+#
 
 # In[6]:
 
@@ -193,11 +193,11 @@ agent_chain.run(
 
 
 # ### Inspect the Zep memory
-# 
+#
 # Note the summary, and that the history has been enriched with token counts, UUIDs, and timestamps.
-# 
+#
 # Summaries are biased towards the most recent messages.
-# 
+#
 
 # In[9]:
 
@@ -213,11 +213,11 @@ print_messages(memory.chat_memory.messages)
 
 
 # ### Vector search over the Zep memory
-# 
+#
 # Zep provides native vector search over historical conversation memory via the `ZepRetriever`.
-# 
+#
 # You can use the `ZepRetriever` with chains that support passing in a Langchain `Retriever` object.
-# 
+#
 
 # In[11]:
 
@@ -235,7 +235,3 @@ for r in search_results:
 
 
 # In[ ]:
-
-
-
-

@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # AWS S3 File
-# 
+#
 # >[Amazon Simple Storage Service (Amazon S3)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-folders.html) is an object storage service.
-# 
+#
 # >[AWS S3 Buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingBucket.html)
-# 
+#
 # This covers how to load document objects from an `AWS S3 File` object.
 
 # In[1]:
@@ -18,7 +18,7 @@ from langchain_community.document_loaders import S3FileLoader
 # In[2]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  boto3')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  boto3")
 
 
 # In[8]:
@@ -51,4 +51,3 @@ loader = S3FileLoader(
 
 
 loader.load()
-

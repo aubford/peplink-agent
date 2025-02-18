@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # How to do "self-querying" retrieval
-# 
+#
 # :::info
-# 
+#
 # Head to [Integrations](/docs/integrations/retrievers/self_query) for documentation on vector stores with built-in support for self-querying.
-# 
+#
 # :::
-# 
+#
 # A self-querying [retriever](/docs/concepts/retrievers/) is one that, as the name suggests, has the ability to query itself. Specifically, given any natural language query, the retriever uses a query-constructing LLM chain to write a structured query and then applies that structured query to its underlying [vector store](/docs/concepts/vectorstores/). This allows the retriever to not only use the user-input query for semantic similarity comparison with the contents of stored documents but to also extract filters from the user query on the metadata of stored documents and to execute those filters.
-# 
+#
 # ![](../../static/img/self_querying.jpg)
-# 
+#
 # ## Get started
 # For demonstration purposes we'll use a `Chroma` vector store. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` package installed.
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark langchain-chroma')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark langchain-chroma")
 
 
 # In[1]:
@@ -66,7 +66,7 @@ vectorstore = Chroma.from_documents(docs, OpenAIEmbeddings())
 
 
 # ### Creating our self-querying retriever
-# 
+#
 # Now we can instantiate our retriever. To do this we'll need to provide some information upfront about the metadata fields that our documents support and a short description of the document contents.
 
 # In[2]:
@@ -107,7 +107,7 @@ retriever = SelfQueryRetriever.from_llm(
 
 
 # ### Testing it out
-# 
+#
 # And now we can actually try using our retriever!
 
 # In[3]:
@@ -141,9 +141,9 @@ retriever.invoke(
 
 
 # ### Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[7]:
@@ -162,9 +162,9 @@ retriever.invoke("What are two movies about dinosaurs")
 
 
 # ## Constructing from scratch with LCEL
-# 
+#
 # To see what's going on under the hood, and to have more custom control, we can reconstruct our retriever from scratch.
-# 
+#
 # First, we need to create a query-construction chain. This chain will take a user query and generated a `StructuredQuery` object which captures the filters specified by the user. We provide some helper functions for creating a prompt and output parser. These have a number of tunable params that we'll ignore here for simplicity.
 
 # In[8]:
@@ -204,7 +204,7 @@ query_constructor.invoke(
 
 
 # The query constructor is the key element of the self-query retriever. To make a great retrieval system you'll need to make sure your query constructor works well. Often this requires adjusting the prompt, the examples in the prompt, the attribute descriptions, etc. For an example that walks through refining a query constructor on some hotel inventory data, [check out this cookbook](https://github.com/langchain-ai/langchain/blob/master/cookbook/self_query_hotel_search.ipynb).
-# 
+#
 # The next key element is the structured query translator. This is the object responsible for translating the generic `StructuredQuery` object into a metadata filter in the syntax of the vector store you're using. LangChain comes with a number of built-in translators. To see them all head to the [Integrations section](/docs/integrations/retrievers/self_query).
 
 # In[11]:
@@ -225,4 +225,3 @@ retriever = SelfQueryRetriever(
 retriever.invoke(
     "What's a movie after 1990 but before 2005 that's all about toys, and preferably is animated"
 )
-

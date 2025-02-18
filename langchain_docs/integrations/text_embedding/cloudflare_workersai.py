@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Cloudflare Workers AI
-# 
+#
 # >[Cloudflare, Inc. (Wikipedia)](https://en.wikipedia.org/wiki/Cloudflare) is an American company that provides content delivery network services, cloud cybersecurity, DDoS mitigation, and ICANN-accredited domain registration services.
-# 
+#
 # >[Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/) allows you to run machine learning models, on the `Cloudflare` network, from your code via REST API.
-# 
+#
 # >[Cloudflare AI document](https://developers.cloudflare.com/workers-ai/models/text-embeddings/) listed all text embeddings models available.
-# 
+#
 # ## Setting up
-# 
+#
 # Both Cloudflare account ID and API token are required. Find how to obtain them from [this document](https://developers.cloudflare.com/workers-ai/get-started/rest-api/).
-# 
+#
 
 # In[2]:
 
@@ -55,7 +55,3 @@ len(batch_query_result), len(batch_query_result[0])
 
 
 # In[ ]:
-
-
-
-

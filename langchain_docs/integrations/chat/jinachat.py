@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # JinaChat
-# 
+#
 # This notebook covers how to get started with JinaChat chat models.
 
 # In[4]:
@@ -38,7 +38,7 @@ chat(messages)
 
 
 # You can make use of templating by using a `MessagePromptTemplate`. You can build a `ChatPromptTemplate` from one or more `MessagePromptTemplates`. You can use `ChatPromptTemplate`'s `format_prompt` -- this returns a `PromptValue`, which you can convert to a string or Message object, depending on whether you want to use the formatted value as input to an llm or chat model.
-# 
+#
 # For convenience, there is a `from_template` method exposed on the template. If you were to use this template, this is what it would look like:
 
 # In[11]:
@@ -68,7 +68,3 @@ chat(
 
 
 # In[ ]:
-
-
-
-

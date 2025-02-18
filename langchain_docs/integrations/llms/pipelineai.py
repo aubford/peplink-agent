@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # PipelineAI
-# 
+#
 # >[PipelineAI](https://pipeline.ai) allows you to run your ML models at scale in the cloud. It also provides API access to [several LLM models](https://pipeline.ai).
-# 
+#
 # This notebook goes over how to use Langchain with [PipelineAI](https://docs.pipeline.ai/docs).
-# 
+#
 # ## PipelineAI example
-# 
+#
 # [This example shows how PipelineAI integrated with LangChain](https://docs.pipeline.ai/docs/langchain) and it is created by PipelineAI.
 
 # ## Setup
@@ -18,11 +18,11 @@
 
 
 # Install the package
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pipeline-ai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pipeline-ai")
 
 
 # ## Example
-# 
+#
 # ### Imports
 
 # In[ ]:
@@ -83,4 +83,3 @@ llm_chain = prompt | llm | StrOutputParser()
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.invoke(question)
-

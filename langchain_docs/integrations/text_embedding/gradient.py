@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Gradient
-# 
+#
 # `Gradient` allows to create `Embeddings` as well fine tune and get completions on LLMs with a simple web API.
-# 
+#
 # This notebook goes over how to use Langchain with Embeddings of [Gradient](https://gradient.ai/).
-# 
+#
 
 # ## Imports
 
@@ -39,7 +39,7 @@ if not os.environ.get("GRADIENT_WORKSPACE_ID", None):
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  gradientai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  gradientai")
 
 
 # ## Create the Gradient instance
@@ -75,7 +75,3 @@ dict(zip(documents, scores))
 
 
 # In[ ]:
-
-
-
-

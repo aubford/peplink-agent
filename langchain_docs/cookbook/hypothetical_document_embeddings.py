@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # Improve document indexing with HyDE
-# This notebook goes over how to use Hypothetical Document Embeddings (HyDE), as described in [this paper](https://arxiv.org/abs/2212.10496). 
-# 
-# At a high level, HyDE is an embedding technique that takes queries, generates a hypothetical answer, and then embeds that generated document and uses that as the final example. 
-# 
+# This notebook goes over how to use Hypothetical Document Embeddings (HyDE), as described in [this paper](https://arxiv.org/abs/2212.10496).
+#
+# At a high level, HyDE is an embedding technique that takes queries, generates a hypothetical answer, and then embeds that generated document and uses that as the final example.
+#
 # In order to use HyDE, we therefore need to provide a base embedding model, as well as an LLMChain that can be used to generate those documents. By default, the HyDE class comes with some default prompts to use (see the paper for more details on them), but we can also create our own.
 
 # In[1]:
@@ -23,7 +23,7 @@ base_embeddings = OpenAIEmbeddings()
 llm = OpenAI()
 
 
-# 
+#
 
 # In[3]:
 
@@ -64,7 +64,7 @@ result = embeddings.embed_query("Where is the Taj Mahal?")
 
 # ## Using our own prompts
 # Besides using preconfigured prompts, we can also easily construct our own prompts and use those in the LLMChain that is generating the documents. This can be useful if we know the domain our queries will be in, as we can condition the prompt to generate text more similar to that.
-# 
+#
 # In the example below, let's condition it to generate text about a state of the union address (because we will use that in the next example).
 
 # In[8]:
@@ -124,7 +124,3 @@ print(docs[0].page_content)
 
 
 # In[ ]:
-
-
-
-

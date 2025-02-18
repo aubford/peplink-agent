@@ -4,32 +4,34 @@
 # # Tavily Search
 
 # [Tavily's Search API](https://tavily.com) is a search engine built specifically for AI agents (LLMs), delivering real-time, accurate, and factual results at speed.
-# 
+#
 # ## Overview
-# 
+#
 # ### Integration details
 # | Class | Package | Serializable | [JS support](https://js.langchain.com/docs/integrations/tools/tavily_search) |  Package latest |
 # | :--- | :--- | :---: | :---: | :---: |
 # | [TavilySearchResults](https://python.langchain.com/api_reference/community/tools/langchain_community.tools.tavily_search.tool.TavilySearchResults.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ❌ | ✅ |  ![PyPI - Version](https://img.shields.io/pypi/v/langchain-community?style=flat-square&label=%20) |
-# 
+#
 # ### Tool features
 # | [Returns artifact](/docs/how_to/tool_artifacts/) | Native async | Return data | Pricing |
 # | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | Title, URL, content, answer | 1,000 free searches / month | 
-# 
-# 
+# | ✅ | ✅ | Title, URL, content, answer | 1,000 free searches / month |
+#
+#
 # ## Setup
-# 
+#
 # The integration lives in the `langchain-community` package. We also need to install the `tavily-python` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU "langchain-community>=0.2.11" tavily-python')
+get_ipython().run_line_magic(
+    "pip", 'install -qU "langchain-community>=0.2.11" tavily-python'
+)
 
 
 # ### Credentials
-# 
+#
 # We also need to set our Tavily API key. You can get an API key by visiting [this site](https://app.tavily.com/sign-in) and creating an account.
 
 # In[2]:
@@ -52,8 +54,8 @@ if not os.environ.get("TAVILY_API_KEY"):
 
 
 # ## Instantiation
-# 
-# Here we show how to instantiate an instance of the Tavily search tools, with 
+#
+# Here we show how to instantiate an instance of the Tavily search tools, with
 
 # In[1]:
 
@@ -75,9 +77,9 @@ tool = TavilySearchResults(
 
 
 # ## Invocation
-# 
+#
 # ### [Invoke directly with args](/docs/concepts/tools)
-# 
+#
 # The `TavilySearchResults` tool takes a single "query" argument, which should be a natural language query:
 
 # In[2]:
@@ -87,7 +89,7 @@ tool.invoke({"query": "What happened at the last wimbledon"})
 
 
 # ### [Invoke with ToolCall](/docs/concepts/tools)
-# 
+#
 # We can also invoke the tool with a model-generated ToolCall, in which case a ToolMessage will be returned:
 
 # In[5]:
@@ -123,13 +125,13 @@ print(json.dumps({k: str(v)[:200] for k, v in tool_msg.artifact.items()}, indent
 
 
 # ## Chaining
-# 
+#
 # We can use our tool in a chain by first binding it to a [tool-calling model](/docs/how_to/tool_calling/) and then calling it:
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
-# 
+#
 
 # In[ ]:
 
@@ -180,5 +182,5 @@ tool_chain.invoke("who won the last womens singles wimbledon")
 # Here's the [LangSmith trace](https://smith.langchain.com/public/b43232c1-b243-4a7f-afeb-5fba8c84ba56/r) for this run.
 
 # ## API reference
-# 
+#
 # For detailed documentation of all TavilySearchResults features and configurations head to the API reference: https://python.langchain.com/api_reference/community/tools/langchain_community.tools.tavily_search.tool.TavilySearchResults.html

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # AsyncHtml
-# 
+#
 # `AsyncHtmlLoader` loads raw HTML from a list of URLs concurrently.
 
 # In[4]:
@@ -33,4 +33,3 @@ docs[0].page_content[1000:2000]
 
 
 docs[1].page_content[1000:2000]
-

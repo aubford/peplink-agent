@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Amazon Personalize
-# 
+#
 # [Amazon Personalize](https://docs.aws.amazon.com/personalize/latest/dg/what-is-personalize.html) is a fully managed machine learning service that uses your data to generate item recommendations for your users. It can also generate user segments based on the users' affinity for certain items or item metadata.
-# 
+#
 # This notebook goes through how to use Amazon Personalize Chain. You need a Amazon Personalize campaign_arn or a recommender_arn before you get started with the below notebook.
-# 
-# Following is a [tutorial](https://github.com/aws-samples/retail-demo-store/blob/master/workshop/1-Personalization/Lab-1-Introduction-and-data-preparation.ipynb) to setup a campaign_arn/recommender_arn on Amazon Personalize. Once the campaign_arn/recommender_arn is setup, you can use it in the langchain ecosystem. 
-# 
+#
+# Following is a [tutorial](https://github.com/aws-samples/retail-demo-store/blob/master/workshop/1-Personalization/Lab-1-Introduction-and-data-preparation.ipynb) to setup a campaign_arn/recommender_arn on Amazon Personalize. Once the campaign_arn/recommender_arn is setup, you can use it in the langchain ecosystem.
+#
 
 # ## 1. Install Dependencies
 
 # In[ ]:
 
 
-get_ipython().system('pip install boto3')
+get_ipython().system("pip install boto3")
 
 
 # ## 2. Sample Use-cases
@@ -85,7 +85,7 @@ chain = AmazonPersonalizeChain.from_llm(
 chain.run({"user_id": "1", "item_id": "234"})
 
 
-# ### 2.4 [Use-case-4] Invoke Amazon Personalize in a Sequential Chain 
+# ### 2.4 [Use-case-4] Invoke Amazon Personalize in a Sequential Chain
 
 # In[ ]:
 
@@ -122,7 +122,7 @@ overall_chain = SequentialChain(
 overall_chain.run({"user_id": "1", "item_id": "234"})
 
 
-# ### 2.5 [Use-case-5] Invoke Amazon Personalize and retrieve metadata 
+# ### 2.5 [Use-case-5] Invoke Amazon Personalize and retrieve metadata
 
 # In[ ]:
 
@@ -156,4 +156,3 @@ chain = AmazonPersonalizeChain.from_llm(
 )
 response = chain({"user_id": "1", "metadata_columns": metadataMap})
 print(response)
-

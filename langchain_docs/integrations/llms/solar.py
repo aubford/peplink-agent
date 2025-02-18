@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Solar
-# 
+#
 # *This community integration is deprecated. You should use [`ChatUpstage`](../../chat/upstage) instead to access Solar LLM via the chat model connector.*
 
 # In[ ]:
@@ -36,4 +36,3 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.run(question)
-

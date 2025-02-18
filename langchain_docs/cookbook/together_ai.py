@@ -2,18 +2,20 @@
 # coding: utf-8
 
 # ## Together AI + RAG
-#  
+#
 # [Together AI](https://python.langchain.com/docs/integrations/llms/together) has a broad set of OSS LLMs via inference API.
-# 
+#
 # See [here](https://docs.together.ai/docs/inference-models). We use `"mistralai/Mixtral-8x7B-Instruct-v0.1` for RAG on the Mixtral paper.
-# 
+#
 # Download the paper:
 # https://arxiv.org/pdf/2401.04088.pdf
 
 # In[ ]:
 
 
-get_ipython().system(' pip install --quiet pypdf tiktoken openai langchain-chroma langchain-together')
+get_ipython().system(
+    " pip install --quiet pypdf tiktoken openai langchain-chroma langchain-together"
+)
 
 
 # In[ ]:
@@ -89,6 +91,6 @@ chain = (
 chain.invoke("What are the Architectural details of Mixtral?")
 
 
-# Trace: 
-# 
+# Trace:
+#
 # https://smith.langchain.com/public/935fd642-06a6-4b42-98e3-6074f93115cd/r

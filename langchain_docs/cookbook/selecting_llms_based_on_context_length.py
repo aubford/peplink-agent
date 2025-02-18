@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Selecting LLMs based on Context Length
-# 
+#
 # Different LLMs have different context lengths. As a very immediate an practical example, OpenAI has two versions of GPT-3.5-Turbo: one with 4k context, another with 16k context. This notebook shows how to route between them based on input.
 
 # In[24]:
@@ -70,7 +70,3 @@ chain.invoke(
 
 
 # In[ ]:
-
-
-
-

@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Polygon IO Toolkit and Tools
-# 
+#
 # This notebook shows how to use agents to interact with the [Polygon IO](https://polygon.io/) toolkit. The toolkit provides access to Polygon's Stock Market Data API.
 
 # ## Setup
-# 
+#
 # ### Installation
-# 
+#
 # To use Polygon IO tools, you need to install the `langchain-community` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community > /dev/null')
+get_ipython().run_line_magic("pip", "install -qU langchain-community > /dev/null")
 
 
 # ### Credentials
-# 
-# Get your Polygon IO API key [here](https://polygon.io/), and then set it below. 
+#
+# Get your Polygon IO API key [here](https://polygon.io/), and then set it below.
 
 # In[2]:
 
@@ -41,11 +41,11 @@ if "POLYGON_API_KEY" not in os.environ:
 
 
 # ## Toolkit
-# 
+#
 # Polygon IO provides both a toolkit and individual tools for each of the tools included in the toolkit. Let's first explore using the toolkit and then we will walk through using the individual tools.
-# 
+#
 # ### Initialization
-# 
+#
 # We can initialize the toolkit by importing it alongside the API wrapper needed to use the tools.
 
 # In[4]:
@@ -59,7 +59,7 @@ toolkit = PolygonToolkit.from_polygon_api_wrapper(polygon)
 
 
 # ### Tools
-# 
+#
 # We can examine the tools included in this toolkit:
 
 # In[5]:
@@ -69,7 +69,7 @@ toolkit.get_tools()
 
 
 # ### Use within an agent
-# 
+#
 # Next we can add our toolkit to an agent and use it!
 
 # In[11]:
@@ -133,11 +133,11 @@ agent_executor.invoke({"input": "What is Doordash stock price right now?"})
 
 
 # ### API reference
-# 
+#
 # For detailed documentation of all the Polygon IO toolkit features and configurations head to the API reference: https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.polygon.toolkit.PolygonToolkit.html
 
 # ## Tools
-# 
+#
 # First, let's set up the API wrapper that we will use for all the tools and then we will walk through each one of them.
 
 # In[16]:
@@ -149,7 +149,7 @@ api_wrapper = PolygonAPIWrapper()
 
 
 # ### Aggregate
-# 
+#
 # This tool shows aggregate information for a stock.
 
 # In[25]:
@@ -190,7 +190,7 @@ print(res)
 
 
 # ### Financials
-# 
+#
 # This tool provides general financial information about a stock
 
 # In[35]:
@@ -217,7 +217,7 @@ print(res)
 
 
 # ### Last Quote
-# 
+#
 # This tool provides information about the live data of a stock, although it requires a "Stocks Advanced" subscription to use.
 
 # In[ ]:
@@ -242,7 +242,7 @@ res = last_quote_tool.invoke(model_generated_tool_call)
 
 
 # ### Ticker News
-# 
+#
 # This tool provides recent news about a certain ticker.
 
 # In[33]:
@@ -269,9 +269,9 @@ print(res)
 
 
 # ### API reference
-# 
+#
 # For detailed documentation of all Polygon IO tools head to the API reference for each:
-# 
+#
 # - Aggregate: https://python.langchain.com/api_reference/community/tools/langchain_community.tools.polygon.aggregates.PolygonAggregates.html
 # - Financials: https://python.langchain.com/api_reference/community/tools/langchain_community.tools.polygon.financials.PolygonFinancials.html
 # - Last Quote: https://python.langchain.com/api_reference/community/tools/langchain_community.tools.polygon.last_quote.PolygonLastQuote.html

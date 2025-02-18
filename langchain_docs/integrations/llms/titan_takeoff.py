@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Titan Takeoff
-# 
+#
 # `TitanML` helps businesses build and deploy better, smaller, cheaper, and faster NLP models through our training, compression, and inference optimization platform.
-# 
+#
 # Our inference server, [Titan Takeoff](https://docs.titanml.co/docs/intro) enables deployment of LLMs locally on your hardware in a single command. Most generative model architectures are supported, such as Falcon, Llama 2, GPT2, T5 and many more. If you experience trouble with a specific model, please let us know at hello@titanml.co.
 
 # ## Example usage
@@ -22,9 +22,9 @@ from langchain_core.prompts import PromptTemplate
 
 
 # ### Example 1
-# 
+#
 # Basic use assuming Takeoff is running on your machine using its default ports (ie localhost:3000).
-# 
+#
 
 # In[ ]:
 
@@ -35,7 +35,7 @@ print(output)
 
 
 # ### Example 2
-# 
+#
 # Specifying a port and other generation parameters
 
 # In[ ]:
@@ -60,7 +60,7 @@ print(output)
 
 
 # ### Example 3
-# 
+#
 # Using generate for multiple inputs
 
 # In[ ]:
@@ -72,7 +72,7 @@ print(rich_output.generations)
 
 
 # ### Example 4
-# 
+#
 # Streaming output
 
 # In[ ]:
@@ -87,7 +87,7 @@ print(output)
 
 
 # ### Example 5
-# 
+#
 # Using LCEL
 
 # In[ ]:
@@ -101,7 +101,7 @@ print(output)
 
 
 # ### Example 6
-# 
+#
 # Starting readers using TitanTakeoff Python Wrapper. If you haven't created any readers with first launching Takeoff, or you want to add another you can do so when you initialize the TitanTakeoff object. Just pass a list of model configs you want to start as the `models` parameter.
 
 # In[ ]:
@@ -127,4 +127,3 @@ time.sleep(60)
 prompt = "What is the capital of France?"
 output = llm.invoke(prompt, consumer_group="llama")
 print(output)
-

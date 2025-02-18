@@ -4,7 +4,7 @@
 # # ChatPredictionGuard
 
 # >[Prediction Guard](https://predictionguard.com) is a secure, scalable GenAI platform that safeguards sensitive data, prevents common AI malfunctions, and runs on affordable hardware.
-# 
+#
 
 # ## Overview
 
@@ -15,10 +15,10 @@
 # The models supported by this integration only feature text-generation currently, along with the input and output checks described here.
 
 # ## Setup
-# To access Prediction Guard models, contact us [here](https://predictionguard.com/get-started) to get a Prediction Guard API key and get started. 
+# To access Prediction Guard models, contact us [here](https://predictionguard.com/get-started) to get a Prediction Guard API key and get started.
 
 # ### Credentials
-# Once you have a key, you can set it with 
+# Once you have a key, you can set it with
 
 # In[1]:
 
@@ -35,7 +35,7 @@ if "PREDICTIONGUARD_API_KEY" not in os.environ:
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-predictionguard')
+get_ipython().run_line_magic("pip", "install -qU langchain-predictionguard")
 
 
 # ## Instantiation

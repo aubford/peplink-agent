@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # TensorFlow Hub
-# 
+#
 # >[TensorFlow Hub](https://www.tensorflow.org/hub) is a repository of trained machine learning models ready for fine-tuning and deployable anywhere. Reuse trained models like `BERT` and `Faster R-CNN` with just a few lines of code.
 # >
 # >
@@ -45,7 +45,3 @@ doc_results
 
 
 # In[ ]:
-
-
-
-

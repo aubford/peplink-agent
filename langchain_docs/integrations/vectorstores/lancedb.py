@@ -2,30 +2,30 @@
 # coding: utf-8
 
 # # LanceDB
-# 
+#
 # >[LanceDB](https://lancedb.com/) is an open-source database for vector-search built with persistent storage, which greatly simplifies retrevial, filtering and management of embeddings. Fully open source.
-# 
+#
 # This notebook shows how to use functionality related to the `LanceDB` vector database based on the Lance data format.
 
 # In[ ]:
 
 
-get_ipython().system(' pip install tantivy')
+get_ipython().system(" pip install tantivy")
 
 
 # In[ ]:
 
 
-get_ipython().system(' pip install -U langchain-openai langchain-community')
+get_ipython().system(" pip install -U langchain-openai langchain-community")
 
 
 # In[ ]:
 
 
-get_ipython().system(' pip install lancedb')
+get_ipython().system(" pip install lancedb")
 
 
-# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key. 
+# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
 
 # In[1]:
 
@@ -40,7 +40,7 @@ if "OPENAI_API_KEY" not in os.environ:
 # In[2]:
 
 
-get_ipython().system(' rm -rf /tmp/lancedb')
+get_ipython().system(" rm -rf /tmp/lancedb")
 
 
 # In[3]:
@@ -59,13 +59,13 @@ embeddings = OpenAIEmbeddings()
 
 
 # ##### For LanceDB cloud, you can invoke the vector store as follows :
-# 
-# 
+#
+#
 # ```python
 # db_url = "db://lang_test" # url of db you created
 # api_key = "xxxxx" # your API key
 # region="us-east-1-dev"  # your selected region
-# 
+#
 # vector_store = LanceDB(
 #     uri=db_url,
 #     api_key=api_key,
@@ -74,9 +74,9 @@ embeddings = OpenAIEmbeddings()
 #     table_name='langchain_test'
 #     )
 # ```
-# 
+#
 # You can also add `region`, `api_key`, `uri` to `from_documents()` classmethod
-# 
+#
 
 # In[4]:
 
@@ -111,13 +111,13 @@ print("text- ", docs[0][0].page_content[:1000])
 print("reranker : ", docsearch._reranker)
 
 
-# Additionaly, to explore the table you can load it into a df or save it in a csv file: 
+# Additionaly, to explore the table you can load it into a df or save it in a csv file:
 # ```python
 # tbl = docsearch.get_table()
 # print("tbl:", tbl)
 # pd_df = tbl.to_pandas()
 # # pd_df.to_csv("docsearch.csv", index=False)
-# 
+#
 # # you can also create a new vector store object using an older connection object:
 # vector_store = LanceDB(connection=tbl, embedding=embeddings)
 # ```
@@ -138,18 +138,18 @@ docs = docsearch.similarity_search(query=query, filter="text LIKE '%Officer Rive
 print(docs[0].page_content)
 
 
-# ## Adding images 
+# ## Adding images
 
 # In[ ]:
 
 
-get_ipython().system(' pip install -U langchain-experimental')
+get_ipython().system(" pip install -U langchain-experimental")
 
 
 # In[ ]:
 
 
-get_ipython().system(' pip install open_clip_torch torch')
+get_ipython().system(" pip install open_clip_torch torch")
 
 
 # In[16]:
@@ -234,4 +234,3 @@ vec_store.similarity_search_by_vector(img_embed)[0]
 
 
 vec_store._table
-

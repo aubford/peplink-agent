@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Dria
-# 
+#
 # >[Dria](https://dria.co/) is a hub of public RAG models for developers to both contribute and utilize a shared embedding lake. This notebook demonstrates how to use the `Dria API` for data retrieval tasks.
 
 # # Installation
-# 
+#
 # Ensure you have the `dria` package installed. You can install it using pip:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet dria')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet dria")
 
 
 # # Configure API Key
-# 
+#
 # Set up your Dria API key for access.
 
 # In[1]:
@@ -28,7 +28,7 @@ os.environ["DRIA_API_KEY"] = "DRIA_API_KEY"
 
 
 # # Initialize Dria Retriever
-# 
+#
 # Create an instance of `DriaRetriever`.
 
 # In[ ]:
@@ -41,7 +41,7 @@ retriever = DriaRetriever(api_key=api_key)
 
 
 # # **Create Knowledge Base**
-# 
+#
 # Create a knowledge on [Dria's Knowledge Hub](https://dria.co/knowledge)
 
 # In[ ]:
@@ -56,7 +56,7 @@ contract_id = retriever.create_knowledge_base(
 
 
 # # Add Data
-# 
+#
 # Load data into your Dria knowledge base.
 
 # In[ ]:
@@ -73,7 +73,7 @@ print("Data added with IDs:", ids)
 
 
 # # Retrieve Data
-# 
+#
 # Use the retriever to find relevant documents given a query.
 
 # In[ ]:
@@ -83,4 +83,3 @@ query = "Find information about Dria."
 result = retriever.invoke(query)
 for doc in result:
     print(doc)
-

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Databricks
-# 
+#
 # This notebook covers how to connect to the [Databricks runtimes](https://docs.databricks.com/runtime/index.html) and [Databricks SQL](https://www.databricks.com/product/databricks-sql) using the SQLDatabase wrapper of LangChain.
 # It is broken into 3 parts: installation and setup, connecting to Databricks, and examples.
 
@@ -11,13 +11,13 @@
 # In[1]:
 
 
-get_ipython().system('pip install databricks-sql-connector')
+get_ipython().system("pip install databricks-sql-connector")
 
 
 # ## Connecting to Databricks
-# 
+#
 # You can connect to [Databricks runtimes](https://docs.databricks.com/runtime/index.html) and [Databricks SQL](https://www.databricks.com/product/databricks-sql) using the `SQLDatabase.from_databricks()` method.
-# 
+#
 # ### Syntax
 # ```python
 # SQLDatabase.from_databricks(
@@ -33,7 +33,7 @@ get_ipython().system('pip install databricks-sql-connector')
 # ### Required Parameters
 # * `catalog`: The catalog name in the Databricks database.
 # * `schema`: The schema name in the catalog.
-# 
+#
 # ### Optional Parameters
 # There following parameters are optional. When executing the method in a Databricks notebook, you don't need to provide them in most of the cases.
 # * `host`: The Databricks workspace hostname, excluding 'https://' part. Defaults to 'DATABRICKS_HOST' environment variable or current workspace if in a Databricks notebook.
@@ -64,7 +64,7 @@ llm = ChatOpenAI(temperature=0, model_name="gpt-4")
 
 
 # ### SQL Chain example
-# 
+#
 # This example demonstrates the use of the [SQL Chain](https://python.langchain.com/en/latest/modules/chains/examples/sqlite.html) for answering a question over a Databricks database.
 
 # In[4]:
@@ -84,7 +84,7 @@ db_chain.run(
 
 
 # ### SQL Database Agent example
-# 
+#
 # This example demonstrates the use of the [SQL Database Agent](/docs/integrations/tools/sql_database) for answering questions over a Databricks database.
 
 # In[7]:
@@ -101,4 +101,3 @@ agent = create_sql_agent(llm=llm, toolkit=toolkit, verbose=True)
 
 
 agent.run("What is the longest trip distance and how long did it take?")
-

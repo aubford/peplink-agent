@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Azure AI Services Toolkit
-# 
+#
 # This toolkit is used to interact with the `Azure AI Services API` to achieve some multimodal capabilities.
-# 
+#
 # Currently There are five tools bundled in this toolkit:
 # - **AzureAiServicesImageAnalysisTool**: used to extract caption, objects, tags, and text from images.
 # - **AzureAiServicesDocumentIntelligenceTool**: used to extract text, tables, and key-value pairs from documents.
@@ -12,18 +12,26 @@
 # - **AzureAiServicesTextToSpeechTool**: used to synthesize text to speech.
 # - **AzureAiServicesTextAnalyticsForHealthTool**: used to extract healthcare entities.
 
-# First, you need to set up an Azure account and create an AI Services resource. You can follow the instructions [here](https://learn.microsoft.com/en-us/azure/ai-services/multi-service-resource) to create a resource. 
-# 
+# First, you need to set up an Azure account and create an AI Services resource. You can follow the instructions [here](https://learn.microsoft.com/en-us/azure/ai-services/multi-service-resource) to create a resource.
+#
 # Then, you need to get the endpoint, key and region of your resource, and set them as environment variables. You can find them in the "Keys and Endpoint" page of your resource.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-ai-formrecognizer > /dev/null')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-cognitiveservices-speech > /dev/null')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-ai-textanalytics > /dev/null')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-ai-vision-imageanalysis > /dev/null')
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  azure-ai-formrecognizer > /dev/null"
+)
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  azure-cognitiveservices-speech > /dev/null"
+)
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  azure-ai-textanalytics > /dev/null"
+)
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  azure-ai-vision-imageanalysis > /dev/null"
+)
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # In[1]:
@@ -119,4 +127,3 @@ List all the diagnoses.
 """
 
 agent_executor.invoke({"input": sample_input})
-

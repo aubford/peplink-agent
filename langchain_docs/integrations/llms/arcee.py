@@ -8,11 +8,11 @@
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # ### Setup
-# 
+#
 # Before using Arcee, make sure the Arcee API key is set as `ARCEE_API_KEY` environment variable. You can also pass the api key as a named parameter.
 
 # In[ ]:
@@ -28,7 +28,7 @@ arcee = Arcee(
 
 
 # ### Additional Configuration
-# 
+#
 # You can also configure Arcee's parameters such as `arcee_api_url`, `arcee_app_url`, and `model_kwargs` as needed.
 # Setting the `model_kwargs` at the object initialization uses the parameters as default for all the subsequent calls to the generate response.
 
@@ -54,7 +54,7 @@ arcee = Arcee(
 
 
 # ### Generating Text
-# 
+#
 # You can generate text from Arcee by providing a prompt. Here's an example:
 
 # In[ ]:
@@ -66,11 +66,11 @@ response = arcee(prompt)
 
 
 # ### Additional parameters
-# 
+#
 # Arcee allows you to apply `filters` and set the `size` (in terms of count) of retrieved document(s) to aid text generation. Filters help narrow down the results. Here's how to use these parameters:
-# 
-# 
-# 
+#
+#
+#
 
 # In[ ]:
 
@@ -83,4 +83,3 @@ filters = [
 
 # Generate text with filters and size params
 response = arcee(prompt, size=5, filters=filters)
-

@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # GitBook
-# 
+#
 # >[GitBook](https://docs.gitbook.com/) is a modern documentation platform where teams can document everything from products to internal knowledge bases and APIs.
-# 
+#
 # This notebook shows how to pull page data from any `GitBook`.
 
 # In[1]:
@@ -52,7 +52,3 @@ all_pages_data[2]
 
 
 # In[ ]:
-
-
-
-

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # GitHub
-# 
+#
 # This notebooks shows how you can load issues and pull requests (PRs) for a given repository on [GitHub](https://github.com/). Also shows how you can load github files for a given repository on [GitHub](https://github.com/). We will use the LangChain Python repository as an example.
 
 # ## Setup access token
@@ -37,7 +37,7 @@ loader = GitHubIssuesLoader(
 
 
 # Let's load all issues and PRs created by "UmerHA".
-# 
+#
 # Here's a list of all filters you can use:
 # - include_prs
 # - milestone
@@ -49,7 +49,7 @@ loader = GitHubIssuesLoader(
 # - sort
 # - direction
 # - since
-# 
+#
 # For more info, see https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#list-repository-issues.
 
 # In[ ]:
@@ -89,7 +89,7 @@ print(docs[0].metadata)
 
 
 # ## Load Github File Content
-# 
+#
 # For below code, loads all markdown file in rpeo `langchain-ai/langchain`
 
 # In[1]:
@@ -113,10 +113,10 @@ loader = GithubFileLoader(
 documents = loader.load()
 
 
-# example output of one of document: 
-# 
+# example output of one of document:
+#
 # ```json
-# document.metadata: 
+# document.metadata:
 #     {
 #       "path": "README.md",
 #       "sha": "82f1c4ea88ecf8d2dfsfx06a700e84be4",

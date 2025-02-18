@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Human-in-the-loop Tool Validation
-# 
+#
 # This walkthrough demonstrates how to add human validation to any Tool. We'll do this using the `HumanApprovalCallbackhandler`.
-# 
+#
 # Let's suppose we need to make use of the `ShellTool`. Adding this tool to an automated flow poses obvious risks. Let's see how we could enforce manual human approval of inputs going into this tool.
-# 
+#
 # **Note**: We generally recommend against using the `ShellTool`. There's a lot of ways to misuse it, and it's not required for most use cases. We employ it here only for demonstration purposes.
 
 # In[1]:
@@ -50,7 +50,7 @@ print(tool.run("ls /private"))
 
 
 # ## Configuring Human Approval
-# 
+#
 # Let's suppose we have an agent that takes in multiple tools, and we want it to only trigger human approval requests on certain tools and certain inputs. We can configure out callback handler to do just this.
 
 # In[ ]:
@@ -117,7 +117,3 @@ agent.run("list all directories in /private", callbacks=callbacks)
 
 
 # In[ ]:
-
-
-
-

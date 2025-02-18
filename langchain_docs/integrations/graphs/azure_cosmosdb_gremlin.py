@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Azure Cosmos DB for Apache Gremlin
-# 
+#
 # >[Azure Cosmos DB for Apache Gremlin](https://learn.microsoft.com/en-us/azure/cosmos-db/gremlin/introduction) is a graph database service that can be used to store massive graphs with billions of vertices and edges. You can query the graphs with millisecond latency and evolve the graph structure easily.
 # >
 # >[Gremlin](https://en.wikipedia.org/wiki/Gremlin_(query_language)) is a graph traversal language and virtual machine developed by `Apache TinkerPop` of the `Apache Software Foundation`.
-# 
+#
 # This notebook shows how to use LLMs to provide a natural language interface to a graph database you can query with the `Gremlin` query language.
 
 # ## Setting up
-# 
+#
 # Install a library:
 
 # In[ ]:
 
 
-get_ipython().system('pip3 install gremlinpython')
+get_ipython().system("pip3 install gremlinpython")
 
 
-# You will need an Azure CosmosDB Graph database instance. One option is to create a [free CosmosDB Graph database instance in Azure](https://learn.microsoft.com/en-us/azure/cosmos-db/free-tier). 
-# 
+# You will need an Azure CosmosDB Graph database instance. One option is to create a [free CosmosDB Graph database instance in Azure](https://learn.microsoft.com/en-us/azure/cosmos-db/free-tier).
+#
 # When you create your Cosmos DB account and Graph, use `/type` as a partition key.
 
 # In[ ]:
@@ -54,9 +54,9 @@ graph = GremlinGraph(
 
 
 # ## Seeding the database
-# 
+#
 # Assuming your database is empty, you can populate it using the GraphDocuments
-# 
+#
 # For Gremlin, always add property called 'label' for each Node.
 # If no label is set, Node.type is used as a label.
 # For cosmos using natural id's make sense, as they are visible in the graph explorer.
@@ -125,7 +125,7 @@ graph.add_graph_documents([graph_doc])
 
 # ## Refresh graph schema information
 # If the schema of database changes (after updates), you can refresh the schema information.
-# 
+#
 
 # In[ ]:
 
@@ -140,7 +140,7 @@ print(graph.schema)
 
 
 # ## Querying the graph
-# 
+#
 # We can now use the gremlin QA chain to ask question of the graph
 
 # In[ ]:
@@ -166,4 +166,3 @@ chain.invoke("Who played in The Matrix?")
 
 
 chain.run("How many people played in The Matrix?")
-

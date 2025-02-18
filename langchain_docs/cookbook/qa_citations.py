@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Citing retrieval sources
-# 
+#
 # This notebook shows how to use OpenAI functions ability to extract citations from text.
 
 # In[1]:
@@ -76,7 +76,3 @@ for fact in result.answer:
 
 
 # In[ ]:
-
-
-
-

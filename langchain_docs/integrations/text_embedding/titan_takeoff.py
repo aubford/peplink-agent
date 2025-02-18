@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Titan Takeoff
-# 
+#
 # `TitanML` helps businesses build and deploy better, smaller, cheaper, and faster NLP models through our training, compression, and inference optimization platform.
-# 
+#
 # Our inference server, [Titan Takeoff](https://docs.titanml.co/docs/intro) enables deployment of LLMs locally on your hardware in a single command. Most embedding models are supported out of the box, if you experience trouble with a specific model, please let us know at hello@titanml.co.
 
 # ## Example usage
@@ -31,9 +31,9 @@ output = embed.embed_query(
 print(output)
 
 
-# ### Example 2 
+# ### Example 2
 # Starting readers using TitanTakeoffEmbed Python Wrapper. If you haven't created any readers with first launching Takeoff, or you want to add another you can do so when you initialize the TitanTakeoffEmbed object. Just pass a list of models you want to start as the `models` parameter.
-# 
+#
 # You can use `embed.query_documents` to embed multiple documents at once. The expected input is a list of strings, rather than just a string expected for the `embed_query` method.
 
 # In[ ]:
@@ -57,4 +57,3 @@ prompt = "What is the capital of France?"
 # We specified "embed" consumer group so need to send request to the same consumer group so it hits our embedding model and not others
 output = embed.embed_query(prompt, consumer_group="embed")
 print(output)
-

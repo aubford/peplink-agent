@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # How to cache LLM responses
-# 
+#
 # LangChain provides an optional [caching](/docs/concepts/chat_models/#caching) layer for LLMs. This is useful for two reasons:
-# 
+#
 # It can save you money by reducing the number of API calls you make to the LLM provider, if you're often requesting the same completion multiple times.
 # It can speed up your application by reducing the number of API calls you make to the LLM provider.
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_openai langchain_community')
+get_ipython().run_line_magic("pip", "install -qU langchain_openai langchain_community")
 
 import os
 from getpass import getpass
@@ -36,13 +36,21 @@ llm = OpenAI(model="gpt-3.5-turbo-instruct", n=2, best_of=2)
 # In[3]:
 
 
-get_ipython().run_cell_magic('time', '', 'from langchain_core.caches import InMemoryCache\n\nset_llm_cache(InMemoryCache())\n\n# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    'from langchain_core.caches import InMemoryCache\n\nset_llm_cache(InMemoryCache())\n\n# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
+)
 
 
 # In[4]:
 
 
-get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
+)
 
 
 # ## SQLite Cache
@@ -50,7 +58,7 @@ get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes fa
 # In[5]:
 
 
-get_ipython().system('rm .langchain.db')
+get_ipython().system("rm .langchain.db")
 
 
 # In[6]:
@@ -65,17 +73,21 @@ set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 # In[7]:
 
 
-get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
+)
 
 
 # In[8]:
 
 
-get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
+get_ipython().run_cell_magic(
+    "time",
+    "",
+    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
+)
 
 
 # In[ ]:
-
-
-
-

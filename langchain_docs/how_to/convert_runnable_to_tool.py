@@ -2,41 +2,45 @@
 # coding: utf-8
 
 # # How to convert Runnables to Tools
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
-# 
+#
 # - [Runnables](/docs/concepts/runnables)
 # - [Tools](/docs/concepts/tools)
 # - [Agents](/docs/tutorials/agents)
-# 
+#
 # :::
-# 
+#
 # Here we will demonstrate how to convert a LangChain `Runnable` into a tool that can be used by agents, chains, or chat models.
-# 
+#
 # ## Dependencies
-# 
+#
 # **Note**: this guide requires `langchain-core` >= 0.2.13. We will also use [OpenAI](/docs/integrations/providers/openai/) for embeddings, but any LangChain embeddings should suffice. We will use a simple [LangGraph](https://langchain-ai.github.io/langgraph/) agent for demonstration purposes.
 
 # In[ ]:
 
 
-get_ipython().run_cell_magic('capture', '--no-stderr', '%pip install -U langchain-core langchain-openai langgraph\n')
+get_ipython().run_cell_magic(
+    "capture",
+    "--no-stderr",
+    "%pip install -U langchain-core langchain-openai langgraph\n",
+)
 
 
 # LangChain [tools](/docs/concepts/tools) are interfaces that an agent, chain, or chat model can use to interact with the world. See [here](/docs/how_to/#tools) for how-to guides covering tool-calling, built-in tools, custom tools, and more information.
-# 
+#
 # LangChain tools-- instances of [BaseTool](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.BaseTool.html)-- are [Runnables](/docs/concepts/runnables) with additional constraints that enable them to be invoked effectively by language models:
-# 
+#
 # - Their inputs are constrained to be serializable, specifically strings and Python `dict` objects;
 # - They contain names and descriptions indicating how and when they should be used;
 # - They may contain a detailed [args_schema](https://python.langchain.com/docs/how_to/custom_tools/) for their arguments. That is, while a tool (as a `Runnable`) might accept a single `dict` input, the specific keys and type information needed to populate a dict should be specified in the `args_schema`.
-# 
+#
 # Runnables that accept string or `dict` input can be converted to tools using the [as_tool](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html#langchain_core.runnables.base.Runnable.as_tool) method, which allows for the specification of names, descriptions, and additional schema information for arguments.
 
 # ## Basic usage
-# 
+#
 # With typed `dict` input:
 
 # In[2]:
@@ -141,18 +145,18 @@ as_tool.invoke("b")
 
 
 # ## In agents
-# 
+#
 # Below we will incorporate LangChain Runnables as tools in an [agent](/docs/concepts/agents) application. We will demonstrate with:
-# 
+#
 # - a document [retriever](/docs/concepts/retrievers);
 # - a simple [RAG](/docs/tutorials/rag/) chain, allowing an agent to delegate relevant queries to it.
-# 
+#
 # We first instantiate a chat model that supports [tool calling](/docs/how_to/tool_calling/):
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
-# 
+#
 
 # In[9]:
 

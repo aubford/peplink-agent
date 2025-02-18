@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # MiniMax
-# 
+#
 # [MiniMax](https://api.minimax.chat/document/guides/embeddings?id=6464722084cdc277dfaa966a) offers an embeddings service.
-# 
+#
 # This example goes over how to use LangChain to interact with MiniMax Inference for text embedding.
 
 # In[1]:
@@ -56,7 +56,3 @@ print(f"Cosine similarity between document and query: {similarity}")
 
 
 # In[ ]:
-
-
-
-

@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # How to add a human-in-the-loop for tools
-# 
+#
 # There are certain tools that we don't trust a model to execute on its own. One thing we can do in such situations is require human approval before the tool is invoked.
-# 
+#
 # :::info
-# 
+#
 # This how-to guide shows a simple way to add human-in-the-loop for code running in a jupyter notebook or in a terminal.
-# 
+#
 # To build a production application, you will need to do more work to keep track of application state appropriately.
-# 
+#
 # We recommend using `langgraph` for powering such a capability. For more details, please see this [guide](https://langchain-ai.github.io/langgraph/how-tos/human-in-the-loop/).
 # :::
-# 
+#
 
 # ## Setup
-# 
+#
 # We'll need to install the following packages:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain")
 
 
 # And set these environment variables:
@@ -39,13 +39,13 @@ import os
 
 
 # ## Chain
-# 
+#
 # Let's create a few simple (dummy) tools and a tool-calling chain:
 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm"/>
-# 
+#
 
 # In[1]:
 
@@ -98,9 +98,9 @@ chain.invoke("how many emails did i get in the last 5 days?")
 
 
 # ## Adding human approval
-# 
+#
 # Let's add a step in the chain that will ask a person to approve or reject the tall call request.
-# 
+#
 # On rejection, the step will raise an exception which will stop execution of the rest of the chain.
 
 # In[12]:
@@ -150,4 +150,3 @@ try:
 except NotApproved as e:
     print()
     print(e)
-

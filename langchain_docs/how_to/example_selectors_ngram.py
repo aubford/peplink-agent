@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # How to select examples by n-gram overlap
-# 
-# The `NGramOverlapExampleSelector` selects and orders examples based on which examples are most similar to the input, according to an ngram overlap score. The ngram overlap score is a float between 0.0 and 1.0, inclusive. 
-# 
+#
+# The `NGramOverlapExampleSelector` selects and orders examples based on which examples are most similar to the input, according to an ngram overlap score. The ngram overlap score is a float between 0.0 and 1.0, inclusive.
+#
 # The [selector](/docs/concepts/example_selectors/) allows for a threshold score to be set. Examples with an ngram overlap score less than or equal to the threshold are excluded. The threshold is set to -1.0, by default, so will not exclude any examples, only reorder them. Setting the threshold to 0.0 will exclude examples that have no ngram overlaps with the input.
-# 
+#
 
 # In[1]:
 
@@ -103,7 +103,3 @@ print(dynamic_prompt.format(sentence="Spot can play fetch."))
 
 
 # In[ ]:
-
-
-
-

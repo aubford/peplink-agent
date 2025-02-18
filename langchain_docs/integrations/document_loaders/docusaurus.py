@@ -3,7 +3,7 @@
 
 # # Docusaurus
 # > [Docusaurus](https://docusaurus.io/) is a static-site generator which provides out-of-the-box documentation features.
-# 
+#
 # By utilizing the existing `SitemapLoader`, this loader scans and loads all pages from a given Docusaurus application and returns the main documentation content of each page as a Document.
 
 # In[1]:
@@ -17,7 +17,7 @@ from langchain_community.document_loaders import DocusaurusLoader
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet beautifulsoup4 lxml')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet beautifulsoup4 lxml")
 
 
 # In[4]:
@@ -46,7 +46,7 @@ docs[0]
 
 
 # ## Filtering sitemap URLs
-# 
+#
 # Sitemaps can contain thousands of URLs and ften you don't need every single one of them. You can filter the URLs by passing a list of strings or regex patterns to the `url_filter` parameter.  Only URLs that match one of the patterns will be loaded.
 
 # In[14]:
@@ -68,7 +68,7 @@ documents[0]
 
 
 # ## Add custom scraping rules
-# 
+#
 # By default, the parser **removes** all but the main content of the docusaurus page, which is normally the `<article>` tag. You also have the option  to define an **inclusive** list HTML tags by providing them as a list utilizing the `custom_html_tags` parameter. For example:
 
 # In[ ]:
@@ -85,7 +85,7 @@ loader = DocusaurusLoader(
 
 
 # You can also define an entirely custom parsing function if you need finer-grained control over the returned content for each page.
-# 
+#
 # The following example shows how to develop and use a custom function to avoid navigation and header elements.
 
 # In[17]:
@@ -118,4 +118,3 @@ loader = DocusaurusLoader(
     ],
     parsing_function=remove_nav_and_header_elements,
 )
-

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # SingleStoreDB
-# 
+#
 # This notebook goes over how to use SingleStoreDB to store chat message history.
 
 # In[ ]:
@@ -25,4 +25,3 @@ history.add_ai_message("whats up?")
 
 
 history.messages
-

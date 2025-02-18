@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # How to use the Parent Document Retriever
-# 
+#
 # When splitting documents for [retrieval](/docs/concepts/retrieval/), there are often conflicting desires:
-# 
+#
 # 1. You may want to have small documents, so that their embeddings can most
 #     accurately reflect their meaning. If too long, then the embeddings can
 #     lose meaning.
 # 2. You want to have long enough documents that the context of each chunk is
 #     retained.
-# 
+#
 # The `ParentDocumentRetriever` strikes that balance by splitting and storing
 # small chunks of data. During retrieval, it first fetches the small chunks
 # but then looks up the parent ids for those chunks and returns those larger
 # documents.
-# 
+#
 # Note that "parent document" refers to the document that a small chunk
 # originated from. This can either be the whole raw document OR a larger
 # chunk.
@@ -49,7 +49,7 @@ for loader in loaders:
 
 
 # ## Retrieving full documents
-# 
+#
 # In this mode, we want to retrieve the full documents. Therefore, we only specify a child [splitter](/docs/concepts/text_splitters/).
 
 # In[4]:
@@ -113,7 +113,7 @@ len(retrieved_docs[0].page_content)
 
 
 # ## Retrieving larger chunks
-# 
+#
 # Sometimes, the full documents can be too big to want to retrieve them as is. In that case, what we really want to do is to first split the raw documents into larger chunks, and then split it into smaller chunks. We then index the smaller chunks, but on retrieval we retrieve the larger chunks (but still not the full documents).
 
 # In[11]:
@@ -187,4 +187,3 @@ len(retrieved_docs[0].page_content)
 
 
 print(retrieved_docs[0].page_content)
-

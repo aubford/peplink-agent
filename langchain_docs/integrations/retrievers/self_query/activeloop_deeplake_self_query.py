@@ -2,30 +2,30 @@
 # coding: utf-8
 
 # # Deep Lake
-# 
+#
 # >[Deep Lake](https://www.activeloop.ai) is a multimodal database for building AI applications
 # >[Deep Lake](https://github.com/activeloopai/deeplake) is a database for AI.
 # >Store Vectors, Images, Texts, Videos, etc. Use with LLMs/LangChain. Store, query, version,
 # > & visualize any AI data. Stream data in real time to PyTorch/TensorFlow.
-# 
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Deep Lake` vector store. 
+#
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Deep Lake` vector store.
 
 # ## Creating a Deep Lake vector store
 # First we'll want to create a Deep Lake vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `deeplake` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark")
 
 
 # In[2]:
 
 
 # in case if some queries fail consider installing libdeeplake manually
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  libdeeplake')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  libdeeplake")
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -175,9 +175,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[13]:
@@ -198,4 +198,3 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
-

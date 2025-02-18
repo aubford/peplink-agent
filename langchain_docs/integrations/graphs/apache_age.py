@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Apache AGE
-# 
+#
 # >[Apache AGE](https://age.apache.org/) is a PostgreSQL extension that provides graph database functionality. AGE is an acronym for A Graph Extension, and is inspired by Bitnine’s fork of PostgreSQL 10, AgensGraph, which is a multi-model database. The goal of the project is to create single storage that can handle both relational and graph model data so that users can use standard ANSI SQL along with openCypher, the Graph query language. The data elements `Apache AGE` stores are nodes, edges connecting them, and attributes of nodes and edges.
-# 
+#
 # >This notebook shows how to use LLMs to provide a natural language interface to a graph database you can query with the `Cypher` query language.
-# 
+#
 # >[Cypher](https://en.wikipedia.org/wiki/Cypher_(query_language)) is a declarative graph query language that allows for expressive and efficient data querying in a property graph.
-# 
+#
 
 # ## Setting up
-# 
+#
 # You will need to have a running `Postgre` instance with the AGE extension installed. One option for testing is to run a docker container using the official AGE docker image.
 # You can run a local docker container by running the executing the following script:
-# 
+#
 # ```
 # docker run \
 #     --name age  \
@@ -25,7 +25,7 @@
 #     -d \
 #     apache/age
 # ```
-# 
+#
 # Additional instructions on running in docker can be found [here](https://hub.docker.com/r/apache/age).
 
 # In[1]:
@@ -51,7 +51,7 @@ graph = AGEGraph(graph_name="age_test", conf=conf)
 
 
 # ## Seeding the database
-# 
+#
 # Assuming your database is empty, you can populate it using Cypher query language. The following Cypher statement is idempotent, which means the database information will be the same if you run it one or multiple times.
 
 # In[3]:
@@ -84,7 +84,7 @@ print(graph.schema)
 
 
 # ## Querying the graph
-# 
+#
 # We can now use the graph cypher QA chain to ask question of the graph
 
 # In[6]:
@@ -233,7 +233,7 @@ chain.invoke("Who played in Top Gun?")
 
 
 # ## Ignore specified node and relationship types
-# 
+#
 # You can use `include_types` or `exclude_types` to ignore parts of the graph schema when generating Cypher statements.
 
 # In[18]:
@@ -275,4 +275,3 @@ chain = GraphCypherQAChain.from_llm(
 
 
 chain.invoke("Who played in Top Gun?")
-

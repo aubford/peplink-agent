@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # Chroma
-# 
+#
 # >[Chroma](https://docs.trychroma.com/getting-started) is a vector database for building AI applications with embeddings.
-# 
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Chroma` vector store. 
+#
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Chroma` vector store.
 
 # ## Creating a Chroma vector store
 # First we'll want to create a Chroma vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `langchain-chroma` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark")
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-chroma')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-chroma")
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -161,9 +161,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[7]:
@@ -187,7 +187,3 @@ retriever.invoke("what are two movies about dinosaurs")
 
 
 # In[ ]:
-
-
-
-

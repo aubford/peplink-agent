@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Voyage AI
-# 
+#
 # >[Voyage AI](https://www.voyageai.com/) provides cutting-edge embedding/vectorizations models.
-# 
+#
 # Let's load the Voyage AI Embedding class. (Install the LangChain partner package with `pip install langchain-voyageai`)
 
 # In[1]:
@@ -14,7 +14,7 @@ from langchain_voyageai import VoyageAIEmbeddings
 
 
 # Voyage AI utilizes API keys to monitor usage and manage permissions. To obtain your key, create an account on our [homepage](https://www.voyageai.com). Then, create a VoyageEmbeddings model with your API key. You can use any of the following models: ([source](https://docs.voyageai.com/docs/embeddings)):
-# 
+#
 # - `voyage-3-large`
 # - `voyage-3`
 # - `voyage-3-lite`
@@ -96,4 +96,3 @@ result = retriever.invoke(query)
 top1_retrieved_doc = result[0].page_content  # return the top1 retrieved result
 
 print(top1_retrieved_doc)
-

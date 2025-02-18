@@ -2,23 +2,25 @@
 # coding: utf-8
 
 # # MLX
-# 
+#
 # This notebook shows how to get started using `MLX` LLM's as chat models.
-# 
+#
 # In particular, we will:
-# 1. Utilize the [MLXPipeline](https://github.com/langchain-ai/langchain/blob/master/libs/community/langchain_community/llms/mlx_pipeline.py), 
+# 1. Utilize the [MLXPipeline](https://github.com/langchain-ai/langchain/blob/master/libs/community/langchain_community/llms/mlx_pipeline.py),
 # 2. Utilize the `ChatMLX` class to enable any of these LLMs to interface with LangChain's [Chat Messages](https://python.langchain.com/docs/modules/model_io/chat/#messages) abstraction.
 # 3. Demonstrate how to use an open-source LLM to power an `ChatAgent` pipeline
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  mlx-lm transformers huggingface_hub')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  mlx-lm transformers huggingface_hub"
+)
 
 
 # ## 1. Instantiate an LLM
-# 
+#
 # There are three LLM options to choose from.
 
 # In[ ]:
@@ -69,9 +71,9 @@ print(res.content)
 
 
 # ## 3. Take it for a spin as an agent!
-# 
+#
 # Here we'll test out `gemma-2b-it` as a zero-shot `ReAct` Agent. The example below is taken from [here](https://python.langchain.com/docs/modules/agents/agent_types/react#using-chat-models).
-# 
+#
 # > Note: To run this section, you'll need to have a [SerpAPI Token](https://serpapi.com/) saved as an environment variable: `SERPAPI_API_KEY`
 
 # In[ ]:
@@ -166,4 +168,3 @@ agent_executor.invoke(
         "input": "Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?"
     }
 )
-

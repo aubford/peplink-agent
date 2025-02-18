@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # StochasticAI
-# 
+#
 # >[Stochastic Acceleration Platform](https://docs.stochastic.ai/docs/introduction/) aims to simplify the life cycle of a Deep Learning model. From uploading and versioning the model, through training, compression and acceleration to putting it into production.
-# 
+#
 # This example goes over how to use LangChain to interact with `StochasticAI` models.
 
 # You have to get the API_KEY and the API_URL [here](https://app.stochastic.ai/workspace/profile/settings?tab=profile).
@@ -70,7 +70,3 @@ llm_chain.run(question)
 
 
 # In[ ]:
-
-
-
-

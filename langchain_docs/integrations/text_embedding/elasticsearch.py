@@ -3,7 +3,7 @@
 
 # # Elasticsearch
 # Walkthrough of how to generate embeddings using a hosted embedding model in Elasticsearch
-# 
+#
 # The easiest way to instantiate the `ElasticsearchEmbeddings` class it either
 # - using the `from_credentials` constructor if you are using Elastic Cloud
 # - or using the `from_es_connection` constructor with any Elasticsearch cluster
@@ -11,7 +11,7 @@
 # In[ ]:
 
 
-get_ipython().system('pip -q install langchain-elasticsearch')
+get_ipython().system("pip -q install langchain-elasticsearch")
 
 
 # In[ ]:
@@ -132,4 +132,3 @@ query_embedding = embeddings.embed_query(query)
 
 # Print query embedding
 print(f"Embedding for query: {query_embedding}")
-

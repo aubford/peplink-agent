@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # OpenWeatherMap
-# 
+#
 # This notebook goes over how to use the `OpenWeatherMap` component to fetch weather information.
-# 
+#
 # First, you need to sign up for an `OpenWeatherMap API` key:
-# 
+#
 # 1. Go to OpenWeatherMap and sign up for an API key [here](https://openweathermap.org/api/)
 # 2. pip install pyowm
-# 
+#
 # Then we will need to set some environment variables:
 # 1. Save your API KEY into OPENWEATHERMAP_API_KEY env variable
-# 
+#
 # ## Use the wrapper
 
 # In[9]:
@@ -60,4 +60,3 @@ agent_chain = initialize_agent(
 
 
 agent_chain.run("What's the weather like in London?")
-

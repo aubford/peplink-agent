@@ -2,32 +2,32 @@
 # coding: utf-8
 
 # # PyMuPDFLoader
-# 
+#
 # This notebook provides a quick overview for getting started with `PyMuPDF` [document loader](https://python.langchain.com/docs/concepts/document_loaders). For detailed documentation of all __ModuleName__Loader features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyMuPDFLoader.html).
-# 
-#   
-# 
+#
+#
+#
 # ## Overview
 # ### Integration details
-# 
+#
 # | Class | Package | Local | Serializable | JS support|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | [PyMuPDFLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyMuPDFLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ | 
-# 
-# ---------   
-# 
+# | [PyMuPDFLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyMuPDFLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ |
+#
+# ---------
+#
 # ### Loader features
-# 
+#
 # | Source | Document Lazy Loading | Native Async Support | Extract Images | Extract Tables |
 # | :---: | :---: | :---: | :---: |:---: |
 # | PyMuPDFLoader | ✅ | ❌ | ✅ | ✅ |
-# 
-#   
-# 
+#
+#
+#
 # ## Setup
-# 
+#
 # ### Credentials
-# 
+#
 # No credentials are required to use PyMuPDFLoader
 
 # If you want to get automated best in-class tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
@@ -40,17 +40,17 @@
 
 
 # ### Installation
-# 
+#
 # Install **langchain_community** and **pymupdf**.
 
 # In[2]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_community pymupdf')
+get_ipython().run_line_magic("pip", "install -qU langchain_community pymupdf")
 
 
 # ## Initialization
-# 
+#
 # Now we can instantiate our model object and load documents:
 
 # In[3]:
@@ -80,7 +80,7 @@ pprint.pp(docs[0].metadata)
 
 
 # ## Lazy Load
-# 
+#
 
 # In[6]:
 
@@ -110,7 +110,7 @@ pprint.pp(pages[0].metadata)
 # - creationdate
 # - creator
 # - producer
-# 
+#
 # Additional metadata are specific to each parser.
 # These pieces of information can be helpful (to categorize your PDFs for example).
 
@@ -119,7 +119,7 @@ pprint.pp(pages[0].metadata)
 # When loading the PDF file you can split it in two different ways:
 # - By page
 # - As a single text flow
-# 
+#
 # By default PDFPlumberLoader will split the PDF by page.
 
 # ### Extract the PDF by page. Each page is extracted as a langchain Document object:
@@ -176,9 +176,9 @@ print(docs[0].page_content[:5780])
 # - rapidOCR (lightweight Optical Character Recognition tool)
 # - Tesseract (OCR tool with high precision)
 # - Multimodal language model
-# 
+#
 # You can tune these functions to choose the output format of the extracted images among *html*, *markdown* or *text*
-# 
+#
 # The result is inserted between the last and the second-to-last paragraphs of text of the page.
 
 # ### Extract images from the PDF with rapidOCR:
@@ -186,7 +186,7 @@ print(docs[0].page_content[:5780])
 # In[11]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU rapidocr-onnxruntime')
+get_ipython().run_line_magic("pip", "install -qU rapidocr-onnxruntime")
 
 
 # In[13]:
@@ -212,7 +212,7 @@ print(docs[5].page_content)
 # In[14]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU pytesseract')
+get_ipython().run_line_magic("pip", "install -qU pytesseract")
 
 
 # In[15]:
@@ -235,7 +235,7 @@ print(docs[5].page_content)
 # In[16]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_openai')
+get_ipython().run_line_magic("pip", "install -qU langchain_openai")
 
 
 # In[17]:
@@ -290,9 +290,9 @@ print(docs[4].page_content)
 
 
 # ## Working with Files
-# 
+#
 # Many document loaders involve parsing files. The difference between such loaders usually stems from how the file is parsed, rather than how the file is loaded. For example, you can use `open` to read the binary content of either a PDF or a markdown file, but you need different parsing logic to convert that binary data into text.
-# 
+#
 # As a result, it can be helpful to decouple the parsing logic from the loading logic, which makes it easier to re-use a given parser regardless of how the data was loaded.
 # You can use this strategy to analyze different files, with the same parsing parameters.
 
@@ -336,5 +336,5 @@ pprint.pp(docs[0].metadata)
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all `PyMuPDFLoader` features and configurations head to the API reference: https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyMuPDFLoader.html

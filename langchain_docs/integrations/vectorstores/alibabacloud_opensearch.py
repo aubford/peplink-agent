@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Alibaba Cloud OpenSearch
-# 
+#
 # >[Alibaba Cloud Opensearch](https://www.alibabacloud.com/product/opensearch) is a one-stop platform to develop intelligent search services. `OpenSearch` was built on the large-scale distributed search engine developed by `Alibaba`. `OpenSearch` serves more than 500 business cases in Alibaba Group and thousands of Alibaba Cloud customers. `OpenSearch` helps develop search services in different search scenarios, including e-commerce, O2O, multimedia, the content industry, communities and forums, and big data query in enterprises.
-# 
+#
 # >`OpenSearch` helps you develop high-quality, maintenance-free, and high-performance intelligent search services to provide your users with high search efficiency and accuracy.
-# 
+#
 # >`OpenSearch` provides the vector search feature. In specific scenarios, especially test question search and image search scenarios, you can use the vector search feature together with the multimodal search feature to improve the accuracy of search results.
-# 
+#
 # This notebook shows how to use functionality related to the `Alibaba Cloud OpenSearch Vector Search Edition`.
 
 # ## Setting up
-# 
-# 
+#
+#
 # ### Purchase an instance and configure it
-# 
+#
 # Purchase OpenSearch Vector Search Edition from [Alibaba Cloud](https://opensearch.console.aliyun.com) and configure the instance according to the help [documentation](https://help.aliyun.com/document_detail/463198.html?spm=a2c4g.465092.0.0.2cd15002hdwavO).
-# 
+#
 # To run, you should have an [OpenSearch Vector Search Edition](https://opensearch.console.aliyun.com) instance up and running.
-# 
-#   
+#
+#
 # ### Alibaba Cloud OpenSearch Vector Store class
 #                                                                                                                 `AlibabaCloudOpenSearch` class supports functions:
 # - `add_texts`
@@ -33,10 +33,10 @@
 # - `asimilarity_search_by_vector`
 # - `similarity_search_with_relevance_scores`
 # - `delete_doc_by_texts`
-# 
-# 
+#
+#
 # Read the [help document](https://www.alibabacloud.com/help/en/opensearch/latest/vector-search) to quickly familiarize and configure OpenSearch Vector Search Edition instance.
-# 
+#
 # If you encounter any problems during use, please feel free to contact xingshaomin.xsm@alibaba-inc.com, and we will do our best to provide you with assistance and support.
 
 # After the instance is up and running, follow these steps to split documents, get embeddings, connect to the alibaba cloud opensearch instance, index documents, and perform vector retrieval.
@@ -46,7 +46,10 @@
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community alibabacloud_ha3engine_vector')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  langchain-community alibabacloud_ha3engine_vector",
+)
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -181,7 +184,7 @@ print(docs[0].page_content)
 
 
 # Query and retrieve data with metadata.
-# 
+#
 
 # In[ ]:
 
@@ -198,4 +201,4 @@ print(docs[0].page_content)
 
 
 # If you encounter any problems during use, please feel free to contact xingshaomin.xsm@alibaba-inc.com, and we will do our best to provide you with assistance and support.
-# 
+#

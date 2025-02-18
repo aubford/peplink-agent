@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Simulated Environment: Gymnasium
-# 
+#
 # For many applications of LLM agents, the environment is real (internet, database, REPL, etc). However, we can also define agents to interact in simulated environments like text-based games. This is an example of how to create a simple agent-environment interaction loop with [Gymnasium](https://github.com/Farama-Foundation/Gymnasium) (formerly [OpenAI Gym](https://github.com/openai/gym)).
 
 # In[1]:
 
 
-get_ipython().system('pip install gymnasium')
+get_ipython().system("pip install gymnasium")
 
 
 # In[2]:
@@ -141,7 +141,3 @@ env.close()
 
 
 # In[ ]:
-
-
-
-

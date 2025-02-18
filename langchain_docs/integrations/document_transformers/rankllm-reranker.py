@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # RankLLM Reranker
-# 
+#
 
 # [RankLLM](https://github.com/castorini/rank_llm) offers a suite of listwise rerankers, albeit with focus on open source LLMs finetuned for the task - RankVicuna and RankZephyr being two of them.
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  rank_llm')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  rank_llm")
 
 
 # In[2]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain_openai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain_openai")
 
 
 # In[3]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss-cpu")
 
 
 # In[4]:
@@ -165,4 +165,3 @@ chain = RetrievalQA.from_chain_type(
 )
 
 chain({"query": query})
-

@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # How to select examples by similarity
-# 
+#
 # This object selects [examples](/docs/concepts/example_selectors/) based on similarity to the inputs. It does this by finding the examples with the embeddings that have the greatest cosine similarity with the inputs.
-# 
+#
 
 # In[1]:
 
@@ -77,7 +77,3 @@ print(similar_prompt.format(adjective="passionate"))
 
 
 # In[ ]:
-
-
-
-

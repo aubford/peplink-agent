@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # UnstructuredMarkdownLoader
-# 
+#
 # This notebook provides a quick overview for getting started with UnstructuredMarkdown [document loader](https://python.langchain.com/docs/concepts/document_loaders). For detailed documentation of all __ModuleName__Loader features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.markdown.UnstructuredMarkdownLoader.html).
-# 
+#
 # ## Overview
 # ### Integration details
-# 
-# 
+#
+#
 # | Class | Package | Local | Serializable | [JS support](https://js.langchain.com/docs/integrations/document_loaders/file_loaders/unstructured/)|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | [UnstructuredMarkdownLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.markdown.UnstructuredMarkdownLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ❌ | ❌ | ✅ | 
+# | [UnstructuredMarkdownLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.markdown.UnstructuredMarkdownLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ❌ | ❌ | ✅ |
 # ### Loader features
 # | Source | Document Lazy Loading | Native Async Support
-# | :---: | :---: | :---: | 
-# | UnstructuredMarkdownLoader | ✅ | ❌ | 
-# 
+# | :---: | :---: | :---: |
+# | UnstructuredMarkdownLoader | ✅ | ❌ |
+#
 # ## Setup
-# 
+#
 # To access UnstructuredMarkdownLoader document loader you'll need to install the `langchain-community` integration package and the `unstructured` python package.
-# 
+#
 # ### Credentials
-# 
+#
 # No credentials are needed to use this loader.
 
 # If you want to get automated best in-class tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
@@ -35,19 +35,19 @@
 
 
 # ### Installation
-# 
+#
 # Install **langchain_community** and **unstructured**
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_community unstructured')
+get_ipython().run_line_magic("pip", "install -qU langchain_community unstructured")
 
 
 # ## Initialization
-# 
-# Now we can instantiate our model object and load documents. 
-# 
+#
+# Now we can instantiate our model object and load documents.
+#
 # You can run the loader in one of two modes: "single" and "elements". If you use "single" mode, the document will be returned as a single `Document` object. If you use "elements" mode, the unstructured library will split the document into elements such as `Title` and `NarrativeText`. You can pass in additional `unstructured` kwargs after mode to apply different `unstructured` settings.
 
 # In[10]:
@@ -94,7 +94,7 @@ page[0]
 
 
 # ## Load Elements
-# 
+#
 # In this example we will load in the `elements` mode, which will return a list of the different elements in the markdown document:
 
 # In[14]:
@@ -121,5 +121,5 @@ docs[0].page_content
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all UnstructuredMarkdownLoader features and configurations head to the API reference: https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.markdown.UnstructuredMarkdownLoader.html

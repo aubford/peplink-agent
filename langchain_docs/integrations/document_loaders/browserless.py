@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Browserless
-# 
+#
 # Browserless is a service that allows you to run headless Chrome instances in the cloud. It's a great way to run browser-based automation at scale without having to worry about managing your own infrastructure.
-# 
+#
 # To use Browserless as a document loader, initialize a `BrowserlessLoader` instance as shown in this notebook. Note that by default, `BrowserlessLoader` returns the `innerText` of the page's `body` element. To disable this and get the raw HTML, set `text_content` to `False`.
 
 # In[11]:
@@ -33,4 +33,3 @@ loader = BrowserlessLoader(
 documents = loader.load()
 
 print(documents[0].page_content[:1000])
-

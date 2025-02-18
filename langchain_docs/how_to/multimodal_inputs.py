@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # How to pass multimodal data directly to models
-# 
-# Here we demonstrate how to pass [multimodal](/docs/concepts/multimodality/) input directly to models. 
+#
+# Here we demonstrate how to pass [multimodal](/docs/concepts/multimodality/) input directly to models.
 # We currently expect all input to be passed in the same format as [OpenAI expects](https://platform.openai.com/docs/guides/vision).
 # For other model providers that support multimodal input, we have added logic inside the class to convert to the expected format.
-# 
+#
 # In this example we will ask a [model](/docs/concepts/chat_models/#multimodality) to describe an image.
 
 # In[1]:
@@ -85,7 +85,7 @@ print(response.content)
 
 
 # ## Tool calls
-# 
+#
 # Some multimodal models support [tool calling](/docs/concepts/tool_calling) features as well. To call tools using such models, simply bind tools to them in the [usual way](/docs/how_to/tool_calling), and invoke the model using content blocks of the desired type (e.g., containing image data).
 
 # In[8]:
@@ -112,4 +112,3 @@ message = HumanMessage(
 )
 response = model_with_tools.invoke([message])
 print(response.tool_calls)
-

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Math chain
-# 
+#
 # This notebook showcases using LLMs and Python REPLs to do complex word math problems.
 
 # In[4]:
@@ -18,7 +18,3 @@ llm_math.invoke("What is 13 raised to the .3432 power?")
 
 
 # In[ ]:
-
-
-
-

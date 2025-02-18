@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # TiDB Vector
-# 
+#
 # > [TiDB Cloud](https://www.pingcap.com/tidb-serverless), is a comprehensive Database-as-a-Service (DBaaS) solution, that provides dedicated and serverless options. TiDB Serverless is now integrating a built-in vector search into the MySQL landscape. With this enhancement, you can seamlessly develop AI applications using TiDB Serverless without the need for a new database or additional technical stacks. Create a free TiDB Serverless cluster and start using the vector search feature at https://pingcap.com/ai.
-# 
+#
 # This notebook provides a detailed guide on utilizing the TiDB Vector functionality, showcasing its features and practical applications.
 
 # ## Setting up environments
@@ -14,10 +14,10 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install langchain langchain-community')
-get_ipython().run_line_magic('pip', 'install langchain-openai')
-get_ipython().run_line_magic('pip', 'install pymysql')
-get_ipython().run_line_magic('pip', 'install tidb-vector')
+get_ipython().run_line_magic("pip", "install langchain langchain-community")
+get_ipython().run_line_magic("pip", "install langchain-openai")
+get_ipython().run_line_magic("pip", "install pymysql")
+get_ipython().run_line_magic("pip", "install tidb-vector")
 
 
 # Configure both the OpenAI and TiDB host settings that you will need. In this notebook, we will follow the standard connection method provided by TiDB Cloud to establish a secure and efficient database connection.
@@ -63,9 +63,9 @@ embeddings = OpenAIEmbeddings()
 
 
 # ## Semantic similarity search
-# 
+#
 # TiDB supports both cosine and Euclidean distances ('cosine', 'l2'), with 'cosine' being the default choice.
-# 
+#
 # The code snippet below creates a table named `TABLE_NAME` in TiDB, optimized for vector searching. Upon successful execution of this code, you will be able to view and access the `TABLE_NAME` table directly within your TiDB database.
 
 # In[5]:
@@ -114,30 +114,30 @@ for doc, score in docs_with_relevance_score:
 
 
 # # Filter with metadata
-# 
+#
 # perform searches using metadata filters to retrieve a specific number of nearest-neighbor results that align with the applied filters.
-# 
+#
 # ## Supported metadata types
-# 
+#
 # Each vector in the TiDB Vector Store can be paired with metadata, structured as key-value pairs within a JSON object. The keys are strings, and the values can be of the following types:
-# 
+#
 # - String
 # - Number (integer or floating point)
 # - Booleans (true, false)
-# 
+#
 # For instance, consider the following valid metadata payloads:
-# 
+#
 # ```json
 # {
 #     "page": 12,
 #     "book_tile": "Siddhartha"
 # }
 # ```
-# 
+#
 # ## Metadata filter syntax
-# 
+#
 # The available filters include:
-# 
+#
 # - $or - Selects vectors that meet any one of the given conditions.
 # - $and - Selects vectors that meet all of the given conditions.
 # - $eq - Equal to
@@ -148,7 +148,7 @@ for doc, score in docs_with_relevance_score:
 # - $lte - Less than or equal to
 # - $in - In array
 # - $nin - Not in array
-# 
+#
 # Assuming one vector with metada:
 # ```json
 # {
@@ -156,26 +156,26 @@ for doc, score in docs_with_relevance_score:
 #     "book_tile": "Siddhartha"
 # }
 # ```
-# 
+#
 # The following metadata filters will match the vector
-# 
+#
 # ```json
 # {"page": 12}
-# 
+#
 # {"page":{"$eq": 12}}
-# 
+#
 # {"page":{"$in": [11, 12, 13]}}
-# 
+#
 # {"page":{"$nin": [13]}}
-# 
+#
 # {"page":{"$lt": 11}}
-# 
+#
 # {
 #     "$or": [{"page": 11}, {"page": 12}],
 #     "$and": [{"page": 12}, {"page": 13}],
 # }
 # ```
-# 
+#
 # Please note that each key-value pair in the metadata filters is treated as a separate filter clause, and these clauses are combined using the AND logical operator.
 
 # In[9]:
@@ -225,11 +225,11 @@ for doc in docs_retrieved:
 
 
 # ## Advanced Use Case Scenario
-# 
+#
 # Let's look a advanced use case - a travel agent is crafting a custom travel report for clients who desire airports with specific amenities such as clean lounges and vegetarian options. The process involves:
 # - A semantic search within airport reviews to extract airport codes meeting these amenities.
 # - A subsequent SQL query that joins these codes with route information, detailing airlines and destinations aligned with the clients' preferences.
-# 
+#
 # First, let's prepare some airpod related data
 
 # In[12]:
@@ -346,11 +346,10 @@ db.tidb_vector_client.execute("DROP TABLE airplan_routes")
 
 
 # # Delete
-# 
+#
 # You can remove the TiDB Vector Store by using the `.drop_vectorstore()` method.
 
 # In[21]:
 
 
 db.drop_vectorstore()
-

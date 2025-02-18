@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Streamlit
-# 
-# >[Streamlit](https://docs.streamlit.io/) is an open-source Python library that makes it easy to create and share beautiful, 
+#
+# >[Streamlit](https://docs.streamlit.io/) is an open-source Python library that makes it easy to create and share beautiful,
 # custom web apps for machine learning and data science.
-# 
+#
 # This notebook goes over how to store and use chat message history in a `Streamlit` app. `StreamlitChatMessageHistory` will store messages in
 # [Streamlit session state](https://docs.streamlit.io/library/api-reference/session-state)
 # at the specified `key=`. The default key is `"langchain_messages"`.
-# 
+#
 # - Note, `StreamlitChatMessageHistory` only works when run in a Streamlit app.
 # - You may also be interested in [StreamlitCallbackHandler](/docs/integrations/callbacks/streamlit) for LangChain.
 # - For more on Streamlit check out their
 # [getting started documentation](https://docs.streamlit.io/library/get-started).
-# 
+#
 # The integration lives in the `langchain-community` package, so we need to install that. We also need to install `streamlit`.
-# 
+#
 # ```
 # pip install -U langchain-community streamlit
 # ```
-# 
+#
 # You can see the [full app example running here](https://langchain-st-memory.streamlit.app/), and more examples in
 # [github.com/langchain-ai/streamlit-agent](https://github.com/langchain-ai/streamlit-agent).
 
@@ -44,7 +44,7 @@ history.messages
 
 
 # We can easily combine this message history class with [LCEL Runnables](/docs/how_to/message_history).
-# 
+#
 # The history will be persisted across re-runs of the Streamlit app within a given user session. A given `StreamlitChatMessageHistory` will NOT be persisted or shared across user sessions.
 
 # In[ ]:

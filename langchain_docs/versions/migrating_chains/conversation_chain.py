@@ -2,21 +2,23 @@
 # coding: utf-8
 
 # # Migrating from ConversationalChain
-# 
+#
 # [`ConversationChain`](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.conversation.base.ConversationChain.html) incorporated a memory of previous messages to sustain a stateful conversation.
-# 
+#
 # Some advantages of switching to the Langgraph implementation are:
-# 
+#
 # - Innate support for threads/separate sessions. To make this work with `ConversationChain`, you'd need to instantiate a separate memory class outside the chain.
 # - More explicit parameters. `ConversationChain` contains a hidden default prompt, which can cause confusion.
 # - Streaming support. `ConversationChain` only supports streaming via callbacks.
-# 
+#
 # Langgraph's [checkpointing](https://langchain-ai.github.io/langgraph/how-tos/persistence/) system supports multiple threads or sessions, which can be specified via the `"thread_id"` key in its configuration parameters.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain langchain-openai')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet langchain langchain-openai"
+)
 
 
 # In[2]:
@@ -30,7 +32,7 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Legacy
-# 
+#
 # <details open>
 
 # In[2]:
@@ -67,9 +69,9 @@ chain({"input": "What is my name?"})
 
 
 # </details>
-# 
+#
 # ## Langgraph
-# 
+#
 # <details open>
 
 # In[4]:
@@ -136,9 +138,9 @@ for event in app.stream({"messages": input_messages}, config, stream_mode="value
 
 
 # </details>
-# 
+#
 # ## Next steps
-# 
+#
 # See [this tutorial](/docs/tutorials/chatbot) for a more end-to-end guide on building with [`RunnableWithMessageHistory`](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html).
-# 
+#
 # Check out the [LCEL conceptual docs](/docs/concepts/lcel) for more background information.

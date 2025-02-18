@@ -4,7 +4,7 @@
 # # Summarization checker chain
 # This notebook shows some examples of LLMSummarizationCheckerChain in use with different types of texts.  It has a few distinct differences from the `LLMCheckerChain`, in that it doesn't have any assumptions to the format of the input text (or summary).
 # Additionally, as the LLMs like to hallucinate when fact checking or get confused by context, it is sometimes beneficial to run the checker multiple times.  It does this by feeding the rewritten "True" result back on itself, and checking the "facts" for truth.  As you can see from the examples below, this can be very effective in arriving at a generally true body of text.
-# 
+#
 # You can control the number of times the checker runs by setting the `max_checks` parameter.  The default is 2, but you can set it to 1 if you don't want any double-checking.
 
 # In[1]:
@@ -46,4 +46,3 @@ llm = OpenAI(temperature=0)
 checker_chain = LLMSummarizationCheckerChain.from_llm(llm, max_checks=3, verbose=True)
 text = "Mammals can lay eggs, birds can lay eggs, therefore birds are mammals."
 checker_chain.run(text)
-

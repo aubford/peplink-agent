@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # AutoGPT
-# 
+#
 # Implementation of https://github.com/Significant-Gravitas/Auto-GPT but with LangChain primitives (LLMs, PromptTemplates, VectorStores, Embeddings, Tools)
 
 # ## Set up tools
-# 
+#
 # We'll set up an AutoGPT with a search tool, and write-file tool, and a read-file tool
 
 # In[2]:
@@ -30,7 +30,7 @@ tools = [
 
 
 # ## Set up memory
-# 
+#
 # The memory here is used for the agents intermediate steps
 
 # In[3]:
@@ -55,7 +55,7 @@ vectorstore = FAISS(embeddings_model.embed_query, index, InMemoryDocstore({}), {
 
 
 # ## Setup model and AutoGPT
-# 
+#
 # Initialize everything! We will use ChatOpenAI model
 
 # In[5]:
@@ -80,7 +80,7 @@ agent.chain.verbose = True
 
 
 # ## Run an example
-# 
+#
 # Here we will make it write a weather report for SF
 
 # In[ ]:
@@ -90,7 +90,7 @@ agent.run(["write a weather report for SF today"])
 
 
 # ## Chat History Memory
-# 
+#
 # In addition to the memory that holds the agent immediate steps, we also have a chat history memory. By default, the agent will use 'ChatMessageHistory' and it can be changed. This is useful when you want to use a different type of memory for example 'FileChatHistoryMemory'
 
 # In[ ]:
@@ -108,4 +108,4 @@ agent = AutoGPT.from_llm_and_tools(
 )
 
 
-# 
+#

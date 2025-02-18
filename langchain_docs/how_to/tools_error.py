@@ -2,28 +2,30 @@
 # coding: utf-8
 
 # # How to handle tool errors
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
 # - [LangChain Tools](/docs/concepts/tools)
 # - [How to use a model to call tools](/docs/how_to/tool_calling)
-# 
+#
 # :::
-# 
+#
 # [Calling tools](/docs/concepts/tool_calling/) with an LLM is generally more reliable than pure prompting, but it isn't perfect. The model may try to call a tool that doesn't exist or fail to return arguments that match the requested schema. Strategies like keeping schemas simple, reducing the number of tools you pass at once, and having good names and descriptions can help mitigate this risk, but aren't foolproof.
-# 
+#
 # This guide covers some ways to build error handling into your chains to mitigate these failure modes.
 
 # ## Setup
-# 
+#
 # We'll need to install the following packages:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-core langchain-openai')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet langchain-core langchain-openai"
+)
 
 
 # If you'd like to trace your runs in [LangSmith](https://docs.smith.langchain.com/) uncomment and set the following environment variables:
@@ -39,13 +41,13 @@ import os
 
 
 # ## Chain
-# 
+#
 # Suppose we have the following (dummy) tool and tool-calling chain. We'll make our tool intentionally convoluted to try and trip up the model.
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm"/>
-# 
+#
 
 # In[3]:
 
@@ -93,7 +95,7 @@ chain.invoke(
 
 
 # ## Try/except tool call
-# 
+#
 # The simplest way to more gracefully handle errors is to try/except the tool-calling step and return a helpful message on errors:
 
 # In[6]:
@@ -121,7 +123,7 @@ print(
 
 
 # ## Fallbacks
-# 
+#
 # We can also try to fallback to a better model in the event of a tool invocation error. In this case we'll fall back to an identical chain that uses `gpt-4-1106-preview` instead of `gpt-3.5-turbo`.
 
 # In[7]:
@@ -145,7 +147,7 @@ chain_with_fallback.invoke(
 # Looking at the [LangSmith trace](https://smith.langchain.com/public/00e91fc2-e1a4-4b0f-a82e-e6b3119d196c/r) for this chain run, we can see that the first chain call fails as expected and it's the fallback that succeeds.
 
 # ## Retry with exception
-# 
+#
 # To take things one step further, we can try to automatically re-run the chain with the exception passed in, so that the model may be able to correct its behavior:
 
 # In[8]:
@@ -215,13 +217,13 @@ self_correcting_chain.invoke(
 # And our chain succeeds! Looking at the [LangSmith trace](https://smith.langchain.com/public/c11e804c-e14f-4059-bd09-64766f999c14/r), we can see that indeed our initial chain still fails, and it's only on retrying that the chain succeeds.
 
 # ## Next steps
-# 
+#
 # Now you've seen some strategies how to handle tool calling errors. Next, you can learn more about how to use tools:
-# 
+#
 # - Few shot prompting [with tools](/docs/how_to/tools_few_shot/)
 # - Stream [tool calls](/docs/how_to/tool_streaming/)
 # - Pass [runtime values to tools](/docs/how_to/tool_runtime)
-# 
+#
 # You can also check out some more specific uses of tool calling:
-# 
+#
 # - Getting [structured outputs](/docs/how_to/structured_output/) from models

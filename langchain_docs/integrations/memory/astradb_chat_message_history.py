@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Astra DB 
-# 
+# # Astra DB
+#
 # > DataStax [Astra DB](https://docs.datastax.com/en/astra/home/astra.html) is a serverless vector-capable database built on Cassandra and made conveniently available through an easy-to-use JSON API.
-# 
+#
 # This notebook goes over how to use Astra DB to store chat message history.
 
 # ## Setting up
-# 
+#
 # To run this notebook you need a running Astra DB. Get the connection secrets on your Astra dashboard:
-# 
+#
 # - the API Endpoint looks like `https://01234567-89ab-cdef-0123-456789abcdef-us-east1.apps.astra.datastax.com`;
 # - the Token looks like `AstraCS:6gBhNmsk135...`.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  "astrapy>=0.7.1 langchain-community"')
+get_ipython().run_line_magic(
+    "pip", 'install --upgrade --quiet  "astrapy>=0.7.1 langchain-community"'
+)
 
 
 # ### Set up the database connection parameters and secrets
@@ -55,4 +57,3 @@ message_history.add_ai_message("whats up?")
 
 
 message_history.messages
-

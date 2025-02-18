@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Gutenberg
-# 
+#
 # >[Project Gutenberg](https://www.gutenberg.org/about/) is an online library of free eBooks.
-# 
+#
 # This notebook covers how to load links to `Gutenberg` e-books into a document format that we can use downstream.
 
 # In[1]:
@@ -35,4 +35,3 @@ data[0].page_content[:300]
 
 
 data[0].metadata
-

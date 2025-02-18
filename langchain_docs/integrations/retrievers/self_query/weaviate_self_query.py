@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Weaviate
-# 
+#
 # >[Weaviate](https://weaviate.io/) is an open-source vector database. It allows you to store data objects and vector embeddings from
 # >your favorite ML models, and scale seamlessly into billions of data objects.
-# 
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Weaviate` vector store. 
+#
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Weaviate` vector store.
 
 # ## Creating a Weaviate vector store
 # First we'll want to create a Weaviate vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `weaviate-client` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark weaviate-client')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark weaviate-client")
 
 
 # In[10]:
@@ -123,9 +123,9 @@ retriever.invoke("Has Greta Gerwig directed any movies about women")
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[27]:
@@ -146,4 +146,3 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
-

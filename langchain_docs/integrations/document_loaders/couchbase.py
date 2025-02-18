@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Couchbase
-# 
+#
 # >[Couchbase](http://couchbase.com/) is an award-winning distributed NoSQL cloud database that delivers unmatched versatility, performance, scalability, and financial value for all of your cloud, mobile, AI, and edge computing applications.
-# 
+#
 
 # ## Installation
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  couchbase')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  couchbase")
 
 
 # ## Querying for Documents from Couchbase
 # For more details on connecting to a Couchbase cluster, please check the [Python SDK documentation](https://docs.couchbase.com/python-sdk/current/howtos/managing-connections.html#connection-strings).
-# 
+#
 # For help with querying for documents using SQL++ (SQL for JSON), please check the [documentation](https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/index.html).
 
 # In[2]:
@@ -95,4 +95,3 @@ loader_with_selected_fields = CouchbaseLoader(
 )
 docs_with_selected_fields = loader_with_selected_fields.load()
 print(docs_with_selected_fields)
-

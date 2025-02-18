@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # HTML to text
-# 
-# >[html2text](https://github.com/Alir3z4/html2text/) is a Python package that converts a page of `HTML` into clean, easy-to-read plain `ASCII text`. 
-# 
+#
+# >[html2text](https://github.com/Alir3z4/html2text/) is a Python package that converts a page of `HTML` into clean, easy-to-read plain `ASCII text`.
+#
 # The ASCII also happens to be a valid `Markdown` (a text-to-HTML format).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet html2text')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet html2text")
 
 
 # In[2]:
@@ -35,4 +35,3 @@ docs_transformed = html2text.transform_documents(docs)
 print(docs_transformed[0].page_content[1000:2000])
 
 print(docs_transformed[1].page_content[1000:2000])
-

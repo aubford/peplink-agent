@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Migrating from StuffDocumentsChain
-# 
+#
 # [StuffDocumentsChain](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.combine_documents.stuff.StuffDocumentsChain.html) combines documents by concatenating them into a single context window. It is a straightforward and effective strategy for combining documents for question-answering, summarization, and other purposes.
-# 
+#
 # [create_stuff_documents_chain](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.combine_documents.stuff.create_stuff_documents_chain.html) is the recommended alternative. It functions the same as `StuffDocumentsChain`, with better support for streaming and batch functionality. Because it is a simple combination of [LCEL primitives](/docs/concepts/lcel), it is also easier to extend and incorporate into other LangChain applications.
-# 
+#
 # Below we will go through both `StuffDocumentsChain` and `create_stuff_documents_chain` on a simple example for illustrative purposes.
-# 
+#
 # Let's first load a chat model:
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
 
 # In[1]:
@@ -27,7 +27,7 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 
 # ## Example
-# 
+#
 # Let's go through an example where we analyze a set of documents. We first generate some simple documents for illustrative purposes:
 
 # In[2]:
@@ -43,9 +43,9 @@ documents = [
 
 
 # ### Legacy
-# 
+#
 # <details open>
-# 
+#
 # Below we show an implementation with `StuffDocumentsChain`. We define the prompt template for a summarization task and instantiate a [LLMChain](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.llm.LLMChain.html) object for this purpose. We define how documents are formatted into the prompt and ensure consistency among the keys in the various prompts.
 
 # In[15]:
@@ -90,11 +90,11 @@ for chunk in chain.stream(documents):
 
 
 # </details>
-# 
+#
 # ### LCEL
-# 
+#
 # <details open>
-# 
+#
 # Below we show an implementation using `create_stuff_documents_chain`:
 
 # In[21]:
@@ -126,11 +126,11 @@ for chunk in chain.stream({"context": documents}):
 
 
 # </details>
-# 
+#
 # ## Next steps
-# 
+#
 # Check out the [LCEL conceptual docs](/docs/concepts/lcel) for more background information.
-# 
+#
 # See these [how-to guides](/docs/how_to/#qa-with-rag) for more on question-answering tasks with RAG.
-# 
+#
 # See [this tutorial](/docs/tutorials/summarization/) for more LLM-based summarization strategies.

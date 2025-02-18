@@ -4,13 +4,13 @@
 # # Activeloop Deep Memory
 
 # >[Activeloop Deep Memory](https://docs.activeloop.ai/performance-features/deep-memory) is a suite of tools that enables you to optimize your Vector Store for your use-case and achieve higher accuracy in your LLM apps.
-# 
+#
 # `Retrieval-Augmented Generatation` (`RAG`) has recently gained significant attention. As advanced RAG techniques and agents emerge, they expand the potential of what RAGs can accomplish. However, several challenges may limit the integration of RAGs into production. The primary factors to consider when implementing RAGs in production settings are accuracy (recall), cost, and latency. For basic use cases, OpenAI's Ada model paired with a naive similarity search can produce satisfactory results. Yet, for higher accuracy or recall during searches, one might need to employ advanced retrieval techniques. These methods might involve varying data chunk sizes, rewriting queries multiple times, and more, potentially increasing latency and costs.  Activeloop's [Deep Memory](https://www.activeloop.ai/resources/use-deep-memory-to-boost-rag-apps-accuracy-by-up-to-22/) a feature available to `Activeloop Deep Lake` users, addresses these issuea by introducing a tiny neural network layer trained to match user queries with relevant data from a corpus. While this addition incurs minimal latency during search, it can boost retrieval accuracy by up to 27
 # % and remains cost-effective and simple to use, without requiring any additional advanced rag techniques.
-# 
+#
 
-# For this tutorial we will parse `DeepLake` documentation, and create a RAG system that could answer the question from the docs. 
-# 
+# For this tutorial we will parse `DeepLake` documentation, and create a RAG system that could answer the question from the docs.
+#
 
 # ## 1. Dataset Creation
 
@@ -19,7 +19,10 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tiktoken langchain-openai python-dotenv datasets langchain deeplake beautifulsoup4 html2text ragas')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  tiktoken langchain-openai python-dotenv datasets langchain deeplake beautifulsoup4 html2text ragas",
+)
 
 
 # Also you'll need to create a [Activeloop](https://activeloop.ai) account.
@@ -114,9 +117,6 @@ docs = loader.load()
 # In[ ]:
 
 
-
-
-
 # Converting data into user readable format:
 
 # In[ ]:
@@ -158,16 +158,16 @@ for doc in docs_transformed:
 docs = db.add_documents(docs_new)
 
 
-# ## 2. Generating synthetic queries and training Deep Memory 
+# ## 2. Generating synthetic queries and training Deep Memory
 
 # Next step would be to train a deep_memory model that will align your users queries with the dataset that you already have. If you don't have any user queries yet, no worries, we will generate them using LLM!
 
 # #### TODO: Add image
 
-# Here above we showed the overall schema how deep_memory works. So as you can see, in order to train it you need relevance, queries together with corpus data (data that we want to query). Corpus data was already populated in the previous section, here we will be generating questions and relevance. 
-# 
+# Here above we showed the overall schema how deep_memory works. So as you can see, in order to train it you need relevance, queries together with corpus data (data that we want to query). Corpus data was already populated in the previous section, here we will be generating questions and relevance.
+#
 # 1. `questions` - is a text of strings, where each string represents a query
-# 2. `relevance` - contains links to the ground truth for each question. There might be several docs that contain answer to the given question. Because of this relevenve is `List[List[tuple[str, float]]]`, where outer list represents queries and inner list relevant documents. Tuple contains str, float pair where string represent the id of the source doc (corresponds to the `id` tensor in the dataset), while float corresponds to how much current document is related to the question.  
+# 2. `relevance` - contains links to the ground truth for each question. There might be several docs that contain answer to the given question. Because of this relevenve is `List[List[tuple[str, float]]]`, where outer list represents queries and inner list relevant documents. Tuple contains str, float pair where string represent the id of the source doc (corresponds to the `id` tensor in the dataset), while float corresponds to how much current document is related to the question.
 
 # Now, let us generate synthetic questions and relevance:
 
@@ -284,7 +284,7 @@ db.vectorstore.deep_memory.status("6538939ca0b69a9ca45c528c")
 
 # ### 3.1 Deep Memory evaluation
 
-# For the beginning we can use deep_memory's builtin evaluation method. 
+# For the beginning we can use deep_memory's builtin evaluation method.
 # It calculates several `recall` metrics.
 # It can be done easily in a few lines of code.
 
@@ -367,7 +367,7 @@ for deep_memory in [False, True]:
 # ### 3.3 Deep Memory Inference
 
 # #### TODO: Add image
-# 
+#
 # with deep_memory
 
 # In[4]:

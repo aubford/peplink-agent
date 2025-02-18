@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Images
-# 
+#
 # This covers how to load images into a document format that we can use downstream with other LangChain modules.
-# 
+#
 # It uses [Unstructured](https://unstructured.io/) to handle a wide variety of image formats, such as `.jpg` and `.png`. Please see [this guide](/docs/integrations/providers/unstructured/) for more instructions on setting up Unstructured locally, including setting up required system dependencies.
 
 # ## Using Unstructured
@@ -12,7 +12,9 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet "unstructured[all-docs]"')
+get_ipython().run_line_magic(
+    "pip", 'install --upgrade --quiet "unstructured[all-docs]"'
+)
 
 
 # In[2]:
@@ -28,7 +30,7 @@ data[0]
 
 
 # ### Retain Elements
-# 
+#
 # Under the hood, Unstructured creates different "elements" for different chunks of text. By default we combine those together, but you can keep that separation by specifying `mode="elements"`.
 
 # In[3]:
@@ -41,4 +43,3 @@ loader = UnstructuredImageLoader(
 data = loader.load()
 
 data[0]
-

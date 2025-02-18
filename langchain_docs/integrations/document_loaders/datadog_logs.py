@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Datadog Logs
-# 
+#
 # >[Datadog](https://www.datadoghq.com/) is a monitoring and analytics platform for cloud-scale applications.
-# 
+#
 # This loader fetches the logs from your applications in Datadog using the `datadog_api_client` Python package. You must initialize the loader with your `Datadog API key` and `APP key`, and you need to pass in the query to extract the desired logs.
 
 # In[ ]:
@@ -16,7 +16,7 @@ from langchain_community.document_loaders import DatadogLogsLoader
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  datadog-api-client')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  datadog-api-client")
 
 
 # In[ ]:
@@ -46,4 +46,3 @@ loader = DatadogLogsLoader(
 
 documents = loader.load()
 documents
-

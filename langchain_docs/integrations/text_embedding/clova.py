@@ -3,9 +3,9 @@
 
 # # Clova Embeddings
 # [Clova](https://api.ncloud-docs.com/docs/ai-naver-clovastudio-summary) offers an embeddings service
-# 
+#
 # This example goes over how to use LangChain to interact with Clova inference for text embedding.
-# 
+#
 
 # In[ ]:
 
@@ -41,4 +41,3 @@ query_result = embeddings.embed_query(query_text)
 
 document_text = ["This is a test doc1.", "This is a test doc2."]
 document_result = embeddings.embed_documents(document_text)
-

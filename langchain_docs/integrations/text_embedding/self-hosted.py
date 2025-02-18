@@ -99,7 +99,3 @@ query_result = embeddings.embed_query(text)
 
 
 # In[ ]:
-
-
-
-

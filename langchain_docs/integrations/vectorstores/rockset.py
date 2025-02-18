@@ -2,43 +2,43 @@
 # coding: utf-8
 
 # # Rockset
-# 
+#
 # >[Rockset](https://rockset.com/) is a real-time search and analytics database built for the cloud. Rockset uses a [Converged Index™](https://rockset.com/blog/converged-indexing-the-secret-sauce-behind-rocksets-fast-queries/) with an efficient store for vector embeddings to serve low latency, high concurrency search queries at scale. Rockset has full support for metadata filtering and  handles real-time ingestion for constantly updating, streaming data.
-# 
+#
 # This notebook demonstrates how to use `Rockset` as a vector store in LangChain. Before getting started, make sure you have access to a `Rockset` account and an API key available. [Start your free trial today.](https://rockset.com/create/)
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # ## Setting Up Your Environment
-# 
-# 1. Leverage the `Rockset` console to create a [collection](https://rockset.com/docs/collections/) with the Write API as your source. In this walkthrough, we create a collection named `langchain_demo`. 
-#     
+#
+# 1. Leverage the `Rockset` console to create a [collection](https://rockset.com/docs/collections/) with the Write API as your source. In this walkthrough, we create a collection named `langchain_demo`.
+#
 #     Configure the following [ingest transformation](https://rockset.com/docs/ingest-transformation/) to mark your embeddings field and take advantage of performance and storage optimizations:
-# 
-# 
+#
+#
 #    (We used OpenAI `text-embedding-ada-002` for this examples, where #length_of_vector_embedding = 1536)
 
 # ```
-# SELECT _input.* EXCEPT(_meta), 
-# VECTOR_ENFORCE(_input.description_embedding, #length_of_vector_embedding, 'float') as description_embedding 
+# SELECT _input.* EXCEPT(_meta),
+# VECTOR_ENFORCE(_input.description_embedding, #length_of_vector_embedding, 'float') as description_embedding
 # FROM _input
 # ```
-# 
+#
 # 2. After creating your collection, use the console to retrieve an [API key](https://rockset.com/docs/iam/#users-api-keys-and-roles). For the purpose of this notebook, we assume you are using the `Oregon(us-west-2)` region.
-# 
+#
 # 3. Install the [rockset-python-client](https://github.com/rockset/rockset-python-client) to enable LangChain to communicate directly with `Rockset`.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  rockset')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  rockset")
 
 
 # ## LangChain Tutorial
-# 
+#
 # Follow along in your own Python notebook to generate and store vector embeddings in Rockset.
 # Start using Rockset to search for documents similar to your search queries.
-# 
+#
 # ### 1. Define Key Variables
 
 # In[ ]:
@@ -141,10 +141,10 @@ for d, dist in output:
 
 
 # ### 6. [Optional] Delete Inserted Documents
-# 
+#
 # You must have the unique ID associated with each document to delete them from your collection.
 # Define IDs when inserting documents with `Rockset.add_texts()`. Rockset will otherwise generate a unique ID for each document. Regardless, `Rockset.add_texts()` returns the IDs of inserted documents.
-# 
+#
 # To delete these docs, simply use the `Rockset.delete_texts()` function.
 
 # In[ ]:
@@ -154,7 +154,7 @@ docsearch.delete_texts(ids)
 
 
 # ## Summary
-# 
+#
 # In this tutorial, we successfully created a `Rockset` collection, `inserted` documents with  OpenAI embeddings, and searched for similar documents with and without metadata filters.
-# 
+#
 # Keep an eye on https://rockset.com/ for future updates in this space.

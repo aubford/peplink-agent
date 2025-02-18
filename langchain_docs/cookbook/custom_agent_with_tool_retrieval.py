@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Custom agent with tool retrieval
-# 
+#
 # The novel idea introduced in this notebook is the idea of using retrieval to select the set of tools to use to answer an agent query. This is useful when you have many many tools to select from. You cannot put the description of all the tools in the prompt (because of context length issues) so instead you dynamically select the N tools you do want to consider using at run time.
-# 
+#
 # In this notebook we will create a somewhat contrived example. We will have one legitimate tool (search) and then 99 fake tools which are just nonsense. We will then add a step in the prompt template that takes the user input and retrieves tool relevant to the query.
 
 # ## Set up environment
-# 
+#
 # Do necessary imports, etc.
 
 # In[1]:
@@ -31,7 +31,7 @@ from langchain_openai import OpenAI
 
 
 # ## Set up tools
-# 
+#
 # We will create one legitimate tool (search) and then 99 fake tools.
 
 # In[12]:
@@ -62,7 +62,7 @@ ALL_TOOLS = [search_tool] + fake_tools
 
 
 # ## Tool Retriever
-# 
+#
 # We will use a vector store to create embeddings for each tool description. Then, for an incoming query we can create embeddings for that query and do a similarity search for relevant tools.
 
 # In[4]:
@@ -114,7 +114,7 @@ get_tools("whats the number 13?")
 
 
 # ## Prompt template
-# 
+#
 # The prompt template is pretty standard, because we're not actually changing that much logic in the actual prompt template, but rather we are just changing how retrieval is done.
 
 # In[21]:
@@ -192,7 +192,7 @@ prompt = CustomPromptTemplate(
 
 
 # ## Output parser
-# 
+#
 # The output parser is unchanged from the previous notebook, since we are not changing anything about the output format.
 
 # In[54]:
@@ -228,7 +228,7 @@ output_parser = CustomOutputParser()
 
 
 # ## Set up LLM, stop sequence, and the agent
-# 
+#
 # Also the same as the previous notebook.
 
 # In[56]:
@@ -258,7 +258,7 @@ agent = LLMSingleActionAgent(
 
 
 # ## Use the Agent
-# 
+#
 # Now we can use it!
 
 # In[59]:
@@ -276,7 +276,3 @@ agent_executor.run("What's the weather in SF?")
 
 
 # In[ ]:
-
-
-
-

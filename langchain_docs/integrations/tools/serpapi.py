@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # SerpAPI
-# 
+#
 # This notebook goes over how to use the SerpAPI component to search the web.
 
 # In[1]:
@@ -54,4 +54,3 @@ repl_tool = Tool(
     description="A Python shell. Use this to execute python commands. Input should be a valid python command. If you want to see the output of a value, you should print it out with `print(...)`.",
     func=search.run,
 )
-

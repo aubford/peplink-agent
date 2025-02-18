@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # Two-Player Dungeons & Dragons
-# 
+#
 # In this notebook, we show how we can use concepts from [CAMEL](https://www.camel-ai.org/) to simulate a role-playing game with a protagonist and a dungeon master. To simulate this game, we create an `DialogueSimulator` class that coordinates the dialogue between the two agents.
 
-# ## Import LangChain related modules 
+# ## Import LangChain related modules
 
 # In[1]:
 
@@ -21,8 +21,8 @@ from langchain_openai import ChatOpenAI
 
 # ## `DialogueAgent` class
 # The `DialogueAgent` class is a simple wrapper around the `ChatOpenAI` model that stores the message history from the `dialogue_agent`'s point of view by simply concatenating the messages as strings.
-# 
-# It exposes two methods: 
+#
+# It exposes two methods:
 # - `send()`: applies the chatmodel to the message history and returns the message string
 # - `receive(name, message)`: adds the `message` spoken by `name` to message history
 
@@ -68,7 +68,7 @@ class DialogueAgent:
 # ## `DialogueSimulator` class
 # The `DialogueSimulator` class takes a list of agents. At each step, it performs the following:
 # 1. Select the next speaker
-# 2. Calls the next speaker to send a message 
+# 2. Calls the next speaker to send a message
 # 3. Broadcasts the message to all other agents
 # 4. Update the step counter.
 # The selection of the next speaker can be implemented as any function, but in this case we simply loop through the agents.
@@ -287,4 +287,3 @@ while n < max_iters:
     print(f"({name}): {message}")
     print("\n")
     n += 1
-

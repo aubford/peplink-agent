@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Pinecone Embeddings
-# 
+#
 # Pinecone's inference API can be accessed via `PineconeEmbeddings`. Providing text embeddings via the Pinecone service. We start by installing prerequisite libraries:
 
 # In[ ]:
@@ -61,4 +61,3 @@ doc_embeds
 query = "Tell me about the tech company known as Apple"
 query_embed = embeddings.embed_query(query)
 query_embed
-

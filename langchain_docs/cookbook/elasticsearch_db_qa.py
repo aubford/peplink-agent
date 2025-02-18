@@ -2,21 +2,23 @@
 # coding: utf-8
 
 # # Elasticsearch
-# 
+#
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/langchain-ai/langchain/blob/master/docs/docs/use_cases/qa_structured/integrations/elasticsearch.ipynb)
-# 
+#
 # We can use LLMs to interact with Elasticsearch analytics databases in natural language.
-# 
+#
 # This chain builds search queries via the Elasticsearch DSL API (filters and aggregations).
-# 
+#
 # The Elasticsearch client must have permissions for index listing, mapping description and search queries.
-# 
+#
 # See [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html) for instructions on how to run Elasticsearch locally.
 
 # In[2]:
 
 
-get_ipython().system(' pip install langchain langchain-experimental openai elasticsearch')
+get_ipython().system(
+    " pip install langchain langchain-experimental openai elasticsearch"
+)
 
 # Set env var OPENAI_API_KEY or load from a .env file
 # import dotenv
@@ -94,4 +96,3 @@ PROMPT = PromptTemplate.from_template(
     PROMPT_TEMPLATE,
 )
 chain = ElasticsearchDatabaseChain.from_llm(llm=llm, database=db, query_prompt=PROMPT)
-

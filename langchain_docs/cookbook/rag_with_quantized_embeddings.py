@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # Embedding Documents using Optimized and Quantized Embedders
-# 
+#
 # In this tutorial, we will demo how to build a RAG pipeline, with the embedding for all documents done using Quantized Embedders.
-# 
+#
 # We will use a pipeline that will:
-# 
+#
 # * Create a document collection.
 # * Embed all documents using Quantized Embedders.
 # * Fetch relevant documents for our question.
 # * Run an LLM answer the question.
-# 
+#
 # For more information about optimized models, we refer to [optimum-intel](https://github.com/huggingface/optimum-intel.git) and [IPEX](https://github.com/intel/intel-extension-for-pytorch).
-# 
+#
 # This tutorial is based on the [Langchain RAG tutorial here](https://towardsai.net/p/machine-learning/dense-x-retrieval-technique-in-langchain-and-llamaindex).
 
 # In[17]:
@@ -59,7 +59,7 @@ all_splits = text_splitter.split_documents(data)
 print(f"Split into {len(all_splits)} documents")
 
 
-# In order to embed our documents, we can use the ```QuantizedBiEncoderEmbeddings```, for efficient and fast embedding. 
+# In order to embed our documents, we can use the ```QuantizedBiEncoderEmbeddings```, for efficient and fast embedding.
 
 # In[9]:
 

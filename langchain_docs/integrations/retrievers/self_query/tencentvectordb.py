@@ -2,20 +2,22 @@
 # coding: utf-8
 
 # # Tencent Cloud VectorDB
-# 
+#
 # > [Tencent Cloud VectorDB](https://cloud.tencent.com/document/product/1709) is a fully managed, self-developed, enterprise-level distributed database    service designed for storing, retrieving, and analyzing multi-dimensional vector data.
-# 
+#
 # In the walkthrough, we'll demo the `SelfQueryRetriever` with a Tencent Cloud VectorDB.
 
 # ## create a TencentVectorDB instance
 # First we'll want to create a TencentVectorDB and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`) along with integration-specific requirements.
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet tcvectordb langchain-openai tiktoken lark')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet tcvectordb langchain-openai tiktoken lark"
+)
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -166,7 +168,7 @@ retriever = SelfQueryRetriever.from_llm(
 
 # ## Test it out
 # And now we can try actually using our retriever!
-# 
+#
 
 # In[6]:
 
@@ -190,9 +192,9 @@ retriever.invoke("movies about a superhero which were released after 2010")
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[9]:
@@ -212,4 +214,3 @@ retriever = SelfQueryRetriever.from_llm(
 
 
 retriever.invoke("what are two movies about a superhero")
-

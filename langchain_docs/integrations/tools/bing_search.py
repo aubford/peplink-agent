@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # Bing Search
-# 
-# > [Bing Search](https://learn.microsoft.com/en-us/bing/search-apis/bing-web-search/) is an Azure service and enables safe, ad-free, location-aware search results, surfacing relevant information from billions of web documents. Help your users find what they're looking for from the world-wide-web by harnessing Bing's ability to comb billions of webpages, images, videos, and news with a single API call. 
+#
+# > [Bing Search](https://learn.microsoft.com/en-us/bing/search-apis/bing-web-search/) is an Azure service and enables safe, ad-free, location-aware search results, surfacing relevant information from billions of web documents. Help your users find what they're looking for from the world-wide-web by harnessing Bing's ability to comb billions of webpages, images, videos, and news with a single API call.
 
 # ## Setup
 # Following the [instruction](https://learn.microsoft.com/en-us/bing/search-apis/bing-web-search/create-bing-search-service-resource) to create Azure Bing Search v7 service, and get the subscription key
-# 
+#
 # The integration lives in the `langchain-community` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -U langchain-community')
+get_ipython().run_line_magic("pip", "install -U langchain-community")
 
 
 # In[12]:
@@ -62,7 +62,7 @@ search.run("python")
 # ## Metadata Results
 
 # Run query through BingSearch and return snippet, title, and link metadata.
-# 
+#
 # - Snippet: The description of the result.
 # - Title: The title of the result.
 # - Link: The link to the result.
@@ -107,14 +107,17 @@ for item in response:
 
 
 # ## Chaining
-# 
+#
 # We show here how to use it as part of an [agent](/docs/tutorials/agents). We use the OpenAI Functions Agent, so we will need to setup and install the required dependencies for that. We will also use [LangSmith Hub](https://smith.langchain.com/hub) to pull the prompt from, so we will need to install that.
 
 # In[ ]:
 
 
 # you need a model to use in the chain
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain langchain-openai langchainhub langchain-community')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet langchain langchain-openai langchainhub langchain-community",
+)
 
 
 # In[11]:
@@ -150,4 +153,3 @@ agent_executor = AgentExecutor(
     verbose=True,
 )
 agent_executor.invoke({"input": "What happened in the latest burning man floods?"})
-

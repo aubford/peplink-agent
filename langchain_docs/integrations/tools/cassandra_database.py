@@ -2,44 +2,44 @@
 # coding: utf-8
 
 # # Cassandra Database Toolkit
-# 
-# >`Apache Cassandra®` is a widely used database for storing transactional application data. The introduction of functions and >tooling in Large Language Models has opened up some exciting use cases for existing data in Generative AI applications. 
-# 
-# >The `Cassandra Database` toolkit enables AI engineers to integrate agents with Cassandra data efficiently, offering 
-# >the following features: 
+#
+# >`Apache Cassandra®` is a widely used database for storing transactional application data. The introduction of functions and >tooling in Large Language Models has opened up some exciting use cases for existing data in Generative AI applications.
+#
+# >The `Cassandra Database` toolkit enables AI engineers to integrate agents with Cassandra data efficiently, offering
+# >the following features:
 # > - Fast data access through optimized queries. Most queries should run in single-digit ms or less.
 # > - Schema introspection to enhance LLM reasoning capabilities
 # > - Compatibility with various Cassandra deployments, including Apache Cassandra®, DataStax Enterprise™, and DataStax Astra™
 # > - Currently, the toolkit is limited to SELECT queries and schema introspection operations. (Safety first)
-# 
+#
 # For more information on creating a Cassandra DB agent see the [CQL agent cookbook](https://github.com/langchain-ai/langchain/blob/master/cookbook/cql_agent.ipynb)
-# 
+#
 # ## Quick Start
 #  - Install the `cassio` library
 #  - Set environment variables for the Cassandra database you are connecting to
 #  - Initialize `CassandraDatabase`
 #  - Pass the tools to your agent with `toolkit.get_tools()`
 #  - Sit back and watch it do all your work for you
-# 
+#
 # ## Theory of Operation
-# 
-# `Cassandra Query Language (CQL)` is the primary *human-centric* way of interacting with a Cassandra database. While offering some flexibility when generating queries, it requires knowledge of Cassandra data modeling best practices. LLM function calling gives an agent the ability to reason and then choose a tool to satisfy the request. Agents using LLMs should reason using Cassandra-specific logic when choosing the appropriate toolkit or chain of toolkits. This reduces the randomness introduced when LLMs are forced to provide a top-down solution. Do you want an LLM to have complete unfettered access to your database? Yeah. Probably not. To accomplish this, we provide a prompt for use when constructing questions for the agent: 
-# 
-# You are an Apache Cassandra expert query analysis bot with the following features 
+#
+# `Cassandra Query Language (CQL)` is the primary *human-centric* way of interacting with a Cassandra database. While offering some flexibility when generating queries, it requires knowledge of Cassandra data modeling best practices. LLM function calling gives an agent the ability to reason and then choose a tool to satisfy the request. Agents using LLMs should reason using Cassandra-specific logic when choosing the appropriate toolkit or chain of toolkits. This reduces the randomness introduced when LLMs are forced to provide a top-down solution. Do you want an LLM to have complete unfettered access to your database? Yeah. Probably not. To accomplish this, we provide a prompt for use when constructing questions for the agent:
+#
+# You are an Apache Cassandra expert query analysis bot with the following features
 # and rules:
-#  - You will take a question from the end user about finding specific 
+#  - You will take a question from the end user about finding specific
 #    data in the database.
-#  - You will examine the schema of the database and create a query path. 
-#  - You will provide the user with the correct query to find the data they are looking 
+#  - You will examine the schema of the database and create a query path.
+#  - You will provide the user with the correct query to find the data they are looking
 #    for, showing the steps provided by the query path.
-#  - You will use best practices for querying Apache Cassandra using partition keys 
+#  - You will use best practices for querying Apache Cassandra using partition keys
 #    and clustering columns.
 #  - Avoid using ALLOW FILTERING in the query.
-#  - The goal is to find a query path, so it may take querying other tables to get 
-#    to the final answer. 
-# 
+#  - The goal is to find a query path, so it may take querying other tables to get
+#    to the final answer.
+#
 # The following is an example of a query path in JSON format:
-# 
+#
 # ```json
 #  {
 #   "query_paths": [
@@ -48,7 +48,7 @@
 #       "steps": [
 #         {
 #           "table": "user_credentials",
-#           "query": 
+#           "query":
 #              "SELECT userid FROM user_credentials WHERE email = 'example@example.com';"
 #         },
 #         {
@@ -60,29 +60,29 @@
 #   ]
 # }
 # ```
-# 
+#
 # ## Tools Provided
-# 
+#
 # ### `cassandra_db_schema`
-# Gathers all schema information for the connected database or a specific schema. Critical for the agent when determining actions. 
-# 
+# Gathers all schema information for the connected database or a specific schema. Critical for the agent when determining actions.
+#
 # ### `cassandra_db_select_table_data`
-# Selects data from a specific keyspace and table. The agent can pass paramaters for a predicate and limits on the number of returned records. 
-# 
+# Selects data from a specific keyspace and table. The agent can pass paramaters for a predicate and limits on the number of returned records.
+#
 # ### `cassandra_db_query`
 # Expiriemental alternative to `cassandra_db_select_table_data` which takes a query string completely formed by the agent instead of parameters. *Warning*: This can lead to unusual queries that may not be as performant(or even work). This may be removed in future releases. If it does something cool, we want to know about that too. You never know!
 
 # ## Environment Setup
-# 
+#
 # Install the following Python modules:
-# 
+#
 # ```bash
 # pip install ipykernel python-dotenv cassio langchain_openai langchain langchain-community langchainhub
 # ```
-# 
+#
 # ### .env file
 # Connection is via `cassio` using `auto=True` parameter, and the notebook uses OpenAI. You should create a `.env` file accordingly.
-# 
+#
 # For Casssandra, set:
 # ```bash
 # CASSANDRA_CONTACT_POINTS
@@ -90,26 +90,26 @@
 # CASSANDRA_PASSWORD
 # CASSANDRA_KEYSPACE
 # ```
-# 
+#
 # For Astra, set:
 # ```bash
 # ASTRA_DB_APPLICATION_TOKEN
 # ASTRA_DB_DATABASE_ID
 # ASTRA_DB_KEYSPACE
 # ```
-# 
+#
 # For example:
-# 
+#
 # ```bash
 # # Connection to Astra:
 # ASTRA_DB_DATABASE_ID=a1b2c3d4-...
 # ASTRA_DB_APPLICATION_TOKEN=AstraCS:...
 # ASTRA_DB_KEYSPACE=notebooks
-# 
-# # Also set 
+#
+# # Also set
 # OPENAI_API_KEY=sk-....
 # ```
-# 
+#
 # (You may also modify the below code to directly connect with `cassio`.)
 
 # In[ ]:
@@ -269,4 +269,3 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 response = agent_executor.invoke({"input": input})
 
 print(response["output"])
-

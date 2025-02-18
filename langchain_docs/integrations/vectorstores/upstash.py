@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Upstash Vector
-# 
+#
 # > [Upstash Vector](https://upstash.com/docs/vector/overall/whatisvector) is a serverless vector database designed for working with vector embeddings.
 # >
 # > The vector langchain integration is a wrapper around the [upstash-vector](https://github.com/upstash/vector-py) package.
@@ -10,23 +10,25 @@
 # > The python package uses the [vector rest api](https://upstash.com/docs/vector/api/get-started) behind the scenes.
 
 # ## Installation
-# 
+#
 # Create a free vector database from [upstash console](https://console.upstash.com/vector) with the desired dimensions and distance metric.
-# 
+#
 # You can then create an `UpstashVectorStore` instance by:
-# 
+#
 # - Providing the environment variables `UPSTASH_VECTOR_URL` and `UPSTASH_VECTOR_TOKEN`
-# 
+#
 # - Giving them as parameters to the constructor
-# 
+#
 # - Passing an Upstash Vector `Index` instance to the constructor
-# 
+#
 # Also, an `Embeddings` instance is required to turn given texts into embeddings. Here we use `OpenAIEmbeddings` as an example
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install langchain-openai langchain langchain-community upstash-vector')
+get_ipython().run_line_magic(
+    "pip", "install langchain-openai langchain langchain-community upstash-vector"
+)
 
 
 # In[5]:
@@ -49,15 +51,15 @@ store = UpstashVectorStore(embedding=embeddings)
 
 
 # An alternative way of creating `UpstashVectorStore` is to [create an Upstash Vector index by selecting a model](https://upstash.com/docs/vector/features/embeddingmodels#using-a-model) and passing `embedding=True`. In this configuration, documents or queries will be sent to Upstash as text and embedded there.
-# 
+#
 # ```python
 # store = UpstashVectorStore(embedding=True)
 # ```
-# 
+#
 # If you are interested in trying out this approach, you can update the initialization of `store` like above and run the rest of the tutorial.
 
 # ## Load documents
-# 
+#
 # Load an example text file and split it into chunks which can be turned into vector embeddings.
 
 # In[6]:
@@ -75,7 +77,7 @@ docs[:3]
 
 
 # ## Inserting documents
-# 
+#
 # The vectorstore embeds text chunks using the embedding object and batch inserts them into the database. This returns an id array of the inserted vectors.
 
 # In[7]:
@@ -87,10 +89,10 @@ inserted_vectors[:5]
 
 
 # ## Querying
-# 
+#
 # The database can be queried using a vector or a text prompt.
 # If a text prompt is used, it's first converted into embedding and then queried.
-# 
+#
 # The `k` parameter specifies how many results to return from the query.
 
 # In[8]:
@@ -101,9 +103,9 @@ result
 
 
 # ## Querying with score
-# 
-# The score of the query can be included for every result. 
-# 
+#
+# The score of the query can be included for every result.
+#
 # > The score returned in the query requests is a normalized value between 0 and 1, where 1 indicates the highest similarity and 0 the lowest regardless of the similarity function used. For more information look at the [docs](https://upstash.com/docs/vector/overall/features#vector-similarity-functions).
 
 # In[9]:
@@ -116,7 +118,7 @@ for doc, score in result:
 
 
 # ## Namespaces
-# 
+#
 # Namespaces can be used to separate different types of documents. This can increase the efficiency of the queries since the search space is reduced. When no namespace is provided, the default namespace is used.
 
 # In[10]:
@@ -158,7 +160,7 @@ result
 
 
 # ## Metadata Filtering
-# 
+#
 # Metadata can be used to filter the results of a query. You can refer to the [docs](https://upstash.com/docs/vector/features/filtering) to see more complex ways of filtering.
 
 # In[14]:
@@ -169,10 +171,10 @@ result
 
 
 # ## Getting info about vector database
-# 
+#
 # You can get information about your database like the distance metric dimension using the info function.
-# 
-# > When an insert happens, the database an indexing takes place. While this is happening new vectors can not be queried. `pendingVectorCount` represents the number of vector that are currently being indexed. 
+#
+# > When an insert happens, the database an indexing takes place. While this is happening new vectors can not be queried. `pendingVectorCount` represents the number of vector that are currently being indexed.
 
 # In[15]:
 
@@ -181,7 +183,7 @@ store.info()
 
 
 # ## Deleting vectors
-# 
+#
 # Vectors can be deleted by their ids
 
 # In[16]:
@@ -191,7 +193,7 @@ store.delete(inserted_vectors)
 
 
 # ## Clearing the vector database
-# 
+#
 # This will clear the vector database
 
 # In[17]:
@@ -199,4 +201,3 @@ store.delete(inserted_vectors)
 
 store.delete(delete_all=True)
 store_books.delete(delete_all=True)
-

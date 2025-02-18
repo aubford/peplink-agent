@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Tencent Cloud VectorDB
-# 
+#
 # >[Tencent Cloud VectorDB](https://cloud.tencent.com/document/product/1709) is a fully managed, self-developed, enterprise-level distributed database service designed for storing, retrieving, and analyzing multi-dimensional vector data. The database supports multiple index types and similarity calculation methods. A single index can support a vector scale of up to 1 billion and can support millions of QPS and millisecond-level query latency. Tencent Cloud Vector Database can not only provide an external knowledge base for large models to improve the accuracy of large model responses but can also be widely used in AI fields such as recommendation systems, NLP services, computer vision, and intelligent customer service.
-# 
+#
 # This notebook shows how to use functionality related to the Tencent vector database.
-# 
+#
 # To run, you should have a [Database instance.](https://cloud.tencent.com/document/product/1709/95101).
-# 
+#
 # ## Basic Usage
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().system('pip3 install tcvectordb langchain-community')
+get_ipython().system("pip3 install tcvectordb langchain-community")
 
 
 # In[4]:
@@ -46,8 +46,8 @@ docs = text_splitter.split_documents(documents)
 #     - `m3e-base`, dimension: 768
 #     - `text2vec-large-chinese`, dimension: 1024
 #     - `e5-large-v2`, dimension: 1024
-#     - `multilingual-e5-base`, dimension: 768 
-# 
+#     - `multilingual-e5-base`, dimension: 768
+#
 # flowing code shows both ways to embed the documents, you can choose one of them by commenting the other:
 
 # In[6]:
@@ -103,9 +103,9 @@ docs[0].page_content
 
 
 # ## Metadata and filtering
-# 
+#
 # Tencent VectorDB supports metadata and [filtering](https://cloud.tencent.com/document/product/1709/95099#c6f6d3a3-02c5-4891-b0a1-30fe4daf18d8). You can add metadata to the documents and filter the search results based on the metadata.
-# 
+#
 # now we will create a new TencentVectorDB collection with metadata and demonstrate how to filter the search results based on the metadata:
 
 # In[2]:
@@ -188,4 +188,3 @@ result = vector_db.similarity_search(query, expr='director="Christopher Nolan"')
 # result = vector_db.similarity_search(query, filter='eq("director", "Christopher Nolan")')
 
 result
-

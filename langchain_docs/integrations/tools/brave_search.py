@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Brave Search
-# 
+#
 # This notebook goes over how to use the Brave Search tool.
 # Go to the [Brave Website](https://brave.com/search/api/) to sign up for a free account and get an API key.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-community")
 
 
 # In[ ]:
@@ -37,7 +37,3 @@ tool.run("obama middle name")
 
 
 # In[ ]:
-
-
-
-

@@ -2,45 +2,48 @@
 # coding: utf-8
 
 # # Diffbot
-# 
+#
 # >[Diffbot](https://docs.diffbot.com/docs/getting-started-with-diffbot) is a suite of ML-based products that make it easy to structure web data.
 # >
 # >Diffbot's [Natural Language Processing API](https://www.diffbot.com/products/natural-language/) allows for the extraction of entities, relationships, and semantic meaning from unstructured text data.
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/langchain-ai/langchain/blob/master/docs/docs/integrations/graphs/diffbot.ipynb)
-# 
+#
 # ## Use case
-# 
+#
 # Text data often contain rich relationships and insights used for various analytics, recommendation engines, or knowledge management applications.
-# 
+#
 # By coupling `Diffbot's NLP API` with `Neo4j`, a graph database, you can create powerful, dynamic graph structures based on the information extracted from text. These graph structures are fully queryable and can be integrated into various applications.
-# 
+#
 # This combination allows for use cases such as:
-# 
+#
 # * Building knowledge graphs (like [Diffbot's Knowledge Graph](https://www.diffbot.com/products/knowledge-graph/)) from textual documents, websites, or social media feeds.
 # * Generating recommendations based on semantic relationships in the data.
 # * Creating advanced search features that understand the relationships between entities.
 # * Building analytics dashboards that allow users to explore the hidden relationships in data.
-# 
+#
 # ## Overview
-# 
+#
 # LangChain provides tools to interact with Graph Databases:
-# 
-# 1. `Construct knowledge graphs from text` using graph transformer and store integrations 
+#
+# 1. `Construct knowledge graphs from text` using graph transformer and store integrations
 # 2. `Query a graph database` using chains for query creation and execution
-# 3. `Interact with a graph database` using agents for robust and flexible querying 
-# 
+# 3. `Interact with a graph database` using agents for robust and flexible querying
+#
 # ## Setting up
-# 
+#
 # First, get required packages and set environment variables:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-experimental langchain-openai langchain-neo4j neo4j wikipedia')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  langchain langchain-experimental langchain-openai langchain-neo4j neo4j wikipedia",
+)
 
 
 # ### Diffbot NLP API
-# 
+#
 # `Diffbot's NLP API` is a tool for extracting entities, relationships, and semantic context from unstructured text data.
 # This extracted information can be used to construct a knowledge graph.
 # To use the API, you'll need to obtain a [free API token from Diffbot](https://app.diffbot.com/get-started/).
@@ -69,7 +72,7 @@ graph_documents = diffbot_nlp.convert_to_graph_documents(raw_documents)
 
 
 # ## Loading the data into a knowledge graph
-# 
+#
 # You will need to have a running Neo4j instance. One option is to create a [free Neo4j database instance in their Aura cloud service](https://neo4j.com/cloud/platform/aura-graph-database/). You can also run the database locally using the [Neo4j Desktop application](https://neo4j.com/download/), or running a docker container. You can run a local docker container by running the executing the following script:
 # ```
 # docker run \
@@ -79,7 +82,7 @@ graph_documents = diffbot_nlp.convert_to_graph_documents(raw_documents)
 #     -e NEO4J_AUTH=neo4j/password \
 #     -e NEO4J_PLUGINS=\[\"apoc\"\]  \
 #     neo4j:latest
-# ```    
+# ```
 # If you are using the docker container, you need to wait a couple of second for the database to start.
 
 # In[4]:
@@ -142,7 +145,3 @@ chain.run("Who is or was working at Berkshire Hathaway?")
 
 
 # In[ ]:
-
-
-
-

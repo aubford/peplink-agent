@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # Agent Debates with Tools
-# 
+#
 # This example shows how to simulate multi-agent dialogues where agents have access to tools.
 
-# ## Import LangChain related modules 
+# ## Import LangChain related modules
 
 # In[1]:
 
@@ -313,4 +313,3 @@ while n < max_iters:
     print(f"({name}): {message}")
     print("\n")
     n += 1
-

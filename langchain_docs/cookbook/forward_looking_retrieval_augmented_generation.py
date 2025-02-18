@@ -2,35 +2,35 @@
 # coding: utf-8
 
 # # Retrieve as you generate with FLARE
-# 
+#
 # This notebook is an implementation of Forward-Looking Active REtrieval augmented generation (FLARE).
-# 
+#
 # Please see the original repo [here](https://github.com/jzbjyb/FLARE/tree/main).
-# 
+#
 # The basic idea is:
-# 
+#
 # - Start answering a question
 # - If you start generating tokens the model is uncertain about, look up relevant documents
 # - Use those documents to continue generating
 # - Repeat until finished
-# 
+#
 # There is a lot of cool detail in how the lookup of relevant documents is done.
 # Basically, the tokens that model is uncertain about are highlighted, and then an LLM is called to generate a question that would lead to that answer. For example, if the generated text is `Joe Biden went to Harvard`, and the tokens the model was uncertain about was `Harvard`, then a good generated question would be `where did Joe Biden go to college`. This generated question is then used in a retrieval step to fetch relevant documents.
-# 
+#
 # In order to set up this chain, we will need three things:
-# 
+#
 # - An LLM to generate the answer
 # - An LLM to generate hypothetical questions to use in retrieval
 # - A retriever to use to look up answers for
-# 
+#
 # The LLM that we use to generate the answer needs to return logprobs so we can identify uncertain tokens. For that reason, we HIGHLY recommend that you use the OpenAI wrapper (NB: not the ChatOpenAI wrapper, as that does not return logprobs).
-# 
+#
 # The LLM we use to generate hypothetical questions to use in retrieval can be anything. In this notebook we will use ChatOpenAI because it is fast and cheap.
-# 
+#
 # The retriever can be anything. In this notebook we will use [SERPER](https://serper.dev/) search engine, because it is cheap.
-# 
+#
 # Other important parameters to understand:
-# 
+#
 # - `max_generation_len`: The maximum number of tokens to generate before stopping to check if any are uncertain
 # - `min_prob`: Any tokens generated with probability below this will be considered uncertain
 
@@ -136,7 +136,3 @@ flare.run("how are the origin stories of langchain and bitcoin similar or differ
 
 
 # In[ ]:
-
-
-
-

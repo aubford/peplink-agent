@@ -2,27 +2,30 @@
 # coding: utf-8
 
 # # Office365 Toolkit
-# 
+#
 # >[Microsoft 365](https://www.office.com/) is a product family of productivity software, collaboration and cloud-based services owned by `Microsoft`.
 # >
 # >Note: `Office 365` was rebranded as `Microsoft 365`.
-# 
+#
 # This notebook walks through connecting LangChain to `Office365` email and calendar.
-# 
+#
 # To use this toolkit, you need to set up your credentials explained in the [Microsoft Graph authentication and authorization overview](https://learn.microsoft.com/en-us/graph/auth/). Once you've received a CLIENT_ID and CLIENT_SECRET, you can input them as environmental variables below.
-# 
+#
 # You can also use the [authentication instructions from here](https://o365.github.io/python-o365/latest/getting_started.html#oauth-setup-pre-requisite).
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  O365')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  beautifulsoup4  # This is optional but is useful for parsing HTML messages')
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  O365")
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  beautifulsoup4  # This is optional but is useful for parsing HTML messages",
+)
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # ## Assign Environmental Variables
-# 
+#
 # The toolkit will read the `CLIENT_ID` and `CLIENT_SECRET` environmental variables to authenticate the user so you need to set them here. You will also need to set your `OPENAI_API_KEY` to use the agent later.
 
 # In[ ]:
@@ -32,7 +35,7 @@ get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # ## Create the Toolkit and Get Tools
-# 
+#
 # To start, you need to create the toolkit, so you can access its tools later.
 
 # In[3]:
@@ -98,4 +101,3 @@ agent.run(
 agent.run(
     "Can you tell me if I have any events on October 3, 2023 in Eastern Time, and if so, tell me if any of them are with a sentient parrot?"
 )
-

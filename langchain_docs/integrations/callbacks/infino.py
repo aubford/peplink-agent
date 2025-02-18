@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Infino
-# 
+#
 # >[Infino](https://github.com/infinohq/infino) is a scalable telemetry store designed for logs, metrics, and traces. Infino can function as a standalone observability solution or as the storage layer in your observability stack.
-# 
+#
 # This example shows how one can track the following while calling OpenAI and ChatOpenAI models via `LangChain` and [Infino](https://github.com/infinohq/infino):
-# 
+#
 # * prompt input
 # * response from `ChatGPT` or any other `LangChain` model
 # * latency
@@ -19,11 +19,13 @@
 
 
 # Install necessary dependencies.
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  infinopy')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  matplotlib')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tiktoken')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-openai langchain-community')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  beautifulsoup4')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  infinopy")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  matplotlib")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  tiktoken")
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain langchain-openai langchain-community"
+)
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  beautifulsoup4")
 
 
 # In[ ]:
@@ -51,7 +53,9 @@ from langchain_openai import OpenAI
 
 
 # Start server using the Infino docker image.
-get_ipython().system('docker run --rm --detach --name infino-example -p 3000:3000 infinohq/infino:latest')
+get_ipython().system(
+    "docker run --rm --detach --name infino-example -p 3000:3000 infinohq/infino:latest"
+)
 
 # Create Infino client.
 client = InfinoClient()
@@ -117,7 +121,7 @@ for question in questions:
 
 
 # ## Create Metric Charts
-# 
+#
 # We now use matplotlib to create graphs of latency, errors and tokens consumed.
 
 # In[6]:
@@ -265,11 +269,7 @@ print("===")
 # In[14]:
 
 
-get_ipython().system('docker rm -f infino-example')
+get_ipython().system("docker rm -f infino-example")
 
 
 # In[ ]:
-
-
-
-

@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Neo4j Vector Index
-# 
+#
 # >[Neo4j](https://neo4j.com/) is an open-source graph database with integrated support for vector similarity search
-# 
+#
 # It supports:
-# 
+#
 # - approximate nearest neighbor search
 # - Euclidean similarity and cosine similarity
 # - Hybrid search combining vector and keyword searches
-# 
+#
 # This notebook shows how to use the Neo4j vector index (`Neo4jVector`).
 
 # See the [installation instruction](https://neo4j.com/docs/operations-manual/current/installation/).
@@ -19,9 +19,11 @@
 
 
 # Pip install necessary package
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  neo4j')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai langchain-neo4j')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tiktoken')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  neo4j")
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain-openai langchain-neo4j"
+)
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  tiktoken")
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -103,7 +105,7 @@ for doc, score in docs_with_score:
 
 
 # ## Working with vectorstore
-# 
+#
 # Above, we created a vectorstore from scratch. However, often times we want to work with an existing vectorstore.
 # In order to do that, we can initialize it directly.
 
@@ -198,10 +200,10 @@ relationship_vector.similarity_search("Example")
 
 
 # ### Metadata filtering
-# 
+#
 # Neo4j vector store also supports metadata filtering by combining parallel runtime and exact nearest neighbor search.
 # _Requires Neo4j 5.18 or greater version._
-# 
+#
 # Equality filtering has the following syntax.
 
 # In[15]:
@@ -214,7 +216,7 @@ existing_graph.similarity_search(
 
 
 # Metadata filtering also support the following operators:
-# 
+#
 # * `$eq: Equal`
 # * `$ne: Not Equal`
 # * `$lt: Less than`
@@ -269,23 +271,23 @@ docs_with_score[0]
 
 
 # ## Customize response with retrieval query
-# 
+#
 # You can also customize responses by using a custom Cypher snippet that can fetch other information from the graph.
 # Under the hood, the final Cypher statement is constructed like so:
-# 
+#
 # ```
 # read_query = (
 #   "CALL db.index.vector.queryNodes($index, $k, $embedding) "
 #   "YIELD node, score "
 # ) + retrieval_query
 # ```
-# 
+#
 # The retrieval query must return the following three columns:
-# 
+#
 # * `text`: Union[str, Dict] = Value used to populate `page_content` of a document
 # * `score`: Float = Similarity score
 # * `metadata`: Dict = Additional metadata of a document
-# 
+#
 # Learn more in this [blog post](https://medium.com/neo4j/implementing-rag-how-to-write-a-graph-retrieval-query-in-langchain-74abf13044f2).
 
 # In[21]:
@@ -345,7 +347,7 @@ retrieval_example.similarity_search("Foo", k=1, params={"extra": "ParamInfo"})
 
 
 # ## Hybrid search (vector + keyword)
-# 
+#
 # Neo4j integrates both vector and keyword indexes, which allows you to use a hybrid search approach
 
 # In[24]:
@@ -382,7 +384,7 @@ store = Neo4jVector.from_existing_index(
 
 
 # ## Retriever options
-# 
+#
 # This section shows how to use `Neo4jVector` as a retriever.
 
 # In[26]:
@@ -393,8 +395,8 @@ retriever.invoke(query)[0]
 
 
 # ## Question Answering with Sources
-# 
-# This section goes over how to do question-answering with sources over an Index. It does this by using the `RetrievalQAWithSourcesChain`, which does the lookup of the documents from an Index. 
+#
+# This section goes over how to do question-answering with sources over an Index. It does this by using the `RetrievalQAWithSourcesChain`, which does the lookup of the documents from an Index.
 
 # In[27]:
 
@@ -421,7 +423,3 @@ chain.invoke(
 
 
 # In[ ]:
-
-
-
-

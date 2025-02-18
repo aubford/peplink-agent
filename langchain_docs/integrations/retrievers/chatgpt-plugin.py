@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # ChatGPT plugin
-# 
+#
 # >[OpenAI plugins](https://platform.openai.com/docs/plugins/introduction) connect `ChatGPT` to third-party applications. These plugins enable `ChatGPT` to interact with APIs defined by developers, enhancing `ChatGPT's` capabilities and allowing it to perform a wide range of actions.
-# 
+#
 # >Plugins allow `ChatGPT` to do things like:
 # >- Retrieve real-time information; e.g., sports scores, stock prices, the latest news, etc.
 # >- Retrieve knowledge-base information; e.g., company docs, personal notes, etc.
 # >- Perform actions on behalf of the user; e.g., booking a flight, ordering food, etc.
-# 
+#
 # This notebook shows how to use the ChatGPT Retriever Plugin within LangChain.
 
 # In[2]:
@@ -50,9 +50,9 @@ write_json("foo.json", data)
 
 
 # ## Using the ChatGPT Retriever Plugin
-# 
+#
 # Okay, so we've created the ChatGPT Retriever Plugin, but how do we actually use it?
-# 
+#
 # The below code walks through how to do that.
 
 # We want to use `ChatGPTPluginRetriever` so we have to get the OpenAI API Key.
@@ -88,7 +88,3 @@ retriever.invoke("alice's phone number")
 
 
 # In[ ]:
-
-
-
-

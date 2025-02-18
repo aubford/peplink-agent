@@ -14,13 +14,13 @@
 # In[ ]:
 
 
-get_ipython().system('pip install langchain_experimental')
+get_ipython().system("pip install langchain_experimental")
 
 
 # In[ ]:
 
 
-get_ipython().system('pip install langchain_chroma')
+get_ipython().system("pip install langchain_chroma")
 
 
 # In[2]:
@@ -40,6 +40,7 @@ from tqdm import tqdm
 # Import the Chroma class (any one of following works fine)
 from langchain_chroma import Chroma
 from langchain_experimental.open_clip import OpenCLIPEmbeddings
+
 # from langchain_community.vectorstores import Chroma
 
 

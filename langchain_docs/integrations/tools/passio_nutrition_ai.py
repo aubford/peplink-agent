@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Passio NutritionAI
-# 
+#
 # To best understand how NutritionAI can give your agents super food-nutrition powers, let's build an agent that can find that information via Passio NutritionAI.
-# 
+#
 # ## Define tools
-# 
+#
 # We first need to create [the Passio NutritionAI tool](/docs/integrations/tools/passio_nutrition_ai).
 
 # ### [Passio Nutrition AI](/docs/integrations/tools/passio_nutrition_ai)
-# 
+#
 # We have a built-in tool in LangChain to easily use Passio NutritionAI to find food nutrition facts.
 # Note that this requires an API key - they have a free tier.
-# 
+#
 # Once you create your API key, you will need to export that as:
-# 
+#
 # ```bash
 # export NUTRITIONAI_SUBSCRIPTION_KEY="..."
 # ```
-# 
+#
 # ... or provide it to your Python environment via some other means such as the `dotenv` package.  You an also explicitly control the key via constructor calls.
 
 # In[10]:
@@ -61,7 +61,7 @@ nutritionai_search.invoke("Schnuck Markets sliced pepper jack cheese")
 
 
 # ### Tools
-# 
+#
 # Now that we have the tool, we can create a list of tools that we will use downstream.
 
 # In[15]:
@@ -71,9 +71,9 @@ tools = [nutritionai_search]
 
 
 # ## Create the agent
-# 
+#
 # Now that we have defined the tools, we can create the agent. We will be using an OpenAI Functions agent - for more information on this type of agent, as well as other options, see [this guide](/docs/concepts/agents)
-# 
+#
 # First, we choose the LLM we want to be guiding the agent.
 
 # In[16]:
@@ -117,7 +117,7 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 
 # ## Run the agent
-# 
+#
 # We can now run the agent on a few queries! Note that for now, these are all **stateless** queries (it won't remember previous interactions).
 
 # In[20]:
@@ -173,7 +173,7 @@ agent_executor.invoke(
 
 
 # ## Conclusion
-# 
+#
 # That's a wrap! In this quick start we covered how to create a simple agent that is able to incorporate food-nutrition information into its answers. Agents are a complex topic, and there's lot to learn!
 
-# 
+#

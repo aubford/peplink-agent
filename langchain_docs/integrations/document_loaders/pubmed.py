@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # PubMed
-# 
+#
 # >[PubMed®](https://pubmed.ncbi.nlm.nih.gov/) by `The National Center for Biotechnology Information, National Library of Medicine` comprises more than 35 million citations for biomedical literature from `MEDLINE`, life science journals, and online books. Citations may include links to full text content from `PubMed Central` and publisher web sites.
 
 # In[1]:
@@ -42,7 +42,3 @@ docs[1].page_content
 
 
 # In[ ]:
-
-
-
-

@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # DataForSEO
-# 
+#
 # >[DataForSeo](https://dataforseo.com/) provides comprehensive SEO and digital marketing data solutions via API.
 # >
 # >The `DataForSeo API` retrieves `SERP` from the most popular search engines like `Google`, `Bing`, `Yahoo`. It also allows to >get SERPs from different search engine types like `Maps`, `News`, `Events`, etc.
-# 
-# This notebook demonstrates how to use the [DataForSeo API](https://dataforseo.com/apis) to obtain search engine results. 
+#
+# This notebook demonstrates how to use the [DataForSeo API](https://dataforseo.com/apis) to obtain search engine results.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-community")
 
 
 # In[ ]:
@@ -22,7 +22,7 @@ from langchain_community.utilities.dataforseo_api_search import DataForSeoAPIWra
 
 
 # ## Setting up the API credentials
-# 
+#
 # You can obtain your API credentials by registering on the `DataForSeo` website.
 
 # In[ ]:
@@ -46,9 +46,9 @@ wrapper.run("Weather in Los Angeles")
 
 # ## The Difference Between `run` and `results`
 # `run` and `results` are two methods provided by the `DataForSeoAPIWrapper` class.
-# 
+#
 # The `run` method executes the search and returns the first result snippet from the answer box, knowledge graph, featured snippet, shopping, or organic results. These elements are sorted by priority from highest to lowest.
-# 
+#
 # The `results` method returns a JSON response configured according to the parameters set in the wrapper. This allows for more flexibility in terms of what data you want to return from the API.
 
 # ## Getting Results as JSON
@@ -141,4 +141,3 @@ json_tool = Tool(
     description="My new json tool",
     func=search.results,
 )
-

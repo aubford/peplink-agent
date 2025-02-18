@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # FlashRank reranker
-# 
+#
 # >[FlashRank](https://github.com/PrithivirajDamodaran/FlashRank) is the Ultra-lite & Super-fast Python library to add re-ranking to your existing search & retrieval pipelines. It is based on SoTA cross-encoders, with gratitude to all the model owners.
-# 
+#
 # This notebook shows how to use [flashrank](https://github.com/PrithivirajDamodaran/FlashRank) for document compression and retrieval.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  flashrank')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  flashrank")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss_cpu')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss_cpu")
 
 
 # In[2]:
@@ -116,4 +116,3 @@ chain = RetrievalQA.from_chain_type(llm=llm, retriever=compression_retriever)
 
 
 chain.invoke(query)
-

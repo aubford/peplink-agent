@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Relyt
-# 
+#
 # >[Relyt](https://docs.relyt.cn/docs/vector-engine/use/) is a cloud native data warehousing service that is designed to analyze large volumes of data online.
-# 
+#
 # >`Relyt` is compatible with the ANSI SQL 2003 syntax and the PostgreSQL and Oracle database ecosystems. Relyt also supports row store and column store. Relyt processes petabytes of data offline at a high performance level and supports highly concurrent online queries.
-# 
+#
 # This notebook shows how to use functionality related to the `Relyt` vector database.
 # To run, you should have an [Relyt](https://docs.relyt.cn/) instance up and running:
 # - Using [Relyt Vector Database](https://docs.relyt.cn/docs/vector-engine/use/). Click here to fast deploy it.
@@ -14,7 +14,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install "pgvecto_rs[sdk]" langchain-community')
+get_ipython().run_line_magic("pip", 'install "pgvecto_rs[sdk]" langchain-community')
 
 
 # In[ ]:
@@ -47,7 +47,7 @@ embeddings = FakeEmbeddings(size=1536)
 # export PG_USER={database_username}
 # export PG_PASSWORD={database_password}
 # ```
-# 
+#
 # Then store your embeddings and documents into Relyt
 
 # In[3]:
@@ -84,4 +84,3 @@ docs = vector_db.similarity_search(query)
 
 
 print(docs[0].page_content)
-

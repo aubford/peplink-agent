@@ -2,39 +2,39 @@
 # coding: utf-8
 
 # # Meta-Prompt
-# 
+#
 # This is a LangChain implementation of [Meta-Prompt](https://noahgoodman.substack.com/p/meta-prompt-a-simple-self-improving), by [Noah Goodman](https://cocolab.stanford.edu/ndg), for building self-improving agents.
-# 
+#
 # The key idea behind Meta-Prompt is to prompt the agent to reflect on its own performance and modify its own instructions.
-# 
+#
 # ![figure](https://substackcdn.com/image/fetch/f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F468217b9-96d9-47c0-a08b-dbf6b21b9f49_492x384.png)
-# 
+#
 # Here is a description from the [original blog post](https://noahgoodman.substack.com/p/meta-prompt-a-simple-self-improving):
-# 
-# 
+#
+#
 # The agent is a simple loop that starts with no instructions and follows these steps:
-# 
+#
 # Engage in conversation with a user, who may provide requests, instructions, or feedback.
-# 
+#
 # At the end of the episode, generate self-criticism and a new instruction using the meta-prompt
 # ```
 # Assistant has just had the below interactions with a User. Assistant followed their "system: Instructions" closely. Your job is to critique the Assistant's performance and then revise the Instructions so that Assistant would quickly and correctly respond in the future.
-#  
+#
 # ####
 # {hist}
 # ####
-#  
+#
 # Please reflect on these interactions.
-# 
+#
 # You should first critique Assistant's performance. What could Assistant have done better? What should the Assistant remember about this user? Are there things this user always wants? Indicate this with "Critique: ...".
-# 
+#
 # You should next revise the Instructions so that Assistant would quickly and correctly respond in the future. Assistant's goal is to satisfy the user in as few interactions as possible. Assistant will only see the new Instructions, not the interaction history, so anything important must be summarized in the Instructions. Don't forget any important details in the current Instructions! Indicate the new Instructions by "Instructions: ...".
 # ```
-# 
+#
 # Repeat.
-# 
+#
 # The only fixed instructions for this system (which I call Meta-prompt) is the meta-prompt that governs revision of the agent’s instructions. The agent has no memory between episodes except for the instruction it modifies for itself each time. Despite its simplicity, this agent can learn over time and self-improve by incorporating useful details into its instructions.
-# 
+#
 
 # ## Setup
 # We define two chains. One serves as the `Assistant`, and the other is a "meta-chain" that critiques the `Assistant`'s performance and modifies the instructions to the `Assistant`.
@@ -159,7 +159,3 @@ main(task)
 
 
 # In[ ]:
-
-
-
-

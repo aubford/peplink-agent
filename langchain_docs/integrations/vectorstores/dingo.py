@@ -2,21 +2,23 @@
 # coding: utf-8
 
 # # DingoDB
-# 
+#
 # >[DingoDB](https://dingodb.readthedocs.io/en/latest/) is a distributed multi-mode vector database, which combines the characteristics of data lakes and vector databases, and can store data of any type and size (Key-Value, PDF, audio, video, etc.). It has real-time low-latency processing capabilities to achieve rapid insight and response, and can efficiently conduct instant analysis and process multi-modal data.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # This notebook shows how to use functionality related to the DingoDB vector database.
-# 
+#
 # To run, you should have a [DingoDB instance up and running](https://github.com/dingodb/dingo-deploy/blob/main/README.md).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  dingodb')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  dingodb")
 # or install latest:
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  git+https://git@github.com/dingodb/pydingo.git')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  git+https://git@github.com/dingodb/pydingo.git"
+)
 
 
 # We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
@@ -100,7 +102,7 @@ print(docs[0].page_content)
 
 
 # ### Adding More Text to an Existing Index
-# 
+#
 # More text can embedded and upserted to an existing Dingo index using the `add_texts` function
 
 # In[ ]:
@@ -112,7 +114,7 @@ vectorstore.add_texts(["More text!"])
 
 
 # ### Maximal Marginal Relevance Searches
-# 
+#
 # In addition to using similarity search in the retriever object, you can also use `mmr` as retriever.
 
 # In[ ]:
@@ -133,4 +135,3 @@ for i, d in enumerate(matched_docs):
 found_docs = docsearch.max_marginal_relevance_search(query, k=2, fetch_k=10)
 for i, doc in enumerate(found_docs):
     print(f"{i + 1}.", doc.page_content, "\n")
-

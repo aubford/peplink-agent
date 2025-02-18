@@ -6,7 +6,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pyairtable')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pyairtable")
 
 
 # In[7]:
@@ -47,4 +47,3 @@ len(docs)
 
 
 eval(docs[0].page_content)
-

@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Infinity
-# 
-# `Infinity` allows to create `Embeddings` using a MIT-licensed Embedding Server. 
-# 
+#
+# `Infinity` allows to create `Embeddings` using a MIT-licensed Embedding Server.
+#
 # This notebook goes over how to use Langchain with Embeddings with the [Infinity Github Project](https://github.com/michaelfeil/infinity).
-# 
+#
 
 # ## Imports
 
@@ -19,10 +19,10 @@ from langchain_community.embeddings import InfinityEmbeddings, InfinityEmbedding
 # # Option 1: Use infinity from Python
 
 # #### Optional: install infinity
-# 
+#
 # To install infinity use the following command. For further details check out the [Docs on Github](https://github.com/michaelfeil/infinity).
-# Install the torch and onnx dependencies. 
-# 
+# Install the torch and onnx dependencies.
+#
 # ```bash
 # pip install infinity_emb[torch,optimum]
 # ```
@@ -91,7 +91,7 @@ dict(zip(documents, scores))
 # # Option 2: Run the server, and connect via the API
 
 # #### Optional: Make sure to start the Infinity instance
-# 
+#
 # To install infinity use the following command. For further details check out the [Docs on Github](https://github.com/michaelfeil/infinity).
 # ```bash
 # pip install infinity_emb[all]
@@ -101,13 +101,13 @@ dict(zip(documents, scores))
 # %pip install --upgrade --quiet  infinity_emb[all]
 
 # Start up the server - best to be done from a separate terminal, not inside Jupyter Notebook
-# 
+#
 # ```bash
 # model=sentence-transformers/all-MiniLM-L6-v2
 # port=7797
 # infinity_emb --port $port --model-name-or-path $model
 # ```
-# 
+#
 # or alternativley just use docker:
 # ```bash
 # model=sentence-transformers/all-MiniLM-L6-v2
@@ -115,7 +115,7 @@ dict(zip(documents, scores))
 # docker run -it --gpus all -p $port:$port michaelf34/infinity:latest --model-name-or-path $model --port $port
 # ```
 
-# ## Embed your documents using your Infinity instance 
+# ## Embed your documents using your Infinity instance
 
 # In[5]:
 
@@ -157,4 +157,3 @@ import numpy as np
 
 scores = np.array(documents_embedded) @ np.array(query_result).T
 dict(zip(documents, scores))
-

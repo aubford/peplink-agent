@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Mastodon
-# 
+#
 # >[Mastodon](https://joinmastodon.org/) is a federated social media and social networking service.
-# 
+#
 # This loader fetches the text from the "toots" of a list of `Mastodon` accounts, using the `Mastodon.py` Python package.
-# 
+#
 # Public accounts can the queried by default without any authentication. If non-public accounts or instances are queried, you have to register an application for your account which gets you an access token, and set that token and your account's API base URL.
-# 
+#
 # Then you need to pass in the Mastodon account names you want to extract, in the `@account@instance` format.
 
 # In[ ]:
@@ -20,7 +20,7 @@ from langchain_community.document_loaders import MastodonTootsLoader
 # In[2]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  Mastodon.py')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  Mastodon.py")
 
 
 # In[3]:

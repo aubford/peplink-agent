@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # How to attach callbacks to a runnable
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
-# 
+#
 # - [Callbacks](/docs/concepts/callbacks)
 # - [Custom callback handlers](/docs/how_to/custom_callbacks)
 # - [Chaining runnables](/docs/how_to/sequence)
 # - [Attach runtime arguments to a Runnable](/docs/how_to/binding)
-# 
+#
 # :::
-# 
+#
 # If you are composing a chain of runnables and want to reuse callbacks across multiple executions, you can attach callbacks with the [`.with_config()`](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html#langchain_core.runnables.base.Runnable.with_config) method. This saves you the need to pass callbacks in each time you invoke the chain.
-# 
+#
 # :::important
-# 
+#
 # `with_config()` binds a configuration which will be interpreted as **runtime** configuration. So these callbacks will propagate to all child components.
 # :::
-# 
+#
 # Here's an example:
 
 # In[ ]:
@@ -29,7 +29,7 @@
 # | output: false
 # | echo: false
 
-get_ipython().run_line_magic('pip', 'install -qU langchain langchain_anthropic')
+get_ipython().run_line_magic("pip", "install -qU langchain langchain_anthropic")
 
 import getpass
 import os
@@ -79,9 +79,9 @@ chain_with_callbacks.invoke({"number": "2"})
 
 
 # The bound callbacks will run for all nested module runs.
-# 
+#
 # ## Next steps
-# 
+#
 # You've now learned how to attach callbacks to a chain.
-# 
+#
 # Next, check out the other how-to guides in this section, such as how to [pass callbacks in at runtime](/docs/how_to/callbacks_runtime).

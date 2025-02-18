@@ -2,29 +2,32 @@
 # coding: utf-8
 
 # # Migrating from ConversationalRetrievalChain
-# 
+#
 # The [`ConversationalRetrievalChain`](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html) was an all-in one way that combined retrieval-augmented generation with chat history, allowing you to "chat with" your documents.
-# 
+#
 # Advantages of switching to the LCEL implementation are similar to the [`RetrievalQA` migration guide](./retrieval_qa.ipynb):
-# 
+#
 # - Clearer internals. The `ConversationalRetrievalChain` chain hides an entire question rephrasing step which dereferences the initial query against the chat history.
 #   - This means the class contains two sets of configurable prompts, LLMs, etc.
 # - More easily return source documents.
 # - Support for runnable methods like streaming and async operations.
-# 
+#
 # Here are equivalent implementations with custom prompts.
 # We'll use the following ingestion code to load a [blog post by Lilian Weng](https://lilianweng.github.io/posts/2023-06-23-agent/) on autonomous agents into a local vector store:
-# 
+#
 # ## Shared setup
-# 
+#
 # For both versions, we'll need to load the data with the `WebBaseLoader` document loader, split it with `RecursiveCharacterTextSplitter`, and add it to an in-memory `FAISS` vector store.
-# 
+#
 # We will also instantiate a chat model to use.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community langchain langchain-openai faiss-cpu beautifulsoup4')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet langchain-community langchain langchain-openai faiss-cpu beautifulsoup4",
+)
 
 
 # In[2]:
@@ -62,7 +65,7 @@ llm = ChatOpenAI()
 
 
 # ## Legacy
-# 
+#
 # <details open>
 
 # In[5]:
@@ -117,9 +120,9 @@ convo_qa_chain(
 
 
 # </details>
-# 
+#
 # ## LCEL
-# 
+#
 # <details open>
 
 # In[7]:
@@ -177,15 +180,11 @@ convo_qa_chain.invoke(
 
 
 # </details>
-# 
+#
 # ## Next steps
-# 
+#
 # You've now seen how to migrate existing usage of some legacy chains to LCEL.
-# 
+#
 # Next, check out the [LCEL conceptual docs](/docs/concepts/lcel) for more background information.
 
 # In[ ]:
-
-
-
-

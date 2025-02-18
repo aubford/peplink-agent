@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # How to select examples by maximal marginal relevance (MMR)
-# 
+#
 # The `MaxMarginalRelevanceExampleSelector` selects [examples](/docs/concepts/example_selectors/) based on a combination of which examples are most similar to the inputs, while also optimizing for diversity. It does this by finding the examples with the embeddings that have the greatest cosine similarity with the inputs, and then iteratively adding them while penalizing them for closeness to already selected examples.
-# 
+#
 
 # In[1]:
 
@@ -89,7 +89,3 @@ print(similar_prompt.format(adjective="worried"))
 
 
 # In[ ]:
-
-
-
-

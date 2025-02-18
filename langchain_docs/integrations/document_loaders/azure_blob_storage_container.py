@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Azure Blob Storage Container
-# 
+#
 # >[Azure Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) is Microsoft's object storage solution for the cloud. Blob Storage is optimized for storing massive amounts of unstructured data. Unstructured data is data that doesn't adhere to a particular data model or definition, such as text or binary data.
-# 
+#
 # `Azure Blob Storage` is designed for:
 # - Serving images or documents directly to a browser.
 # - Storing files for distributed access.
@@ -12,13 +12,13 @@
 # - Writing to log files.
 # - Storing data for backup and restore, disaster recovery, and archiving.
 # - Storing data for analysis by an on-premises or Azure-hosted service.
-# 
+#
 # This notebook covers how to load document objects from a container on `Azure Blob Storage`.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-storage-blob')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  azure-storage-blob")
 
 
 # In[2]:
@@ -57,7 +57,3 @@ loader.load()
 
 
 # In[ ]:
-
-
-
-

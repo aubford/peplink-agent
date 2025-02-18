@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # SQLDatabase Toolkit
-# 
+#
 # This will help you getting started with the SQL Database [toolkit](/docs/concepts/tools/#toolkits). For detailed documentation of all `SQLDatabaseToolkit` features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.sql.toolkit.SQLDatabaseToolkit.html).
-# 
-# Tools within the `SQLDatabaseToolkit` are designed to interact with a `SQL` database. 
-# 
+#
+# Tools within the `SQLDatabaseToolkit` are designed to interact with a `SQL` database.
+#
 # A common application is to enable agents to answer questions using data in a relational database, potentially in an iterative fashion (e.g., recovering from errors).
-# 
+#
 # **⚠️ Security note ⚠️**
-# 
+#
 # Building Q&A systems of SQL databases requires executing model-generated SQL queries. There are inherent risks in doing this. Make sure that your database connection permissions are always scoped as narrowly as possible for your chain/agent's needs. This will mitigate though not eliminate the risks of building a model-driven system. For more on general security best practices, [see here](/docs/security).
-# 
+#
 # ## Setup
-# 
+#
 # If you want to get automated tracing from runs of individual tools, you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
 
 # In[ ]:
@@ -25,13 +25,13 @@
 
 
 # ### Installation
-# 
+#
 # This toolkit lives in the `langchain-community` package:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-community")
 
 
 # For demonstration purposes, we will access a prompt in the LangChain [Hub](https://smith.langchain.com/hub). We will also require `langgraph` to demonstrate the use of the toolkit with an agent. This is not required to use the toolkit.
@@ -39,20 +39,20 @@ get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-commun
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchainhub langgraph')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchainhub langgraph")
 
 
 # ## Instantiation
-# 
+#
 # The `SQLDatabaseToolkit` toolkit requires:
-# 
+#
 # - a [SQLDatabase](https://python.langchain.com/api_reference/community/utilities/langchain_community.utilities.sql_database.SQLDatabase.html) object;
 # - a LLM or chat model (for instantiating the [QuerySQLCheckerTool](https://python.langchain.com/api_reference/community/tools/langchain_community.tools.sql_database.tool.QuerySQLCheckerTool.html) tool).
-# 
+#
 # Below, we instantiate the toolkit with these objects. Let's first create a database object.
-# 
+#
 # This guide uses the example `Chinook` database based on [these instructions](https://database.guide/2-sample-databases-sqlite/).
-# 
+#
 # Below we will use the `requests` library to pull the `.sql` file and create an in-memory SQLite database. Note that this approach is lightweight, but ephemeral and not thread-safe. If you'd prefer, you can follow the instructions to save the file locally as `Chinook.db` and instantiate the database via `db = SQLDatabase.from_uri("sqlite:///Chinook.db")`.
 
 # In[1]:
@@ -88,11 +88,11 @@ db = SQLDatabase(engine)
 
 
 # We will also need a LLM or chat model:
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
-# 
+#
 
 # In[2]:
 
@@ -116,7 +116,7 @@ toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
 
 # ## Tools
-# 
+#
 # View available tools:
 
 # In[4]:
@@ -139,7 +139,7 @@ from langchain_community.tools.sql_database.tool import (
 
 
 # ## Use within an agent
-# 
+#
 # Following the [SQL Q&A Tutorial](/docs/tutorials/sql_qa/#agents), below we equip a simple question-answering agent with the tools in our toolkit. First we pull a relevant prompt and populate it with its required parameters:
 
 # In[6]:
@@ -200,24 +200,24 @@ for event in events:
 
 
 # ## Specific functionality
-# 
+#
 # `SQLDatabaseToolkit` implements a [.get_context](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.sql.toolkit.SQLDatabaseToolkit.html#langchain_community.agent_toolkits.sql.toolkit.SQLDatabaseToolkit.get_context) method as a convenience for use in prompts or other contexts.
-# 
+#
 # **⚠️ Disclaimer ⚠️** : The agent may generate insert/update/delete queries. When this is not expected, use a custom prompt or create a SQL users without write permissions.
-# 
+#
 # The final user might overload your SQL database by asking a simple question such as "run the biggest query possible". The generated query might look like:
-# 
+#
 # ```sql
 # SELECT * FROM "public"."users"
 #     JOIN "public"."user_permissions" ON "public"."users".id = "public"."user_permissions".user_id
 #     JOIN "public"."projects" ON "public"."users".id = "public"."projects".user_id
 #     JOIN "public"."events" ON "public"."projects".id = "public"."events".project_id;
 # ```
-# 
+#
 # For a transactional SQL database, if one of the table above contains millions of rows, the query might cause trouble to other applications using the same database.
-# 
+#
 # Most datawarehouse oriented databases support user-level quota, for limiting resource usage.
 
 # ## API reference
-# 
+#
 # For detailed documentation of all SQLDatabaseToolkit features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.sql.toolkit.SQLDatabaseToolkit.html).

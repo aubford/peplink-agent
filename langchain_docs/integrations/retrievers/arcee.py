@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Arcee
-# 
+#
 # >[Arcee](https://www.arcee.ai/about/about-us) helps with the development of the SLMs—small, specialized, secure, and scalable language models.
-# 
+#
 # This notebook demonstrates how to use the `ArceeRetriever` class to retrieve relevant document(s) for Arcee's `Domain Adapted Language Models` (`DALMs`).
 
 # ### Setup
-# 
+#
 # Before using `ArceeRetriever`, make sure the Arcee API key is set as `ARCEE_API_KEY` environment variable. You can also pass the api key as a named parameter.
 
 # In[ ]:
@@ -23,7 +23,7 @@ retriever = ArceeRetriever(
 
 
 # ### Additional Configuration
-# 
+#
 # You can also configure `ArceeRetriever`'s parameters such as `arcee_api_url`, `arcee_app_url`, and `model_kwargs` as needed.
 # Setting the `model_kwargs` at the object initialization uses the filters and size as default for all the subsequent retrievals.
 
@@ -59,7 +59,7 @@ documents = retriever.invoke(query)
 
 
 # ### Additional parameters
-# 
+#
 # Arcee allows you to apply `filters` and set the `size` (in terms of count) of retrieved document(s). Filters help narrow down the results. Here's how to use these parameters:
 
 # In[ ]:
@@ -73,4 +73,3 @@ filters = [
 
 # Retrieve documents with filters and size params
 documents = retriever.invoke(query, size=5, filters=filters)
-

@@ -2,26 +2,29 @@
 # coding: utf-8
 
 # # LM Format Enforcer
-# 
+#
 # [LM Format Enforcer](https://github.com/noamgat/lm-format-enforcer) is a library that enforces the output format of language models by filtering tokens.
-# 
+#
 # It works by combining a character level parser with a tokenizer prefix tree to allow only the tokens which contains sequences of characters that lead to a potentially valid format.
-# 
+#
 # It supports batched generation.
-# 
+#
 # **Warning - this module is still experimental**
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lm-format-enforcer langchain-huggingface > /dev/null')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  lm-format-enforcer langchain-huggingface > /dev/null",
+)
 
 
 # ### Setting up the model
-# 
+#
 # We will start by setting up a LLama2 model and initializing our desired output format.
 # Note that Llama2 [requires approval for access to the models](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf).
-# 
+#
 
 # In[2]:
 
@@ -69,7 +72,7 @@ if tokenizer.pad_token_id is None:
 
 
 # ### HuggingFace Baseline
-# 
+#
 # First, let's establish a qualitative baseline by checking the output of the model without structured decoding.
 
 # In[9]:
@@ -117,7 +120,7 @@ print(generated)
 # ***The result is usually closer to the JSON object of the schema definition, rather than a json object conforming to the schema. Lets try to enforce proper output.***
 
 # ## JSONFormer LLM Wrapper
-# 
+#
 # Let's try that again, now providing a the Action input's JSON Schema to the model.
 
 # In[6]:
@@ -133,11 +136,11 @@ print(results)
 
 
 # **The output conforms to the exact specification! Free of parsing errors.**
-# 
+#
 # This means that if you need to format a JSON for an API call or similar, if you can generate the schema (from a pydantic model or general) you can use this library to make sure that the JSON output is correct, with minimal risk of hallucinations.
-# 
+#
 # ### Batch processing
-# 
+#
 # LMFormatEnforcer also works in batch mode:
 
 # In[7]:
@@ -152,7 +155,7 @@ for generation in results.generations:
 
 
 # ## Regular Expressions
-# 
+#
 # LMFormatEnforcer has an additional mode, which uses regular expressions to filter the output. Note that it uses [interegular](https://pypi.org/project/interegular/) under the hood, therefore it does not support 100% of the regex capabilities.
 
 # In[8]:

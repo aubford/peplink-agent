@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Migrating from LLMChain
-# 
+#
 # [`LLMChain`](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.llm.LLMChain.html) combined a prompt template, LLM, and output parser into a class.
-# 
+#
 # Some advantages of switching to the LCEL implementation are:
-# 
+#
 # - Clarity around contents and parameters. The legacy `LLMChain` contains a default output parser and other options.
 # - Easier streaming. `LLMChain` only supports streaming via callbacks.
 # - Easier access to raw message outputs if desired. `LLMChain` only exposes these via a parameter or via callback.
@@ -14,7 +14,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-openai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-openai")
 
 
 # In[1]:
@@ -28,7 +28,7 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Legacy
-# 
+#
 # <details open>
 
 # In[5]:
@@ -57,9 +57,9 @@ legacy_result["text"]
 
 
 # </details>
-# 
+#
 # ## LCEL
-# 
+#
 # <details open>
 
 # In[3]:
@@ -91,9 +91,9 @@ outer_chain.invoke({"adjective": "funny"})
 
 
 # </details>
-# 
+#
 # ## Next steps
-# 
+#
 # See [this tutorial](/docs/tutorials/llm_chain) for more detail on building with prompt templates, LLMs, and output parsers.
-# 
+#
 # Check out the [LCEL conceptual docs](/docs/concepts/lcel) for more background information.

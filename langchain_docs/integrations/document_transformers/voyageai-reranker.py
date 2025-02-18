@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # VoyageAI Reranker
-# 
+#
 # >[Voyage AI](https://www.voyageai.com/) provides cutting-edge embedding/vectorizations models.
-# 
+#
 # This notebook shows how to use [Voyage AI's rerank endpoint](https://api.voyageai.com/v1/rerank) in a retriever. This builds on top of ideas in the [ContextualCompressionRetriever](/docs/how_to/contextual_compression).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  voyageai')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-voyageai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  voyageai")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-voyageai")
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss-cpu")
 
 
 # In[13]:
@@ -52,9 +52,9 @@ def pretty_print_docs(docs):
 
 # ## Set up the base vector store retriever
 # Let's start by initializing a simple vector store retriever and storing the 2023 State of the Union speech (in chunks). We can set up the retriever to retrieve a high number (20) of docs. You can use any of the following Embeddings models: ([source](https://docs.voyageai.com/docs/embeddings)):
-# 
+#
 # - `voyage-3`
-# - `voyage-3-lite` 
+# - `voyage-3-lite`
 # - `voyage-large-2`
 # - `voyage-code-2`
 # - `voyage-2`
@@ -85,7 +85,7 @@ pretty_print_docs(docs)
 
 # ## Doing reranking with VoyageAIRerank
 # Now let's wrap our base retriever with a `ContextualCompressionRetriever`. We'll use the Voyage AI reranker to rerank the returned results. You can use any of the following Reranking models: ([source](https://docs.voyageai.com/docs/reranker)):
-# 
+#
 # - `rerank-2`
 # - `rerank-2-lite`
 # - `rerank-1`
@@ -132,4 +132,3 @@ chain = RetrievalQA.from_chain_type(
 
 
 chain({"query": query})
-

@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # OctoAI
-# 
+#
 # [OctoAI](https://docs.octoai.cloud/docs) offers easy access to efficient compute and enables users to integrate their choice of AI models into applications. The `OctoAI` compute service helps you run, tune, and scale AI applications easily.
-# 
+#
 # This example goes over how to use LangChain to interact with `OctoAI` [LLM endpoints](https://octoai.cloud/templates)
-# 
+#
 # ## Setup
-# 
+#
 # To run our example app, there are two simple steps to take:
-# 
+#
 # 1. Get an API Token from [your OctoAI account page](https://octoai.cloud/settings).
-#    
+#
 # 2. Paste your API key in in the code cell below.
-# 
+#
 # Note: If you want to use a different LLM model, you can containerize the model and make a custom OctoAI endpoint yourself, by following [Build a Container from Python](https://octo.ai/docs/bring-your-own-model/advanced-build-a-container-from-scratch-in-python) and [Create a Custom Endpoint from a Container](https://octo.ai/docs/bring-your-own-model/create-custom-endpoints-from-a-container/create-custom-endpoints-from-a-container) and then updating your `OCTOAI_API_BASE` environment variable.
-# 
+#
 
 # In[6]:
 

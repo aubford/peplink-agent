@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # Hybrid Search
-# 
+#
 # The standard search in LangChain is done by vector similarity. However, a number of [vector store](/docs/integrations/vectorstores/) implementations (Astra DB, ElasticSearch, Neo4J, AzureSearch, Qdrant...) also support more advanced search combining vector similarity search and other search techniques (full-text, BM25, and so on). This is generally referred to as "Hybrid" search.
-# 
+#
 # **Step 1: Make sure the vectorstore you are using supports hybrid search**
-# 
+#
 # At the moment, there is no unified way to perform hybrid search in LangChain. Each vectorstore may have their own way to do it. This is generally exposed as a keyword argument that is passed in during `similarity_search`.
-# 
+#
 # By reading the documentation or source code, figure out whether the vectorstore you are using supports hybrid search, and, if so, how to use it.
-# 
+#
 # **Step 2: Add that parameter as a configurable field for the chain**
-# 
+#
 # This will let you easily call the chain and configure any relevant flags at runtime. See [this documentation](/docs/how_to/configure) for more information on configuration.
-# 
+#
 # **Step 3: Call the chain with that configurable field**
-# 
+#
 # Now, at runtime you can call this chain with configurable field.
-# 
+#
 # ## Code Example
-# 
+#
 # Let's see a concrete example of what this looks like in code. We will use the Cassandra/CQL interface of Astra DB for this example.
-# 
+#
 # Install the following Python package:
 
 # In[ ]:
@@ -32,7 +32,7 @@ get_ipython().system('pip install "cassio>=0.1.7"')
 
 
 # Get the [connection secrets](https://docs.datastax.com/en/astra/astra-db-vector/get-started/quickstart.html).
-# 
+#
 # Initialize cassio:
 
 # In[ ]:
@@ -164,4 +164,3 @@ chain.invoke(
     "What city did I visit last?",
     config={"configurable": {"search_kwargs": {"body_search": "new"}}},
 )
-

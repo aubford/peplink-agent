@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Embaas
-# 
+#
 # [embaas](https://embaas.io) is a fully managed NLP API service that offers features like embedding generation, document text extraction, document to embeddings and more. You can choose a [variety of pre-trained models](https://embaas.io/docs/models/embeddings).
-# 
+#
 # In this tutorial, we will show you how to use the embaas Embeddings API to generate embeddings for a given text.
-# 
+#
 # ### Prerequisites
 # Create your free embaas account at [https://embaas.io/register](https://embaas.io/register) and generate an [API key](https://embaas.io/dashboard/api-keys).
 

@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Kinetica Vectorstore based Retriever
-# 
+#
 # >[Kinetica](https://www.kinetica.com/) is a database with integrated support for vector similarity search
-# 
+#
 # It supports:
 # - exact and approximate nearest neighbor search
 # - L2 distance, inner product, and cosine distance
-# 
+#
 # This notebook shows how to use a retriever based on Kinetica vector store (`Kinetica`).
 
 # In[ ]:
 
 
 # Please ensure that this connector is installed in your working environment.
-get_ipython().run_line_magic('pip', 'install gpudb==7.2.0.9')
+get_ipython().run_line_magic("pip", "install gpudb==7.2.0.9")
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -105,4 +105,3 @@ result = retriever.get_relevant_documents(
     "What did the president say about Ketanji Brown Jackson"
 )
 print(docs[0].page_content)
-

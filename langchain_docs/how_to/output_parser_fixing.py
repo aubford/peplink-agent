@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # How to use the output-fixing parser
-# 
+#
 # This [output parser](/docs/concepts/output_parsers/) wraps another output parser, and in the event that the first one fails it calls out to another LLM to fix any errors.
-# 
+#
 # But we can do other things besides throw errors. Specifically, we can pass the misformatted output, along with the formatted instructions, to the model and ask it to fix it.
-# 
+#
 # For this example, we'll use the above Pydantic output parser. Here's what happens if we pass it a result that does not comply with the schema:
 
 # In[1]:
@@ -67,7 +67,3 @@ new_parser.parse(misformatted)
 # Find out api documentation for [OutputFixingParser](https://python.langchain.com/api_reference/langchain/output_parsers/langchain.output_parsers.fix.OutputFixingParser.html#langchain.output_parsers.fix.OutputFixingParser).
 
 # In[ ]:
-
-
-
-

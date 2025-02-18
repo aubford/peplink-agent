@@ -8,10 +8,10 @@
 # ## Overview
 
 # The Cassandra Document Loader returns a list of Langchain Documents from a Cassandra database.
-# 
+#
 # You must either provide a CQL query or a table name to retrieve the documents.
 # The Loader takes the following parameters:
-# 
+#
 # * table: (Optional) The table to load the data from.
 # * session: (Optional) The cassandra driver session. If not provided, the cassio resolved session will be used.
 # * keyspace: (Optional) The keyspace of the table. If not provided, the cassio resolved keyspace will be used.
@@ -34,7 +34,7 @@ from langchain_community.document_loaders import CassandraLoader
 
 
 # ### Init from a cassandra driver Session
-# 
+#
 # You need to create a `cassandra.cluster.Session` object, as described in the [Cassandra driver documentation](https://docs.datastax.com/en/developer/python-driver/latest/api/cassandra/cluster/#module-cassandra.cluster). The details vary (e.g. with network settings and authentication), but this might be something like:
 
 # In[ ]:
@@ -79,7 +79,7 @@ docs[0]
 
 
 # ### Init from cassio
-# 
+#
 # It's also possible to use cassio to configure the session and keyspace.
 
 # In[ ]:
@@ -97,5 +97,5 @@ docs = loader.load()
 
 
 # #### Attribution statement
-# 
+#
 # > Apache Cassandra, Cassandra and Apache are either registered trademarks or trademarks of the [Apache Software Foundation](http://www.apache.org/) in the United States and/or other countries.

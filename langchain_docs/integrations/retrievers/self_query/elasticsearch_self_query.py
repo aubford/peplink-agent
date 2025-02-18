@@ -2,23 +2,25 @@
 # coding: utf-8
 
 # # Elasticsearch
-# 
+#
 # > [Elasticsearch](https://www.elastic.co/elasticsearch/) is a distributed, RESTful search and analytics engine.
 # > It provides a distributed, multi-tenant-capable full-text search engine with an HTTP web interface and schema-free
 # > JSON documents.
-# 
+#
 # In this notebook, we'll demo the `SelfQueryRetriever` with an `Elasticsearch` vector store.
 
 # ## Creating an Elasticsearch vector store
-# 
+#
 # First, we'll want to create an `Elasticsearch` vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `elasticsearch` package.
 
 # In[11]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  U lark langchain langchain-elasticsearch')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  U lark langchain langchain-elasticsearch"
+)
 
 
 # In[1]:
@@ -134,9 +136,9 @@ retriever.invoke("Has Greta Gerwig directed any movies about women")
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[6]:
@@ -174,4 +176,3 @@ retriever.invoke(
 
 
 vectorstore.client.indices.delete(index="elasticsearch-self-query-demo")
-

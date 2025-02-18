@@ -3,35 +3,35 @@
 
 # # Zep Open Source
 # ## Retriever Example for [Zep](https://docs.getzep.com/)
-# 
+#
 # > Recall, understand, and extract data from chat histories. Power personalized AI experiences.
-# 
+#
 # > [Zep](https://www.getzep.com) is a long-term memory service for AI Assistant apps.
 # > With Zep, you can provide AI assistants with the ability to recall past conversations, no matter how distant,
 # > while also reducing hallucinations, latency, and cost.
-# 
+#
 # > Interested in Zep Cloud? See [Zep Cloud Installation Guide](https://help.getzep.com/sdks) and [Zep Cloud Retriever Example](https://help.getzep.com/langchain/examples/rag-message-history-example)
-# 
+#
 # ## Open Source Installation and Setup
-# 
+#
 # > Zep Open Source project: [https://github.com/getzep/zep](https://github.com/getzep/zep)
 # > Zep Open Source Docs: [https://docs.getzep.com/](https://docs.getzep.com/)
 
 # ## Retriever Example
-# 
+#
 # This notebook demonstrates how to search historical chat message histories using the [Zep Long-term Memory Store](https://getzep.github.io/).
-# 
+#
 # We'll demonstrate:
-# 
+#
 # 1. Adding conversation history to the Zep memory store.
-# 2. Vector search over the conversation history: 
+# 2. Vector search over the conversation history:
 #     1. With a similarity search over chat messages
 #     2. Using maximal marginal relevance re-ranking of a chat message search
 #     3. Filtering a search using metadata filters
 #     4. A similarity search over summaries of the chat messages
 #     5. Using maximal marginal relevance re-ranking of a summary search
-# 
-# 
+#
+#
 
 # In[1]:
 
@@ -48,7 +48,7 @@ ZEP_API_URL = "http://localhost:8000"
 
 
 # ### Initialize the Zep Chat Message History Class and add a chat message history to the memory store
-# 
+#
 # **NOTE:** Unlike other Retrievers, the content returned by the Zep Retriever is session/user specific. A `session_id` is required when instantiating the Retriever.
 
 # In[2]:
@@ -201,9 +201,9 @@ time.sleep(
 
 
 # ### Use the Zep Retriever to vector search over the Zep memory
-# 
+#
 # Zep provides native vector search over historical conversation memory. Embedding happens automatically.
-# 
+#
 # NOTE: Embedding of messages occurs asynchronously, so the first query may not return results. Subsequent queries will return results as the embeddings are generated.
 
 # In[5]:
@@ -230,7 +230,7 @@ zep_retriever.invoke("Who wrote Parable of the Sower?")
 
 
 # ### Reranking using MMR (Maximal Marginal Relevance)
-# 
+#
 # Zep has native, SIMD-accelerated support for reranking results using MMR. This is useful for removing redundancy in results.
 
 # In[7]:
@@ -249,9 +249,9 @@ await zep_retriever.ainvoke("Who wrote Parable of the Sower?")
 
 
 # ### Using metadata filters to refine search results
-# 
+#
 # Zep supports filtering results by metadata. This is useful for filtering results by entity type, or other metadata.
-# 
+#
 # More information here: https://docs.getzep.com/sdk/search_query/
 
 # In[8]:
@@ -263,9 +263,9 @@ await zep_retriever.ainvoke("Who wrote Parable of the Sower?", metadata=filter)
 
 
 # ### Searching over Summaries with MMR Reranking
-# 
+#
 # Zep automatically generates summaries of chat messages. These summaries can be searched over using the Zep Retriever. Since a summary is a distillation of a conversation, they're more likely to match your search query and offer rich, succinct context to the LLM.
-# 
+#
 # Successive summaries may include similar content, with Zep's similarity search returning the highest matching results but with little diversity.
 # MMR re-ranks the results to ensure that the summaries you populate into your prompt are both relevant and each offers additional information to the LLM.
 
@@ -286,7 +286,3 @@ await zep_retriever.ainvoke("Who wrote Parable of the Sower?")
 
 
 # In[ ]:
-
-
-
-

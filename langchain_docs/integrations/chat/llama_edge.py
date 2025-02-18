@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # LlamaEdge
-# 
+#
 # [LlamaEdge](https://github.com/second-state/LlamaEdge) allows you to chat with LLMs of [GGUF](https://github.com/ggerganov/llama.cpp/blob/master/gguf-py/README.md) format both locally and via chat service.
-# 
+#
 # - `LlamaEdgeChatService` provides developers an OpenAI API compatible service to chat with LLMs via HTTP requests.
-# 
+#
 # - `LlamaEdgeChatLocal` enables developers to chat with LLMs locally (coming soon).
-# 
+#
 # Both `LlamaEdgeChatService` and `LlamaEdgeChatLocal` run on the infrastructure driven by [WasmEdge Runtime](https://wasmedge.org/), which provides a lightweight and portable WebAssembly container environment for LLM inference tasks.
-# 
+#
 # ## Chat via API Service
-# 
+#
 # `LlamaEdgeChatService` works on the `llama-api-server`. Following the steps in [llama-api-server quick-start](https://github.com/second-state/llama-utils/tree/main/api-server#readme), you can host your own API service so that you can chat with any models you like on any device you have anywhere as long as the internet is available.
 
 # In[2]:
@@ -69,4 +69,3 @@ for chunk in chat.stream(messages):
     output += chunk.content
 
 print(f"[Bot] {output}")
-

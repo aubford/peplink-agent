@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Bearly Code Interpreter
-# 
+#
 # > Bearly Code Interpreter allows for remote execution of code. This makes it perfect for a code sandbox for agents, to allow for safe implementation of things like Code Interpreter
-# 
+#
 # Get your api key here: https://bearly.ai/dashboard/developers
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-community")
 
 
 # In this notebook, we will create an example of an agent that uses Bearly to interact with data
@@ -113,7 +113,3 @@ agent.run("Create a nice and labeled chart of the GDP growth over time")
 
 
 # In[ ]:
-
-
-
-

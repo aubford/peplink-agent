@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # OpenSearch
-# 
+#
 # > [OpenSearch](https://opensearch.org/) is a scalable, flexible, and extensible open-source software suite for search, analytics, and observability applications licensed under Apache 2.0. `OpenSearch` is a distributed search and analytics engine based on `Apache Lucene`.
-# 
-# 
+#
+#
 # This notebook shows how to use functionality related to the `OpenSearch` database.
-# 
+#
 # To run, you should have an OpenSearch instance up and running: [see here for an easy Docker installation](https://hub.docker.com/r/opensearchproject/opensearch).
-# 
+#
 # `similarity_search` by default performs the Approximate k-NN Search which uses one of the several algorithms like lucene, nmslib, faiss recommended for
 # large datasets. To perform brute force search we have other search methods known as Script Scoring and Painless Scripting.
 # Check [this](https://opensearch.org/docs/latest/search-plugins/knn/index/) for more details.
@@ -20,7 +20,9 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  opensearch-py langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  opensearch-py langchain-community"
+)
 
 
 # We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
@@ -58,7 +60,7 @@ embeddings = OpenAIEmbeddings()
 
 
 # ## similarity_search using Approximate k-NN
-# 
+#
 # `similarity_search` using `Approximate k-NN` Search with Custom Parameters
 
 # In[ ]:
@@ -118,7 +120,7 @@ print(docs[0].page_content)
 
 
 # ## similarity_search using Script Scoring
-# 
+#
 # `similarity_search` using `Script Scoring` with Custom Parameters
 
 # In[ ]:
@@ -143,7 +145,7 @@ print(docs[0].page_content)
 
 
 # ## similarity_search using Painless Scripting
-# 
+#
 # `similarity_search` using `Painless Scripting` with Custom Parameters
 
 # In[ ]:
@@ -179,7 +181,7 @@ docs = docsearch.max_marginal_relevance_search(query, k=2, fetch_k=10, lambda_pa
 
 
 # ## Using a preexisting OpenSearch instance
-# 
+#
 # It's also possible to use a preexisting OpenSearch instance with documents that already have vectors present.
 
 # In[ ]:
@@ -204,16 +206,18 @@ docs = docsearch.similarity_search(
 
 
 # ## Using AOSS (Amazon OpenSearch Service Serverless)
-# 
+#
 # It is an example of the `AOSS` with `faiss` engine and `efficient_filter`.
-# 
-# 
+#
+#
 # We need to install several `python` packages.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  boto3 requests requests-aws4auth')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  boto3 requests requests-aws4auth"
+)
 
 
 # In[ ]:
@@ -255,7 +259,7 @@ docs = docsearch.similarity_search(
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  boto3')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  boto3")
 
 
 # In[ ]:
@@ -288,4 +292,3 @@ docs = docsearch.similarity_search(
     "What is feature selection",
     k=200,
 )
-

@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Jira Toolkit
-# 
+#
 # This notebook goes over how to use the `Jira` toolkit.
-# 
+#
 # The `Jira` toolkit allows agents to interact with a given Jira instance, performing actions such as searching for issues and creating issues, the tool wraps the atlassian-python-api library, for more see: https://atlassian-python-api.readthedocs.io/jira.html
-# 
+#
 # ## Installation and setup
-# 
+#
 # To use this tool, you must first set as environment variables:
 #     JIRA_API_TOKEN
 #     JIRA_USERNAME
@@ -18,13 +18,13 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  atlassian-python-api')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  atlassian-python-api")
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community langchain_openai')
+get_ipython().run_line_magic("pip", "install -qU langchain-community langchain_openai")
 
 
 # In[2]:
@@ -57,7 +57,7 @@ toolkit = JiraToolkit.from_jira_api_wrapper(jira)
 
 
 # ## Tool usage
-# 
+#
 # Let's see what individual tools are in the Jira toolkit:
 
 # In[5]:
@@ -78,4 +78,3 @@ agent = initialize_agent(
 
 
 agent.run("make a new issue in project PW to remind me to make more fried rice")
-

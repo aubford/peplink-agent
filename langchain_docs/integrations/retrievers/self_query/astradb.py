@@ -2,20 +2,22 @@
 # coding: utf-8
 
 # # Astra DB (Cassandra)
-# 
+#
 # >[DataStax Astra DB](https://docs.datastax.com/en/astra/home/astra.html) is a serverless vector-capable database built on `Cassandra` and made conveniently available through an easy-to-use JSON API.
-# 
+#
 # In the walkthrough, we'll demo the `SelfQueryRetriever` with an `Astra DB` vector store.
 
 # ## Creating an Astra DB vector store
 # First we'll want to create an Astra DB VectorStore and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # NOTE: The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `astrapy` package.
 
 # In[5]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet lark astrapy langchain-openai')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet lark astrapy langchain-openai"
+)
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -35,7 +37,7 @@ embeddings = OpenAIEmbeddings()
 
 
 # Create the Astra DB VectorStore:
-# 
+#
 # - the API Endpoint looks like `https://01234567-89ab-cdef-0123-456789abcdef-us-east1.apps.astra.datastax.com`
 # - the Token looks like `AstraCS:6gBhNmsk135....`
 
@@ -172,9 +174,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[ ]:
@@ -198,13 +200,12 @@ retriever.invoke("What are two movies about dinosaurs?")
 
 
 # ## Cleanup
-# 
+#
 # If you want to completely delete the collection from your Astra DB instance, run this.
-# 
+#
 # _(You will lose the data you stored in it.)_
 
 # In[ ]:
 
 
 vectorstore.delete_collection()
-

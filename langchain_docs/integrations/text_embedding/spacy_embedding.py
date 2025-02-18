@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # SpaCy
-# 
+#
 # >[spaCy](https://spacy.io/) is an open-source software library for advanced natural language processing, written in the programming languages Python and Cython.
-#  
-# 
+#
+#
 # ## Installation and Setup
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  spacy')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  spacy")
 
 
 # Import the necessary classes
@@ -23,7 +23,7 @@ from langchain_community.embeddings.spacy_embeddings import SpacyEmbeddings
 
 
 # ## Example
-# 
+#
 # Initialize SpacyEmbeddings.This will load the Spacy model into memory.
 
 # In[ ]:
@@ -63,4 +63,3 @@ for i, embedding in enumerate(embeddings):
 query = "Quick foxes and lazy dogs."
 query_embedding = embedder.embed_query(query)
 print(f"Embedding for query: {query_embedding}")
-

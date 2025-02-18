@@ -2,8 +2,8 @@
 # coding: utf-8
 
 # # Kafka
-# 
-# [Kafka](https://github.com/apache/kafka) is a distributed messaging system that is used to publish and subscribe to streams of records. 
+#
+# [Kafka](https://github.com/apache/kafka) is a distributed messaging system that is used to publish and subscribe to streams of records.
 # This demo shows how to use `KafkaChatMessageHistory` to store and retrieve chat messages from a Kafka cluster.
 
 # A running Kafka cluster is required to run the demo. You can follow this [instruction](https://developer.confluent.io/get-started/python) to create a Kafka cluster locally.
@@ -33,10 +33,10 @@ history = KafkaChatMessageHistory(
 #     2. `max_time_sec`: maximum time in seconds to read messages.
 # - `messages_from_latest`: reset the consumer to the end of the chat history and try consuming messages. Optional parameters same as above.
 # - `messages_from_last_consumed`: return messages continuing from the last consumed message, similar to `messages`, but with optional parameters.
-# 
+#
 # `max_message_count` and `max_time_sec` are used to avoid blocking indefinitely when retrieving messages.
 # As a result, `messages` and other methods to retrieve messages may not return all messages in the chat history. You will need to specify `max_message_count` and `max_time_sec` to retrieve all chat history in a single batch.
-# 
+#
 
 # Add messages and retrieve.
 
@@ -84,4 +84,3 @@ history.messages_from_latest()
 history.add_user_message("HI!")
 history.add_ai_message("WHATS UP?")
 history.messages
-

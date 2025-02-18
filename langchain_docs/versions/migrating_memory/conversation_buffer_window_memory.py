@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # Migrating off ConversationBufferWindowMemory or ConversationTokenBufferMemory
-# 
+#
 # Follow this guide if you're trying to migrate off one of the old memory classes listed below:
-# 
-# 
+#
+#
 # | Memory Type                      | Description                                                                                                                                                       |
 # |----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 # | `ConversationBufferWindowMemory` | Keeps the last `n` messages of the conversation. Drops the oldest messages when there are more than `n` messages.                                                                      |
 # | `ConversationTokenBufferMemory`  | Keeps only the most recent messages in the conversation under the constraint that the total number of tokens in the conversation does not exceed a certain limit. |
-# 
-# `ConversationBufferWindowMemory` and `ConversationTokenBufferMemory` apply additional processing on top of the raw conversation history to trim the conversation history to a size that fits inside the context window of a chat model. 
-# 
+#
+# `ConversationBufferWindowMemory` and `ConversationTokenBufferMemory` apply additional processing on top of the raw conversation history to trim the conversation history to a size that fits inside the context window of a chat model.
+#
 # This processing functionality can be accomplished using LangChain's built-in [trim_messages](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.utils.trim_messages.html) function.
 
 # :::important
-# 
+#
 # We’ll begin by exploring a straightforward method that involves applying processing logic to the entire conversation history.
-# 
+#
 # While this approach is easy to implement, it has a downside: as the conversation grows, so does the latency, since the logic is re-applied to all previous exchanges in the conversation at each turn.
-# 
+#
 # More advanced strategies focus on incrementally updating the conversation history to avoid redundant processing.
-# 
+#
 # For instance, the langgraph [how-to guide on summarization](https://langchain-ai.github.io/langgraph/how-tos/memory/add-summary-conversation-history/) demonstrates
 # how to maintain a running summary of the conversation while discarding older messages, ensuring they aren't re-processed during later turns.
 # :::
@@ -32,7 +32,11 @@
 # In[1]:
 
 
-get_ipython().run_cell_magic('capture', '--no-stderr', '%pip install --upgrade --quiet langchain-openai langchain\n')
+get_ipython().run_cell_magic(
+    "capture",
+    "--no-stderr",
+    "%pip install --upgrade --quiet langchain-openai langchain\n",
+)
 
 
 # In[1]:
@@ -46,7 +50,7 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Legacy usage with LLMChain / Conversation Chain
-# 
+#
 # <details open>
 
 # In[3]:
@@ -90,13 +94,13 @@ print(legacy_result)
 
 
 # </details>
-# 
+#
 # ## Reimplementing ConversationBufferWindowMemory logic
-# 
+#
 # Let's first create appropriate logic to process the conversation history, and then we'll see how to integrate it into an application. You can later replace this basic setup with more advanced logic tailored to your specific needs.
-# 
+#
 # We'll use `trim_messages` to implement logic that keeps the last `n` messages of the conversation. It will drop the oldest messages when the number of messages exceeds `n`.
-# 
+#
 # In addition, we will also keep the system message if it's present -- when present, it's the first message in a conversation that includes instructions for the chat model.
 
 # In[4]:
@@ -156,9 +160,9 @@ for msg in selected_messages:
 
 
 # ## Reimplementing ConversationTokenBufferMemory logic
-# 
-# Here, we'll use `trim_messages` to keeps the system message and the most recent messages in the conversation under the constraint that the total number of tokens in the conversation does not exceed a certain limit. 
-# 
+#
+# Here, we'll use `trim_messages` to keeps the system message and the most recent messages in the conversation under the constraint that the total number of tokens in the conversation does not exceed a certain limit.
+#
 
 # In[6]:
 
@@ -188,17 +192,17 @@ for msg in selected_messages:
 
 
 # ## Modern usage with LangGraph
-# 
+#
 # The example below shows how to use LangGraph to add simple conversation pre-processing logic.
-# 
+#
 # :::note
-# 
+#
 # If you want to avoid running the computation on the entire conversation history each time, you can follow
 # the [how-to guide on summarization](https://langchain-ai.github.io/langgraph/how-tos/memory/add-summary-conversation-history/) that demonstrates
 # how to discard older messages, ensuring they aren't re-processed during later turns.
-# 
+#
 # :::
-# 
+#
 # <details open>
 
 # In[7]:
@@ -278,15 +282,15 @@ for event in app.stream({"messages": [input_message]}, config, stream_mode="valu
 
 
 # </details>
-# 
+#
 # ## Usage with a pre-built langgraph agent
-# 
+#
 # This example shows usage of an Agent Executor with a pre-built agent constructed using the [create_tool_calling_agent](https://python.langchain.com/api_reference/langchain/agents/langchain.agents.tool_calling_agent.base.create_tool_calling_agent.html) function.
-# 
+#
 # If you are using one of the [old LangChain pre-built agents](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/), you should be able
 # to replace that code with the new [langgraph pre-built agent](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/) which leverages
 # native tool calling capabilities of chat models and will likely work better out of the box.
-# 
+#
 # <details open>
 
 # In[8]:
@@ -374,24 +378,24 @@ for event in app.stream({"messages": [input_message]}, config, stream_mode="valu
 
 
 # </details>
-# 
+#
 # ## LCEL: Add a preprocessing step
-# 
+#
 # The simplest way to add complex conversation management is by introducing a pre-processing step in front of the chat model and pass the full conversation history to the pre-processing step.
-# 
+#
 # This approach is conceptually simple and will work in many situations; for example, if using a [RunnableWithMessageHistory](/docs/how_to/message_history/) instead of wrapping the chat model, wrap the chat model with the pre-processor.
-# 
+#
 # The obvious downside of this approach is that latency starts to increase as the conversation history grows because of two reasons:
-# 
+#
 # 1. As the conversation gets longer, more data may need to be fetched from whatever store your'e using to store the conversation history (if not storing it in memory).
 # 2. The pre-processing logic will end up doing a lot of redundant computation, repeating computation from previous steps of the conversation.
-# 
+#
 # :::caution
-# 
+#
 # If you want to use a chat model's tool calling capabilities, remember to bind the tools to the model before adding the history pre-processing step to it!
-# 
+#
 # :::
-# 
+#
 # <details open>
 
 # In[9]:
@@ -463,35 +467,31 @@ model_with_preprocessor.invoke(full_history).pretty_print()
 
 
 # </details>
-# 
+#
 # If you need to implement more efficient logic and want to use `RunnableWithMessageHistory` for now the way to achieve this
 # is to subclass from [BaseChatMessageHistory](https://python.langchain.com/api_reference/core/chat_history/langchain_core.chat_history.BaseChatMessageHistory.html) and
 # define appropriate logic for `add_messages` (that doesn't simply append the history, but instead re-writes it).
-# 
+#
 # Unless you have a good reason to implement this solution, you should instead use LangGraph.
 
 # ## Next steps
-# 
+#
 # Explore persistence with LangGraph:
-# 
+#
 # * [LangGraph quickstart tutorial](https://langchain-ai.github.io/langgraph/tutorials/introduction/)
 # * [How to add persistence ("memory") to your graph](https://langchain-ai.github.io/langgraph/how-tos/persistence/)
 # * [How to manage conversation history](https://langchain-ai.github.io/langgraph/how-tos/memory/manage-conversation-history/)
 # * [How to add summary of the conversation history](https://langchain-ai.github.io/langgraph/how-tos/memory/add-summary-conversation-history/)
-# 
+#
 # Add persistence with simple LCEL (favor langgraph for more complex use cases):
-# 
+#
 # * [How to add message history](/docs/how_to/message_history/)
-# 
+#
 # Working with message history:
-# 
+#
 # * [How to trim messages](/docs/how_to/trim_messages)
 # * [How to filter messages](/docs/how_to/filter_messages/)
 # * [How to merge message runs](/docs/how_to/merge_message_runs/)
-# 
+#
 
 # In[ ]:
-
-
-
-

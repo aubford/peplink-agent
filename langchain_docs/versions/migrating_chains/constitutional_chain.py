@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Migrating from ConstitutionalChain
-# 
+#
 # [ConstitutionalChain](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.constitutional_ai.base.ConstitutionalChain.html) allowed for a LLM to critique and revise generations based on [principles](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.constitutional_ai.models.ConstitutionalPrinciple.html), structured as combinations of critique and revision requests. For example, a principle might include a request to identify harmful content, and a request to rewrite the content.
-# 
+#
 # `Constitutional AI principles` are based on the [Constitutional AI: Harmlessness from AI Feedback](https://arxiv.org/pdf/2212.08073) paper.
-# 
+#
 # In `ConstitutionalChain`, this structure of critique requests and associated revisions was formatted into a LLM prompt and parsed out of string responses. This is more naturally achieved via [structured output](/docs/how_to/structured_output/) features of chat models. We can construct a simple chain in [LangGraph](https://langchain-ai.github.io/langgraph/) for this purpose. Some advantages of this approach include:
-# 
+#
 # - Leverage tool-calling capabilities of chat models that have been fine-tuned for this purpose;
 # - Reduce parsing errors from extracting expression from a string LLM response;
 # - Delegation of instructions to [message roles](/docs/concepts/messages) (e.g., chat models can understand what a `ToolMessage` represents without the need for additional prompting);
@@ -17,7 +17,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-openai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-openai")
 
 
 # In[2]:
@@ -31,7 +31,7 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Legacy
-# 
+#
 # <details open>
 
 # In[3]:
@@ -72,20 +72,20 @@ result
 
 
 # Above, we've returned intermediate steps showing:
-# 
+#
 # - The original question;
 # - The initial output;
 # - Critiques and revisions;
 # - The final output (matching a revision).
 
 # </details>
-# 
+#
 # ## LangGraph
-# 
+#
 # <details open>
-# 
+#
 # Below, we use the [.with_structured_output](/docs/how_to/structured_output/) method to simultaneously generate (1) a judgment of whether a critique is needed, and (2) the critique. We surface all prompts involved for clarity and ease of customizability.
-# 
+#
 # Note that we are also able to stream intermediate steps with this implementation, so we can monitor and if needed intervene during its execution.
 
 # In[5]:
@@ -217,9 +217,9 @@ async for step in app.astream(
 
 
 # </details>
-# 
+#
 # ## Next steps
-# 
+#
 # See guides for generating structured output [here](/docs/how_to/structured_output/).
-# 
+#
 # Check out the [LangGraph documentation](https://langchain-ai.github.io/langgraph/) for detail on building with LangGraph.

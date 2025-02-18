@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # NASA Toolkit
-# 
+#
 # This notebook shows how to use agents to interact with the NASA toolkit. The toolkit provides access to the NASA Image and Video Library API, with potential to expand and include other accessible NASA APIs in future iterations.
-# 
+#
 # **Note: NASA Image and Video Library search queries can result in large responses when the number of desired media results is not specified. Consider this prior to using the agent with LLM token credits.**
 
 # ## Example Use:
@@ -14,7 +14,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # In[ ]:
@@ -52,4 +52,3 @@ output = agent.run(
     "I've just queried an image of the moon with the NASA id NHQ_2019_0311_Go Forward to the Moon."
     " Where can I find the metadata manifest for this asset?"
 )
-

@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # How to use BaseChatMessageHistory with LangGraph
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
 # * [Chat History](/docs/concepts/chat_history)
 # * [RunnableWithMessageHistory](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html)
 # * [LangGraph](https://langchain-ai.github.io/langgraph/concepts/high_level/)
 # * [Memory](https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/#memory)
 # :::
-# 
+#
 # We recommend that new LangChain applications take advantage of the [built-in LangGraph peristence](https://langchain-ai.github.io/langgraph/concepts/persistence/) to implement memory.
-# 
+#
 # In some situations, users may need to keep using an existing persistence solution for chat message history.
-# 
+#
 # Here, we will show how to use [LangChain chat message histories](https://python.langchain.com/docs/integrations/memory/) (implementations of [BaseChatMessageHistory](https://python.langchain.com/api_reference/core/chat_history/langchain_core.chat_history.BaseChatMessageHistory.html)) with LangGraph.
 
 # ## Set up
@@ -23,7 +23,11 @@
 # In[1]:
 
 
-get_ipython().run_cell_magic('capture', '--no-stderr', '%pip install --upgrade --quiet langchain-anthropic langgraph\n')
+get_ipython().run_cell_magic(
+    "capture",
+    "--no-stderr",
+    "%pip install --upgrade --quiet langchain-anthropic langgraph\n",
+)
 
 
 # In[ ]:
@@ -37,11 +41,11 @@ if "ANTHROPIC_API_KEY" not in os.environ:
 
 
 # ## ChatMessageHistory
-# 
+#
 # A message history needs to be parameterized by a conversation ID or maybe by the 2-tuple of (user ID, conversation ID).
-# 
+#
 # Many of the [LangChain chat message histories](https://python.langchain.com/docs/integrations/memory/) will have either a `session_id` or some `namespace` to allow keeping track of different conversations. Please refer to the specific implementations to check how it is parameterized.
-# 
+#
 # The built-in `InMemoryChatMessageHistory` does not contains such a parameterization, so we'll create a dictionary to keep track of the message histories.
 
 # In[ ]:
@@ -63,11 +67,11 @@ def get_chat_history(session_id: str) -> InMemoryChatMessageHistory:
 
 
 # ## Use with LangGraph
-# 
+#
 # Next, we'll set up a basic chat bot using LangGraph. If you're not familiar with LangGraph, you should look at the following [Quick Start Tutorial](https://langchain-ai.github.io/langgraph/tutorials/introduction/).
-# 
+#
 # We'll create a [LangGraph node](https://langchain-ai.github.io/langgraph/concepts/low_level/#nodes) for the chat model, and manually manage the conversation history, taking into account the conversation ID passed as part of the RunnableConfig.
-# 
+#
 # The conversation ID can be passed as either part of the RunnableConfig (as we'll do here), or as part of the [graph state](https://langchain-ai.github.io/langgraph/concepts/low_level/#state).
 
 # In[6]:
@@ -129,7 +133,7 @@ for event in graph.stream({"messages": [input_message]}, config, stream_mode="va
 
 
 # :::hint
-# 
+#
 # This also supports streaming LLM content token by token if using langgraph >= 0.2.28.
 # :::
 
@@ -148,13 +152,13 @@ for msg, metadata in graph.stream(
 
 
 # ## Using With RunnableWithMessageHistory
-# 
-# This how-to guide used the `messages` and `add_messages` interface of `BaseChatMessageHistory` directly. 
-# 
+#
+# This how-to guide used the `messages` and `add_messages` interface of `BaseChatMessageHistory` directly.
+#
 # Alternatively, you can use [RunnableWithMessageHistory](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html), as [LCEL](/docs/concepts/lcel/) can be used inside any [LangGraph node](https://langchain-ai.github.io/langgraph/concepts/low_level/#nodes).
-# 
+#
 # To do that replace the following code:
-# 
+#
 # ```python
 # def call_model(state: MessagesState, config: RunnableConfig) -> list[BaseMessage]:
 #     # highlight-start
@@ -174,12 +178,12 @@ for msg, metadata in graph.stream(
 #     # hilight-end
 #     return {"messages": ai_message}
 # ```
-# 
+#
 # With the corresponding instance of `RunnableWithMessageHistory` defined in your current application.
-# 
+#
 # ```python
 # runnable = RunnableWithMessageHistory(...) # From existing code
-# 
+#
 # def call_model(state: MessagesState, config: RunnableConfig) -> list[BaseMessage]:
 #     # RunnableWithMessageHistory takes care of reading the message history
 #     # and updating it with the new human message and ai response.

@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # INVALID_TOOL_RESULTS
-# 
+#
 # You are passing too many, too few, or mismatched [`ToolMessages`](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.tool.ToolMessage.html#toolmessage) to a model.
-# 
+#
 # When [using a model to call tools](/docs/concepts/tool_calling), the [`AIMessage`](https://api.js.langchain.com/classes/_langchain_core.messages.AIMessage.html)
 # the model responds with will contain a `tool_calls` array. To continue the flow, the next messages you pass back to the model must
 # be exactly one `ToolMessage` for each item in that array containing the result of that tool call. Each `ToolMessage` must have a `tool_call_id` field
 # that matches one of the `tool_calls` on the `AIMessage`.
-# 
+#
 # For example, given the following response from a model:
 
 # In[2]:
@@ -102,13 +102,13 @@ model_with_tools.invoke(
 
 
 # See [this guide](/docs/how_to/tool_results_pass_to_model/) for more details on tool calling.
-# 
+#
 # ## Troubleshooting
-# 
+#
 # The following may help resolve this error:
-# 
+#
 # - If you are using a custom executor rather than a prebuilt one like LangGraph's [`ToolNode`](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph_prebuilt.ToolNode.html)
 #   or the legacy LangChain [AgentExecutor](/docs/how_to/agent_executor), verify that you are invoking and returning the result for one tool per tool call.
 # - If you are using [few-shot tool call examples](/docs/how_to/tools_few_shot) with messages that you manually create, and you want to simulate a failure,
 #   you still need to pass back a `ToolMessage` whose content indicates that failure.
-# 
+#

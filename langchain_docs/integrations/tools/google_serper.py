@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Google Serper
-# 
+#
 # This notebook goes over how to use the `Google Serper` component to search the web. First you need to sign up for a free account at [serper.dev](https://serper.dev) and get your api key.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-community")
 
 
 # In[11]:
@@ -116,22 +116,22 @@ pprint.pp(results)
 
 
 # Some examples of the `tbs` parameter:
-# 
+#
 # `qdr:h` (past hour)
 # `qdr:d` (past day)
 # `qdr:w` (past week)
 # `qdr:m` (past month)
 # `qdr:y` (past year)
-# 
+#
 # You can specify intermediate time periods by adding a number:
 # `qdr:h12` (past 12 hours)
 # `qdr:d3` (past 3 days)
 # `qdr:w2` (past 2 weeks)
 # `qdr:m6` (past 6 months)
 # `qdr:m2` (past 2 years)
-# 
+#
 # For all supported filters simply go to [Google Search](https://google.com), search for something, click on "Tools", add your date filter and check the URL for "tbs=".
-# 
+#
 
 # ## Searching for Google Places
 # We can also query Google Places using this wrapper. For example:
@@ -142,4 +142,3 @@ pprint.pp(results)
 search = GoogleSerperAPIWrapper(type="places")
 results = search.results("Italian restaurants in Upper East Side")
 pprint.pp(results)
-

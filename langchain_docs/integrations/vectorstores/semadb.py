@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # SemaDB
-# 
+#
 # > [SemaDB](https://www.semafind.com/products/semadb) from [SemaFind](https://www.semafind.com) is a no fuss vector similarity database for building AI applications. The hosted `SemaDB Cloud` offers a no fuss developer experience to get started.
-# 
+#
 # The full documentation of the API along with examples and an interactive playground is available on [RapidAPI](https://rapidapi.com/semafind-semadb/api/semadb).
-# 
+#
 # This notebook demonstrates usage of the `SemaDB Cloud` vector store.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # ## Load document embeddings
-# 
+#
 # To run things locally, we are using [Sentence Transformers](https://www.sbert.net/) which are commonly used for embedding sentences. You can use any embedding model LangChain offers.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  sentence_transformers')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  sentence_transformers")
 
 
 # In[2]:
@@ -44,7 +44,7 @@ print(len(docs))
 
 
 # ## Connect to SemaDB
-# 
+#
 # SemaDB Cloud uses [RapidAPI keys](https://rapidapi.com/semafind-semadb/api/semadb) to authenticate. You can obtain yours by creating a free RapidAPI account.
 
 # In[4]:
@@ -65,7 +65,7 @@ from langchain_community.vectorstores.utils import DistanceStrategy
 
 
 # The parameters to the SemaDB vector store reflect the API directly:
-# 
+#
 # - "mycollection": is the collection name in which we will store these vectors.
 # - 768: is dimensions of the vectors. In our case, the sentence transformer embeddings yield 768 dimensional vectors.
 # - API_KEY: is your RapidAPI key.
@@ -91,7 +91,7 @@ db.add_documents(docs)[:2]
 
 
 # ## Similarity Search
-# 
+#
 # We use the default LangChain similarity search interface to search for the most similar sentences.
 
 # In[8]:
@@ -110,7 +110,7 @@ docs[0]
 
 
 # ## Clean up
-# 
+#
 # You can delete the collection to remove all data.
 
 # In[10]:
@@ -120,7 +120,3 @@ db.delete_collection()
 
 
 # In[ ]:
-
-
-
-

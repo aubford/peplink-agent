@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # LocalAI
-# 
+#
 # :::info
-# 
+#
 # `langchain-localai` is a 3rd party integration package for LocalAI. It provides a simple way to use LocalAI services in Langchain.
-# 
+#
 # The source code is available on [Github](https://github.com/mkhludnev/langchain-localai)
-# 
+#
 # :::
-# 
+#
 # Let's load the LocalAI Embedding class. In order to use the LocalAI Embedding class, you need to have the LocalAI service hosted somewhere and configure the embedding models. See the documentation at https://localai.io/basics/getting_started/index.html and https://localai.io/features/embeddings/index.html.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -U langchain-localai')
+get_ipython().run_line_magic("pip", "install -U langchain-localai")
 
 
 # In[2]:
@@ -92,4 +92,3 @@ import os
 
 # if you are behind an explicit proxy, you can use the OPENAI_PROXY environment variable to pass through
 os.environ["OPENAI_PROXY"] = "http://proxy.yourcompany.com:8080"
-

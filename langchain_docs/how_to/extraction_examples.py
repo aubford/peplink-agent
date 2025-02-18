@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # How to use reference examples when doing extraction
-# 
+#
 # The quality of extractions can often be improved by providing reference examples to the LLM.
-# 
+#
 # Data extraction attempts to generate [structured representations](/docs/concepts/structured_outputs/) of information found in text and other unstructured or semi-structured formats. [Tool-calling](/docs/concepts/tool_calling) LLM features are often used in this context. This guide demonstrates how to build few-shot examples of tool calls to help steer the behavior of extraction and similar applications.
-# 
+#
 # :::tip
 # While this guide focuses how to use examples with a tool calling model, this technique is generally applicable, and will work
 # also with JSON more or prompt based techniques.
 # :::
-# 
-# LangChain implements a [tool-call attribute](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessage.html#langchain_core.messages.ai.AIMessage.tool_calls) on messages from LLMs that include tool calls. See our [how-to guide on tool calling](/docs/how_to/tool_calling) for more detail. To build reference examples for data extraction, we build a chat history containing a sequence of: 
-# 
+#
+# LangChain implements a [tool-call attribute](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessage.html#langchain_core.messages.ai.AIMessage.tool_calls) on messages from LLMs that include tool calls. See our [how-to guide on tool calling](/docs/how_to/tool_calling) for more detail. To build reference examples for data extraction, we build a chat history containing a sequence of:
+#
 # - [HumanMessage](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.human.HumanMessage.html) containing example inputs;
 # - [AIMessage](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessage.html) containing example tool calls;
 # - [ToolMessage](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.tool.ToolMessage.html) containing example tool outputs.
-# 
+#
 # LangChain adopts this convention for structuring tool calls into conversation across LLM model providers.
-# 
+#
 # First we build a prompt template that includes a placeholder for these messages:
 
 # In[1]:
@@ -63,7 +63,7 @@ prompt.invoke(
 
 
 # ## Define the schema
-# 
+#
 # Let's re-use the person schema from the [extraction tutorial](/docs/tutorials/extraction).
 
 # In[3]:
@@ -101,16 +101,16 @@ class Data(BaseModel):
 
 
 # ## Define reference examples
-# 
-# Examples can be defined as a list of input-output pairs. 
-# 
+#
+# Examples can be defined as a list of input-output pairs.
+#
 # Each example contains an example `input` text and an example `output` showing what should be extracted from the text.
-# 
+#
 # :::important
 # This is a bit in the weeds, so feel free to skip.
-# 
+#
 # The format of the example needs to match the API used (e.g., tool calling or JSON mode etc.).
-# 
+#
 # Here, the formatted examples will match the format expected for the tool calling API since that's what we're using.
 # :::
 
@@ -215,16 +215,16 @@ for message in example_prompt.messages:
 
 
 # ## Create an extractor
-# 
+#
 # Let's select an LLM. Because we are using tool-calling, we will need a model that supports a tool-calling feature. See [this table](/docs/integrations/chat) for available LLMs.
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs
 #   customVarName="llm"
 #   openaiParams={`model="gpt-4-0125-preview", temperature=0`}
 # />
-# 
+#
 
 # In[7]:
 
@@ -250,7 +250,7 @@ runnable = prompt | llm.with_structured_output(
 
 
 # ## Without examples 😿
-# 
+#
 # Notice that even capable models can fail with a **very simple** test case!
 
 # In[9]:
@@ -262,7 +262,7 @@ for _ in range(5):
 
 
 # ## With examples 😻
-# 
+#
 # Reference examples helps to fix the failure!
 
 # In[10]:
@@ -274,7 +274,7 @@ for _ in range(5):
 
 
 # Note that we can see the few-shot examples as tool-calls in the [Langsmith trace](https://smith.langchain.com/public/4c436bc2-a1ce-440b-82f5-093947542e40/r).
-# 
+#
 # And we retain performance on a positive sample:
 
 # In[11]:
@@ -286,4 +286,3 @@ runnable.invoke(
         "examples": messages,
     }
 )
-

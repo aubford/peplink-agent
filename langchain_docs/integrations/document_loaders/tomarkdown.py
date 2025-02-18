@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # 2Markdown
-# 
+#
 # >[2markdown](https://2markdown.com/) service transforms website content into structured markdown files.
-# 
+#
 
 # In[2]:
 
@@ -39,7 +39,3 @@ print(docs[0].page_content)
 
 
 # In[ ]:
-
-
-
-

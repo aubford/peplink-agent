@@ -2,29 +2,32 @@
 # coding: utf-8
 
 # # Intel's Visual Data Management System (VDMS)
-# 
+#
 # >Intel's [VDMS](https://github.com/IntelLabs/vdms) is a storage solution for efficient access of big-”visual”-data that aims to achieve cloud scale by searching for relevant visual data via visual metadata stored as a graph and enabling machine friendly enhancements to visual data for faster access. VDMS is licensed under MIT.
-# 
+#
 # VDMS supports:
 # * K nearest neighbor search
 # * Euclidean distance (L2) and inner product (IP)
 # * Libraries for indexing and computing distances: TileDBDense, TileDBSparse, FaissFlat (Default), FaissIVFFlat, Flinng
 # * Embeddings for text, images, and video
 # * Vector and metadata searches
-# 
+#
 # VDMS has server and client components. To setup the server, see the [installation instructions](https://github.com/IntelLabs/vdms/blob/master/INSTALL.md) or use the [docker image](https://hub.docker.com/r/intellabs/vdms).
-# 
+#
 # This notebook shows how to use VDMS as a vector store using the docker image.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # To begin, install the Python packages for the VDMS client and Sentence Transformers:
 
 # In[1]:
 
 
 # Pip install necessary package
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet pip vdms sentence-transformers langchain-huggingface > /dev/null')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet pip vdms sentence-transformers langchain-huggingface > /dev/null",
+)
 
 
 # ## Start VDMS Server
@@ -33,17 +36,19 @@ get_ipython().run_line_magic('pip', 'install --upgrade --quiet pip vdms sentence
 # In[2]:
 
 
-get_ipython().system('docker run --rm -d -p 55555:55555 --name vdms_vs_test_nb intellabs/vdms:latest')
+get_ipython().system(
+    "docker run --rm -d -p 55555:55555 --name vdms_vs_test_nb intellabs/vdms:latest"
+)
 
 
 # ## Basic Example (using the Docker Container)
-# 
+#
 # In this basic example, we demonstrate adding documents into VDMS and using it as a vector database.
-# 
-# You can run the VDMS Server in a Docker container separately to use with LangChain which connects to the server via the VDMS Python Client. 
-# 
+#
+# You can run the VDMS Server in a Docker container separately to use with LangChain which connects to the server via the VDMS Python Client.
+#
 # VDMS has the ability to handle multiple collections of documents, but the LangChain interface expects one, so we need to specify the name of the collection . The default collection name used by LangChain is "langchain".
-# 
+#
 
 # In[3]:
 
@@ -101,8 +106,8 @@ def print_response(list_of_entities):
 
 
 # ### Load Document and Obtain Embedding Function
-# Here we load the most recent State of the Union Address and split the document into chunks. 
-# 
+# Here we load the most recent State of the Union Address and split the document into chunks.
+#
 # LangChain vector stores use a string/keyword `id` for bookkeeping documents. By default, `id` is a uuid but here we're defining it as an integer cast as a string. Additional metadata is also provided with the documents and the HuggingFaceEmbeddings are used for this example as the embedding function.
 
 # In[5]:
@@ -135,7 +140,7 @@ print(
 
 
 # ### Similarity Search using Faiss Flat and Euclidean Distance (Default)
-# 
+#
 # In this section, we add the documents to VDMS using FAISS IndexFlat indexing (default) and Euclidena distance (default) as the distance metric for simiarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson`.
 
 # In[6]:
@@ -170,9 +175,9 @@ print_results(returned_docs, score=False)
 
 
 # ### Similarity Search using Faiss IVFFlat and Inner Product (IP) Distance
-# 
+#
 # In this section, we add the documents to VDMS using Faiss IndexIVFFlat indexing and IP as the distance metric for similarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson` and also return the score along with the document.
-# 
+#
 
 # In[8]:
 
@@ -194,7 +199,7 @@ print_results(docs_with_score)
 
 
 # ### Similarity Search using FLINNG and IP Distance
-# 
+#
 # In this section, we add the documents to VDMS using Filters to Identify Near-Neighbor Groups (FLINNG) indexing and IP as the distance metric for similarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson` and also return the score along with the document.
 
 # In[9]:
@@ -217,10 +222,10 @@ print_results(docs_with_score)
 
 
 # ### Similarity Search using TileDBDense and Euclidean Distance
-# 
+#
 # In this section, we add the documents to VDMS using TileDB Dense indexing and L2 as the distance metric for similarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson` and also return the score along with the document.
-# 
-# 
+#
+#
 
 # In[10]:
 
@@ -242,10 +247,10 @@ print_results(docs_with_score)
 
 
 # ### Update and Delete
-# 
+#
 # While building toward a real application, you want to go beyond adding data, and also update and delete data.
-# 
-# Here is a basic example showing how to do so.  First, we will update the metadata for the document most relevant to the query by adding a date. 
+#
+# Here is a basic example showing how to do so.  First, we will update the metadata for the document most relevant to the query by adding a date.
 
 # In[11]:
 
@@ -293,9 +298,9 @@ print(
 
 # ## Other Information
 # VDMS supports various types of visual data and operations. Some of the capabilities are integrated in the LangChain interface but additional workflow improvements will be added as VDMS is under continuous development.
-# 
+#
 # Addtional capabilities integrated into LangChain are below.
-# 
+#
 # ### Similarity search by vector
 # Instead of searching by string query, you can also search by embedding/vector.
 
@@ -310,9 +315,9 @@ print_document_details(returned_docs[0])
 
 
 # ### Filtering on metadata
-# 
+#
 # It can be helpful to narrow down the collection before working with it.
-# 
+#
 # For example, collections can be filtered on metadata using the get method. A dictionary is used to filter metadata. Here we retrieve the document where `id = 2` and remove it from the vector store.
 
 # In[14]:
@@ -333,14 +338,14 @@ print_response([response[0]["FindDescriptor"]["entities"][0]])
 
 
 # ### Retriever options
-# 
+#
 # This section goes over different options for how to use VDMS as a retriever.
-# 
-# 
+#
+#
 # #### Simiarity Search
-# 
+#
 # Here we use similarity search in the retriever object.
-# 
+#
 
 # In[15]:
 
@@ -352,7 +357,7 @@ print_document_details(relevant_docs)
 
 
 # #### Maximal Marginal Relevance Search (MMR)
-# 
+#
 # In addition to using similarity search in the retriever object, you can also use `mmr`.
 
 # In[16]:
@@ -391,11 +396,7 @@ print("Documents after deletion: ", db_FaissFlat.count(collection_name))
 # In[19]:
 
 
-get_ipython().system('docker kill vdms_vs_test_nb')
+get_ipython().system("docker kill vdms_vs_test_nb")
 
 
 # In[ ]:
-
-
-
-

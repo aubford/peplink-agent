@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # FalkorDB
-# 
+#
 # <a href='https://docs.falkordb.com/' target='_blank'>FalkorDB</a> is an open-source graph database management system, renowned for its efficient management of highly connected data. Unlike traditional databases that store data in tables, FalkorDB uses a graph structure with nodes, edges, and properties to represent and store data. This design allows for high-performance queries on complex data relationships.
-# 
+#
 # This notebook goes over how to use `FalkorDB` to store chat message history
-# 
+#
 # **NOTE**: You can use FalkorDB locally or use FalkorDB Cloud. <a href='https://docs.falkordb.com/' target='blank'>See installation instructions</a>
 
 # In[6]:
@@ -35,4 +35,3 @@ history.add_ai_message("whats up?")
 
 
 history.messages
-

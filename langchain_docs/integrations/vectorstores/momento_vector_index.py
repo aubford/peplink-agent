@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Momento Vector Index (MVI)
-# 
+#
 # >[MVI](https://gomomento.com): the most productive, easiest to use, serverless vector index for your data. To get started with MVI, simply sign up for an account. There's no need to handle infrastructure, manage servers, or be concerned about scaling. MVI is a service that scales automatically to meet your needs.
-# 
+#
 # To sign up and access MVI, visit the [Momento Console](https://console.gomomento.com).
 
 # # Setup
@@ -19,7 +19,10 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  momento langchain-openai langchain-community tiktoken')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  momento langchain-openai langchain-community tiktoken",
+)
 
 
 # ## Enter API keys
@@ -54,7 +57,7 @@ if "OPENAI_API_KEY" not in os.environ:
 # # Load your data
 
 # Here we use the example dataset from Langchain, the state of the union address.
-# 
+#
 # First we load relevant modules:
 
 # In[12]:
@@ -160,11 +163,11 @@ qa_chain({"query": "What did the president say about Ketanji Brown Jackson?"})
 # # Next Steps
 
 # That's it! You've now indexed your data and can query it using the Momento Vector Index. You can use the same index to query your data from any chain that supports vector similarity search.
-# 
+#
 # With Momento you can not only index your vector data, but also cache your API calls and store your chat message history. Check out the other Momento langchain integrations to learn more.
-# 
+#
 # To learn more about the Momento Vector Index, visit the [Momento Documentation](https://docs.gomomento.com).
-# 
-# 
+#
+#
 
-# 
+#

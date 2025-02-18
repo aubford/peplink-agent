@@ -2,25 +2,27 @@
 # coding: utf-8
 
 # # How to handle long text when doing extraction
-# 
+#
 # When working with files, like PDFs, you're likely to encounter text that exceeds your language model's context window. To process this text, consider these strategies:
-# 
+#
 # 1. **Change LLM** Choose a different LLM that supports a larger context window.
 # 2. **Brute Force** Chunk the document, and extract content from each chunk.
 # 3. **RAG** Chunk the document, index the chunks, and only extract content from a subset of chunks that look "relevant".
-# 
+#
 # Keep in mind that these strategies have different trade off and the best strategy likely depends on the application that you're designing!
-# 
+#
 # This guide demonstrates how to implement strategies 2 and 3.
 
 # ## Setup
-# 
+#
 # First we'll install the dependencies needed for this guide:
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community lxml faiss-cpu langchain-openai')
+get_ipython().run_line_magic(
+    "pip", "install -qU langchain-community lxml faiss-cpu langchain-openai"
+)
 
 
 # Now we need some example data! Let's download an article about [cars from wikipedia](https://en.wikipedia.org/wiki/Car) and load it as a LangChain [Document](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html).
@@ -53,9 +55,9 @@ print(len(document.page_content))
 
 
 # ## Define the schema
-# 
+#
 # Following the [extraction tutorial](/docs/tutorials/extraction), we will use Pydantic to define the schema of information we wish to extract. In this case, we will extract a list of "key developments" (e.g., important historical events) that include a year and description.
-# 
+#
 # Note that we also include an `evidence` key and instruct the model to provide in verbatim the relevant sentences of text from the article. This allows us to compare the extraction results to (the model's reconstruction of) text from the original document.
 
 # In[3]:
@@ -105,16 +107,16 @@ prompt = ChatPromptTemplate.from_messages(
 
 
 # ## Create an extractor
-# 
+#
 # Let's select an LLM. Because we are using tool-calling, we will need a model that supports a tool-calling feature. See [this table](/docs/integrations/chat) for available LLMs.
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs
 #   customVarName="llm"
 #   openaiParams={`model="gpt-4o", temperature=0`}
 # />
-# 
+#
 
 # In[4]:
 
@@ -137,7 +139,7 @@ extractor = prompt | llm.with_structured_output(
 
 
 # ## Brute force approach
-# 
+#
 # Split the documents into chunks such that each chunk fits into the context window of the LLMs.
 
 # In[6]:
@@ -155,11 +157,11 @@ text_splitter = TokenTextSplitter(
 texts = text_splitter.split_text(document.page_content)
 
 
-# Use [batch](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html) functionality to run the extraction in **parallel** across each chunk! 
-# 
+# Use [batch](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html) functionality to run the extraction in **parallel** across each chunk!
+#
 # :::tip
 # You can often use .batch() to parallelize the extractions! `.batch` uses a threadpool under the hood to help you parallelize workloads.
-# 
+#
 # If your model is exposed via an API, this will likely speed up your extraction flow!
 # :::
 
@@ -177,7 +179,7 @@ extractions = extractor.batch(
 
 
 # ### Merge results
-# 
+#
 # After extracting data from across the chunks, we'll want to merge the extractions together.
 
 # In[8]:
@@ -192,23 +194,23 @@ key_developments[:10]
 
 
 # ## RAG based approach
-# 
+#
 # Another simple idea is to chunk up the text, but instead of extracting information from every chunk, just focus on the the most relevant chunks.
-# 
+#
 # :::caution
 # It can be difficult to identify which chunks are relevant.
-# 
+#
 # For example, in the `car` article we're using here, most of the article contains key development information. So by using
 # **RAG**, we'll likely be throwing out a lot of relevant information.
-# 
+#
 # We suggest experimenting with your use case and determining whether this approach works or not.
 # :::
-# 
-# To implement the RAG based approach: 
-# 
+#
+# To implement the RAG based approach:
+#
 # 1. Chunk up your document(s) and index them (e.g., in a vectorstore);
 # 2. Prepend the `extractor` chain with a retrieval step using the vectorstore.
-# 
+#
 # Here's a simple example that relies on the `FAISS` vectorstore.
 
 # In[9]:
@@ -252,11 +254,11 @@ for key_development in results.key_developments:
 
 
 # ## Common issues
-# 
+#
 # Different methods have their own pros and cons related to cost, speed, and accuracy.
-# 
+#
 # Watch out for these issues:
-# 
+#
 # * Chunking content means that the LLM can fail to extract information if the information is spread across multiple chunks.
 # * Large chunk overlap may cause the same information to be extracted twice, so be prepared to de-duplicate!
 # * LLMs can make up data. If looking for a single fact across a large text and using a brute force approach, you may end up getting more made up data.

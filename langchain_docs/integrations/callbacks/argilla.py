@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # Argilla
-# 
+#
 # >[Argilla](https://argilla.io/) is an open-source data curation platform for LLMs.
-# > Using Argilla, everyone can build robust language models through faster data curation 
-# > using both human and machine feedback. We provide support for each step in the MLOps cycle, 
+# > Using Argilla, everyone can build robust language models through faster data curation
+# > using both human and machine feedback. We provide support for each step in the MLOps cycle,
 # > from data labeling to model monitoring.
-# 
+#
 # <a target="_blank" href="https://colab.research.google.com/github/langchain-ai/langchain/blob/master/docs/docs/integrations/callbacks/argilla.ipynb">
 #   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 # </a>
 
 # In this guide we will demonstrate how to track the inputs and responses of your LLM to generate a dataset in Argilla, using the `ArgillaCallbackHandler`.
-# 
+#
 # It's useful to keep track of the inputs and outputs of your LLMs to generate datasets for future fine-tuning. This is especially useful when you're using a LLM to generate data for a specific task, such as question answering, summarization, or translation.
 
 # ## Installation and Setup
@@ -21,19 +21,21 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-openai argilla')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain langchain-openai argilla"
+)
 
 
 # ### Getting API Credentials
-# 
+#
 # To get the Argilla API credentials, follow the next steps:
-# 
+#
 # 1. Go to your Argilla UI.
 # 2. Click on your profile picture and go to "My settings".
 # 3. Then copy the API Key.
-# 
+#
 # In Argilla the API URL will be the same as the URL of your Argilla UI.
-# 
+#
 # To get the OpenAI API credentials, please visit https://platform.openai.com/account/api-keys
 
 # In[11]:
@@ -48,7 +50,7 @@ os.environ["OPENAI_API_KEY"] = "..."
 
 
 # ### Setup Argilla
-# 
+#
 # To use the `ArgillaCallbackHandler` we will need to create a new `FeedbackDataset` in Argilla to keep track of your LLM experiments. To do so, please use the following code:
 
 # In[3]:
@@ -120,7 +122,7 @@ argilla_callback = ArgillaCallbackHandler(
 
 
 # ### Scenario 1: Tracking an LLM
-# 
+#
 # First, let's just run a single LLM a few times and capture the resulting prompt-response pairs in Argilla.
 
 # In[7]:
@@ -143,7 +145,7 @@ llm.generate(["Tell me a joke", "Tell me a poem"] * 3)
 # ![Argilla UI with LangChain LLM input-response](https://docs.argilla.io/en/latest/_images/llm.png)
 
 # ### Scenario 2: Tracking an LLM in a chain
-# 
+#
 # Then we can create a chain using a prompt template, and then track the initial prompt and the final response in Argilla.
 
 # In[8]:
@@ -175,7 +177,7 @@ synopsis_chain.apply(test_prompts)
 # ![Argilla UI with LangChain Chain input-response](https://docs.argilla.io/en/latest/_images/chain.png)
 
 # ### Scenario 3: Using an Agent with Tools
-# 
+#
 # Finally, as a more advanced workflow, you can create an agent that uses some tools. So that `ArgillaCallbackHandler` will keep track of the input and the output, but not about the intermediate steps/thoughts, so that given a prompt we log the original prompt and the final response to that given prompt.
 
 # > Note that for this scenario we'll be using Google Search API (Serp API) so you will need to both install `google-search-results` as `pip install google-search-results`, and to set the Serp API Key as `os.environ["SERPAPI_API_KEY"] = "..."` (you can find it at https://serpapi.com/dashboard), otherwise the example below won't work.

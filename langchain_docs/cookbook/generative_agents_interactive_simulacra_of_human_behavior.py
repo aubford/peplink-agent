@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # Generative Agents in LangChain
-# 
+#
 # This notebook implements a generative agent based on the paper [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/abs/2304.03442) by Park, et. al.
-# 
+#
 # In it, we leverage a time-weighted Memory object backed by a LangChain Retriever.
 
 # In[1]:
 
 
 # Use termcolor to make it easy to colorize the outputs.
-get_ipython().system('pip install termcolor > /dev/null')
+get_ipython().system("pip install termcolor > /dev/null")
 
 
 # In[1]:
@@ -43,20 +43,20 @@ LLM = ChatOpenAI(max_tokens=1500)  # Can be any LLM you want.
 
 
 # ### Generative Agent Memory Components
-# 
+#
 # This tutorial highlights the memory of generative agents and its impact on their behavior. The memory varies from standard LangChain Chat memory in two aspects:
-# 
+#
 # 1. **Memory Formation**
-# 
+#
 #    Generative Agents have extended memories, stored in a single stream:
 #       1. Observations - from dialogues or interactions with the virtual world, about self or others
 #       2. Reflections - resurfaced and summarized core memories
-# 
-# 
+#
+#
 # 2. **Memory Recall**
-# 
+#
 #    Memories are retrieved using a weighted sum of salience, recency, and importance.
-# 
+#
 # You can review the definitions of the `GenerativeAgent` and `GenerativeAgentMemory` in the [reference documentation]("https://api.python.langchain.com/en/latest/modules/experimental.html") for the following imports, focusing on `add_memory` and `summarize_related_memories` methods.
 
 # In[4]:
@@ -69,25 +69,25 @@ from langchain_experimental.generative_agents import (
 
 
 # ## Memory Lifecycle
-# 
+#
 # Summarizing the key methods in the above: `add_memory` and `summarize_related_memories`.
-# 
+#
 # When an agent makes an observation, it stores the memory:
-#     
+#
 # 1. Language model scores the memory's importance (1 for mundane, 10 for poignant)
 # 2. Observation and importance are stored within a document by TimeWeightedVectorStoreRetriever, with a `last_accessed_time`.
-# 
+#
 # When an agent responds to an observation:
-# 
+#
 # 1. Generates query(s) for retriever, which fetches documents based on salience, recency, and importance.
 # 2. Summarizes the retrieved information
 # 3. Updates the `last_accessed_time` for the used documents.
-# 
+#
 
 # ## Create a Generative Character
-# 
-# 
-# 
+#
+#
+#
 # Now that we've walked through the definition, we will create two characters named "Tommie" and "Eve".
 
 # In[5]:
@@ -183,7 +183,7 @@ print(tommie.get_summary(force_refresh=True))
 
 
 # ## Pre-Interview with Character
-# 
+#
 # Before sending our character on their way, let's ask them a few questions.
 
 # In[10]:
@@ -290,7 +290,7 @@ interview_agent(tommie, "Tell me about your childhood dog!")
 
 
 # ## Adding Multiple Characters
-# 
+#
 # Let's add a second character to have a conversation with Tommie. Feel free to configure different traits.
 
 # In[47]:
@@ -311,9 +311,7 @@ eve = GenerativeAgent(
     status="N/A",  # When connected to a virtual world, we can have the characters update their status
     llm=LLM,
     daily_summaries=[
-        (
-            "Eve started her new job as a career counselor last week and received her first assignment, a client named Tommie."
-        )
+        "Eve started her new job as a career counselor last week and received her first assignment, a client named Tommie."
     ],
     memory=eves_memory,
     verbose=False,
@@ -342,8 +340,8 @@ print(eve.get_summary())
 
 
 # ## Pre-conversation interviews
-# 
-# 
+#
+#
 # Let's "Interview" Eve before she speaks with Tommie.
 
 # In[50]:
@@ -377,7 +375,7 @@ interview_agent(
 
 
 # ## Dialogue between Generative Agents
-# 
+#
 # Generative agents are much more complex when they interact with a virtual environment or with each other. Below, we run a simple conversation between Tommie and Eve.
 
 # In[54]:
@@ -414,7 +412,7 @@ run_conversation(
 
 
 # ## Let's interview our agents after their conversation
-# 
+#
 # Since the generative agents retain their memories from the day, we can ask them about their plans, conversations, and other memoreis.
 
 # In[56]:
@@ -447,4 +445,3 @@ interview_agent(eve, "How was your conversation with Tommie?")
 
 
 interview_agent(eve, "What do you wish you would have said to Tommie?")
-

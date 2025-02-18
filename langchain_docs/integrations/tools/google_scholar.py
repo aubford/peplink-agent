@@ -2,13 +2,15 @@
 # coding: utf-8
 
 # # Google Scholar
-# 
+#
 # This notebook goes through how to use Google Scholar Tool
 
 # In[5]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  google-search-results langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  google-search-results langchain-community"
+)
 
 
 # In[6]:
@@ -29,7 +31,3 @@ tool.run("LLM Models")
 
 
 # In[ ]:
-
-
-
-

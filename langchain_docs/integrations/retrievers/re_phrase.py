@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # RePhraseQuery
-# 
+#
 # `RePhraseQuery` is a simple retriever that applies an LLM between the user input and the query passed by the retriever.
-# 
+#
 # It can be used to pre-process the user input in any way.
-# 
+#
 # ## Example
-# 
+#
 # ### Setting up
-# 
+#
 # Create a vector store.
 
 # In[2]:
@@ -41,9 +41,9 @@ vectorstore = Chroma.from_documents(documents=all_splits, embedding=OpenAIEmbedd
 
 
 # ### Using the default prompt
-# 
+#
 # The default prompt used in the `from_llm` classmethod:
-# 
+#
 # ```
 # DEFAULT_TEMPLATE = """You are an assistant tasked with taking a natural language \
 # query from a user and converting it into a query for a vectorstore. \
@@ -110,4 +110,3 @@ retriever_from_llm_chain = RePhraseQueryRetriever(
 docs = retriever_from_llm_chain.invoke(
     "Hi I'm Lance. What is Maximum Inner Product Search?"
 )
-

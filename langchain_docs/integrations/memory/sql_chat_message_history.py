@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # SQL (SQLAlchemy)
-# 
+#
 # >[Structured Query Language (SQL)](https://en.wikipedia.org/wiki/SQL) is a domain-specific language used in programming and designed for managing data held in a relational database management system (RDBMS), or for stream processing in a relational data stream management system (RDSMS). It is particularly useful in handling structured data, i.e., data incorporating relations among entities and variables.
-# 
+#
 # >[SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy) is an open-source `SQL` toolkit and object-relational mapper (ORM) for the Python programming language released under the MIT License.
-# 
+#
 # This notebook goes over a `SQLChatMessageHistory` class that allows to store chat history in any database supported by `SQLAlchemy`.
-# 
+#
 # Please note that to use it with databases other than `SQLite`, you will need to install the corresponding database driver.
 
 # ## Setup
-# 
+#
 # The integration lives in the `langchain-community` package, so we need to install that. We also need to install the `SQLAlchemy` package.
-# 
+#
 # ```bash
 # pip install -U langchain-community SQLAlchemy langchain-openai
 # ```
@@ -29,9 +29,9 @@
 
 
 # ## Usage
-# 
+#
 # To use the storage you need to provide only 2 things:
-# 
+#
 # 1. Session Id - a unique identifier of the session, like user name, email, chat id etc.
 # 2. Connection string - a string that specifies the database connection. It will be passed to SQLAlchemy create_engine function.
 
@@ -55,11 +55,11 @@ chat_message_history.messages
 
 
 # ## Chaining
-# 
+#
 # We can easily combine this message history class with [LCEL Runnables](/docs/how_to/message_history)
-# 
+#
 # To do this we will want to use OpenAI, so we need to install that
-# 
+#
 
 # In[3]:
 
@@ -113,4 +113,3 @@ chain_with_history.invoke({"question": "Hi! I'm bob"}, config=config)
 
 
 chain_with_history.invoke({"question": "Whats my name"}, config=config)
-

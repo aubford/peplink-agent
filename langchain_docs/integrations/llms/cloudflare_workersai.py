@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Cloudflare Workers AI
-# 
+#
 # [Cloudflare AI documentation](https://developers.cloudflare.com/workers-ai/models/) listed all generative text models available.
-# 
+#
 # Both Cloudflare account ID and API token are required. Find how to obtain them from [this document](https://developers.cloudflare.com/workers-ai/get-started/rest-api/).
 
 # In[1]:
@@ -51,7 +51,3 @@ for chunk in llm.stream("Why is sky blue?"):
 
 
 # In[ ]:
-
-
-
-

@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Pandas DataFrame
-# 
+#
 # This notebook goes over how to load data from a [pandas](https://pandas.pydata.org/pandas-docs/stable/user_guide/index) DataFrame.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pandas')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pandas")
 
 
 # In[1]:
@@ -53,4 +53,3 @@ loader.load()
 # Use lazy load for larger table, which won't read the full table into memory
 for i in loader.lazy_load():
     print(i)
-

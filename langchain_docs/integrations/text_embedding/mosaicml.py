@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # MosaicML
-# 
+#
 # >[MosaicML](https://docs.mosaicml.com/en/latest/inference.html) offers a managed inference service. You can either use a variety of open-source models, or deploy your own.
-# 
+#
 # This example goes over how to use LangChain to interact with `MosaicML` Inference for text embedding.
 
 # In[ ]:
@@ -64,4 +64,3 @@ similarity = np.dot(query_numpy, document_numpy) / (
     np.linalg.norm(query_numpy) * np.linalg.norm(document_numpy)
 )
 print(f"Cosine similarity between document and query: {similarity}")
-

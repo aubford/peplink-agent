@@ -2,36 +2,39 @@
 # coding: utf-8
 
 # # Google Drive
-# 
+#
 # This notebook walks through connecting a LangChain to the `Google Drive API`.
-# 
+#
 # ## Prerequisites
-# 
+#
 # 1. Create a Google Cloud project or use an existing project
 # 1. Enable the [Google Drive API](https://console.cloud.google.com/flows/enableapi?apiid=drive.googleapis.com)
 # 1. [Authorize credentials for desktop app](https://developers.google.com/drive/api/quickstart/python#authorize_credentials_for_a_desktop_application)
 # 1. `pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib`
-# 
+#
 # ## Instructions for retrieving your Google Docs data
-# By default, the `GoogleDriveTools` and `GoogleDriveWrapper` expects the `credentials.json` file to be `~/.credentials/credentials.json`, but this is configurable using the `GOOGLE_ACCOUNT_FILE` environment variable. 
+# By default, the `GoogleDriveTools` and `GoogleDriveWrapper` expects the `credentials.json` file to be `~/.credentials/credentials.json`, but this is configurable using the `GOOGLE_ACCOUNT_FILE` environment variable.
 # The location of `token.json` use the same directory (or use the parameter `token_path`). Note that `token.json` will be created automatically the first time you use the tool.
-# 
-# `GoogleDriveSearchTool` can retrieve a selection of files with some requests. 
-# 
+#
+# `GoogleDriveSearchTool` can retrieve a selection of files with some requests.
+#
 # By default, If you use a `folder_id`, all the files inside this folder can be retrieved to `Document`, if the name match the query.
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  google-api-python-client google-auth-httplib2 google-auth-oauthlib langchain-community')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  google-api-python-client google-auth-httplib2 google-auth-oauthlib langchain-community",
+)
 
 
 # You can obtain your folder and document id from the URL:
-# 
+#
 # * Folder: https://drive.google.com/drive/u/0/folders/1yucgL9WGgWZdM1TOuKkeghlPizuzMYb5 -> folder id is `"1yucgL9WGgWZdM1TOuKkeghlPizuzMYb5"`
 # * Document: https://docs.google.com/document/d/1bfaMQ18_i56204VaQDVeAFpqEijJTgvurupdEDiaUQw/edit -> document id is `"1bfaMQ18_i56204VaQDVeAFpqEijJTgvurupdEDiaUQw"`
-# 
+#
 # The special value `root` is for your personal home.
 
 # In[ ]:
@@ -58,15 +61,15 @@ folder_id = "root"
 # - application/vnd.google.colaboratory (Notebook colab)
 # - application/vnd.openxmlformats-officedocument.presentationml.presentation (PPTX)
 # - application/vnd.openxmlformats-officedocument.wordprocessingml.document (DOCX)
-# 
+#
 # It's possible to update or customize this. See the documentation of `GoogleDriveAPIWrapper`.
-# 
+#
 # But, the corresponding packages must installed.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  unstructured')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  unstructured")
 
 
 # In[ ]:
@@ -137,4 +140,3 @@ agent = initialize_agent(
 
 
 agent.run("Search in google drive, who is 'Yann LeCun' ?")
-

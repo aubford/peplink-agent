@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Exploring OpenAI V1 functionality
-# 
+#
 # On 11.06.23 OpenAI released a number of new features, and along with it bumped their Python SDK to 1.0.0. This notebook shows off the new features and how to use them with LangChain.
 
 # In[ ]:
 
 
 # need openai>=1.1.0, langchain>=0.0.335, langchain-experimental>=0.0.39
-get_ipython().system('pip install -U openai langchain langchain-experimental')
+get_ipython().system("pip install -U openai langchain langchain-experimental")
 
 
 # In[1]:
@@ -20,7 +20,7 @@ from langchain_openai import ChatOpenAI
 
 
 # ## [Vision](https://platform.openai.com/docs/guides/vision)
-# 
+#
 # OpenAI released multi-modal models, which can take a sequence of text and images as input.
 
 # In[2]:
@@ -46,12 +46,12 @@ chat.invoke(
 
 
 # ## [OpenAI assistants](https://platform.openai.com/docs/assistants/overview)
-# 
+#
 # > The Assistants API allows you to build AI assistants within your own applications. An Assistant has instructions and can leverage models, tools, and knowledge to respond to user queries. The Assistants API currently supports three types of tools: Code Interpreter, Retrieval, and Function calling
-# 
-# 
+#
+#
 # You can interact with OpenAI Assistants using OpenAI tools or custom tools. When using exclusively OpenAI tools, you can just invoke the assistant directly and get final answers. When using custom tools, you can run the assistant and tool execution loop using the built-in AgentExecutor or easily write your own executor.
-# 
+#
 # Below we show the different ways to interact with Assistants. As a simple example, let's build a math tutor that can write and run code.
 
 # ### Using only OpenAI tools
@@ -76,13 +76,13 @@ output
 
 
 # ### As a LangChain agent with arbitrary tools
-# 
+#
 # Now let's recreate this functionality using our own tools. For this example we'll use the [E2B sandbox runtime tool](https://e2b.dev/docs?ref=landing-page-get-started).
 
 # In[ ]:
 
 
-get_ipython().system('pip install e2b duckduckgo-search')
+get_ipython().system("pip install e2b duckduckgo-search")
 
 
 # In[3]:
@@ -175,10 +175,10 @@ print(next_response.return_values["output"])
 
 
 # ## [JSON mode](https://platform.openai.com/docs/guides/text-generation/json-mode)
-# 
+#
 # Constrain the model to only generate valid JSON. Note that you must include a system message with instructions to use JSON for this mode to work.
-# 
-# Only works with certain models. 
+#
+# Only works with certain models.
 
 # In[ ]:
 
@@ -209,7 +209,7 @@ json.loads(output.content)
 
 
 # ## [System fingerprint](https://platform.openai.com/docs/guides/text-generation/reproducible-outputs)
-# 
+#
 # OpenAI sometimes changes model configurations in a way that impacts outputs. Whenever this happens, the system_fingerprint associated with a generation will change.
 
 # In[ ]:
@@ -232,22 +232,22 @@ print(output.llm_output)
 
 
 # ## Breaking changes to Azure classes
-# 
+#
 # OpenAI V1 rewrote their clients and separated Azure and OpenAI clients. This has led to some changes in LangChain interfaces when using OpenAI V1.
-# 
+#
 # BREAKING CHANGES:
 # - To use Azure embeddings with OpenAI V1, you'll need to use the new `AzureOpenAIEmbeddings` instead of the existing `OpenAIEmbeddings`. `OpenAIEmbeddings` continue to work when using Azure with `openai<1`.
 # ```python
 # from langchain_openai import AzureOpenAIEmbeddings
 # ```
-# 
-# 
+#
+#
 # RECOMMENDED CHANGES:
 # - When using `AzureChatOpenAI` or `AzureOpenAI`, if passing in an Azure endpoint (eg https://example-resource.azure.openai.com/) this should be specified via the `azure_endpoint` parameter or the `AZURE_OPENAI_ENDPOINT`. We're maintaining backwards compatibility for now with specifying this via `openai_api_base`/`base_url` or env var `OPENAI_API_BASE` but this shouldn't be relied upon.
 # - When using Azure chat or embedding models, pass in API keys either via `openai_api_key` parameter or `AZURE_OPENAI_API_KEY` parameter. We're maintaining backwards compatibility for now with specifying this via `OPENAI_API_KEY` but this shouldn't be relied upon.
 
 # ## Tools
-# 
+#
 # Use tools for parallel function calling.
 
 # In[3]:
@@ -279,4 +279,3 @@ model = ChatOpenAI(model="gpt-3.5-turbo-1106").bind(
 chain = prompt | model | PydanticToolsParser(tools=[GetCurrentWeather])
 
 chain.invoke({"input": "what's the weather in NYC, LA, and SF"})
-

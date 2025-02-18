@@ -1,24 +1,26 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Cassandra 
-# 
+# # Cassandra
+#
 # >[Apache Cassandra®](https://cassandra.apache.org) is a `NoSQL`, row-oriented, highly scalable and highly available database, well suited for storing large amounts of data.
-# 
+#
 # >`Cassandra` is a good choice for storing chat message history because it is easy to scale and can handle a large number of writes.
-# 
+#
 # This notebook goes over how to use Cassandra to store chat message history.
-# 
-# 
+#
+#
 
 # ## Setting up
-# 
+#
 # To run this notebook you need either a running `Cassandra` cluster or a `DataStax Astra DB` instance running in the cloud (you can get one for free at [datastax.com](https://astra.datastax.com)). Check [cassio.org](https://cassio.org/start_here/) for more information.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  "cassio>=0.1.0 langchain-community"')
+get_ipython().run_line_magic(
+    "pip", 'install --upgrade --quiet  "cassio>=0.1.0 langchain-community"'
+)
 
 
 # ### Set up the database connection parameters and secrets
@@ -101,11 +103,7 @@ message_history.messages
 
 
 # #### Attribution statement
-# 
+#
 # > Apache Cassandra, Cassandra and Apache are either registered trademarks or trademarks of the [Apache Software Foundation](http://www.apache.org/) in the United States and/or other countries.
 
 # In[ ]:
-
-
-
-

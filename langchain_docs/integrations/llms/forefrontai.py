@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # ForefrontAI
-# 
-# 
+#
+#
 # The `Forefront` platform gives you the ability to fine-tune and use [open-source large language models](https://docs.forefront.ai/get-started/models).
-# 
+#
 # This notebook goes over how to use Langchain with [ForefrontAI](https://www.forefront.ai/).
-# 
+#
 
 # ## Imports
 
@@ -79,4 +79,3 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.run(question)
-

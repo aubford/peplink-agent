@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Llama.cpp
-# 
+#
 # >[llama.cpp python](https://github.com/abetlen/llama-cpp-python) library is a simple Python bindings for `@ggerganov`
 # >[llama.cpp](https://github.com/ggerganov/llama.cpp).
 # >
@@ -18,12 +18,12 @@
 # >   - Function Calling support
 # >   - Vision API support
 # >   - Multiple Models
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  llama-cpp-python')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  llama-cpp-python")
 
 
 # In[ ]:
@@ -54,4 +54,3 @@ query_result = llama.embed_query(text)
 
 
 doc_result = llama.embed_documents([text])
-

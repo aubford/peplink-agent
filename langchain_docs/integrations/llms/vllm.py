@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # vLLM
-# 
+#
 # [vLLM](https://vllm.readthedocs.io/en/latest/index.html) is a fast and easy-to-use library for LLM inference and serving, offering:
-# 
-# * State-of-the-art serving throughput 
+#
+# * State-of-the-art serving throughput
 # * Efficient management of attention key and value memory with PagedAttention
 # * Continuous batching of incoming requests
 # * Optimized CUDA kernels
-# 
+#
 # This notebooks goes over how to use a LLM with langchain and vLLM.
-# 
+#
 # To use, you should have the `vllm` python package installed.
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  vllm -q')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  vllm -q")
 
 
 # In[1]:
@@ -58,9 +58,9 @@ print(llm_chain.invoke(question))
 
 
 # ## Distributed Inference
-# 
-# vLLM supports distributed tensor-parallel inference and serving. 
-# 
+#
+# vLLM supports distributed tensor-parallel inference and serving.
+#
 # To run multi-GPU inference with the LLM class, set the `tensor_parallel_size` argument to the number of GPUs you want to use. For example, to run inference on 4 GPUs
 
 # In[ ]:
@@ -78,7 +78,7 @@ llm.invoke("What is the future of AI?")
 
 
 # ## Quantization
-# 
+#
 # vLLM supports `awq` quantization. To enable it, pass `quantization` to `vllm_kwargs`.
 
 # In[ ]:
@@ -93,11 +93,11 @@ llm_q = VLLM(
 
 
 # ## OpenAI-Compatible Server
-# 
+#
 # vLLM can be deployed as a server that mimics the OpenAI API protocol. This allows vLLM to be used as a drop-in replacement for applications using OpenAI API.
-# 
+#
 # This server can be queried in the same format as OpenAI API.
-# 
+#
 # ### OpenAI-Compatible Completion
 
 # In[3]:
@@ -141,4 +141,3 @@ lora_adapter = LoRARequest("lora_adapter", 1, LoRA_ADAPTER_PATH)
 print(
     llm.invoke("What are some popular Korean street foods?", lora_request=lora_adapter)
 )
-

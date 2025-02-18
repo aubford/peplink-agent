@@ -2,37 +2,37 @@
 # coding: utf-8
 
 # # How to get a RAG application to add citations
-# 
+#
 # This guide reviews methods to get a model to cite which parts of the source documents it referenced in generating its response.
-# 
+#
 # We will cover five methods:
-# 
+#
 # 1. Using tool-calling to cite document IDs;
 # 2. Using tool-calling to cite documents IDs and provide text snippets;
 # 3. Direct prompting;
 # 4. Retrieval post-processing (i.e., compressing the retrieved context to make it more relevant);
 # 5. Generation post-processing (i.e., issuing a second LLM call to annotate a generated answer with citations).
-# 
+#
 # We generally suggest using the first item of the list that works for your use-case. That is, if your model supports tool-calling, try methods 1 or 2; otherwise, or if those fail, advance down the list.
-# 
+#
 # Let's first create a simple [RAG](/docs/concepts/rag/) chain. To start we'll just retrieve from Wikipedia using the [WikipediaRetriever](https://python.langchain.com/api_reference/community/retrievers/langchain_community.retrievers.wikipedia.WikipediaRetriever.html). We will use the same [LangGraph](/docs/concepts/architecture/#langgraph) implementation from the [RAG Tutorial](/docs/tutorials/rag).
 
 # ## Setup
-# 
+#
 # First we'll need to install some dependencies:
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community wikipedia')
+get_ipython().run_line_magic("pip", "install -qU langchain-community wikipedia")
 
 
 # Let's first select a LLM:
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
-# 
+#
 
 # In[2]:
 
@@ -129,13 +129,13 @@ print(f'Answer: {result["answer"]}')
 # Check out the [LangSmith trace](https://smith.langchain.com/public/ed043789-8599-44de-b88e-ba463ea454a3/r).
 
 # ## Tool-calling
-# 
+#
 # If your LLM of choice implements a [tool-calling](/docs/concepts/tool_calling) feature, you can use it to make the model specify which of the provided documents it's referencing when generating its answer. LangChain tool-calling models implement a `.with_structured_output` method which will force generation adhering to a desired schema (see details [here](/docs/how_to/structured_output/)).
-# 
+#
 # ### Cite documents
-# 
+#
 # To cite documents using an identifier, we format the identifiers into the prompt, then use `.with_structured_output` to coerce the LLM to reference these identifiers in its output.
-# 
+#
 # First we define a schema for the output. The `.with_structured_output` supports multiple formats, including JSON schema and Pydantic. Here we will use Pydantic:
 
 # In[11]:
@@ -188,7 +188,7 @@ result.dict()
 
 
 # Now we structure the source identifiers into the prompt to replicate with our chain. We will make three changes:
-# 
+#
 # 1. Update the prompt to include source identifiers;
 # 2. Use the `structured_llm` (i.e., `llm.with_structured_output(CitedAnswer)`);
 # 3. Return the Pydantic object in the output.
@@ -246,9 +246,9 @@ print(result["context"][0])
 # LangSmith trace: https://smith.langchain.com/public/6f34d136-451d-4625-90c8-2d8decebc21a/r
 
 # ### Cite snippets
-# 
+#
 # To return text spans (perhaps in addition to source identifiers), we can use the same approach. The only change will be to build a more complex output schema, here using Pydantic, that includes a "quote" alongside a source identifier.
-# 
+#
 # *Aside: Note that if we break up our documents so that we have many documents with only a sentence or two instead of a few long documents, citing documents becomes roughly equivalent to citing snippets, and may be easier for the model because the model just needs to return an identifier for each snippet instead of the actual text. Probably worth trying both approaches and evaluating.*
 
 # In[28]:
@@ -314,7 +314,7 @@ result["answer"]
 # LangSmith trace: https://smith.langchain.com/public/e16dc72f-4261-4f25-a9a7-906238737283/r
 
 # ## Direct prompting
-# 
+#
 # Some models don't support function-calling. We can achieve similar results with direct prompting. Let's try instructing a model to generate structured XML for its output:
 
 # In[38]:
@@ -343,7 +343,7 @@ xml_prompt = ChatPromptTemplate.from_messages(
 
 
 # We now make similar small updates to our chain:
-# 
+#
 # 1. We update the formatting function to wrap the retrieved context in XML tags;
 # 2. We do not use `.with_structured_output` (e.g., because it does not exist for a model);
 # 3. We use [XMLOutputParser](https://python.langchain.com/api_reference/core/output_parsers/langchain_core.output_parsers.xml.XMLOutputParser.html) to parse the answer into a dict.
@@ -403,13 +403,13 @@ result["answer"]
 # LangSmith trace: https://smith.langchain.com/public/0c45f847-c640-4b9a-a5fa-63559e413527/r
 
 # ## Retrieval post-processing
-# 
+#
 # Another approach is to post-process our retrieved documents to compress the content, so that the source content is already minimal enough that we don't need the model to cite specific sources or spans. For example, we could break up each document into a sentence or two, embed those and keep only the most relevant ones. LangChain has some built-in components for this. Here we'll use a [RecursiveCharacterTextSplitter](https://python.langchain.com/api_reference/text_splitters/text_splitter/langchain_text_splitters.RecursiveCharacterTextSplitter.html#langchain_text_splitters.RecursiveCharacterTextSplitter), which creates chunks of a specified size by splitting on separator substrings, and an [EmbeddingsFilter](https://python.langchain.com/api_reference/langchain/retrievers/langchain.retrievers.document_compressors.embeddings_filter.EmbeddingsFilter.html#langchain.retrievers.document_compressors.embeddings_filter.EmbeddingsFilter), which keeps only the texts with the most relevant embeddings.
-# 
+#
 # This approach effectively updates our `retrieve` step to compress the documents. Let's first select an [embedding model](/docs/integrations/text_embedding/):
-# 
+#
 # import EmbeddingTabs from "@theme/EmbeddingTabs";
-# 
+#
 # <EmbeddingTabs/>
 
 # In[43]:
@@ -510,9 +510,9 @@ result["context"][0].metadata["summary"]  # original document  # original docume
 # LangSmith trace: https://smith.langchain.com/public/21b0dc15-d70a-4293-9402-9c70f9178e66/r
 
 # ## Generation post-processing
-# 
+#
 # Another approach is to post-process our model generation. In this example we'll first generate just an answer, and then we'll ask the model to annotate it's own answer with citations. The downside of this approach is of course that it is slower and more expensive, because two model calls need to be made.
-# 
+#
 # Let's apply this to our initial chain. If desired, we can implement this via a third step in our application.
 
 # In[67]:
@@ -607,7 +607,3 @@ result["annotations"]
 # LangSmith trace: https://smith.langchain.com/public/b8257417-573b-47c4-a750-74e542035f19/r
 
 # In[ ]:
-
-
-
-

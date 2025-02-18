@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # DuckDuckGo Search
-# 
+#
 # This guide shows over how to use the DuckDuckGo search component.
-# 
+#
 # ## Usage
 
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU duckduckgo-search langchain-community')
+get_ipython().run_line_magic("pip", "install -qU duckduckgo-search langchain-community")
 
 
 # In[2]:
@@ -70,5 +70,5 @@ search.invoke("Obama")
 
 
 # ## Related
-# 
+#
 # - [How to use a chat model to call tools](https://python.langchain.com/docs/how_to/tool_calling/)

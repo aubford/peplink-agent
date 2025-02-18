@@ -6,14 +6,20 @@
 # This tutorial demonstrates how to implement the Option 2 described [here](https://github.com/langchain-ai/langchain/blob/master/cookbook/Multi_modal_RAG.ipynb) with Generative API on Google Cloud.
 
 # ## Setup
-# 
+#
 # Install the required dependencies, and create an API key for your Google service.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -U --quiet langchain langchain-chroma langchain-community openai langchain-experimental')
-get_ipython().run_line_magic('pip', 'install --quiet "unstructured[all-docs]" pypdf pillow pydantic lxml pillow matplotlib chromadb tiktoken')
+get_ipython().run_line_magic(
+    "pip",
+    "install -U --quiet langchain langchain-chroma langchain-community openai langchain-experimental",
+)
+get_ipython().run_line_magic(
+    "pip",
+    'install --quiet "unstructured[all-docs]" pypdf pillow pydantic lxml pillow matplotlib chromadb tiktoken',
+)
 
 
 # ## Data loading

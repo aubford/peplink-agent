@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # LarkSuite (FeiShu)
-# 
+#
 # >[LarkSuite](https://www.larksuite.com/) is an enterprise collaboration platform developed by ByteDance.
-# 
+#
 # This notebook covers how to load data from the `LarkSuite` REST API into a format that can be ingested into LangChain, along with example usage for text summarization.
-# 
+#
 # The LarkSuite API requires an access token (tenant_access_token or user_access_token), checkout [LarkSuite open platform document](https://open.larksuite.com/document) for API details.
 
 # In[1]:
@@ -61,4 +61,3 @@ from langchain_community.llms.fake import FakeListLLM
 llm = FakeListLLM()
 chain = load_summarize_chain(llm, chain_type="map_reduce")
 chain.run(docs)
-

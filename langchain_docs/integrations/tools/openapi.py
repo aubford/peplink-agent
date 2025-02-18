@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # OpenAPI Toolkit
-# 
+#
 # We can construct agents to consume arbitrary APIs, here APIs conformant to the `OpenAPI`/`Swagger` specification.
 
 # In[ ]:
@@ -14,13 +14,13 @@ ALLOW_DANGEROUS_REQUEST = True
 
 
 # ## 1st example: hierarchical planning agent
-# 
+#
 # In this example, we'll consider an approach called hierarchical planning, common in robotics and appearing in recent works for LLMs X robotics. We'll see it's a viable approach to start working with a massive API spec AND to assist with user queries that require multiple steps against the API.
-# 
+#
 # The idea is simple: to get coherent agent behavior over long sequences behavior & to save on tokens, we'll separate concerns: a "planner" will be responsible for what endpoints to call and a "controller" will be responsible for how to call them.
-# 
+#
 # In the initial implementation, the planner is an LLM chain that has the name and a short description for each endpoint in context. The controller is an LLM agent that is instantiated with documentation for only the endpoints for a particular plan. There's a lot left to get this working very robustly :)
-# 
+#
 # ---
 
 # ### To start, let's collect some OpenAPI specs.
@@ -38,9 +38,15 @@ import yaml
 # In[2]:
 
 
-get_ipython().system('wget https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml -O openai_openapi.yaml')
-get_ipython().system('wget https://www.klarna.com/us/shopping/public/openai/v0/api-docs -O klarna_openapi.yaml')
-get_ipython().system('wget https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/spotify.com/1.0.0/openapi.yaml -O spotify_openapi.yaml')
+get_ipython().system(
+    "wget https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml -O openai_openapi.yaml"
+)
+get_ipython().system(
+    "wget https://www.klarna.com/us/shopping/public/openai/v0/api-docs -O klarna_openapi.yaml"
+)
+get_ipython().system(
+    "wget https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/spotify.com/1.0.0/openapi.yaml -O spotify_openapi.yaml"
+)
 
 
 # In[3]:
@@ -66,9 +72,9 @@ spotify_api_spec = reduce_openapi_spec(raw_spotify_api_spec)
 
 
 # ---
-# 
+#
 # We'll work with the Spotify API as one of the examples of a somewhat complex API. There's a bit of auth-related setup to do if you want to replicate this.
-# 
+#
 # - You'll have to set up an application in the Spotify developer console, documented [here](https://developer.spotify.com/documentation/general/guides/authorization/), to get credentials: `CLIENT_ID`, `CLIENT_SECRET`, and `REDIRECT_URI`.
 # - To get an access tokens (and keep them fresh), you can implement the oauth flows, or you can use `spotipy`. If you've set your Spotify creedentials as environment variables `SPOTIPY_CLIENT_ID`, `SPOTIPY_CLIENT_SECRET`, and `SPOTIPY_REDIRECT_URI`, you can use the helper functions below:
 
@@ -124,7 +130,7 @@ count_tokens(yaml.dump(raw_spotify_api_spec))
 
 
 # ### Let's see some examples!
-# 
+#
 # Starting with GPT-4. (Some robustness iterations under way for GPT-3 family.)
 
 # In[8]:
@@ -160,7 +166,7 @@ spotify_agent.invoke(user_query)
 
 
 # #### Try another API.
-# 
+#
 
 # In[23]:
 
@@ -184,9 +190,9 @@ openai_agent.invoke(user_query)
 # Takes awhile to get there!
 
 # ## 2nd example: "json explorer" agent
-# 
+#
 # Here's an agent that's not particularly practical, but neat! The agent has access to 2 toolkits. One comprises tools to interact with json: one tool to list the keys of a json object and another tool to get the value for a given key. The other toolkit comprises `requests` wrappers to send GET and POST requests. This agent consumes a lot calls to the language model, but does a surprisingly decent job.
-# 
+#
 
 # In[29]:
 
@@ -221,4 +227,3 @@ openapi_agent_executor = create_openapi_agent(
 openapi_agent_executor.run(
     "Make a post request to openai /completions. The prompt should be 'tell me a joke.'"
 )
-

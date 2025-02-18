@@ -2,26 +2,28 @@
 # coding: utf-8
 
 # # LangSmith Chat Datasets
-# 
+#
 # This notebook demonstrates an easy way to load a LangSmith chat dataset fine-tune a model on that data.
 # The process is simple and comprises 3 steps.
-# 
+#
 # 1. Create the chat dataset.
 # 2. Use the LangSmithDatasetChatLoader to load examples.
 # 3. Fine-tune your model.
-# 
+#
 # Then you can use the fine-tuned model in your LangChain app.
-# 
+#
 # Before diving in, let's install our prerequisites.
-# 
+#
 # ## Prerequisites
-# 
+#
 # Ensure you've installed langchain >= 0.0.311 and have configured your environment with your LangSmith API key.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-openai')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain langchain-openai"
+)
 
 
 # In[1]:
@@ -36,9 +38,9 @@ os.environ["LANGSMITH_API_KEY"] = "YOUR API KEY"
 
 
 # ## 1. Select a dataset
-# 
+#
 # This notebook fine-tunes a model directly on selecting which runs to fine-tune on. You will often curate these from traced runs. You can learn more about LangSmith datasets in the docs [docs](https://docs.smith.langchain.com/evaluation/concepts#datasets).
-# 
+#
 # For the sake of this tutorial, we will upload an existing dataset here that you can use.
 
 # In[2]:
@@ -136,7 +138,7 @@ while status != "succeeded":
 
 
 # ## 4. Use in LangChain
-# 
+#
 # After fine-tuning, use the resulting model ID with the ChatOpenAI model class in your LangChain app.
 
 # In[10]:

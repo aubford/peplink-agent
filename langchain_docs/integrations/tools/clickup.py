@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # ClickUp Toolkit
-# 
-# >[ClickUp](https://clickup.com/) is an all-in-one productivity platform that provides small and large teams across industries with flexible and customizable work management solutions, tools, and functions. 
-# 
+#
+# >[ClickUp](https://clickup.com/) is an all-in-one productivity platform that provides small and large teams across industries with flexible and customizable work management solutions, tools, and functions.
+#
 # >It is a cloud-based project management solution for businesses of all sizes featuring communication and collaboration tools to help achieve organizational goals.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # In[1]:
 
 
-get_ipython().run_line_magic('reload_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '2')
+get_ipython().run_line_magic("reload_ext", "autoreload")
+get_ipython().run_line_magic("autoreload", "2")
 from datetime import datetime
 
 from langchain.agents import AgentType, initialize_agent
@@ -33,7 +33,7 @@ from langchain_openai import OpenAI
 # 2. Follow [these steps](https://clickup.com/api/developer-portal/authentication/) to get your `client_id` and `client_secret`.
 #     - *Suggestion: use `https://google.com` as the redirect_uri. This is what we assume in the defaults for this toolkit.*
 # 3. Copy/paste them and run the next cell to get your `code`
-# 
+#
 
 # In[48]:
 
@@ -48,9 +48,9 @@ print(ClickupAPIWrapper.get_access_code_url(oauth_client_id, redirect_uri))
 
 
 # The url should change to something like this https://www.google.com/?code=THISISMYCODERIGHTHERE.
-# 
+#
 # Next, copy/paste the `CODE` (THISISMYCODERIGHTHERE) generated in the URL in the cell below.
-# 
+#
 
 # In[4]:
 
@@ -60,7 +60,7 @@ code = "THISISMYCODERIGHTHERE"
 
 # ### Get Access Token
 # Then, use the code below to get your `access_token`.
-# 
+#
 # *Important*: Each code is a one time code that will expire after use. The `access_token` can be used for a period of time. Make sure to copy paste the `access_token` once you get it!
 
 # In[5]:
@@ -221,4 +221,3 @@ print_and_run(
 print_and_run(
     "Figure out what user ID Rodrigo is, create a task called 'Rod's task', assign it to Rodrigo"
 )
-

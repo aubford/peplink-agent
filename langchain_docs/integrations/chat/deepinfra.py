@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # DeepInfra
-# 
+#
 # [DeepInfra](https://deepinfra.com/?utm_source=langchain) is a serverless inference as a service that provides access to a [variety of LLMs](https://deepinfra.com/models?utm_source=langchain) and [embeddings models](https://deepinfra.com/models?type=embeddings&utm_source=langchain). This notebook goes over how to use LangChain with DeepInfra for chat models.
-# 
+#
 # ## Set the Environment API Key
 # Make sure to get your API key from DeepInfra. You have to [Login](https://deepinfra.com/login?from=%2Fdash) and get a new token.
-# 
+#
 # You are given a 1 hour free of serverless GPU compute to test different models. (see [here](https://github.com/deepinfra/deepctl#deepctl))
 # You can print your token with `deepctl auth token`
 
@@ -63,9 +63,9 @@ chat.invoke(messages)
 
 
 # # Tool Calling
-# 
+#
 # DeepInfra currently supports only invoke and async invoke tool calling.
-# 
+#
 # For a complete list of models that support tool calling, please refer to our [tool calling documentation](https://deepinfra.com/docs/advanced/function_calling).
 
 # In[ ]:
@@ -122,4 +122,3 @@ async def call_ainvoke():
 # Async call
 asyncio.run(call_ainvoke())
 # [{'name': 'foo', 'args': {'something': None}, 'id': 'call_ZH7FetmgSot4LHcMU6CEb8tI'}, {'name': 'Bar', 'args': {}, 'id': 'call_2MQhDifAJVoijZEvH8PeFSVB'}]
-

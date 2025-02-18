@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # HugeGraph
-# 
+#
 # >[HugeGraph](https://hugegraph.apache.org/) is a convenient, efficient, and adaptable graph database compatible with
 # >the `Apache TinkerPop3` framework and the `Gremlin` query language.
 # >
 # >[Gremlin](https://en.wikipedia.org/wiki/Gremlin_(query_language)) is a graph traversal language and virtual machine developed by `Apache TinkerPop` of the `Apache Software Foundation`.
-# 
+#
 # This notebook shows how to use LLMs to provide a natural language interface to [HugeGraph](https://hugegraph.apache.org/cn/) database.
 
 # ## Setting up
 
 # You will need to have a running HugeGraph instance.
 # You can run a local docker container by running the executing the following script:
-# 
+#
 # ```
 # docker run \
 #     --name=graph \
@@ -22,9 +22,9 @@
 #     -p 8080:8080 \
 #     hugegraph/hugegraph
 # ```
-# 
+#
 # If we want to connect HugeGraph in the application, we need to install python sdk:
-# 
+#
 # ```
 # pip3 install hugegraph-python
 # ```
@@ -81,7 +81,7 @@ g.addEdge("ActedIn", "1:Robert De Niro", "2:The Godfather Part II", {})
 
 
 # ## Creating `HugeGraphQAChain`
-# 
+#
 # We can now create the `HugeGraph` and `HugeGraphQAChain`. To create the `HugeGraph` we simply need to pass the database object to the `HugeGraph` constructor.
 
 # In[27]:
@@ -105,7 +105,7 @@ graph = HugeGraph(
 
 
 # ## Refresh graph schema information
-# 
+#
 # If the schema of database changes, you can refresh the schema information needed to generate Gremlin statements.
 
 # In[29]:
@@ -121,7 +121,7 @@ print(graph.get_schema)
 
 
 # ## Querying the graph
-# 
+#
 # We can now use the graph Gremlin QA chain to ask question of the graph
 
 # In[31]:
@@ -137,7 +137,3 @@ chain.run("Who played in The Godfather?")
 
 
 # In[ ]:
-
-
-
-

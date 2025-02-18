@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # E2B Data Analysis
-# 
+#
 # [E2B's cloud environments](https://e2b.dev) are great runtime sandboxes for LLMs.
-# 
+#
 # E2B's Data Analysis sandbox allows for safe code execution in a sandboxed environment. This is ideal for building tools such as code interpreters, or Advanced Data Analysis like in ChatGPT.
-# 
+#
 # E2B Data Analysis sandbox allows you to:
 # - Run Python code
 # - Generate charts via matplotlib
@@ -14,20 +14,22 @@
 # - Install system packages dynamically during runtime
 # - Run shell commands
 # - Upload and download files
-# 
+#
 # We'll create a simple OpenAI agent that will use E2B's Data Analysis sandbox to perform analysis on a uploaded files using Python.
 
 # Get your OpenAI API key and [E2B API key here](https://e2b.dev/docs/getting-started/api-key) and set them as environment variables.
-# 
+#
 # You can find the full API documentation [here](https://e2b.dev/docs).
-# 
+#
 
 # You'll need to install `e2b` to get started:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain e2b langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain e2b langchain-community"
+)
 
 
 # In[ ]:
@@ -154,4 +156,3 @@ print("exit code: ", output["exit_code"])
 
 
 e2b_data_analysis_tool.close()
-

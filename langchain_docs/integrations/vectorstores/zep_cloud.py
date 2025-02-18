@@ -3,18 +3,18 @@
 
 # # Zep Cloud
 # > Recall, understand, and extract data from chat histories. Power personalized AI experiences.
-# 
+#
 # > [Zep](https://www.getzep.com) is a long-term memory service for AI Assistant apps.
 # > With Zep, you can provide AI assistants with the ability to recall past conversations, no matter how distant,
 # > while also reducing hallucinations, latency, and cost.
-# 
+#
 # > See [Zep Cloud Installation Guide](https://help.getzep.com/sdks)
-# 
+#
 # ## Usage
-# 
-# In the examples below, we're using Zep's auto-embedding feature which automatically embeds documents on the Zep server 
+#
+# In the examples below, we're using Zep's auto-embedding feature which automatically embeds documents on the Zep server
 # using low-latency embedding models.
-# 
+#
 # ## Note
 # - These examples use Zep's async interfaces. Call sync interfaces by removing the `a` prefix from the method names.
 
@@ -93,7 +93,7 @@ for d, s in docs_scores:
 
 
 # ## Search over Collection Re-ranked by MMR
-# 
+#
 # Zep offers native, hardware-accelerated MMR re-ranking of search results.
 
 # In[5]:
@@ -107,7 +107,7 @@ for d in docs:
 
 
 # # Filter by Metadata
-# 
+#
 # Use a metadata filter to narrow down results. First, load another book: "Adventures of Sherlock Holmes"
 
 # In[3]:
@@ -159,7 +159,3 @@ for d in docs:
 
 
 # In[ ]:
-
-
-
-

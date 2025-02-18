@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # BagelDB
-# 
+#
 # > [BagelDB](https://www.bageldb.ai/) (`Open Vector Database for AI`), is like GitHub for AI data.
 # It is a collaborative platform where users can create,
 # share, and manage vector datasets. It can support private projects for independent developers,
 # internal collaborations for enterprises, and public contributions for data DAOs.
-# 
+#
 # ### Installation and Setup
-# 
+#
 # ```bash
 # pip install betabageldb langchain-community
 # ```
-# 
-# 
+#
+#
 
 # ## Create VectorStore from texts
 
@@ -126,4 +126,3 @@ cluster.similarity_search_with_score("hello bagel", where={"source": "notion"})
 
 # delete the cluster
 cluster.delete_cluster()
-

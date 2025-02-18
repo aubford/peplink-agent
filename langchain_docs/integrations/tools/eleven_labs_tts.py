@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Eleven Labs Text2Speech
-# 
+#
 # This notebook shows how to interact with the `ElevenLabs API` to achieve text-to-speech capabilities.
 
 # First, you need to set up an ElevenLabs account. You can follow the instructions [here](https://docs.elevenlabs.io/welcome/introduction).
@@ -10,7 +10,9 @@
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  elevenlabs langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  elevenlabs langchain-community"
+)
 
 
 # In[ ]:
@@ -83,4 +85,3 @@ audio_file = agent.run("Tell me a joke and read it out for me.")
 
 
 tts.play(audio_file)
-

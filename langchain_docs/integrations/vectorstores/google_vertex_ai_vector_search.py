@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Google Vertex AI Vector Search
-# 
+#
 # This notebook shows how to use functionality related to the `Google Cloud Vertex AI Vector Search` vector database.
-# 
+#
 # > [Google Vertex AI Vector Search](https://cloud.google.com/vertex-ai/docs/vector-search/overview), formerly known as Vertex AI Matching Engine, provides the industry's leading high-scale low latency vector database. These vector databases are commonly referred to as vector similarity-matching or an approximate nearest neighbor (ANN) service.
-# 
+#
 # **Note**: Langchain API expects an endpoint and deployed index already created.Index creation time can take upto one hour.
-# 
-# > To see how to create an index refer to the section [Create Index and deploy it to an Endpoint](#create-index-and-deploy-it-to-an-endpoint)  
+#
+# > To see how to create an index refer to the section [Create Index and deploy it to an Endpoint](#create-index-and-deploy-it-to-an-endpoint)
 # If you already have an index deployed , skip to [Create VectorStore from texts](#create-vector-store-from-texts)
 
 # ## Create Index and deploy it to an Endpoint
@@ -38,7 +38,7 @@ DEPLOYED_INDEX_ID = "<my_matching_engine_endpoint_id>"
 
 
 # Create a bucket.
-get_ipython().system(' gsutil mb -l $REGION -p $PROJECT_ID $BUCKET_URI')
+get_ipython().system(" gsutil mb -l $REGION -p $PROJECT_ID $BUCKET_URI")
 
 
 # ### Use [VertexAIEmbeddings](https://python.langchain.com/docs/integrations/text_embedding/google_vertex_ai_palm/) as the embeddings model
@@ -62,13 +62,13 @@ aiplatform.init(project=PROJECT_ID, location=REGION, staging_bucket=BUCKET_URI)
 embedding_model = VertexAIEmbeddings(model_name="text-embedding-005")
 
 
-# ### Create an empty Index 
+# ### Create an empty Index
 
 # **Note :** While creating an index you should specify an "index_update_method" from either a "BATCH_UPDATE" or "STREAM_UPDATE"
 # > A batch index is for when you want to update your index in a batch, with data which has been stored over a set amount of time, like systems which are processed weekly or monthly. A streaming index is when you want index data to be updated as new data is added to your datastore, for instance, if you have a bookstore and want to show new inventory online as soon as possible. Which type you choose is important, since setup and requirements are different.
-# 
+#
 # Refer [Official Documentation](https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index#create-index-batch) for more details on configuring indexes
-# 
+#
 
 # In[ ]:
 
@@ -163,7 +163,7 @@ vector_store = VectorSearchVectorStore.from_components(
 vector_store.add_texts(texts=texts)
 
 
-# ### OPTIONAL : You can also create vectore and store chunks in a Datastore 
+# ### OPTIONAL : You can also create vectore and store chunks in a Datastore
 
 # In[ ]:
 
@@ -397,7 +397,7 @@ print(f"{response['source_documents']}")
 # In[ ]:
 
 
-get_ipython().system('pip install pypdf')
+get_ipython().system("pip install pypdf")
 
 
 # In[ ]:
@@ -479,7 +479,7 @@ vector_store = VectorSearchVectorStore.from_components(
 
 # Vector Search supports hybrid search, a popular architecture pattern in information retrieval (IR) that combines both semantic search and keyword search (also called token-based search). With hybrid search, developers can take advantage of the best of the two approaches, effectively providing higher search quality.
 # Click [here](https://cloud.google.com/vertex-ai/docs/vector-search/about-hybrid-search) to learn more.
-# 
+#
 # In order to use hybrid search, we need to fit a sparse embedding vectorizer and handle the embeddings outside of the Vector Search integration.
 # An example of sparse embedding vectorizer is sklearn TfidfVectorizer but other techniques can be used, for instance BM25.
 
@@ -571,4 +571,3 @@ vector_store.similarity_search_by_vector_with_score(
     k=5,
     rrf_ranking_alpha=0.7,  # 0.7 weight to dense and 0.3 weight to sparse
 )
-

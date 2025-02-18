@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Concurrent Loader
-# 
+#
 # Works just like the GenericLoader but concurrently for those who choose to optimize their workflow.
-# 
+#
 
 # In[3]:
 
@@ -31,7 +31,3 @@ len(files)
 
 
 # In[ ]:
-
-
-
-

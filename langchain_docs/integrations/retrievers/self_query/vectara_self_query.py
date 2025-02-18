@@ -1,47 +1,47 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Vectara self-querying 
-# 
+# # Vectara self-querying
+#
 # [Vectara](https://vectara.com/) is the trusted AI Assistant and Agent platform which focuses on enterprise readiness for mission-critical applications.
-# 
+#
 # Vectara serverless RAG-as-a-service provides all the components of RAG behind an easy-to-use API, including:
 # 1. A way to extract text from files (PDF, PPT, DOCX, etc)
 # 2. ML-based chunking that provides state of the art performance.
 # 3. The [Boomerang](https://vectara.com/how-boomerang-takes-retrieval-augmented-generation-to-the-next-level-via-grounded-generation/) embeddings model.
 # 4. Its own internal vector database where text chunks and embedding vectors are stored.
-# 5. A query service that automatically encodes the query into embedding, and retrieves the most relevant text segments, including support for [Hybrid Search](https://docs.vectara.com/docs/api-reference/search-apis/lexical-matching) as well as multiple reranking options such as the [multi-lingual relevance reranker](https://www.vectara.com/blog/deep-dive-into-vectara-multilingual-reranker-v1-state-of-the-art-reranker-across-100-languages), [MMR](https://vectara.com/get-diverse-results-and-comprehensive-summaries-with-vectaras-mmr-reranker/), [UDF reranker](https://www.vectara.com/blog/rag-with-user-defined-functions-based-reranking). 
+# 5. A query service that automatically encodes the query into embedding, and retrieves the most relevant text segments, including support for [Hybrid Search](https://docs.vectara.com/docs/api-reference/search-apis/lexical-matching) as well as multiple reranking options such as the [multi-lingual relevance reranker](https://www.vectara.com/blog/deep-dive-into-vectara-multilingual-reranker-v1-state-of-the-art-reranker-across-100-languages), [MMR](https://vectara.com/get-diverse-results-and-comprehensive-summaries-with-vectaras-mmr-reranker/), [UDF reranker](https://www.vectara.com/blog/rag-with-user-defined-functions-based-reranking).
 # 6. An LLM to for creating a [generative summary](https://docs.vectara.com/docs/learn/grounded-generation/grounded-generation-overview), based on the retrieved documents (context), including citations.
-# 
+#
 # See the [Vectara API documentation](https://docs.vectara.com/docs/) for more information on how to use the API.
-# 
+#
 # This notebook shows how to use `SelfQueryRetriever` with Vectara.
 
 # # Getting Started
-# 
+#
 # To get started, use the following steps:
 # 1. If you don't already have one, [Sign up](https://www.vectara.com/integrations/langchain) for your free Vectara trial. Once you have completed your sign up you will have a Vectara customer ID. You can find your customer ID by clicking on your name, on the top-right of the Vectara console window.
 # 2. Within your account you can create one or more corpora. Each corpus represents an area that stores text data upon ingest from input documents. To create a corpus, use the **"Create Corpus"** button. You then provide a name to your corpus as well as a description. Optionally you can define filtering attributes and apply some advanced options. If you click on your created corpus, you can see its name and corpus ID right on the top.
-# 3. Next you'll need to create API keys to access the corpus. Click on the **"Access Control"** tab in the corpus view and then the **"Create API Key"** button. Give your key a name, and choose whether you want query-only or query+index for your key. Click "Create" and you now have an active API key. Keep this key confidential. 
-# 
+# 3. Next you'll need to create API keys to access the corpus. Click on the **"Access Control"** tab in the corpus view and then the **"Create API Key"** button. Give your key a name, and choose whether you want query-only or query+index for your key. Click "Create" and you now have an active API key. Keep this key confidential.
+#
 # To use LangChain with Vectara, you'll need to have these three values: `customer ID`, `corpus ID` and `api_key`.
 # You can provide those to LangChain in two ways:
-# 
+#
 # 1. Include in your environment these three variables: `VECTARA_CUSTOMER_ID`, `VECTARA_CORPUS_ID` and `VECTARA_API_KEY`.
-# 
+#
 #    For example, you can set these variables using os.environ and getpass as follows:
-# 
+#
 # ```python
 # import os
 # import getpass
-# 
+#
 # os.environ["VECTARA_CUSTOMER_ID"] = getpass.getpass("Vectara Customer ID:")
 # os.environ["VECTARA_CORPUS_ID"] = getpass.getpass("Vectara Corpus ID:")
 # os.environ["VECTARA_API_KEY"] = getpass.getpass("Vectara API Key:")
 # ```
-# 
+#
 # 2. Add them to the `Vectara` vectorstore constructor:
-# 
+#
 # ```python
 # vectara = Vectara(
 #                 vectara_customer_id=vectara_customer_id,
@@ -50,13 +50,13 @@
 #             )
 # ```
 # In this notebook we assume they are provided in the environment.
-# 
-# **Notes:** The self-query retriever requires you to have `lark` installed (`pip install lark`). 
+#
+# **Notes:** The self-query retriever requires you to have `lark` installed (`pip install lark`).
 
 # ## Connecting to Vectara from LangChain
-# 
+#
 # In this example, we assume that you've created an account and a corpus, and added your `VECTARA_CUSTOMER_ID`, `VECTARA_CORPUS_ID` and `VECTARA_API_KEY` (created with permissions for both indexing and query) as environment variables.
-# 
+#
 # We further assume the corpus has 4 fields defined as filterable metadata attributes: `year`, `director`, `rating`, and `genre`
 
 # In[1]:
@@ -77,7 +77,7 @@ from langchain_openai.chat_models import ChatOpenAI
 
 
 # ## Dataset
-# 
+#
 # We first define an example dataset of movie, and upload those to the corpus, along with the metadata:
 
 # In[2]:
@@ -122,7 +122,7 @@ for doc in docs:
 
 # ## Creating the self-querying retriever
 # Now we can instantiate our retriever. To do this we'll need to provide some information upfront about the metadata fields that our documents support and a short description of the document contents.
-# 
+#
 # We then provide an llm (in this case OpenAI) and the `vectara` vectorstore as arguments:
 
 # In[3]:
@@ -196,9 +196,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[9]:
@@ -214,7 +214,7 @@ retriever = SelfQueryRetriever.from_llm(
 )
 
 
-# This is cool, we can include the number of results we would like to see in the query and the self retriever would correctly understand it. For example, let's look for 
+# This is cool, we can include the number of results we would like to see in the query and the self retriever would correctly understand it. For example, let's look for
 
 # In[10]:
 
@@ -224,7 +224,3 @@ retriever.invoke("what are two movies with a rating above 8.5")
 
 
 # In[ ]:
-
-
-
-

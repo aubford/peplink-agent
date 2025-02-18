@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # SageMaker
-# 
+#
 # Let's load the `SageMaker Endpoints Embeddings` class. The class can be used if you host, e.g. your own Hugging Face model on SageMaker.
-# 
-# For instructions on how to do this, please see [here](https://www.philschmid.de/custom-inference-huggingface-sagemaker). 
-# 
+#
+# For instructions on how to do this, please see [here](https://www.philschmid.de/custom-inference-huggingface-sagemaker).
+#
 # **Note**: In order to handle batched requests, you will need to adjust the return line in the `predict_fn()` function within the custom `inference.py` script:
-# 
+#
 # Change from
-# 
+#
 # `return {"vectors": sentence_embeddings[0].tolist()}`
-# 
+#
 # to:
-# 
+#
 # `return {"vectors": sentence_embeddings.tolist()}`.
 
 # In[ ]:
 
 
-get_ipython().system('pip3 install langchain boto3')
+get_ipython().system("pip3 install langchain boto3")
 
 
 # In[3]:
@@ -108,7 +108,3 @@ doc_results
 
 
 # In[ ]:
-
-
-
-

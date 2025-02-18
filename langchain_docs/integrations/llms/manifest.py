@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Manifest
-# 
+#
 # This notebook goes over how to use Manifest and LangChain.
 
 # For more detailed information on `manifest`, and how to use it with local huggingface models like in this example, see https://github.com/HazyResearch/manifest
-# 
+#
 # Another example of [using Manifest with Langchain](https://github.com/HazyResearch/manifest/blob/main/examples/langchain_chatgpt.html).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  manifest-ml')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  manifest-ml")
 
 
 # In[2]:
@@ -102,4 +102,3 @@ model_lab = ModelLaboratory(llms)
 
 
 model_lab.compare("What color is a flamingo?")
-

@@ -2,15 +2,17 @@
 # coding: utf-8
 
 # # Image captions
-# 
+#
 # By default, the loader utilizes the pre-trained [Salesforce BLIP image captioning model](https://huggingface.co/Salesforce/blip-image-captioning-base).
-# 
+#
 # This notebook shows how to use the `ImageCaptionLoader` to generate a queryable index of image captions.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU transformers langchain_openai langchain_chroma')
+get_ipython().run_line_magic(
+    "pip", "install -qU transformers langchain_openai langchain_chroma"
+)
 
 import getpass
 import os
@@ -110,4 +112,3 @@ print(response["answer"])
 response = rag_chain.invoke({"input": "What kind of images are there?"})
 
 print(response["answer"])
-

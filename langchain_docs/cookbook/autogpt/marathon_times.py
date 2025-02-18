@@ -2,8 +2,8 @@
 # coding: utf-8
 
 # ## AutoGPT example finding Winning Marathon Times
-# 
-# * Implementation of https://github.com/Significant-Gravitas/Auto-GPT 
+#
+# * Implementation of https://github.com/Significant-Gravitas/Auto-GPT
 # * With LangChain primitives (LLMs, PromptTemplates, VectorStores, Embeddings, Tools)
 
 # In[1]:
@@ -40,7 +40,7 @@ llm = ChatOpenAI(model="gpt-4", temperature=1.0)
 
 
 # ### Set up tools
-# 
+#
 # * We'll set up an AutoGPT with a `search` tool, and `write-file` tool, and a `read-file` tool, a web browsing tool, and a tool to interact with a CSV file via a python REPL
 
 # Define any other `tools` you want to use below:
@@ -146,7 +146,7 @@ def browse_web_page(url: str) -> str:
 
 
 # **Q&A Over a webpage**
-# 
+#
 # Help the model ask more directed questions of web pages to avoid cluttering its memory
 
 # In[7]:
@@ -213,7 +213,7 @@ query_website_tool = WebpageQATool(qa_chain=load_qa_with_sources_chain(llm))
 
 
 # ### Set up memory
-# 
+#
 # * The memory here is used for the agents intermediate steps
 
 # In[9]:
@@ -232,7 +232,7 @@ vectorstore = FAISS(embeddings_model.embed_query, index, InMemoryDocstore({}), {
 
 
 # ### Setup model and AutoGPT
-# 
+#
 # `Model set-up`
 
 # In[10]:
@@ -270,10 +270,10 @@ agent = AutoGPT.from_llm_and_tools(
 
 
 # ### AutoGPT for Querying the Web
-#  
-#   
+#
+#
 # I've spent a lot of time over the years crawling data sources and cleaning data. Let's see if AutoGPT can help with this!
-# 
+#
 # Here is the prompt for looking up recent boston marathon times and converting them to tabular form.
 
 # In[13]:
@@ -287,7 +287,3 @@ agent.run(
 
 
 # In[ ]:
-
-
-
-

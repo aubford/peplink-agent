@@ -3,14 +3,14 @@
 
 # # **NeuralDB**
 # NeuralDB is a CPU-friendly and fine-tunable retrieval engine developed by ThirdAI.
-# 
+#
 # ### **Initialization**
 # There are two initialization methods:
 # - From Scratch: Basic model
 # - From Checkpoint: Load a model that was previously saved
-# 
+#
 # For all of the following initialization methods, the `thirdai_key` parameter can be ommitted if the `THIRDAI_KEY` environment variable is set.
-# 
+#
 # ThirdAI API keys can be obtained at https://www.thirdai.com/try-bolt/
 
 # In[ ]:
@@ -98,4 +98,3 @@ retriever.upvote_batch(
         ("query 2", 20),
     ]
 )
-

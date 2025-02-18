@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Lantern
-# 
+#
 # >[Lantern](https://github.com/lanterndata/lantern) is an open-source vector similarity search for `Postgres`
-# 
+#
 # It supports:
 # - Exact and approximate nearest neighbor search
 # - L2 squared distance, hamming distance, and cosine distance
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # This notebook shows how to use the Postgres vector database (`Lantern`).
 
 # See the [installation instruction](https://github.com/lanterndata/lantern#-quick-install).
@@ -142,7 +142,7 @@ for doc, score in docs_with_score:
 
 
 # ## Working with vectorstore
-# 
+#
 # Above, we created a vectorstore from scratch. However, often times we want to work with an existing vectorstore.
 # In order to do that, we can initialize it directly.
 
@@ -184,8 +184,8 @@ docs_with_score[1]
 
 
 # ### Overriding a vectorstore
-# 
-# If you have an existing collection, you override it by doing `from_documents` and setting `pre_delete_collection` = True 
+#
+# If you have an existing collection, you override it by doing `from_documents` and setting `pre_delete_collection` = True
 # This will delete the collection before re-populating it
 
 # In[20]:
@@ -227,7 +227,3 @@ print(retriever)
 
 
 # In[ ]:
-
-
-
-

@@ -4,7 +4,7 @@
 # # PredictionGuard
 
 # >[Prediction Guard](https://predictionguard.com) is a secure, scalable GenAI platform that safeguards sensitive data, prevents common AI malfunctions, and runs on affordable hardware.
-# 
+#
 
 # ## Overview
 
@@ -31,7 +31,7 @@ if "PREDICTIONGUARD_API_KEY" not in os.environ:
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-predictionguard')
+get_ipython().run_line_magic("pip", "install -qU langchain-predictionguard")
 
 
 # ## Instantiation

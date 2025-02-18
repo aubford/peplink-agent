@@ -2,25 +2,28 @@
 # coding: utf-8
 
 # # How to retrieve using multiple vectors per document
-# 
+#
 # It can often be useful to store multiple [vectors](/docs/concepts/vectorstores/) per document. There are multiple use cases where this is beneficial. For example, we can [embed](/docs/concepts/embedding_models/) multiple chunks of a document and associate those embeddings with the parent document, allowing [retriever](/docs/concepts/retrievers/) hits on the chunks to return the larger document.
-# 
+#
 # LangChain implements a base [MultiVectorRetriever](https://python.langchain.com/api_reference/langchain/retrievers/langchain.retrievers.multi_vector.MultiVectorRetriever.html), which simplifies this process. Much of the complexity lies in how to create the multiple vectors per document. This notebook covers some of the common ways to create those vectors and use the `MultiVectorRetriever`.
-# 
+#
 # The methods to create multiple vectors per document include:
-# 
+#
 # - Smaller chunks: split a document into smaller chunks, and embed those (this is [ParentDocumentRetriever](https://python.langchain.com/api_reference/langchain/retrievers/langchain.retrievers.parent_document_retriever.ParentDocumentRetriever.html)).
 # - Summary: create a summary for each document, embed that along with (or instead of) the document.
 # - Hypothetical questions: create hypothetical questions that each document would be appropriate to answer, embed those along with (or instead of) the document.
-# 
+#
 # Note that this also enables another method of adding embeddings - manually. This is useful because you can explicitly add questions or queries that should lead to a document being recovered, giving you more control.
-# 
+#
 # Below we walk through an example. First we instantiate some documents. We will index them in an (in-memory) [Chroma](/docs/integrations/providers/chroma/) vector store using [OpenAI](https://python.langchain.com/docs/integrations/text_embedding/openai/) embeddings, but any LangChain vector store or embeddings model will suffice.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-chroma langchain langchain-openai > /dev/null')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  langchain-chroma langchain langchain-openai > /dev/null",
+)
 
 
 # In[1]:
@@ -49,9 +52,9 @@ vectorstore = Chroma(
 
 
 # ## Smaller chunks
-# 
+#
 # Often times it can be useful to retrieve larger chunks of information, but embed smaller chunks. This allows for embeddings to capture the semantic meaning as closely as possible, but for as much context as possible to be passed downstream. Note that this is what the [ParentDocumentRetriever](https://python.langchain.com/api_reference/langchain/retrievers/langchain.retrievers.parent_document_retriever.ParentDocumentRetriever.html) does. Here we show what is going on under the hood.
-# 
+#
 # We will make a distinction between the vector store, which indexes embeddings of the (sub) documents, and the document store, which houses the "parent" documents and associates them with an identifier.
 
 # In[2]:
@@ -130,15 +133,15 @@ len(retriever.invoke("justice breyer")[0].page_content)
 
 
 # ## Associating summaries with a document for retrieval
-# 
+#
 # A summary may be able to distill more accurately what a chunk is about, leading to better retrieval. Here we show how to create summaries, and then embed those.
-# 
+#
 # We construct a simple [chain](/docs/how_to/sequence) that will receive an input [Document](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html) object and generate a summary using a LLM.
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
-# 
+#
 
 # In[8]:
 
@@ -233,9 +236,9 @@ len(retrieved_docs[0].page_content)
 
 
 # ## Hypothetical Queries
-# 
+#
 # An LLM can also be used to generate a list of hypothetical questions that could be asked of a particular document, which might bear close semantic similarity to relevant queries in a [RAG](/docs/tutorials/rag) application. These questions can then be embedded and associated with the documents to improve retrieval.
-# 
+#
 # Below, we use the [with_structured_output](/docs/how_to/structured_output/) method to structure the LLM output into a list of strings.
 
 # In[16]:
@@ -327,4 +330,3 @@ sub_docs
 
 retrieved_docs = retriever.invoke("justice breyer")
 len(retrieved_docs[0].page_content)
-

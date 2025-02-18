@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Twitter (via Apify)
-# 
-# This notebook shows how to load chat messages from Twitter to fine-tune on. We do this by utilizing Apify. 
-# 
+#
+# This notebook shows how to load chat messages from Twitter to fine-tune on. We do this by utilizing Apify.
+#
 # First, use Apify to export tweets. An example
 
 # In[1]:
@@ -34,4 +34,3 @@ messages = [AIMessage(content=t) for t in tweets]
 # TODO: we could try to extract the subject from the tweets, and put that in the system message.
 system_message = {"role": "system", "content": "write a tweet"}
 data = [[system_message, convert_message_to_dict(m)] for m in messages]
-

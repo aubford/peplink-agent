@@ -2,36 +2,36 @@
 # coding: utf-8
 
 # # How to stream events from a tool
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
 # - [LangChain Tools](/docs/concepts/tools)
 # - [Custom tools](/docs/how_to/custom_tools)
 # - [Using stream events](/docs/how_to/streaming/#using-stream-events)
 # - [Accessing RunnableConfig within a custom tool](/docs/how_to/tool_configure/)
-# 
+#
 # :::
-# 
+#
 # If you have [tools](/docs/concepts/tools/) that call [chat models](/docs/concepts/chat_models/), [retrievers](/docs/concepts/retrievers/), or other [runnables](/docs/concepts/runnables/), you may want to access internal events from those runnables or configure them with additional properties. This guide shows you how to manually pass parameters properly so that you can do this using the `astream_events()` method.
-# 
+#
 # :::caution Compatibility
-# 
+#
 # LangChain cannot automatically propagate configuration, including callbacks necessary for `astream_events()`, to child runnables if you are running `async` code in `python&lt;=3.10`. This is a common reason why you may fail to see events being emitted from custom runnables or tools.
-# 
+#
 # If you are running python&lt;=3.10, you will need to manually propagate the `RunnableConfig` object to the child runnable in async environments. For an example of how to manually propagate the config, see the implementation of the `bar` RunnableLambda below.
-# 
+#
 # If you are running python>=3.11, the `RunnableConfig` will automatically propagate to child runnables in async environment. However, it is still a good idea to propagate the `RunnableConfig` manually if your code may run in older Python versions.
-# 
+#
 # This guide also requires `langchain-core>=0.2.16`.
 # :::
-# 
+#
 # Say you have a custom tool that calls a chain that condenses its input by prompting a chat model to return only 10 words, then reversing the output. First, define it in a naive way:
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="model" />
-# 
+#
 
 # In[1]:
 
@@ -110,7 +110,7 @@ async for event in stream:
 
 
 # You'll notice (unless you're running through this guide in `python>=3.11`) that there are no chat model events emitted from the child run!
-# 
+#
 # This is because the example above does not pass the tool's config object into the internal chain. To fix this, redefine your tool to take a special parameter typed as `RunnableConfig` (see [this guide](/docs/how_to/tool_configure) for more details). You'll also need to pass that parameter through into the internal chain when executing it:
 
 # In[7]:
@@ -152,7 +152,7 @@ async for event in stream:
 
 
 # Awesome! This time there's an event emitted.
-# 
+#
 # For streaming, `astream_events()` automatically calls internal runnables in a chain with streaming enabled if possible, so if you wanted to a stream of tokens as they are generated from the chat model, you could simply filter to look for `on_chat_model_stream` events with no other changes:
 
 # In[9]:
@@ -168,14 +168,14 @@ async for event in stream:
 
 
 # ## Next steps
-# 
+#
 # You've now seen how to stream events from within a tool. Next, check out the following guides for more on using tools:
-# 
+#
 # - Pass [runtime values to tools](/docs/how_to/tool_runtime)
 # - Pass [tool results back to a model](/docs/how_to/tool_results_pass_to_model)
 # - [Dispatch custom callback events](/docs/how_to/callbacks_custom_events)
-# 
+#
 # You can also check out some more specific uses of tool calling:
-# 
+#
 # - Building [tool-using chains and agents](/docs/how_to#tools)
 # - Getting [structured outputs](/docs/how_to/structured_output/) from models

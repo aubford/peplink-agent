@@ -2,16 +2,18 @@
 # coding: utf-8
 
 # # Google BigQuery
-# 
+#
 # >[Google BigQuery](https://cloud.google.com/bigquery) is a serverless and cost-effective enterprise data warehouse that works across clouds and scales with your data.
 # `BigQuery` is a part of the `Google Cloud Platform`.
-# 
+#
 # Load a `BigQuery` query with one document per row.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-google-community[bigquery]')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet langchain-google-community[bigquery]"
+)
 
 
 # In[3]:
@@ -118,4 +120,3 @@ data = loader.load()
 
 
 print(data)
-

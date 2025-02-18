@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Copy Paste
-# 
+#
 # This notebook covers how to load a document object from something you just want to copy and paste. In this case, you don't even need to use a DocumentLoader, but rather can just construct the Document directly.
 
 # In[1]:
@@ -39,7 +39,3 @@ doc = Document(page_content=text, metadata=metadata)
 
 
 # In[ ]:
-
-
-
-

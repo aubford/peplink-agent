@@ -2,20 +2,22 @@
 # coding: utf-8
 
 # # Vald
-# 
+#
 # > [Vald](https://github.com/vdaas/vald) is a highly scalable distributed fast approximate nearest neighbor (ANN) dense vector search engine.
-# 
+#
 # This notebook shows how to use functionality related to the `Vald` database.
-# 
+#
 # To run this notebook you need a running Vald cluster.
 # Check [Get Started](https://github.com/vdaas/vald#get-started) for more information.
-# 
+#
 # See the [installation instructions](https://github.com/vdaas/vald-client-python#install).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  vald-client-python langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  vald-client-python langchain-community"
+)
 
 
 # ## Basic Example
@@ -84,9 +86,9 @@ db.max_marginal_relevance_search(query, k=2, fetch_k=10)
 
 # ## Example of using secure connection
 # In order to run this notebook, it is necessary to run a Vald cluster with secure connection.
-# 
+#
 # Here is an example of a Vald cluster with the following configuration using [Athenz](https://github.com/AthenZ/athenz) authentication.
-# 
+#
 # ingress(TLS) -> [authorization-proxy](https://github.com/AthenZ/authorization-proxy)(Check athenz-role-auth in grpc metadata) -> vald-lb-gateway
 
 # In[ ]:
@@ -173,4 +175,3 @@ retriever.invoke(query, grpc_metadata=metadata)
 
 
 db.max_marginal_relevance_search(query, k=2, fetch_k=10, grpc_metadata=metadata)
-

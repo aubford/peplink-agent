@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # Wikibase Agent
-# 
+#
 # This notebook demonstrates a very simple wikibase agent that uses sparql generation. Although this code is intended to work against any
 # wikibase instance, we use http://wikidata.org for testing.
-# 
+#
 # If you are interested in wikibases and sparql, please consider helping to improve this agent. Look [here](https://github.com/donaldziff/langchain-wikibase) for more details and open questions.
-# 
+#
 
 # ## Preliminaries
 
 # ### API keys and other secrets
-# 
-# We use an `.ini` file, like this: 
+#
+# We use an `.ini` file, like this:
 # ```
 # [OPENAI]
 # OPENAI_API_KEY=xyzzy
@@ -31,7 +31,7 @@ config.read("./secrets.ini")
 
 
 # ### OpenAI API Key
-# 
+#
 # An OpenAI API key is required unless you modify the code below to use another LLM provider.
 
 # In[2]:
@@ -44,7 +44,7 @@ os.environ.update({"OPENAI_API_KEY": openai_api_key})
 
 
 # ### Wikidata user-agent header
-# 
+#
 # Wikidata policy requires a user-agent header. See https://meta.wikimedia.org/wiki/User-Agent_policy. However, at present this policy is not strictly enforced.
 
 # In[3]:
@@ -68,14 +68,14 @@ wikidata_user_agent_header = (
 
 
 # # Tools
-# 
+#
 # Three tools are provided for this simple agent:
 # * `ItemLookup`: for finding the q-number of an item
 # * `PropertyLookup`: for finding the p-number of a property
 # * `SparqlQueryRunner`: for running a sparql query
 
 # ## Item and Property lookup
-# 
+#
 # Item and Property lookup are implemented in a single method, using an elastic search endpoint. Not all wikibase instances have it, but wikidata does, and that's where we'll start.
 
 # In[5]:
@@ -157,7 +157,7 @@ print(vocab_lookup("instance of", entity_type="property"))
 print(vocab_lookup("Ceci n'est pas un q-item"))
 
 
-# ## Sparql runner 
+# ## Sparql runner
 
 # This tool runs sparql - by default, wikidata is used.
 
@@ -322,7 +322,7 @@ prompt = CustomPromptTemplate(
 )
 
 
-# ## Output parser 
+# ## Output parser
 # This is unchanged from langchain docs
 
 # In[16]:
@@ -420,7 +420,3 @@ agent_executor.run(
 
 
 # In[ ]:
-
-
-
-

@@ -2,29 +2,29 @@
 # coding: utf-8
 
 # # ChatHuggingFace
-# 
+#
 # This will help you getting started with `langchain_huggingface` [chat models](/docs/concepts/chat_models). For detailed documentation of all `ChatHuggingFace` features and configurations head to the [API reference](https://python.langchain.com/api_reference/huggingface/chat_models/langchain_huggingface.chat_models.huggingface.ChatHuggingFace.html). For a list of models supported by Hugging Face check out [this page](https://huggingface.co/models).
-# 
+#
 # ## Overview
 # ### Integration details
-# 
+#
 # ### Integration details
-# 
+#
 # | Class | Package | Local | Serializable | JS support | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
 # | [ChatHuggingFace](https://python.langchain.com/api_reference/huggingface/chat_models/langchain_huggingface.chat_models.huggingface.ChatHuggingFace.html) | [langchain-huggingface](https://python.langchain.com/api_reference/huggingface/index.html) | ✅ | beta | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_huggingface?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_huggingface?style=flat-square&label=%20) |
-# 
+#
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ | 
-# 
+# | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+#
 # ## Setup
-# 
+#
 # To access Hugging Face models you'll need to create a Hugging Face account, get an API key, and install the `langchain-huggingface` integration package.
-# 
+#
 # ### Credentials
-# 
+#
 # Generate a [Hugging Face Access Token](https://huggingface.co/docs/hub/security-tokens) and store it as an environment variable: `HUGGINGFACEHUB_API_TOKEN`.
 
 # In[ ]:
@@ -38,22 +38,22 @@ if not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
 
 
 # ### Installation
-# 
+#
 # | Class | Package | Local | Serializable | JS support | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
 # | [ChatHuggingFace](https://python.langchain.com/api_reference/huggingface/chat_models/langchain_huggingface.chat_models.huggingface.ChatHuggingFace.html) | [langchain_huggingface](https://python.langchain.com/api_reference/huggingface/index.html) | ✅ | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_huggingface?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_huggingface?style=flat-square&label=%20) |
-# 
+#
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 
-# 
+# | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+#
 # ## Setup
-# 
+#
 # To access `langchain_huggingface` models you'll need to create a/an `Hugging Face` account, get an API key, and install the `langchain_huggingface` integration package.
-# 
+#
 # ### Credentials
-# 
+#
 # You'll need to have a [Hugging Face Access Token](https://huggingface.co/docs/hub/security-tokens) saved as an environment variable: `HUGGINGFACEHUB_API_TOKEN`.
 
 # In[1]:
@@ -70,11 +70,14 @@ os.environ["HUGGINGFACEHUB_API_TOKEN"] = getpass.getpass(
 # In[5]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-huggingface text-generation transformers google-search-results numexpr langchainhub sentencepiece jinja2 bitsandbytes accelerate')
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  langchain-huggingface text-generation transformers google-search-results numexpr langchainhub sentencepiece jinja2 bitsandbytes accelerate",
+)
 
 
 # ## Instantiation
-# 
+#
 # You can instantiate a `ChatHuggingFace` model in two different ways, either from a `HuggingFaceEndpoint` or from a `HuggingFacePipeline`.
 
 # ### `HuggingFaceEndpoint`
@@ -116,7 +119,7 @@ chat_model = ChatHuggingFace(llm=llm)
 
 
 # ### Instatiating with Quantization
-# 
+#
 # To run a quantized version of your model, you can specify a `bitsandbytes` quantization config as follows:
 
 # In[6]:
@@ -179,9 +182,9 @@ print(ai_msg.content)
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all `ChatHuggingFace` features and configurations head to the API reference: https://python.langchain.com/api_reference/huggingface/chat_models/langchain_huggingface.chat_models.huggingface.ChatHuggingFace.html
 
 # ## API reference
-# 
+#
 # For detailed documentation of all ChatHuggingFace features and configurations head to the API reference: https://python.langchain.com/api_reference/huggingface/chat_models/langchain_huggingface.chat_models.huggingface.ChatHuggingFace.html

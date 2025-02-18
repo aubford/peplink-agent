@@ -2,50 +2,52 @@
 # coding: utf-8
 
 # ## Docugami RAG over XML Knowledge Graphs (KG-RAG)
-# 
-# Many documents contain a mixture of content types, including text and tables. 
-# 
-# Semi-structured data can be challenging for conventional RAG for a few reasons since semantics may be lost by text-only chunking techniques, e.g.: 
-# 
+#
+# Many documents contain a mixture of content types, including text and tables.
+#
+# Semi-structured data can be challenging for conventional RAG for a few reasons since semantics may be lost by text-only chunking techniques, e.g.:
+#
 # * Text splitting may break up tables, corrupting the data in retrieval
-# * Embedding tables may pose challenges for semantic similarity search 
-# 
+# * Embedding tables may pose challenges for semantic similarity search
+#
 # Docugami deconstructs documents into XML Knowledge Graphs consisting of hierarchical semantic chunks using the XML data model. This cookbook shows how to perform RAG using XML Knowledge Graphs as input (**KG-RAG**):
-# 
+#
 # * We will use [Docugami](http://docugami.com/) to segment out text and table chunks from documents (PDF \[scanned or digital\], DOC or DOCX) including semantic XML markup in the chunks.
 # * We will use the [multi-vector retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector) to store raw tables and text (including semantic XML markup) along with table summaries better suited for retrieval.
 # * We will use [LCEL](https://python.langchain.com/docs/expression_language/) to implement the chains used.
-# 
+#
 # The overall flow is here:
-# 
+#
 # ![image.png](attachment:image.png)
-# 
+#
 # ## Packages
 
 # In[16]:
 
 
-get_ipython().system(' pip install langchain docugami==0.0.8 dgml-utils==0.3.0 pydantic langchainhub langchain-chroma hnswlib --upgrade --quiet')
+get_ipython().system(
+    " pip install langchain docugami==0.0.8 dgml-utils==0.3.0 pydantic langchainhub langchain-chroma hnswlib --upgrade --quiet"
+)
 
 
-# Docugami processes documents in the cloud, so you don't need to install any additional local dependencies. 
+# Docugami processes documents in the cloud, so you don't need to install any additional local dependencies.
 
 # ## Data Loading
-# 
+#
 # Let's use Docugami to process some documents. Here's what you need to get started:
-# 
+#
 # 1. Create a [Docugami workspace](http://www.docugami.com) (free trials available)
 # 1. Create an access token via the Developer Playground for your workspace. [Detailed instructions](https://help.docugami.com/home/docugami-api).
 # 1. Add your documents (PDF \[scanned or digital\], DOC or DOCX) to Docugami for processing. There are two ways to do this:
 #     1. Use the simple Docugami web experience. [Detailed instructions](https://help.docugami.com/home/adding-documents).
 #     1. Use the [Docugami API](https://api-docs.docugami.com), specifically the [documents](https://api-docs.docugami.com/#tag/documents/operation/upload-document) endpoint. You can also use the [docugami python library](https://pypi.org/project/docugami/) as a convenient wrapper.
-# 
+#
 # Once your documents are in Docugami, they are processed and organized into sets of similar documents, e.g. NDAs, Lease Agreements, and Service Agreements. Docugami is not limited to any particular types of documents, and the clusters created depend on your particular documents. You can [change the docset assignments](https://help.docugami.com/home/working-with-the-doc-sets-view) later if you wish. You can monitor file status in the simple Docugami webapp, or use a [webhook](https://api-docs.docugami.com/#tag/webhooks) to be informed when your documents are done processing.
-# 
+#
 # You can also use the [Docugami API](https://api-docs.docugami.com) or the  [docugami](https://pypi.org/project/docugami/) python library to do all the file processing without visiting the Docugami webapp except to get the API key.
-# 
+#
 # > You can get an API key as documented here: https://help.docugami.com/home/docugami-api. This following code assumes you have set the `DOCUGAMI_API_TOKEN` environment variable.
-# 
+#
 # First, let's define two simple helper methods to upload files and wait for them to finish processing.
 
 # In[3]:
@@ -83,7 +85,7 @@ pprint(dgml_paths)
 # If you are on the free Docugami tier, your files should be done in ~15 minutes or less depending on the number of pages uploaded and available resources (please contact Docugami for paid plans for faster processing). You can re-run the code above without reprocessing your files to continue waiting if your notebook is not continuously running (it does not re-upload).
 
 # ### Partition PDF tables and text
-# 
+#
 # You can use the [Docugami Loader](https://python.langchain.com/docs/integrations/document_loaders/docugami) to very easily get chunks for your documents, including semantic and structural metadata. This is the simpler and recommended approach for most use cases but in this notebook let's explore using the `dgml-utils` library to explore the segmented output for this file in more detail by processing the XML we just downloaded above.
 
 # In[4]:
@@ -111,8 +113,8 @@ with open(dgml_path, "r") as file:
         print(chunk.text)
 
 
-# The file processed by Docugami in the example above was [this one](https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/192541/pdf) from the NTSB and you can look at the PDF side by side to compare the XML chunks above. 
-# 
+# The file processed by Docugami in the example above was [this one](https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/192541/pdf) from the NTSB and you can look at the PDF side by side to compare the XML chunks above.
+#
 # If you want text based chunks instead, Docugami also supports those and renders tables as markdown:
 
 # In[5]:
@@ -134,7 +136,7 @@ with open(dgml_path, "r") as file:
 
 
 # ## Docugami XML Deep Dive: Jane Doe NDA Example
-# 
+#
 # Let's explore the Docugami XML output for a different example PDF file (a long form contract): [Jane Doe NDA](https://github.com/docugami/dgml-utils/blob/main/python/tests/test_data/article/Jane%20Doe%20NDA.pdf). We have provided processed Docugami XML output for this PDF here: https://github.com/docugami/dgml-utils/blob/main/python/tests/test_data/article/Jane%20Doe.xml so you can follow along without processing your own documents.
 
 # In[6]:
@@ -194,7 +196,7 @@ print(table_elements[0].text)
 
 
 # The XML markup contains structural as well as semantic tags, which provide additional semantics to the LLM for improved retrieval and generation.
-# 
+#
 # If you prefer, you can set `include_xml_tags=False` in the `get_chunks_str` call above to not include XML markup. The text-only Docugami chunks are still very good since they follow the structural and semantic contours of the document rather than whitespace-only chunking. Tables are rendered as markdown in this case, so that some structural context is maintained even without the XML markup.
 
 # In[11]:
@@ -207,15 +209,15 @@ print(table_elements_as_text[0].text)
 
 
 # ## Multi-vector retriever
-# 
-# Use [multi-vector-retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary) to produce summaries of tables and, optionally, text. 
-# 
+#
+# Use [multi-vector-retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary) to produce summaries of tables and, optionally, text.
+#
 # With the summary, we will also store the raw table elements.
-# 
+#
 # The summaries are used to improve the quality of retrieval, [as explained in the multi vector retriever docs](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector).
-# 
-# The raw tables are passed to the LLM, providing the full table context for the LLM to generate the answer.  
-# 
+#
+# The raw tables are passed to the LLM, providing the full table context for the LLM to generate the answer.
+#
 # ### Summaries
 
 # In[12]:
@@ -231,9 +233,9 @@ from langchain_openai import ChatOpenAI
 
 
 # We create a simple summarize chain for each element.
-# 
+#
 # You can also see, re-use, or modify the prompt in the Hub [here](https://smith.langchain.com/hub/rlm/multi-vector-retriever-summarization).
-# 
+#
 # ```
 # from langchain import hub
 # obj = hub.pull("rlm/multi-vector-retriever-summarization")
@@ -261,9 +263,9 @@ table_summaries = summarize_chain.batch(tables, {"max_concurrency": 5})
 
 
 # ### Add to vectorstore
-# 
-# Use [Multi Vector Retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary) with summaries: 
-# 
+#
+# Use [Multi Vector Retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary) with summaries:
+#
 # * `InMemoryStore` stores the raw text, tables
 # * `vectorstore` stores the embedded summaries
 
@@ -316,7 +318,7 @@ retriever = build_retriever(text_elements, tables, table_summaries)
 
 
 # ## RAG
-# 
+#
 # Run [RAG pipeline](https://python.langchain.com/docs/expression_language/cookbook/retrieval).
 
 # In[18]:
@@ -369,11 +371,11 @@ print(result)
 
 
 # We can check the [trace](https://smith.langchain.com/public/21b3aa16-4ef3-40c3-92f6-3f0ceab2aedb/r) to see what chunks were retrieved.
-# 
+#
 # This includes Table 1 in the doc, showing the disclosures table as XML markup (same one as above)
 
 # # RAG on Llama2 paper
-# 
+#
 # Let's run the same Llama2 paper example from the [Semi_Structured_RAG.ipynb](./Semi_Structured_RAG.ipynb) notebook to see if we get the same results, and to contrast the table chunk returned by Docugami with the ones returned from Unstructured.
 
 # In[20]:
@@ -427,9 +429,9 @@ llama2_chain.invoke("What is the number of training tokens for LLaMA2?")
 
 
 # We can check the [trace](https://smith.langchain.com/public/5de100c3-bb40-4234-bf02-64bc708686a1/r) to see what chunks were retrieved.
-# 
+#
 # This includes Table 1 in the doc, showing the tokens used for training table as semantic XML markup:
-# 
+#
 # ```xml
 # <table>
 #     <tbody>
@@ -518,10 +520,10 @@ llama2_chain.invoke("What was the learning rate for LLaMA2?")
 
 
 # ## Docugami KG-RAG Template
-# 
+#
 # Docugami also provides a [langchain template](https://github.com/docugami/langchain-template-docugami-kg-rag) that you can integrate into your langchain projects.
-# 
+#
 # Here's a walkthrough of how you can do this.
-# 
+#
 # [![Docugami KG-RAG Walkthrough](https://img.youtube.com/vi/xOHOmL1NFMg/0.jpg)](https://www.youtube.com/watch?v=xOHOmL1NFMg)
-# 
+#

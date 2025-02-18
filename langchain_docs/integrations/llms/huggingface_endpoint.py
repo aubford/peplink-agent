@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # Huggingface Endpoints
-# 
+#
 # >The [Hugging Face Hub](https://huggingface.co/docs/hub/index) is a platform with over 120k models, 20k datasets, and 50k demo apps (Spaces), all open source and publicly available, in an online platform where people can easily collaborate and build ML together.
-# 
+#
 # The `Hugging Face Hub` also offers various endpoints to build ML applications.
 # This example showcases how to connect to the different Endpoints types.
-# 
+#
 # In particular, text generation inference is powered by [Text Generation Inference](https://github.com/huggingface/text-generation-inference): a custom-built Rust, Python and gRPC server for blazing-faset text generation inference.
 
 # In[ ]:
@@ -23,7 +23,7 @@ from langchain_huggingface import HuggingFaceEndpoint
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet huggingface_hub')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet huggingface_hub")
 
 
 # In[ ]:
@@ -72,7 +72,7 @@ prompt = PromptTemplate.from_template(template)
 
 
 # ## Examples
-# 
+#
 # Here is an example of how you can access `HuggingFaceEndpoint` integration of the free [Serverless Endpoints](https://huggingface.co/inference-endpoints/serverless) API.
 
 # In[ ]:
@@ -91,14 +91,14 @@ print(llm_chain.invoke({"question": question}))
 
 
 # ## Dedicated Endpoint
-# 
-# 
+#
+#
 # The free serverless API lets you implement solutions and iterate in no time, but it may be rate limited for heavy use cases, since the loads are shared with other requests.
-# 
+#
 # For enterprise workloads, the best is to use [Inference Endpoints - Dedicated](https://huggingface.co/inference-endpoints/dedicated).
 # This gives access to a fully managed infrastructure that offer more flexibility and speed. These resoucres come with continuous support and uptime guarantees, as well as options like AutoScaling
-# 
-# 
+#
+#
 
 # In[ ]:
 

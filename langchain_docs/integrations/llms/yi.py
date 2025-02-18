@@ -8,7 +8,7 @@
 
 
 ## Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # ## Prerequisite
@@ -88,4 +88,3 @@ res = llm_with_params(
     "Propose an innovative AI application that could benefit society."
 )
 print(res)
-

@@ -2,13 +2,15 @@
 # coding: utf-8
 
 # # RSS Feeds
-# 
+#
 # This covers how to load HTML news articles from a list of RSS feed URLs into a document format that we can use downstream.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  feedparser newspaper3k listparser')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  feedparser newspaper3k listparser"
+)
 
 
 # In[32]:
@@ -79,7 +81,3 @@ data[0].page_content
 
 
 # In[ ]:
-
-
-
-

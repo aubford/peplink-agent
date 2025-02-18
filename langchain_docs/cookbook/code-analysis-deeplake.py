@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Use LangChain, GPT and Activeloop's Deep Lake to work with code base
-# In this tutorial, we are going to use Langchain + Activeloop's Deep Lake with GPT to analyze the code base of the LangChain itself. 
+# In this tutorial, we are going to use Langchain + Activeloop's Deep Lake with GPT to analyze the code base of the LangChain itself.
 
 # ## Design
 
@@ -14,7 +14,7 @@
 #    1. Build a chain from `langchain.chat_models.ChatOpenAI` and `langchain.chains.ConversationalRetrievalChain`
 #    2. Prepare questions.
 #    3. Get answers running the chain.
-# 
+#
 
 # ## Implementation
 
@@ -28,8 +28,8 @@
 #!python3 -m pip install --upgrade langchain deeplake openai
 
 
-# Set up OpenAI embeddings, Deep Lake multi-modal vector store api and authenticate. 
-# 
+# Set up OpenAI embeddings, Deep Lake multi-modal vector store api and authenticate.
+#
 # For full documentation of Deep Lake please follow https://docs.activeloop.ai/ and API reference https://docs.deeplake.ai/en/latest/
 
 # In[1]:
@@ -52,10 +52,10 @@ activeloop_token = getpass("Activeloop Token:")
 os.environ["ACTIVELOOP_TOKEN"] = activeloop_token
 
 
-# ### Prepare data 
+# ### Prepare data
 
 # Load all repository files. Here we assume this notebook is downloaded as the part of the langchain fork and we work with the python files of the `langchain` repo.
-# 
+#
 # If you want to use files from different repo, change `root_dir` to the root dir of your repo.
 
 # In[10]:
@@ -96,8 +96,8 @@ print(f"{len(texts)}")
 
 
 # Then embed chunks and upload them to the DeepLake.
-# 
-# This can take several minutes. 
+#
+# This can take several minutes.
 
 # In[13]:
 
@@ -230,4 +230,3 @@ print(qa_dict["What classes are derived from the Chain class?"])
 
 
 print(qa_dict["What kind of retrievers does LangChain have?"])
-

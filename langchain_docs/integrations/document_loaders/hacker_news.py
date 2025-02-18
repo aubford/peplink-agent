@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Hacker News
-# 
+#
 # >[Hacker News](https://en.wikipedia.org/wiki/Hacker_News) (sometimes abbreviated as `HN`) is a social news website focusing on computer science and entrepreneurship. It is run by the investment fund and startup incubator `Y Combinator`. In general, content that can be submitted is defined as "anything that gratifies one's intellectual curiosity."
-# 
+#
 # This notebook covers how to pull page data and comments from [Hacker News](https://news.ycombinator.com/)
 
 # In[1]:
@@ -35,4 +35,3 @@ data[0].page_content[:300]
 
 
 data[0].metadata
-

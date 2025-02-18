@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # iMessage
-# 
+#
 # This notebook shows how to use the iMessage chat loader. This class helps convert iMessage conversations to LangChain chat messages.
-# 
-# On MacOS, iMessage stores conversations in a sqlite database at `~/Library/Messages/chat.db` (at least for macOS Ventura 13.4). 
-# The `IMessageChatLoader` loads from this database file. 
-# 
+#
+# On MacOS, iMessage stores conversations in a sqlite database at `~/Library/Messages/chat.db` (at least for macOS Ventura 13.4).
+# The `IMessageChatLoader` loads from this database file.
+#
 # 1. Create the `IMessageChatLoader` with the file path pointed to `chat.db` database you'd like to process.
 # 2. Call `loader.load()` (or `loader.lazy_load()`) to perform the conversion. Optionally use `merge_chat_runs` to combine message from the same sender in sequence, and/or `map_ai_messages` to convert messages from the specified sender to the "AIMessage" class.
-# 
+#
 # ## 1. Access Chat DB
-# 
+#
 # It's likely that your terminal is denied access to `~/Library/Messages`. To use this class, you can copy the DB to an accessible directory (e.g., Documents) and load from there. Alternatively (and not recommended), you can grant full disk access for your terminal emulator in System Settings > Security and Privacy > Full Disk Access.
-# 
+#
 # We have created an example database you can use at [this linked drive file](https://drive.google.com/file/d/1NebNKqTA2NXApCmeH6mu0unJD2tANZzo/view?usp=sharing).
 
 # In[1]:
@@ -47,7 +47,7 @@ download_drive_file(url)
 
 
 # ## 2. Create the Chat Loader
-# 
+#
 # Provide the loader with the file path to the zip directory. You can optionally specify the user id that maps to an ai message as well an configure whether to merge message runs.
 
 # In[2]:
@@ -65,9 +65,9 @@ loader = IMessageChatLoader(
 
 
 # ## 3. Load messages
-# 
-# The `load()` (or `lazy_load`) methods return a list of "ChatSessions" that currently just contain a list of messages per loaded conversation. All messages are mapped to "HumanMessage" objects to start. 
-# 
+#
+# The `load()` (or `lazy_load`) methods return a list of "ChatSessions" that currently just contain a list of messages per loaded conversation. All messages are mapped to "HumanMessage" objects to start.
+#
 # You can optionally choose to merge message "runs" (consecutive messages from the same sender) and select a sender to represent the "AI". The fine-tuned LLM will learn to generate these AI messages.
 
 # In[9]:
@@ -99,7 +99,7 @@ chat_sessions[0]["messages"][:3]
 
 
 # ## 3. Prepare for fine-tuning
-# 
+#
 # Now it's time to convert our chat  messages to OpenAI dictionaries. We can use the `convert_messages_for_finetuning` utility to do so.
 
 # In[14]:
@@ -116,14 +116,14 @@ print(f"Prepared {len(training_data)} dialogues for training")
 
 
 # ## 4. Fine-tune the model
-# 
+#
 # It's time to fine-tune the model. Make sure you have `openai` installed
 # and have set your `OPENAI_API_KEY` appropriately
 
 # In[16]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-openai")
 
 
 # In[18]:
@@ -186,7 +186,7 @@ print(job.fine_tuned_model)
 
 
 # ## 5. Use in LangChain
-# 
+#
 # You can use the resulting model ID directly the `ChatOpenAI` model class.
 
 # In[22]:
@@ -224,7 +224,3 @@ for tok in chain.stream({"input": "What's the golden thread?"}):
 
 
 # In[ ]:
-
-
-
-

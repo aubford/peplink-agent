@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Vearch
-# 
+#
 # >[Vearch](https://vearch.readthedocs.io) is the vector search infrastructure for deeping learning and AI applications.
-# 
+#
 
 # ## Setting up
-# 
+#
 # Follow [instructions](https://vearch.readthedocs.io/en/latest/quick-start-guide.html#).
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  vearch')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  vearch")
 
 # OR
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  vearch_cluster')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  vearch_cluster")
 
 
 # ## Example
@@ -240,17 +240,7 @@ print("get existed docid", get_id_doc)
 # In[ ]:
 
 
-
-
-
 # In[ ]:
 
 
-
-
-
 # In[ ]:
-
-
-
-

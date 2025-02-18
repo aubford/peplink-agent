@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # JaguarDB Vector Database
-# 
+#
 # >[JaguarDB Vector Database](http://www.jaguardb.com/windex.html
 # >
 # >1. It is a distributed vector database
@@ -15,22 +15,22 @@
 # >8. Distance metrics: Euclidean, Cosine, InnerProduct, Manhatten, Chebyshev, Hamming, Jeccard, Minkowski
 
 # ## Prerequisites
-# 
+#
 # There are two requirements for running the examples in this file.
 # 1. You must install and set up the JaguarDB server and its HTTP gateway server.
 #    Please refer to the instructions in:
 #    [www.jaguardb.com](http://www.jaguardb.com)
-# 
+#
 # 2. You must install the http client package for JaguarDB:
 #    ```
 #        pip install -U jaguardb-http-client
 #    ```
-# 
+#
 
 # ## RAG With Langchain
-# 
+#
 # This section demonstrates chatting with LLM together with Jaguar in the langchain software stack.
-# 
+#
 
 # In[ ]:
 
@@ -114,9 +114,9 @@ retriever = vectorstore.as_retriever()
 
 
 # ## Interaction With Jaguar Vector Store
-# 
+#
 # Users can interact directly with the Jaguar vector store for similarity search and anomaly detection.
-# 
+#
 
 # In[ ]:
 
@@ -193,4 +193,3 @@ vectorstore.drop()
 
 # Logout
 vectorstore.logout()
-

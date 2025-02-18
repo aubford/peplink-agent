@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # SurrealDB
-# 
+#
 # >[SurrealDB](https://surrealdb.com/) is an end-to-end cloud-native database designed for modern applications, including web, mobile, serverless, Jamstack, backend, and traditional applications. With SurrealDB, you can simplify your database and API infrastructure, reduce development time, and build secure, performant apps quickly and cost-effectively.
 # >
 # >**Key features of SurrealDB include:**
@@ -13,15 +13,15 @@
 # >* **Granular access control:** SurrealDB provides row-level permissions-based access control, giving you the ability to manage data access with precision.
 # >
 # >View the [features](https://surrealdb.com/features), the latest [releases](https://surrealdb.com/releases), and [documentation](https://surrealdb.com/docs).
-# 
+#
 # This notebook shows how to use functionality related to the `SurrealDBLoader`.
 
 # ## Overview
-# 
+#
 # The SurrealDB Document Loader returns a list of Langchain Documents from a SurrealDB database.
-# 
+#
 # The Document Loader takes the following optional parameters:
-# 
+#
 # * `dburl`: connection string to the websocket endpoint. default: `ws://localhost:8000/rpc`
 # * `ns`: name of the namespace. default: `langchain`
 # * `db`: name of the database. default: `database`
@@ -29,7 +29,7 @@
 # * `db_user`: SurrealDB credentials if needed: db username.
 # * `db_pass`: SurrealDB credentails if needed: db password.
 # * `filter_criteria`: dictionary to construct the `WHERE` clause for filtering results from table.
-# 
+#
 # The output `Document` takes the following shape:
 # ```
 # Document(
@@ -45,7 +45,7 @@
 # ```
 
 # ## Setup
-# 
+#
 # Uncomment the below cells to install surrealdb and langchain.
 
 # In[1]:
@@ -110,4 +110,3 @@ page_content = json.loads(doc.page_content)
 
 
 page_content["text"]
-

@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Postgres Embedding
-# 
+#
 # > [Postgres Embedding](https://github.com/neondatabase/pg_embedding) is an open-source vector similarity search for `Postgres` that uses  `Hierarchical Navigable Small Worlds (HNSW)` for approximate nearest neighbor search.
-# 
+#
 # >It supports:
 # >- exact and approximate nearest neighbor search using HNSW
 # >- L2 distance
-# 
+#
 # This notebook shows how to use the Postgres vector database (`PGEmbedding`).
-# 
+#
 # > The PGEmbedding integration creates the pg_embedding extension for you, but you run the following Postgres query to add it:
 # ```sql
 # CREATE EXTENSION embedding;
@@ -20,9 +20,11 @@
 
 
 # Pip install necessary package
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai langchain-community')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  psycopg2-binary')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tiktoken')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain-openai langchain-community"
+)
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  psycopg2-binary")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  tiktoken")
 
 
 # Add the OpenAI API Key to the environment variables to use `OpenAIEmbeddings`.
@@ -100,7 +102,7 @@ for doc, score in docs_with_score:
 
 # ## Working with vectorstore in Postgres
 
-# ### Uploading a vectorstore in PG 
+# ### Uploading a vectorstore in PG
 
 # In[32]:
 
@@ -130,12 +132,12 @@ PGEmbedding.create_hnsw_index(
 # CREATE INDEX ON vectors USING hnsw(vec) WITH (maxelements=10000, dims=1536, m=3, efconstruction=16, efsearch=16);
 # ```
 # The HNSW index options used in the statement above include:
-# 
+#
 # - maxelements: Defines the maximum number of elements indexed. This is a required parameter. The example shown above has a value of 3. A real-world example would have a much large value, such as 1000000. An "element" refers to a data point (a vector) in the dataset, which is represented as a node in the HNSW graph. Typically, you would set this option to a value able to accommodate the number of rows in your in your dataset.
 # - dims: Defines the number of dimensions in your vector data. This is a required parameter. A small value is used in the example above. If you are storing data generated using OpenAI's text-embedding-ada-002 model, which supports 1536 dimensions, you would define a value of 1536, for example.
 # - m: Defines the maximum number of bi-directional links (also referred to as "edges") created for each node during graph construction.
 # The following additional index options are supported:
-# 
+#
 # - efConstruction: Defines the number of nearest neighbors considered during index construction. The default value is 32.
 # - efsearch: Defines the number of nearest neighbors considered during index search. The default value is 32.
 # For information about how you can configure these options to influence the HNSW algorithm, refer to [Tuning the HNSW algorithm](https://neon.tech/docs/extensions/pg_embedding#tuning-the-hnsw-algorithm).
@@ -182,4 +184,3 @@ for doc, score in docs_with_score:
     print("Score: ", score)
     print(doc.page_content)
     print("-" * 80)
-

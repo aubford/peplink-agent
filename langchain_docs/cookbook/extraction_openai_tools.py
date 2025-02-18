@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Extraction with OpenAI Tools
-# 
-# Performing extraction has never been easier! OpenAI's tool calling ability is the perfect thing to use as it allows for extracting multiple different elements from text that are different types. 
-# 
+#
+# Performing extraction has never been easier! OpenAI's tool calling ability is the perfect thing to use as it allows for extracting multiple different elements from text that are different types.
+#
 # Models after 1106 use tools and support "parallel function calling" which makes this super easy.
 
 # In[8]:
@@ -71,12 +71,12 @@ chain.invoke({"input": "jane is 2 and bob is 3 and they are in Mrs Sampson's cla
 
 
 # ## Under the hood
-# 
+#
 # Under the hood, this is a simple chain:
 
 # ```python
 # from typing import Union, List, Type, Optional
-# 
+#
 # from langchain.output_parsers.openai_tools import PydanticToolsParser
 # from langchain.utils.openai_functions import convert_pydantic_to_openai_tool
 # from langchain_core.runnables import Runnable
@@ -84,13 +84,13 @@ chain.invoke({"input": "jane is 2 and bob is 3 and they are in Mrs Sampson's cla
 # from langchain_core.prompts import ChatPromptTemplate
 # from langchain_core.messages import SystemMessage
 # from langchain_core.language_models import BaseLanguageModel
-# 
+#
 # _EXTRACTION_TEMPLATE = """Extract and save the relevant entities mentioned \
 # in the following passage together with their properties.
-# 
+#
 # If a property is not present and is not required in the function parameters, do not include it in the output."""  # noqa: E501
-# 
-# 
+#
+#
 # def create_extraction_chain_pydantic(
 #     pydantic_schemas: Union[List[Type[BaseModel]], Type[BaseModel]],
 #     llm: BaseLanguageModel,
@@ -109,7 +109,3 @@ chain.invoke({"input": "jane is 2 and bob is 3 and they are in Mrs Sampson's cla
 # ```
 
 # In[ ]:
-
-
-
-

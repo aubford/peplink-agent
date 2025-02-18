@@ -11,12 +11,12 @@
 # This integration shows how to use the Prediction Guard embeddings integration with Langchain. This integration supports text and images, separately or together in matched pairs.
 
 # ## Setup
-# To access Prediction Guard models, contact us [here](https://predictionguard.com/get-started) to get a Prediction Guard API key and get started. 
-# 
+# To access Prediction Guard models, contact us [here](https://predictionguard.com/get-started) to get a Prediction Guard API key and get started.
+#
 
 # ### Credentials
-# Once you have a key, you can set it with 
-# 
+# Once you have a key, you can set it with
+#
 
 # In[1]:
 
@@ -31,7 +31,9 @@ os.environ["PREDICTIONGUARD_API_KEY"] = "<Prediction Guard API Key"
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-predictionguard')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet langchain-predictionguard"
+)
 
 
 # ## Instantiation
@@ -50,7 +52,7 @@ from langchain_predictionguard import PredictionGuardEmbeddings
 embeddings = PredictionGuardEmbeddings(model="bridgetower-large-itm-mlm-itc")
 
 
-# 
+#
 
 # Prediction Guard embeddings generation supports both text and images. This integration includes that support spread across various functions.
 
@@ -81,7 +83,7 @@ retrieved_documents[0].page_content
 
 # ## Direct Usage
 # The vectorstore and retriever implementations are calling `embeddings.embed_documents(...)` and `embeddings.embed_query(...)` to create embeddings from the texts used in the `from_texts` and retrieval `invoke` operations.
-# 
+#
 # These methods can be directly called with the following commands.
 
 # ### Embed single texts

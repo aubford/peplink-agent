@@ -6,42 +6,42 @@
 # ---
 
 # # ChatReka
-# 
-# This notebook provides a quick overview for getting started with Reka [chat models](../../concepts/chat_models.mdx). 
-# 
+#
+# This notebook provides a quick overview for getting started with Reka [chat models](../../concepts/chat_models.mdx).
+#
 # Reka has several chat models. You can find information about their latest models and their costs, context windows, and supported input types in the [Reka docs](https://docs.reka.ai/available-models).
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # ## Overview
 # ### Integration details
-# 
+#
 # | Class | Package | Local | Serializable | JS support | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
 # | [ChatReka] | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_community?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_community?style=flat-square&label=%20) |
-# 
+#
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | 
-# 
+# | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+#
 # ## Setup
-# 
+#
 # To access Reka models you'll need to create an Reka developer account, get an API key, and install the `langchain_community` integration package and the reka python package via 'pip install reka-api'.
-# 
+#
 # ### Credentials
-# 
+#
 # Head to https://platform.reka.ai/ to sign up for Reka and generate an API key. Once you've done this set the REKA_API_KEY environment variable:
 
 # ### Installation
-# 
+#
 # The LangChain __ModuleName__ integration lives in the `langchain_community` package:
 
 # In[4]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain_community reka-api')
+get_ipython().run_line_magic("pip", "install -qU langchain_community reka-api")
 
 
 # ## Instantiation
@@ -83,7 +83,7 @@ model = ChatReka()
 model.invoke("hi")
 
 
-# # Images input 
+# # Images input
 
 # In[3]:
 
@@ -161,12 +161,12 @@ chain.invoke(
 # Use use with tavtly api search
 
 # # Tool use and agent creation
-# 
+#
 # ## Define the tools
-# 
+#
 # We first need to create the tools we want to use. Our main tool of choice will be Tavily - a search engine. We have a built-in tool in LangChain to easily use Tavily search engine as tool.
-# 
-# 
+#
+#
 
 # In[ ]:
 
@@ -191,8 +191,8 @@ tools = [search]
 
 
 # We can now see what it is like to enable this model to do tool calling. In order to enable that we use .bind_tools to give the language model knowledge of these tools
-# 
-# 
+#
+#
 
 # In[7]:
 
@@ -201,8 +201,8 @@ model_with_tools = model.bind_tools(tools)
 
 
 # We can now call the model. Let's first call it with a normal message, and see how it responds. We can look at both the content field as well as the tool_calls field.
-# 
-# 
+#
+#
 
 # In[8]:
 
@@ -216,8 +216,8 @@ print(f"ToolCalls: {response.tool_calls}")
 
 
 # Now, let's try calling it with some input that would expect a tool to be called.
-# 
-# 
+#
+#
 
 # In[9]:
 
@@ -229,15 +229,15 @@ print(f"ToolCalls: {response.tool_calls}")
 
 
 # We can see that there's now no text content, but there is a tool call! It wants us to call the Tavily Search tool.
-# 
+#
 # This isn't calling that tool yet - it's just telling us to. In order to actually call it, we'll want to create our agent.
 
 # # Create the agent
 
 # Now that we have defined the tools and the LLM, we can create the agent. We will be using LangGraph to construct the agent. Currently, we are using a high level interface to construct the agent, but the nice thing about LangGraph is that this high-level interface is backed by a low-level, highly controllable API in case you want to modify the agent logic.
-# 
+#
 # Now, we can initialize the agent with the LLM and the tools.
-# 
+#
 # Note that we are passing in the model, not model_with_tools. That is because `create_react_agent` will call `.bind_tools` for us under the hood.
 
 # In[14]:
@@ -270,12 +270,12 @@ response["messages"]
 
 
 # We can check out the LangSmith trace to make sure it's calling the search tool effectively.
-# 
+#
 # https://smith.langchain.com/public/013ef704-654b-4447-8428-637b343d646e/r
 
 # We've seen how the agent can be called with `.invoke` to get a final response. If the agent executes multiple steps, this may take a while. To show intermediate progress, we can stream back messages as they occur.
-# 
-# 
+#
+#
 
 # In[18]:
 

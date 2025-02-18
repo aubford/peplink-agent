@@ -4,17 +4,17 @@
 # # CTranslate2
 
 # **CTranslate2** is a C++ and Python library for efficient inference with Transformer models.
-# 
+#
 # The project implements a custom runtime that applies many performance optimization techniques such as weights quantization, layers fusion, batch reordering, etc., to accelerate and reduce the memory usage of Transformer models on CPU and GPU.
-# 
+#
 # Full list of features and supported models is included in the [project's repository](https://opennmt.net/CTranslate2/guides/transformers.html). To start, please check out the official [quickstart guide](https://opennmt.net/CTranslate2/quickstart.html).
-# 
+#
 # To use, you should have `ctranslate2` python package installed.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  ctranslate2')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  ctranslate2")
 
 
 # To use a Hugging Face model with CTranslate2, it has to be first converted to CTranslate2 format using the `ct2-transformers-converter` command. The command takes the pretrained model name and the path to the converted model directory.
@@ -23,7 +23,9 @@ get_ipython().run_line_magic('pip', 'install --upgrade --quiet  ctranslate2')
 
 
 # conversation can take several minutes
-get_ipython().system('ct2-transformers-converter --model meta-llama/Llama-2-7b-hf --quantization bfloat16 --output_dir ./llama-2-7b-ct2 --force')
+get_ipython().system(
+    "ct2-transformers-converter --model meta-llama/Llama-2-7b-hf --quantization bfloat16 --output_dir ./llama-2-7b-ct2 --force"
+)
 
 
 # In[3]:
@@ -91,4 +93,3 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "Who was the US president in the year the first Pokemon game was released?"
 
 print(llm_chain.run(question))
-

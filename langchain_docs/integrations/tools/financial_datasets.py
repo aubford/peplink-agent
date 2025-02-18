@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # FinancialDatasets Toolkit
-# 
+#
 # The [financial datasets](https://financialdatasets.ai/) stock market API provides REST endpoints that let you get financial data for 16,000+ tickers spanning 30+ years.
-# 
+#
 # ## Setup
-# 
+#
 # To use this toolkit, you need two API keys:
-# 
+#
 # `FINANCIAL_DATASETS_API_KEY`: Get it from [financialdatasets.ai](https://financialdatasets.ai/).
 # `OPENAI_API_KEY`: Get it from [OpenAI](https://platform.openai.com/).
 
@@ -28,17 +28,17 @@ os.environ["OPENAI_API_KEY"] = getpass.getpass()
 
 
 # ### Installation
-# 
+#
 # This toolkit lives in the `langchain-community` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community')
+get_ipython().run_line_magic("pip", "install -qU langchain-community")
 
 
 # ## Instantiation
-# 
+#
 # Now we can instantiate our toolkit:
 
 # In[ ]:
@@ -56,7 +56,7 @@ toolkit = FinancialDatasetsToolkit(api_wrapper=api_wrapper)
 
 
 # ## Tools
-# 
+#
 # View available tools:
 
 # In[ ]:
@@ -66,7 +66,7 @@ tools = toolkit.get_tools()
 
 
 # ## Use within an agent
-# 
+#
 # Let's equip our agent with the FinancialDatasetsToolkit and ask financial questions.
 
 # In[ ]:
@@ -156,7 +156,7 @@ agent_executor.invoke({"input": query})
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all `FinancialDatasetsToolkit` features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.financial_datasets.toolkit.FinancialDatasetsToolkit.html).
 
-# 
+#

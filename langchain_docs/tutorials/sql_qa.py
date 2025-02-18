@@ -2,45 +2,49 @@
 # coding: utf-8
 
 # # Build a Question/Answering system over SQL data
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
-# 
+#
 # - [Chat models](/docs/concepts/chat_models)
 # - [Tools](/docs/concepts/tools)
 # - [Agents](/docs/concepts/agents)
 # - [LangGraph](/docs/concepts/architecture/#langgraph)
-# 
+#
 # :::
-# 
+#
 # Enabling a LLM system to query structured data can be qualitatively different from unstructured text data. Whereas in the latter it is common to generate text that can be searched against a vector database, the approach for structured data is often for the LLM to write and execute queries in a DSL, such as SQL. In this guide we'll go over the basic ways to create a Q&A system over tabular data in databases. We will cover implementations using both [chains](/docs/tutorials/sql_qa#chains) and [agents](/docs/tutorials/sql_qa#agents). These systems will allow us to ask a question about the data in a database and get back a natural language answer. The main difference between the two is that our agent can query the database in a loop as many times as it needs to answer the question.
-# 
+#
 # ## ⚠️ Security note ⚠️
-# 
+#
 # Building Q&A systems of SQL databases requires executing model-generated SQL queries. There are inherent risks in doing this. Make sure that your database connection permissions are always scoped as narrowly as possible for your chain/agent's needs. This will mitigate though not eliminate the risks of building a model-driven system. For more on general security best practices, [see here](/docs/security).
-# 
-# 
+#
+#
 # ## Architecture
-# 
+#
 # At a high-level, the steps of these systems are:
-# 
+#
 # 1. **Convert question to SQL query**: Model converts user input to a SQL query.
 # 2. **Execute SQL query**: Execute the query.
 # 3. **Answer the question**: Model responds to user input using the query results.
-# 
+#
 # Note that querying data in CSVs can follow a similar approach. See our [how-to guide](/docs/how_to/sql_csv) on question-answering over CSV data for more detail.
-# 
+#
 # ![sql_usecase.png](../../static/img/sql_usecase.png)
-# 
+#
 # ## Setup
-# 
+#
 # First, get required packages and set environment variables:
 
 # In[ ]:
 
 
-get_ipython().run_cell_magic('capture', '--no-stderr', '%pip install --upgrade --quiet langchain-community langchainhub langgraph\n')
+get_ipython().run_cell_magic(
+    "capture",
+    "--no-stderr",
+    "%pip install --upgrade --quiet langchain-community langchainhub langgraph\n",
+)
 
 
 # ```python
@@ -51,12 +55,12 @@ get_ipython().run_cell_magic('capture', '--no-stderr', '%pip install --upgrade -
 # ```
 
 # ### Sample data
-# 
+#
 # The below example will use a SQLite connection with the Chinook database, which is a sample database that represents a digital media store. Follow [these installation steps](https://database.guide/2-sample-databases-sqlite/) to create `Chinook.db` in the same directory as this notebook. You can also download and build the database via the command line:
 # ```bash
 # curl -s https://raw.githubusercontent.com/lerocha/chinook-database/master/ChinookDatabase/DataSources/Chinook_Sqlite.sql | sqlite3 Chinook.db
 # ```
-# 
+#
 # Now, `Chinook.db` is in our directory and we can interface with it using the SQLAlchemy-driven `SQLDatabase` class:
 
 # In[2]:
@@ -71,20 +75,20 @@ db.run("SELECT * FROM Artist LIMIT 10;")
 
 
 # Great! We've got a SQL database that we can query. Now let's try hooking it up to an LLM.
-# 
+#
 # ## Chains {#chains}
-# 
+#
 # Chains are compositions of predictable steps. In [LangGraph](/docs/concepts/architecture/#langgraph), we can represent a chain via simple sequence of nodes. Let's create a sequence of steps that, given a question, does the following:
 # - converts the question into a SQL query;
 # - executes the query;
 # - uses the result to answer the original question.
-# 
+#
 # There are scenarios not supported by this arrangement. For example, this system will execute a SQL query for any user input-- even "hello". Importantly, as we'll see below, some questions require more than one query to answer. We will address these scenarios in the Agents section.
-# 
+#
 # ### Application state
-# 
+#
 # The LangGraph [state](https://langchain-ai.github.io/langgraph/concepts/low_level/#state) of our application controls what data is input to the application, transferred between steps, and output by the application. It is typically a `TypedDict`, but can also be a [Pydantic BaseModel](https://langchain-ai.github.io/langgraph/how-tos/state-model/).
-# 
+#
 # For this application, we can just keep track of the input question, generated query, query result, and generated answer:
 
 # In[3]:
@@ -101,17 +105,17 @@ class State(TypedDict):
 
 
 # Now we just need functions that operate on this state and populate its contents.
-# 
+#
 # ### Convert question to SQL query
-# 
+#
 # The first step is to take the user input and convert it to a SQL query. To reliably obtain SQL queries (absent markdown formatting and explanations or clarifications), we will make use of LangChain's [structured output](/docs/concepts/structured_outputs/) abstraction.
-# 
+#
 # Let's select a chat model for our application:
 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs customVarName="llm" />
-# 
+#
 
 # In[4]:
 
@@ -175,9 +179,9 @@ write_query({"question": "How many Employees are there?"})
 
 
 # ### Execute query
-# 
+#
 # **This is the most dangerous part of creating a SQL chain.** Consider carefully if it is OK to run automated queries over your data. Minimize the database connection permissions as much as possible. Consider adding a human approval step to you chains before query execution (see below).
-# 
+#
 # To execute the query, we will load a tool from [langchain-community](/docs/concepts/architecture/#langchain-community). Our `execute_query` node will just wrap this tool:
 
 # In[8]:
@@ -201,7 +205,7 @@ execute_query({"query": "SELECT COUNT(EmployeeId) AS EmployeeCount FROM Employee
 
 
 # ### Generate answer
-# 
+#
 # Finally, our last step generates an answer to the question given the information pulled from the database:
 
 # In[10]:
@@ -221,7 +225,7 @@ def generate_answer(state: State):
 
 
 # ### Orchestrating with LangGraph
-# 
+#
 # Finally, we compile our application into a single `graph` object. In this case, we are just connecting the three steps into a single sequence.
 
 # In[11]:
@@ -260,7 +264,7 @@ for step in graph.stream(
 # Check out the [LangSmith trace](https://smith.langchain.com/public/30a79380-6ba6-46af-8bd9-5d1df0b9ccca/r).
 
 # ### Human-in-the-loop
-# 
+#
 # LangGraph supports a number of features that can be useful for this workflow. One of them is [human-in-the-loop](https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/): we can interrupt our application before sensitive steps (such as the execution of a SQL query) for human review. This is enabled by LangGraph's [persistence](https://langchain-ai.github.io/langgraph/concepts/persistence/) layer, which saves run progress to your storage of choice. Below, we specify storage in-memory:
 
 # In[14]:
@@ -310,32 +314,32 @@ else:
 # See [this](https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/) LangGraph guide for more detail and examples.
 
 # ### Next steps
-# 
+#
 # For more complex query-generation, we may want to create few-shot prompts or add query-checking steps. For advanced techniques like this and more check out:
-# 
+#
 # * [Prompting strategies](/docs/how_to/sql_prompting): Advanced prompt engineering techniques.
 # * [Query checking](/docs/how_to/sql_query_checking): Add query validation and error handling.
 # * [Large databases](/docs/how_to/sql_large_db): Techniques for working with large databases.
 
 # ## Agents {#agents}
-# 
+#
 # [Agents](/docs/concepts/agents) leverage the reasoning capabilities of LLMs to make decisions during execution. Using agents allows you to offload additional discretion over the query generation and execution process. Although their behavior is less predictable than the above "chain", they feature some advantages:
-# 
+#
 # - They can query the database as many times as needed to answer the user question.
 # - They can recover from errors by running a generated query, catching the traceback and regenerating it correctly.
 # - They can answer questions based on the databases' schema as well as on the databases' content (like describing a specific table).
-# 
-# 
+#
+#
 # Below we assemble a minimal SQL agent. We will equip it with a set of tools using LangChain's [SQLDatabaseToolkit](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.sql.toolkit.SQLDatabaseToolkit.html). Using LangGraph's [pre-built ReAct agent constructor](https://langchain-ai.github.io/langgraph/how-tos/#langgraph.prebuilt.chat_agent_executor.create_react_agent), we can do this in one line.
-# 
+#
 # :::tip
-# 
+#
 # Check out LangGraph's [SQL Agent Tutorial](https://langchain-ai.github.io/langgraph/tutorials/sql-agent/) for a more advanced formulation of a SQL agent.
-# 
+#
 # :::
-# 
+#
 # The `SQLDatabaseToolkit` includes tools that can:
-# 
+#
 # * Create and execute queries
 # * Check query syntax
 # * Retrieve table descriptions
@@ -354,7 +358,7 @@ tools
 
 
 # ### System Prompt
-# 
+#
 # We will also want to load a system prompt for our agent. This will consist of instructions for how to behave.
 
 # In[18]:
@@ -377,7 +381,7 @@ system_message = prompt_template.format(dialect="SQLite", top_k=5)
 
 
 # ### Initializing agent
-# 
+#
 # We will use a prebuilt [LangGraph](/docs/concepts/architecture/#langgraph) agent to build our agent
 
 # In[20]:
@@ -404,14 +408,14 @@ for step in agent_executor.stream(
 
 
 # You can also use the [LangSmith trace](https://smith.langchain.com/public/8af422aa-b651-4bfe-8683-e2a7f4ccd82c/r) to visualize these steps and associated metadata.
-# 
+#
 # Note that the agent executes multiple queries until it has the information it needs:
 # 1. List available tables;
 # 2. Retrieves the schema for three tables;
 # 3. Queries multiple of the tables via a join operation.
-# 
+#
 # The agent is then able to use the result of the final query to generate an answer to the original question.
-# 
+#
 # The agent can similarly handle qualitative questions:
 
 # In[22]:
@@ -427,11 +431,11 @@ for step in agent_executor.stream(
 
 
 # ### Dealing with high-cardinality columns
-# 
-# In order to filter columns that contain proper nouns such as addresses, song names or artists, we first need to double-check the spelling in order to filter the data correctly. 
-# 
+#
+# In order to filter columns that contain proper nouns such as addresses, song names or artists, we first need to double-check the spelling in order to filter the data correctly.
+#
 # We can achieve this by creating a vector store with all the distinct proper nouns that exist in the database. We can then have the agent query that vector store each time the user includes a proper noun in their question, to find the correct spelling for that word. In this way, the agent can make sure it understands which entity the user is referring to before building the target query.
-# 
+#
 # First we need the unique values for each entity we want, for which we define a function that parses the result into a list of elements:
 
 # In[24]:
@@ -454,13 +458,13 @@ albums[:5]
 
 
 # Using this function, we can create a **retriever tool** that the agent can execute at its discretion.
-# 
+#
 # Let's select an [embeddings model](/docs/integrations/text_embedding/) and [vector store](/docs/integrations/vectorstores/) for this step:
-# 
+#
 # **Select an embedding model**:
-# 
+#
 # import EmbeddingTabs from "@theme/EmbeddingTabs";
-# 
+#
 # <EmbeddingTabs/>
 
 # In[25]:
@@ -475,9 +479,9 @@ embeddings = OpenAIEmbeddings()
 
 
 # **Select a vector store**:
-# 
+#
 # import VectorStoreTabs from "@theme/VectorStoreTabs";
-# 
+#
 # <VectorStoreTabs/>
 
 # In[26]:
@@ -521,7 +525,7 @@ print(retriever_tool.invoke("Alice Chains"))
 
 
 # This way, if the agent determines it needs to write a filter based on an artist along the lines of "Alice Chains", it can first use the retriever tool to observe relevant values of a column.
-# 
+#
 # Putting this together:
 
 # In[31]:

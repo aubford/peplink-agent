@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Custom multi-action agent
-# 
+#
 # This notebook goes through how to create your own custom agent.
-# 
+#
 # An agent consists of two parts:
-# 
+#
 # - Tools: The tools the agent has available to use.
 # - The agent class itself: this decides which action to take.
-#         
-#         
+#
+#
 # In this notebook we walk through how to create a custom agent that predicts/takes multiple steps at a time.
 
 # In[1]:
@@ -125,7 +125,3 @@ agent_executor.run("How many people live in canada as of 2023?")
 
 
 # In[ ]:
-
-
-
-

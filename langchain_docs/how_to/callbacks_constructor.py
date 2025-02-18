@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # How to propagate callbacks  constructor
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following concepts:
-# 
+#
 # - [Callbacks](/docs/concepts/callbacks)
 # - [Custom callback handlers](/docs/how_to/custom_callbacks)
-# 
+#
 # :::
-# 
+#
 # Most LangChain modules allow you to pass `callbacks` directly into the constructor (i.e., initializer). In this case, the callbacks will only be called for that instance (and any nested runs).
-# 
+#
 # :::warning
 # Constructor callbacks are scoped only to the object they are defined on. They are **not** inherited by children of the object. This can lead to confusing behavior,
 # and it's generally better to pass callbacks as a run time argument.
 # :::
-# 
+#
 # Here's an example:
 
 # In[1]:
@@ -27,7 +27,7 @@
 # | output: false
 # | echo: false
 
-get_ipython().run_line_magic('pip', 'install -qU langchain langchain_anthropic')
+get_ipython().run_line_magic("pip", "install -qU langchain langchain_anthropic")
 
 import getpass
 import os
@@ -75,9 +75,9 @@ chain.invoke({"number": "2"})
 
 
 # You can see that we only see events from the chat model run - no chain events from the prompt or broader chain.
-# 
+#
 # ## Next steps
-# 
+#
 # You've now learned how to pass callbacks into a constructor.
-# 
+#
 # Next, check out the other how-to guides in this section, such as how to [pass callbacks at runtime](/docs/how_to/callbacks_runtime).

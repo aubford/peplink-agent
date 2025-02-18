@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # How to select examples by length
-# 
+#
 # This [example selector](/docs/concepts/example_selectors/) selects which examples to use based on length. This is useful when you are worried about constructing a prompt that will go over the length of the context window. For longer inputs, it will select fewer examples to include, while for shorter inputs it will select more.
 
 # In[1]:
@@ -72,7 +72,3 @@ print(dynamic_prompt.format(adjective="enthusiastic"))
 
 
 # In[ ]:
-
-
-
-

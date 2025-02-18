@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # Yahoo Finance News
-# 
-# This notebook goes over how to use the `yahoo_finance_news` tool with an agent. 
-# 
-# 
+#
+# This notebook goes over how to use the `yahoo_finance_news` tool with an agent.
+#
+#
 # ## Setting up
-# 
+#
 # First, you need to install `yfinance` python package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  yfinance')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  yfinance")
 
 
 # ## Example with Chain
@@ -81,7 +81,3 @@ print(res)
 
 
 # In[ ]:
-
-
-
-

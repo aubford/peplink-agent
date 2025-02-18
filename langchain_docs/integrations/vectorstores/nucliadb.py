@@ -2,15 +2,17 @@
 # coding: utf-8
 
 # # NucliaDB
-# 
+#
 # You can use a local NucliaDB instance or use [Nuclia Cloud](https://nuclia.cloud).
-# 
+#
 # When using a local instance, you need a Nuclia Understanding API key, so your texts are properly vectorized and indexed. You can get a key by creating a free account at [https://nuclia.cloud](https://nuclia.cloud), and then [create a NUA key](https://docs.nuclia.dev/docs/docs/using/understanding/intro).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-community nuclia')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  langchain langchain-community nuclia"
+)
 
 
 # ## Usage with nuclia.cloud
@@ -26,7 +28,7 @@ ndb = NucliaDB(knowledge_box="YOUR_KB_ID", local=False, api_key=API_KEY)
 
 
 # ## Usage with a local instance
-# 
+#
 # Note: By default `backend` is set to `http://localhost:8080`.
 
 # In[ ]:
@@ -58,4 +60,3 @@ ndb.delete(ids=ids)
 
 results = ndb.similarity_search("Who was inspired by Ada Lovelace?")
 print(results[0].page_content)
-

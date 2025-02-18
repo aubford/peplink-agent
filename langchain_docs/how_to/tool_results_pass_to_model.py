@@ -2,32 +2,32 @@
 # coding: utf-8
 
 # # How to pass tool outputs to chat models
-# 
+#
 # :::info Prerequisites
 # This guide assumes familiarity with the following concepts:
-# 
+#
 # - [LangChain Tools](/docs/concepts/tools)
 # - [Function/tool calling](/docs/concepts/tool_calling)
 # - [Using chat models to call tools](/docs/how_to/tool_calling)
 # - [Defining custom tools](/docs/how_to/custom_tools/)
-# 
+#
 # :::
-# 
+#
 # Some models are capable of [**tool calling**](/docs/concepts/tool_calling) - generating arguments that conform to a specific user-provided schema. This guide will demonstrate how to use those tool calls to actually call a function and properly pass the results back to the model.
-# 
+#
 # ![Diagram of a tool call invocation](/img/tool_invocation.png)
-# 
+#
 # ![Diagram of a tool call result](/img/tool_results.png)
-# 
+#
 # First, let's define our tools and our model:
 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs
 #   customVarName="llm"
 #   fireworksParams={`model="accounts/fireworks/models/firefunction-v1", temperature=0`}
 # />
-# 
+#
 
 # In[1]:
 
@@ -88,15 +88,15 @@ messages.append(ai_msg)
 
 
 # Next let's invoke the tool functions using the args the model populated!
-# 
+#
 # Conveniently, if we invoke a LangChain `Tool` with a `ToolCall`, we'll automatically get back a `ToolMessage` that can be fed back to the model:
-# 
+#
 # :::caution Compatibility
-# 
+#
 # This functionality was added in `langchain-core == 0.2.19`. Please make sure your package is up to date.
-# 
+#
 # If you are on earlier versions of `langchain-core`, you will need to extract the `args` field from the tool and construct a `ToolMessage` manually.
-# 
+#
 # :::
 
 # In[4]:
@@ -119,11 +119,11 @@ llm_with_tools.invoke(messages)
 
 
 # Note that each `ToolMessage` must include a `tool_call_id` that matches an `id` in the original tool calls that the model generates. This helps the model match tool responses with tool calls.
-# 
+#
 # Tool calling agents, like those in [LangGraph](https://langchain-ai.github.io/langgraph/tutorials/introduction/), use this basic flow to answer queries and solve tasks.
-# 
+#
 # ## Related
-# 
+#
 # - [LangGraph quickstart](https://langchain-ai.github.io/langgraph/tutorials/introduction/)
 # - Few shot prompting [with tools](/docs/how_to/tools_few_shot/)
 # - Stream [tool calls](/docs/how_to/tool_streaming/)

@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # ArxivLoader
-# 
+#
 # [arXiv](https://arxiv.org/) is an open-access archive for 2 million scholarly articles in the fields of physics, mathematics, computer science, quantitative biology, quantitative finance, statistics, electrical engineering and systems science, and economics.
 
 # ## Setup
-# 
+#
 # To access Arxiv document loader you'll need to install the `arxiv`, `PyMuPDF` and `langchain-community` integration packages. PyMuPDF transforms PDF files downloaded from the arxiv.org site into the text format.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install -qU langchain-community arxiv pymupdf')
+get_ipython().run_line_magic("pip", "install -qU langchain-community arxiv pymupdf")
 
 
 # ## Instantiation
-# 
+#
 # Now we can instantiate our model object and load documents:
 
 # In[1]:
@@ -35,10 +35,10 @@ loader = ArxivLoader(
 
 
 # ## Load
-# 
+#
 # Use ``.load()`` to synchronously load into memory all Documents, with one
 # Document per one arxiv paper.
-# 
+#
 # Let's run through a basic example of how to use the `ArxivLoader` searching for papers of reasoning:
 
 # In[2]:
@@ -55,7 +55,7 @@ print(docs[0].metadata)
 
 
 # ## Lazy Load
-# 
+#
 # If we're loading a  large number of Documents and our downstream operations can be done over subsets of all loaded Documents, we can lazily load our Documents one at a time to minimize our memory footprint:
 
 # In[4]:
@@ -76,7 +76,7 @@ for doc in loader.lazy_load():
 # In this example we never have more than 10 Documents loaded into memory at a time.
 
 # ## Use papers summaries as documents
-# 
+#
 # You can use summaries of Arvix paper as documents rather than raw papers:
 
 # In[5]:
@@ -87,5 +87,5 @@ docs[0]
 
 
 # ## API reference
-# 
+#
 # For detailed documentation of all ArxivLoader features and configurations head to the API reference: https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.arxiv.ArxivLoader.html#langchain_community.document_loaders.arxiv.ArxivLoader

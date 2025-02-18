@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Embedding Documents using Optimized and Quantized Embedders
-# 
+#
 # Embedding all documents using Quantized Embedders.
-# 
+#
 # The embedders are based on optimized models, created by using [optimum-intel](https://github.com/huggingface/optimum-intel.git) and [IPEX](https://github.com/intel/intel-extension-for-pytorch).
-# 
+#
 # Example text is based on [SBERT](https://www.sbert.net/docs/pretrained_cross-encoders.html).
 
 # In[2]:
@@ -24,8 +24,8 @@ model = QuantizedBiEncoderEmbeddings(
 )
 
 
-# Lets ask a question, and compare to 2 documents. The first contains the answer to the question, and the second one does not. 
-# 
+# Lets ask a question, and compare to 2 documents. The first contains the answer to the question, and the second one does not.
+#
 # We can check better suits our query.
 
 # In[5]:

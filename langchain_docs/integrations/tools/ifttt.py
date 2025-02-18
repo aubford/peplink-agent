@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # IFTTT WebHooks
-# 
+#
 # This notebook shows how to use IFTTT Webhooks.
-# 
+#
 # From https://github.com/SidU/teams-langchain-js/wiki/Connecting-IFTTT-Services.
-# 
+#
 # ## Creating a webhook
 # - Go to https://ifttt.com/create
-# 
+#
 # ## Configuring the "If This"
 # - Click on the "If This" button in the IFTTT interface.
 # - Search for "Webhooks" in the search bar.
@@ -19,7 +19,7 @@
 # For example, if you're connecting to Spotify, you could use "Spotify" as your
 # Event Name.
 # - Click the "Create Trigger" button to save your settings and create your webhook.
-# 
+#
 # ## Configuring the "Then That"
 # - Tap on the "Then That" button in the IFTTT interface.
 # - Search for the service you want to connect, such as Spotify.
@@ -33,17 +33,17 @@
 # complete the setup.
 # - Congratulations! You have successfully connected the Webhook to the desired
 # service, and you're ready to start receiving data and triggering actions 🎉
-# 
+#
 # ## Finishing up
 # - To get your webhook URL go to https://ifttt.com/maker_webhooks/settings
 # - Copy the IFTTT key value from there. The URL is of the form
 # https://maker.ifttt.com/use/YOUR_IFTTT_KEY. Grab the YOUR_IFTTT_KEY value.
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-community")
 
 
 # In[1]:
@@ -71,7 +71,3 @@ tool.run("taylor swift")
 
 
 # In[ ]:
-
-
-
-

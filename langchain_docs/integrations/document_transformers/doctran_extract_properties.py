@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Doctran: extract properties
-# 
+#
 # We can extract useful features of documents using the [Doctran](https://github.com/psychic-api/doctran) library, which uses OpenAI's function calling feature to extract specific metadata.
-# 
+#
 # Extracting metadata from documents is helpful for a variety of tasks, including:
-# 
+#
 # * **Classification:** classifying documents into different categories
 # * **Data mining:** Extract structured data that can be used for data analysis
 # * **Style transfer:** Change the way text is written to more closely match expected user input, improving vector search results
@@ -14,7 +14,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  doctran')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  doctran")
 
 
 # In[1]:
@@ -129,7 +129,3 @@ print(json.dumps(extracted_document[0].metadata, indent=2))
 
 
 # In[ ]:
-
-
-
-

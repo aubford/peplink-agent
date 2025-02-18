@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Postgres
-# 
+#
 # >[PostgreSQL](https://en.wikipedia.org/wiki/PostgreSQL) also known as `Postgres`, is a free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance.
-# 
+#
 # This notebook goes over how to use Postgres to store chat message history.
 
 # In[ ]:
@@ -28,4 +28,3 @@ history.add_ai_message("whats up?")
 
 
 history.messages
-

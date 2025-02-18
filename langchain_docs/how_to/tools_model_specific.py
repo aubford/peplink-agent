@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # How to bind model-specific tools
-# 
-# Providers adopt different conventions for formatting tool schemas. 
+#
+# Providers adopt different conventions for formatting tool schemas.
 # For instance, OpenAI uses a format like this:
-# 
+#
 # - `type`: The type of the tool. At the time of writing, this is always `"function"`.
 # - `function`: An object containing tool parameters.
 # - `function.name`: The name of the schema to output.
 # - `function.description`: A high level description of the schema to output.
 # - `function.parameters`: The nested details of the schema you want to extract, formatted as a [JSON schema](https://json-schema.org/) dict.
-# 
+#
 # We can bind this model-specific format directly to the model as well if preferred. Here's an example:
 
 # In[ ]:

@@ -3,30 +3,30 @@
 
 # # Zep
 # > Recall, understand, and extract data from chat histories. Power personalized AI experiences.
-# 
+#
 # > [Zep](https://www.getzep.com) is a long-term memory service for AI Assistant apps.
 # > With Zep, you can provide AI assistants with the ability to recall past conversations, no matter how distant,
 # > while also reducing hallucinations, latency, and cost.
-# 
+#
 # > Interested in Zep Cloud? See [Zep Cloud Installation Guide](https://help.getzep.com/sdks) and [Zep Cloud Vector Store example](https://help.getzep.com/langchain/examples/vectorstore-example)
-# 
+#
 # ## Open Source Installation and Setup
-# 
+#
 # > Zep Open Source project: [https://github.com/getzep/zep](https://github.com/getzep/zep)
 # >
 # > Zep Open Source Docs: [https://docs.getzep.com/](https://docs.getzep.com/)
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # ## Usage
-# 
-# In the examples below, we're using Zep's auto-embedding feature which automatically embeds documents on the Zep server 
+#
+# In the examples below, we're using Zep's auto-embedding feature which automatically embeds documents on the Zep server
 # using low-latency embedding models.
-# 
+#
 # ## Note
 # - These examples use Zep's async interfaces. Call sync interfaces by removing the `a` prefix from the method names.
 # - If you pass in an `Embeddings` instance Zep will use this to embed documents rather than auto-embed them.
-# You must also set your document collection to `isAutoEmbedded === false`. 
+# You must also set your document collection to `isAutoEmbedded === false`.
 # - If you set your collection to `isAutoEmbedded === false`, you must pass in an `Embeddings` instance.
 
 # ## Load or create a Collection from documents
@@ -117,7 +117,7 @@ for d, s in docs_scores:
 
 
 # ## Search over Collection Re-ranked by MMR
-# 
+#
 # Zep offers native, hardware-accelerated MMR re-ranking of search results.
 
 # In[4]:
@@ -131,7 +131,7 @@ for d in docs:
 
 
 # # Filter by Metadata
-# 
+#
 # Use a metadata filter to narrow down results. First, load another book: "Adventures of Sherlock Holmes"
 
 # In[5]:
@@ -183,7 +183,3 @@ for d in docs:
 
 
 # In[ ]:
-
-
-
-

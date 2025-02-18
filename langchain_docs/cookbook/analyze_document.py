@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Analyze a single long document
-# 
+#
 # The AnalyzeDocumentChain takes in a single document, splits it up, and then runs it through a CombineDocumentsChain.
 
 # In[3]:
@@ -42,4 +42,3 @@ qa_document_chain.run(
     input_document=state_of_the_union,
     question="what did the president say about justice breyer?",
 )
-

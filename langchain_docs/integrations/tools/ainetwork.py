@@ -2,24 +2,26 @@
 # coding: utf-8
 
 # # AINetwork Toolkit
-# 
+#
 # >[AI Network](https://www.ainetwork.ai/build-on-ain) is a layer 1 blockchain designed to accommodate large-scale AI models, utilizing a decentralized GPU network powered by the [$AIN token](https://www.ainetwork.ai/token), enriching AI-driven `NFTs` (`AINFTs`).
 # >
 # >The `AINetwork Toolkit` is a set of tools for interacting with the [AINetwork Blockchain](https://www.ainetwork.ai/public/whitepaper.pdf). These tools allow you to transfer `AIN`, read and write values, create apps, and set permissions for specific paths within the blockchain database.
 
 # ## Installing dependencies
-# 
+#
 # Before using the AINetwork Toolkit, you need to install the ain-py package. You can install it with pip:
-# 
+#
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  ain-py langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  ain-py langchain-community"
+)
 
 
 # ## Set environmental variables
-# 
+#
 # You need to set the `AIN_BLOCKCHAIN_ACCOUNT_PRIVATE_KEY` environmental variable to your AIN Blockchain Account Private Key.
 
 # In[2]:
@@ -56,7 +58,7 @@ private_key: {account.private_key}
 
 
 # ## Initialize the AINetwork Toolkit
-# 
+#
 # You can initialize the AINetwork Toolkit like this:
 
 # In[4]:
@@ -70,7 +72,7 @@ address = tools[0].interface.wallet.defaultAccount.address
 
 
 # ## Initialize the Agent with the AINetwork Toolkit
-# 
+#
 # You can initialize the agent with the AINetwork Toolkit like this:
 
 # In[5]:
@@ -89,7 +91,7 @@ agent = initialize_agent(
 
 
 # ## Example Usage
-# 
+#
 # Here are some examples of how you can use the agent with the AINetwork Toolkit:
 
 # ### Define App name to test
@@ -148,7 +150,7 @@ print(agent.run(f"Retrieve the permissions for the path /apps/{appName}."))
 # In[11]:
 
 
-get_ipython().system('curl http://faucet.ainetwork.ai/api/test/{address}/')
+get_ipython().system("curl http://faucet.ainetwork.ai/api/test/{address}/")
 
 
 # ### Get AIN Balance
@@ -169,4 +171,3 @@ print(
         "Transfer 100 AIN to the address 0x19937b227b1b13f29e7ab18676a89ea3bdea9c5b"
     )
 )
-

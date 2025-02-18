@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # Neo4j
-# 
+#
 # >[Neo4j](https://neo4j.com/docs/) is a graph database that stores nodes and relationships, that also supports native vector search.
-# 
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Neo4j` vector store. 
+#
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Neo4j` vector store.
 
 # ## Creating a Neo4j vector store
 # First we'll want to create a Neo4j vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
@@ -15,7 +15,7 @@
 # In[1]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade neo4j')
+get_ipython().run_line_magic("pip", "install --upgrade neo4j")
 
 
 # In[2]:
@@ -167,9 +167,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[12]:
@@ -195,11 +195,4 @@ retriever.invoke("what are two movies about dinosaurs")
 # In[ ]:
 
 
-
-
-
 # In[ ]:
-
-
-
-

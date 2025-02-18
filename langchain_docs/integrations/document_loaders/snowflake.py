@@ -2,13 +2,15 @@
 # coding: utf-8
 
 # # Snowflake
-# 
+#
 # This notebooks goes over how to load documents from Snowflake
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  snowflake-connector-python')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  snowflake-connector-python"
+)
 
 
 # In[3]:
@@ -56,4 +58,3 @@ snowflake_loader = SnowflakeLoader(
 )
 snowflake_documents = snowflake_loader.load()
 print(snowflake_documents)
-

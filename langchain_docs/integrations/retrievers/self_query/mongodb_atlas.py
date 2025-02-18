@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # MongoDB Atlas
-# 
-# >[MongoDB Atlas](https://www.mongodb.com/) is a document database that can be 
+#
+# >[MongoDB Atlas](https://www.mongodb.com/) is a document database that can be
 # used as a vector database.
-# 
+#
 # In the walkthrough, we'll demo the `SelfQueryRetriever` with a `MongoDB Atlas` vector store.
 
 # ## Creating a MongoDB Atlas vectorstore
 # First we'll want to create a MongoDB Atlas VectorStore and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # NOTE: The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `pymongo` package.
 
 # In[5]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark pymongo')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark pymongo")
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -90,7 +90,7 @@ vectorstore = MongoDBAtlasVectorSearch.from_documents(
 
 # Now, let's create a vector search index on your cluster. In the below example, `embedding` is the name of the field that contains the embedding vector. Please refer to the [documentation](https://www.mongodb.com/docs/atlas/atlas-search/field-types/knn-vector) to get more details on how to define an Atlas Vector Search index.
 # You can name the index `{COLLECTION_NAME}` and create the index on the namespace `{DB_NAME}.{COLLECTION_NAME}`. Finally, write the following definition in the JSON editor on MongoDB Atlas:
-# 
+#
 # ```json
 # {
 #   "mappings": {
@@ -194,9 +194,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[ ]:
@@ -217,4 +217,3 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("What are two movies about dinosaurs?")
-

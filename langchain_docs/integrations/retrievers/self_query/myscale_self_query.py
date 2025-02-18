@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # MyScale
-# 
+#
 # >[MyScale](https://docs.myscale.com/en/) is an integrated vector database. You can access your database in SQL and also from here, LangChain.
 # >`MyScale` can make use of [various data types and functions for filters](https://blog.myscale.com/2023/06/06/why-integrated-database-solution-can-boost-your-llm-apps/#filter-on-anything-without-constraints). It will boost up your LLM app no matter if you are scaling up your data or expand your system to broader application.
-# 
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `MyScale` vector store with some extra pieces we contributed to LangChain. 
-# 
+#
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `MyScale` vector store with some extra pieces we contributed to LangChain.
+#
 # In short, it can be condensed into 4 points:
 # 1. Add `contain` comparator to match the list of any if there is more than one element matched
 # 2. Add `timestamp` data type for datetime match (ISO-format, or YYYY-MM-DD)
@@ -16,13 +16,15 @@
 
 # ## Creating a MyScale vector store
 # MyScale has already been integrated to LangChain for a while. So you can follow [this notebook](/docs/integrations/vectorstores/myscale) to create your own vectorstore for a self-query retriever.
-# 
+#
 # **Note:** All self-query retrievers requires you to have `lark` installed (`pip install lark`). We use `lark` for grammar definition. Before you proceed to the next step, we also want to remind you that `clickhouse-connect` is also needed to interact with your MyScale backend.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark clickhouse-connect')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  lark clickhouse-connect"
+)
 
 
 # In this tutorial we follow other example's setting and use `OpenAIEmbeddings`. Remember to get an OpenAI API Key for valid access to LLMs.
@@ -57,7 +59,7 @@ embeddings = OpenAIEmbeddings()
 
 # ## Create some sample data
 # As you can see, the data we created has some differences compared to other self-query retrievers. We replaced the keyword `year` with `date` which gives you finer control on timestamps. We also changed the type of the keyword `gerne` to a list of strings, where an LLM can use a new `contain` comparator to construct filters. We also provide the `like` comparator and arbitrary function support to filters, which will be introduced in next few cells.
-# 
+#
 # Now let's look at the data first.
 
 # In[ ]:
@@ -188,7 +190,7 @@ retriever.invoke(
 
 
 # # Wait a second... what else?
-# 
+#
 # Self-query retriever with MyScale can do more! Let's find out.
 
 # In[ ]:
@@ -220,9 +222,9 @@ retriever.invoke("What's a movie who has genres science fiction and adventure?")
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[ ]:
@@ -243,4 +245,3 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
-

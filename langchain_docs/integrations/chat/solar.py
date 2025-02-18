@@ -26,7 +26,3 @@ chat.invoke(messages)
 
 
 # In[ ]:
-
-
-
-

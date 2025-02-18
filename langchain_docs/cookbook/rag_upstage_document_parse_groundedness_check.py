@@ -62,4 +62,3 @@ while groundedness != "grounded":
             "answer": result,
         }
     )
-

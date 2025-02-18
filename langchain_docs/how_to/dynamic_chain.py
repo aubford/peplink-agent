@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # How to create a dynamic (self-constructing) chain
-# 
+#
 # :::info Prerequisites
-# 
+#
 # This guide assumes familiarity with the following:
 # - [LangChain Expression Language (LCEL)](/docs/concepts/lcel)
 # - [How to turn any function into a runnable](/docs/how_to/functions)
-# 
+#
 # :::
-# 
+#
 # Sometimes we want to construct parts of a chain at runtime, depending on the chain inputs ([routing](/docs/how_to/routing/) is the most common example of this). We can create dynamic chains like this using a very useful property of RunnableLambda's, which is that if a RunnableLambda returns a Runnable, that Runnable is itself invoked. Let's see an example.
-# 
+#
 # import ChatModelTabs from "@theme/ChatModelTabs";
-# 
+#
 # <ChatModelTabs
 #   customVarName="llm"
 # />
-# 
+#
 
 # In[4]:
 
@@ -92,7 +92,7 @@ full_chain.invoke(
 
 
 # The key here is that `contextualize_if_needed` returns another Runnable and not an actual output. This returned Runnable is itself run when the full chain is executed.
-# 
+#
 # Looking at the trace we can see that, since we passed in chat_history, we executed the contextualize_question chain as part of the full chain: https://smith.langchain.com/public/9e0ae34c-4082-4f3f-beed-34a2a2f4c991/r
 
 # Note that the streaming, batching, etc. capabilities of the returned Runnable are all preserved
@@ -110,4 +110,3 @@ for chunk in contextualize_if_needed.stream(
     }
 ):
     print(chunk)
-

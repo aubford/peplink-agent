@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Apache Doris
-# 
+#
 # >[Apache Doris](https://doris.apache.org/) is a modern data warehouse for real-time analytics.
 # It delivers lightning-fast analytics on real-time data at scale.
-# 
+#
 # >Usually `Apache Doris` is categorized into OLAP, and it has showed excellent performance in [ClickBench — a Benchmark For Analytical DBMS](https://benchmark.clickhouse.com/). Since it has a super-fast vectorized execution engine, it could also be used as a fast vectordb.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # Here we'll show how to use the Apache Doris Vector Store.
 
 # ## Setup
@@ -17,7 +17,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pymysql')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pymysql")
 
 
 # Set `update_vectordb = False` at the beginning. If there is no docs updated, then we don't need to rebuild the embeddings of docs
@@ -25,8 +25,8 @@ get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pymysql')
 # In[ ]:
 
 
-get_ipython().system('pip install  sqlalchemy')
-get_ipython().system('pip install langchain')
+get_ipython().system("pip install  sqlalchemy")
+get_ipython().system("pip install langchain")
 
 
 # In[1]:
@@ -50,7 +50,7 @@ update_vectordb = False
 # ## Load docs and split them into tokens
 
 # Load all markdown files under the `docs` directory
-# 
+#
 # for Apache Doris documents, you can clone repo from https://github.com/apache/doris, and there is `docs` directory in it.
 
 # In[2]:
@@ -97,7 +97,7 @@ def gen_apache_doris(update_vectordb, embeddings, settings):
 # ## Convert tokens into embeddings and put them into vectordb
 
 # Here we use Apache Doris as vectordb, you can configure Apache Doris instance via `ApacheDorisSettings`.
-# 
+#
 # Configuring Apache Doris instance is pretty much like configuring mysql instance. You need to specify:
 # 1. host/port
 # 2. username(default: 'root')
@@ -148,4 +148,3 @@ qa = RetrievalQA.from_chain_type(
 query = "what is apache doris"
 resp = qa.run(query)
 print(resp)
-

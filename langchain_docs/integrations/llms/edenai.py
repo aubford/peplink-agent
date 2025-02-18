@@ -6,25 +6,25 @@
 # Eden AI is revolutionizing the AI landscape by uniting the best AI providers, empowering users to unlock limitless possibilities and tap into the true potential of artificial intelligence. With an all-in-one comprehensive and hassle-free platform, it allows users to deploy AI features to production lightning fast, enabling effortless access to the full breadth of AI capabilities via a single API. (website: https://edenai.co/)
 
 # This example goes over how to use LangChain to interact with Eden AI models
-# 
+#
 # -----------------------------------------------------------------------------------
-# 
+#
 
-# Accessing the EDENAI's API requires an API key, 
-# 
+# Accessing the EDENAI's API requires an API key,
+#
 # which you can get by creating an account https://app.edenai.run/user/register  and heading here https://app.edenai.run/admin/account/settings
-# 
+#
 # Once we have a key we'll want to set it as an environment variable by running:
-# 
+#
 # ```bash
 # export EDENAI_API_KEY="..."
 # ```
 
 # If you'd prefer not to set an environment variable you can pass the key in directly via the edenai_api_key named parameter
-# 
+#
 #  when initiating the EdenAI LLM class:
-# 
-# 
+#
+#
 
 # In[ ]:
 
@@ -39,13 +39,13 @@ llm = EdenAI(edenai_api_key="...", provider="openai", temperature=0.2, max_token
 
 
 # ## Calling a model
-# 
+#
 
 # The EdenAI API brings together various providers, each offering multiple models.
-# 
+#
 # To access a specific model, you can simply add 'model' during instantiation.
-# 
-# For instance, let's explore the models provided by OpenAI, such as GPT3.5 
+#
+# For instance, let's explore the models provided by OpenAI, such as GPT3.5
 
 # ### text generation
 
@@ -198,4 +198,3 @@ output = overall_chain.run("hats")
 
 # print the image
 print_base64_image(output)
-

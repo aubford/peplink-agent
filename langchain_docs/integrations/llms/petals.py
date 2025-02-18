@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Petals
-# 
+#
 # `Petals` runs 100B+ language models at home, BitTorrent-style.
-# 
+#
 # This notebook goes over how to use Langchain with [Petals](https://github.com/bigscience-workshop/petals).
 
 # ## Install petals
 # The `petals` package is required to use the Petals API. Install `petals` using `pip3 install petals`.
-# 
-# For Apple Silicon(M1/M2) users please follow this guide [https://github.com/bigscience-workshop/petals/issues/147#issuecomment-1365379642](https://github.com/bigscience-workshop/petals/issues/147#issuecomment-1365379642) to install petals 
+#
+# For Apple Silicon(M1/M2) users please follow this guide [https://github.com/bigscience-workshop/petals/issues/147#issuecomment-1365379642](https://github.com/bigscience-workshop/petals/issues/147#issuecomment-1365379642) to install petals
 
 # In[ ]:
 
 
-get_ipython().system('pip3 install petals')
+get_ipython().system("pip3 install petals")
 
 
 # ## Imports
@@ -88,4 +88,3 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.run(question)
-

@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Response metadata
-# 
+#
 # Many model providers include some metadata in their chat generation [responses](/docs/concepts/messages/#aimessage). This metadata can be accessed via the `AIMessage.response_metadata: Dict` attribute. Depending on the model provider and model configuration, this can contain information like [token counts](/docs/how_to/chat_token_usage_tracking), [logprobs](/docs/how_to/logprobs), and more.
-# 
+#
 # Here's what the response metadata looks like for a few different providers:
-# 
+#
 # ## OpenAI
 
 # In[2]:
@@ -107,4 +107,3 @@ from langchain_fireworks import ChatFireworks
 llm = ChatFireworks(model="accounts/fireworks/models/mixtral-8x7b-instruct")
 msg = llm.invoke([("human", "What's the oldest known example of cuneiform")])
 msg.response_metadata
-

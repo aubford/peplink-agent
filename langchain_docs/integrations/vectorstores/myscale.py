@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # MyScale
-# 
-# >[MyScale](https://docs.myscale.com/en/overview/) is a cloud-based database optimized for AI applications and solutions, built on the open-source [ClickHouse](https://github.com/ClickHouse/ClickHouse). 
-# 
+#
+# >[MyScale](https://docs.myscale.com/en/overview/) is a cloud-based database optimized for AI applications and solutions, built on the open-source [ClickHouse](https://github.com/ClickHouse/ClickHouse).
+#
 # This notebook shows how to use functionality related to the `MyScale` vector database.
 
 # ## Setting up environments
@@ -12,7 +12,9 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  clickhouse-connect langchain-community')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  clickhouse-connect langchain-community"
+)
 
 
 # We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
@@ -38,19 +40,19 @@ if "MYSCALE_PASSWORD" not in os.environ:
 
 
 # There are two ways to set up parameters for myscale index.
-# 
+#
 # 1. Environment Variables
-# 
+#
 #     Before you run the app, please set the environment variable with `export`:
 #     `export MYSCALE_HOST='<your-endpoints-url>' MYSCALE_PORT=<your-endpoints-port> MYSCALE_USERNAME=<your-username> MYSCALE_PASSWORD=<your-password> ...`
-# 
+#
 #     You can easily find your account, password and other info on our SaaS. For details please refer to [this document](https://docs.myscale.com/en/cluster-management/)
-# 
+#
 #     Every attributes under `MyScaleSettings` can be set with prefix `MYSCALE_` and is case insensitive.
-# 
+#
 # 2. Create `MyScaleSettings` object with parameters
-# 
-# 
+#
+#
 #     ```python
 #     from langchain_community.vectorstores import MyScale, MyScaleSettings
 #     config = MyScaleSetting(host="<your-backend-url>", port=8443, ...)
@@ -106,11 +108,11 @@ print(str(docsearch))
 
 
 # ## Filtering
-# 
+#
 # You can have direct access to myscale SQL where statement. You can write `WHERE` clause following standard SQL.
-# 
+#
 # **NOTE**: Please be aware of SQL injection, this interface must not be directly called by end-user.
-# 
+#
 # If you customized your `column_map` under your setting, you search with filter like this:
 
 # In[7]:
@@ -150,7 +152,7 @@ for d, dist in output:
 
 
 # ## Deleting your data
-# 
+#
 # You can either drop the table with `.drop()` method or partially delete your data with `.delete()` method.
 
 # In[9]:
@@ -175,7 +177,3 @@ docsearch.drop()
 
 
 # In[ ]:
-
-
-
-

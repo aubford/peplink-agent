@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # AskNews
-# 
+#
 # > [AskNews](https://asknews.app) infuses any LLM with the latest global news (or historical news), using a single natural language query. Specifically, AskNews is enriching over 300k articles per day by translating, summarizing, extracting entities, and indexing them into hot and cold vector databases. AskNews puts these vector databases on a low-latency endpoint for you. When you query AskNews, you get back a prompt-optimized string that contains all the most pertinent enrichments (e.g. entities, classifications, translation, summarization). This means that you do not need to manage your own news RAG, and you do not need to worry about how to properly convey news information in a condensed way to your LLM.
 # > AskNews is also committed to transparency, which is why our coverage is monitored and diversified across hundreds of countries, 13 languages, and 50 thousand sources. If you'd like to track our source coverage, you can visit our [transparency dashboard](https://asknews.app/en/transparency).
-# 
+#
 # ## Setup
-# 
+#
 # The integration lives in the `langchain-community` package. We also need to install the `asknews` package itself.
-# 
+#
 # ```bash
 # pip install -U langchain-community asknews
 # ```
-# 
+#
 # We also need to set our AskNews API credentials, which can be generated at the [AskNews console](https://my.asknews.app).
 
 # In[1]:
@@ -69,7 +69,7 @@ retriever.invoke("federal reserve S&P500")
 
 
 # ## Chaining
-# 
+#
 # We can easily combine this retriever in to a chain.
 
 # In[3]:
@@ -113,7 +113,3 @@ chain.invoke({"question": "What is the impact of fed policy on the tech sector?"
 
 
 # In[ ]:
-
-
-
-

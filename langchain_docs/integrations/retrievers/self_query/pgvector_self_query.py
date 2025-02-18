@@ -2,20 +2,22 @@
 # coding: utf-8
 
 # # PGVector (Postgres)
-# 
+#
 # >[PGVector](https://github.com/pgvector/pgvector) is a vector similarity search package for `Postgres` data base.
-# 
+#
 # In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `PGVector` vector store.
 
 # ## Creating a PGVector vector store
 # First we'll want to create a PGVector vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-# 
+#
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark pgvector psycopg2-binary')
+get_ipython().run_line_magic(
+    "pip", "install --upgrade --quiet  lark pgvector psycopg2-binary"
+)
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -160,9 +162,9 @@ retriever.invoke(
 
 
 # ## Filter k
-# 
+#
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-# 
+#
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[7]:
@@ -183,4 +185,3 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
-

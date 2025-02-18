@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # Vespa
-# 
+#
 # >[Vespa](https://vespa.ai/) is a fully featured search engine and vector database. It supports vector search (ANN), lexical search, and search in structured data, all in the same query.
-# 
+#
 # This notebook shows how to use `Vespa.ai` as a LangChain retriever.
-# 
+#
 # In order to create a retriever, we use [pyvespa](https://pyvespa.readthedocs.io/en/latest/index.html) to
 # create a connection a `Vespa` service.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pyvespa')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pyvespa")
 
 
 # In[2]:
@@ -29,8 +29,8 @@ vespa_app = Vespa(url="https://doc-search.vespa.oath.cloud")
 # [Vespa Cloud instance](https://pyvespa.readthedocs.io/en/latest/deploy-vespa-cloud.html)
 # or a local
 # [Docker instance](https://pyvespa.readthedocs.io/en/latest/deploy-docker.html).
-# 
-# 
+#
+#
 # After connecting to the service, you can set up the retriever:
 
 # In[ ]:
@@ -52,14 +52,13 @@ retriever = VespaRetriever(vespa_app, vespa_query_body, vespa_content_field)
 # Here, up to 5 results are retrieved from the `content` field in the `paragraph` document type,
 # using `doumentation` as the ranking method. The `userQuery()` is replaced with the actual query
 # passed from LangChain.
-# 
+#
 # Please refer to the [pyvespa documentation](https://pyvespa.readthedocs.io/en/latest/getting-started-pyvespa.html#Query)
 # for more information.
-# 
+#
 # Now you can return the results and continue using the results in LangChain.
 
 # In[2]:
 
 
 retriever.invoke("what is vespa?")
-

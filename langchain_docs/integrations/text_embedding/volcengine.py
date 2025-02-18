@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # Volc Engine
-# 
+#
 # This notebook provides you with a guide on how to load the Volcano Embedding class.
-# 
-# 
+#
+#
 # ## API Initialization
-# 
+#
 # To use the LLM services based on [VolcEngine](https://www.volcengine.com/docs/82379/1099455), you have to initialize these parameters:
-# 
+#
 # You could either choose to init the AK,SK in environment variables or init params:
-# 
+#
 # ```base
 # export VOLC_ACCESSKEY=XXX
 # export VOLC_SECRETKEY=XXX
@@ -44,7 +44,3 @@ print("", r[:8])
 
 
 # In[ ]:
-
-
-
-

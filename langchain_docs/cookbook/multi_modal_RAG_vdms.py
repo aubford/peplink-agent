@@ -2,29 +2,31 @@
 # coding: utf-8
 
 # ## VDMS multi-modal RAG
-# 
-# Many documents contain a mixture of content types, including text and images. 
-# 
+#
+# Many documents contain a mixture of content types, including text and images.
+#
 # Yet, information captured in images is lost in most RAG applications.
-# 
-# With the emergence of multimodal LLMs, like [GPT-4V](https://openai.com/research/gpt-4v-system-card), it is worth considering how to utilize images in RAG. 
-# 
-# This cookbook highlights: 
+#
+# With the emergence of multimodal LLMs, like [GPT-4V](https://openai.com/research/gpt-4v-system-card), it is worth considering how to utilize images in RAG.
+#
+# This cookbook highlights:
 # * Use of [Unstructured](https://unstructured.io/) to parse images, text, and tables from documents (PDFs).
 # * Use of multimodal embeddings (such as [CLIP](https://openai.com/research/clip)) to embed images and text
 # * Use of [VDMS](https://github.com/IntelLabs/vdms/blob/master/README.md) as a vector store with support for multi-modal
 # * Retrieval of both images and text using similarity search
-# * Passing raw images and text chunks to a multimodal LLM for answer synthesis 
+# * Passing raw images and text chunks to a multimodal LLM for answer synthesis
 
 # ## Start VDMS Server
-# 
-# Let's start a VDMS docker using port 55559 instead of default 55555. 
+#
+# Let's start a VDMS docker using port 55559 instead of default 55555.
 # Keep note of the port and hostname as this is needed for the vector store as it uses the VDMS Python client to connect to the server.
 
 # In[1]:
 
 
-get_ipython().system(' docker run --rm -d -p 55559:55555 --name vdms_rag_nb intellabs/vdms:latest')
+get_ipython().system(
+    " docker run --rm -d -p 55559:55555 --name vdms_rag_nb intellabs/vdms:latest"
+)
 
 # Connect to VDMS Vector Store
 from langchain_community.vectorstores.vdms import VDMS_Client
@@ -33,16 +35,18 @@ vdms_client = VDMS_Client(port=55559)
 
 
 # ## Packages
-# 
+#
 # For `unstructured`, you will also need `poppler` ([installation instructions](https://pdf2image.readthedocs.io/en/latest/installation.html)) and `tesseract` ([installation instructions](https://tesseract-ocr.github.io/tessdoc/Installation.html)) in your system.
 
 # In[2]:
 
 
-get_ipython().system(' pip install --quiet -U vdms langchain-experimental')
+get_ipython().system(" pip install --quiet -U vdms langchain-experimental")
 
 # lock to 0.10.19 due to a persistent bug in more recent versions
-get_ipython().system(' pip install --quiet pdf2image "unstructured[all-docs]==0.10.19" pillow pydantic lxml open_clip_torch')
+get_ipython().system(
+    ' pip install --quiet pdf2image "unstructured[all-docs]==0.10.19" pillow pydantic lxml open_clip_torch'
+)
 
 
 # In[3]:
@@ -53,11 +57,11 @@ get_ipython().system(' pip install --quiet pdf2image "unstructured[all-docs]==0.
 
 
 # ## Data Loading
-# 
+#
 # ### Partition PDF text and images
-#   
+#
 # Let's use famous photographs from the PDF version of Library of Congress Magazine in this example.
-# 
+#
 # We can use `partition_pdf` from [Unstructured](https://unstructured-io.github.io/unstructured/introduction.html#key-concepts) to extract text and images.
 
 # In[4]:
@@ -111,10 +115,10 @@ for element in raw_pdf_elements:
 
 
 # ## Multi-modal embeddings with our document
-# 
+#
 # In this section, we initialize the VDMS vector store for both text and images. For better performance, we use model `ViT-g-14` from [OpenClip multimodal embeddings](https://python.langchain.com/docs/integrations/text_embedding/open_clip).
 # The images are stored as base64 encoded strings with `vectorstore.add_images`.
-# 
+#
 
 # In[7]:
 
@@ -153,7 +157,7 @@ retriever = vectorstore.as_retriever()
 
 
 # ## RAG
-# 
+#
 # Here we define helper functions for image results.
 
 # In[8]:
@@ -216,13 +220,13 @@ def split_image_text_types(docs):
 
 
 # Currently, we format the inputs using a `RunnableLambda` while we add image support to `ChatPromptTemplates`.
-# 
-# Our runnable follows the classic RAG flow - 
-# 
-# * We first compute the context (both "texts" and "images" in this case) and the question (just a RunnablePassthrough here) 
-# * Then we pass this into our prompt template, which is a custom function that formats the message for the llava model. 
+#
+# Our runnable follows the classic RAG flow -
+#
+# * We first compute the context (both "texts" and "images" in this case) and the question (just a RunnablePassthrough here)
+# * Then we pass this into our prompt template, which is a custom function that formats the message for the llava model.
 # * And finally we parse the output as a string.
-# 
+#
 # Here we are using Ollama to serve the Llava model. Please see [Ollama](https://python.langchain.com/docs/integrations/llms/ollama) for setup instructions.
 
 # In[9]:
@@ -333,5 +337,4 @@ print(response)
 # In[12]:
 
 
-get_ipython().system(' docker kill vdms_rag_nb')
-
+get_ipython().system(" docker kill vdms_rag_nb")

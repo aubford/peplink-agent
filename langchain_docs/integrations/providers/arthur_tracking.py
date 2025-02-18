@@ -4,13 +4,13 @@
 # # Arthur
 
 # >[Arthur](https://arthur.ai) is a model monitoring and observability platform.
-# 
+#
 # The following guide shows how to run a registered chat LLM with the Arthur callback handler to automatically log model inferences to Arthur.
-# 
+#
 # If you do not have a model currently onboarded to Arthur, visit our [onboarding guide for generative text models](https://docs.arthur.ai/user-guide/walkthroughs/model-onboarding/generative_text_onboarding.html). For more information about how to use the `Arthur SDK`, visit our [docs](https://docs.arthur.ai/).
 
 # ## Installation and Setup
-# 
+#
 # Place Arthur credentials here
 
 # In[3]:
@@ -57,7 +57,7 @@ chatgpt = make_langchain_chat_llm()
 
 
 # Running the chat LLM with this `run` function will save the chat history in an ongoing list so that the conversation can reference earlier messages and log each response to the Arthur platform. You can view the history of this model's inferences on your [model dashboard page](https://app.arthur.ai/).
-# 
+#
 # Enter `q` to quit the run loop
 
 # In[13]:
@@ -77,4 +77,3 @@ def run(llm):
 
 
 run(chatgpt)
-

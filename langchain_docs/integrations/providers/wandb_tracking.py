@@ -2,32 +2,32 @@
 # coding: utf-8
 
 # # Weights & Biases tracking
-# 
-# This notebook goes over how to track your LangChain experiments into one centralized `Weights and Biases` dashboard. 
-# 
+#
+# This notebook goes over how to track your LangChain experiments into one centralized `Weights and Biases` dashboard.
+#
 # To learn more about prompt engineering and the callback please refer to this notebook which explains both alongside the resultant dashboards you can expect to see:
-# 
+#
 # <a href="https://colab.research.google.com/drive/1DXH4beT4HFaRKy_Vm4PoxhXVDRf7Ym8L?usp=sharing" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-# 
-# 
+#
+#
 # View a detailed description and examples in the [W&B article](https://wandb.ai/a-sh0ts/langchain_callback_demo/reports/Prompt-Engineering-LLMs-with-LangChain-and-W-B--VmlldzozNjk1NTUw#👋-how-to-build-a-callback-in-langchain-for-better-prompt-engineering
-# ). 
-# 
-# 
-# **Note**: _the `WandbCallbackHandler` is being deprecated in favour of the `WandbTracer`_ . In future please use the `WandbTracer` as it is more flexible and allows for more granular logging. 
-# 
-# To know more about the `WandbTracer` refer to the [agent_with_wandb_tracing](/docs/integrations/providers/wandb_tracing) notebook or use the following [colab notebook](http://wandb.me/prompts-quickstart). 
-# 
+# ).
+#
+#
+# **Note**: _the `WandbCallbackHandler` is being deprecated in favour of the `WandbTracer`_ . In future please use the `WandbTracer` as it is more flexible and allows for more granular logging.
+#
+# To know more about the `WandbTracer` refer to the [agent_with_wandb_tracing](/docs/integrations/providers/wandb_tracing) notebook or use the following [colab notebook](http://wandb.me/prompts-quickstart).
+#
 # To know more about Weights & Biases Prompts refer to the following [prompts documentation](https://docs.wandb.ai/guides/prompts).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  wandb')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pandas')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  textstat')
-get_ipython().run_line_magic('pip', 'install --upgrade --quiet  spacy')
-get_ipython().system('python -m spacy download en_core_web_sm')
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  wandb")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  pandas")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  textstat")
+get_ipython().run_line_magic("pip", "install --upgrade --quiet  spacy")
+get_ipython().system("python -m spacy download en_core_web_sm")
 
 
 # In[1]:
@@ -52,7 +52,7 @@ from langchain_openai import OpenAI
 
 # ```
 # Callback Handler that logs to Weights and Biases.
-# 
+#
 # Parameters:
 #     job_type (str): The type of job.
 #     project (str): The project to log to.
@@ -68,12 +68,12 @@ from langchain_openai import OpenAI
 
 # ```
 # Default values for WandbCallbackHandler(...)
-# 
+#
 # visualize: bool = False,
 # complexity_metrics: bool = False,
 # stream_logs: bool = False,
 # ```
-# 
+#
 
 # NOTE: For beta workflows we have made the default analysis based on textstat and the visualizations based on spacy
 
@@ -100,16 +100,16 @@ callbacks = [StdOutCallbackHandler(), wandb_callback]
 llm = OpenAI(temperature=0, callbacks=callbacks)
 
 
-# 
-# 
+#
+#
 # ```
 # # Defaults for WandbCallbackHandler.flush_tracker(...)
-# 
+#
 # reset: bool = True,
 # finish: bool = False,
 # ```
-# 
-# 
+#
+#
 
 # The `flush_tracker` function is used to log LangChain sessions to Weights & Biases. It takes in the LangChain module or agent, and logs at minimum the prompts and generations alongside the serialized form of the LangChain module to the specified Weights & Biases project. By default we reset the session as opposed to concluding the session outright.
 
@@ -181,7 +181,3 @@ wandb_callback.flush_tracker(agent, reset=False, finish=True)
 
 
 # In[ ]:
-
-
-
-

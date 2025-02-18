@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # #  Activeloop Deep Lake
-# 
+#
 # >[Activeloop Deep Lake](https://docs.activeloop.ai/) as a Multi-Modal Vector Store that stores embeddings and their metadata including text, Jsons, images, audio, video, and more. It saves the data locally, in your cloud, or on Activeloop storage. It performs hybrid search including embeddings and their attributes.
-# 
-# This notebook showcases basic functionality related to `Activeloop Deep Lake`. While `Deep Lake` can store embeddings, it is capable of storing any type of data. It is a serverless data lake with version control, query engine and streaming dataloaders to deep learning frameworks.  
-# 
+#
+# This notebook showcases basic functionality related to `Activeloop Deep Lake`. While `Deep Lake` can store embeddings, it is capable of storing any type of data. It is a serverless data lake with version control, query engine and streaming dataloaders to deep learning frameworks.
+#
 # For more information, please see the Deep Lake [documentation](https://docs.activeloop.ai) or [api reference](https://docs.deeplake.ai)
 
 # ## Setting up
@@ -14,13 +14,16 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic('pip', "install --upgrade --quiet  langchain-openai langchain-community 'deeplake[enterprise]' tiktoken")
+get_ipython().run_line_magic(
+    "pip",
+    "install --upgrade --quiet  langchain-openai langchain-community 'deeplake[enterprise]' tiktoken",
+)
 
 
 # ## Example provided by Activeloop
-# 
+#
 # [Integration with LangChain](https://docs.activeloop.ai/tutorials/vector-store/deep-lake-vector-store-in-langchain).
-# 
+#
 
 # ## Deep Lake locally
 
@@ -58,7 +61,7 @@ embeddings = OpenAIEmbeddings()
 
 
 # ### Create a local dataset
-# 
+#
 # Create a dataset locally at `./deeplake/`, then run similarity search. The Deeplake+LangChain integration uses Deep Lake datasets under the hood, so `dataset` and `vector store` are used interchangeably. To create a dataset in your own cloud, or in the Deep Lake storage, [adjust the path accordingly](https://docs.activeloop.ai/storage-and-credentials/storage-options).
 
 # In[ ]:
@@ -147,7 +150,7 @@ db.similarity_search(
 
 
 # ### Choosing distance function
-# Distance function `L2` for Euclidean, `L1` for Nuclear, `Max` l-infinity distance, `cos` for cosine similarity, `dot` for dot product 
+# Distance function `L2` for Euclidean, `L1` for Nuclear, `Max` l-infinity distance, `cos` for cosine similarity, `dot` for dot product
 
 # In[12]:
 
@@ -215,7 +218,7 @@ docs = db.similarity_search(query)
 print(docs[0].page_content)
 
 
-# #### `tensor_db` execution option 
+# #### `tensor_db` execution option
 
 # In order to utilize Deep Lake's Managed Tensor Database, it is necessary to specify the runtime parameter as `{'tensor_db': True}` during the creation of the vector store. This configuration enables the execution of queries on the Managed Tensor Database, rather than on the client side. It should be noted that this functionality is not applicable to datasets stored locally or in-memory. In the event that a vector store has already been created outside of the Managed Tensor Database, it is possible to transfer it to the Managed Tensor Database by following the prescribed steps.
 
@@ -327,4 +330,3 @@ deeplake.deepcopy(src=source, dest=destination, overwrite=True)
 
 db = DeepLake(dataset_path=destination, embedding=embeddings)
 db.add_documents(docs)
-

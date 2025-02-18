@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # AnalyticDB
-# 
+#
 # >[AnalyticDB for PostgreSQL](https://www.alibabacloud.com/help/en/analyticdb-for-postgresql/latest/product-introduction-overview) is a massively parallel processing (MPP) data warehousing service that is designed to analyze large volumes of data online.
-# 
+#
 # >`AnalyticDB for PostgreSQL` is developed based on the open-source `Greenplum Database` project and is enhanced with in-depth extensions by `Alibaba Cloud`. AnalyticDB for PostgreSQL is compatible with the ANSI SQL 2003 syntax and the PostgreSQL and Oracle database ecosystems. AnalyticDB for PostgreSQL also supports row store and column store. AnalyticDB for PostgreSQL processes petabytes of data offline at a high performance level and supports highly concurrent online queries.
-# 
+#
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-# 
+#
 # This notebook shows how to use functionality related to the `AnalyticDB` vector database.
 # To run, you should have an [AnalyticDB](https://www.alibabacloud.com/help/en/analyticdb-for-postgresql/latest/product-introduction-overview) instance up and running:
-# 
+#
 # - Using [AnalyticDB Cloud Vector Database](https://www.alibabacloud.com/product/hybriddb-postgresql). Click here to fast deploy it.
 
 # In[ ]:
@@ -45,7 +45,7 @@ embeddings = OpenAIEmbeddings()
 # export PG_USER={database_username}
 # export PG_PASSWORD={database_password}
 # ```
-# 
+#
 # Then store your embeddings and documents into AnalyticDB
 
 # In[3]:
@@ -82,4 +82,3 @@ docs = vector_db.similarity_search(query)
 
 
 print(docs[0].page_content)
-
