@@ -1,7 +1,6 @@
-# %%
 import pandas as pd
 from pathlib import Path
-from transform.base_transform import BaseTransform
+from transform.base_transform import BaseTransform, SubjectMatter
 from transform.html.langchain_splitter_fork import HTMLSemanticPreservingSplitter
 from util.util_main import set_string_columns
 
@@ -10,7 +9,7 @@ class HTMLTransform(BaseTransform):
     """Transform and chunk HTML documents."""
 
     folder_name = "html"
-    subject_matter = "pepwave"
+    subject_matter = SubjectMatter.PEPWAVE
 
     def __init__(self):
         super().__init__()

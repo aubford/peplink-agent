@@ -84,7 +84,9 @@ class TestRedditTransform:
             "replies": [],
         }
 
-    def high_quality_blocked_reply(self, *, id: str = "42", parent_id: str = "42") -> RedditComment:
+    def high_quality_blocked_reply(
+        self, *, id: str = "42", parent_id: str = "42"
+    ) -> RedditComment:
         return {
             "id": self._id(id),
             "parent_id": self._id(parent_id, True),
@@ -98,7 +100,9 @@ class TestRedditTransform:
             "replies": [],
         }
 
-    def low_quality_reply(self, *, id: str = "42", parent_id: str = "42") -> RedditComment:
+    def low_quality_reply(
+        self, *, id: str = "42", parent_id: str = "42"
+    ) -> RedditComment:
         return {
             "id": self._id(id),
             "parent_id": self._id(parent_id, True),
@@ -220,7 +224,11 @@ class TestRedditTransform:
             ],
         }
 
-        expected_xml = f"<comment> {self.get_body(False)}\n" f"  <reply> {self.get_body()} </reply>\n" "</comment>"
+        expected_xml = (
+            f"<comment> {self.get_body(False)}\n"
+            f"  <reply> {self.get_body()} </reply>\n"
+            "</comment>"
+        )
 
         actual_xml = transformer.transform_comment(comment_with_good_descendants)
         assert actual_xml == expected_xml
@@ -262,7 +270,9 @@ class TestRedditTransform:
                 },
                 "replies": [
                     self.low_quality_reply(parent_id="short_comment_for_no_replies"),
-                    self.high_quality_blocked_reply(parent_id="short_comment_for_no_replies"),
+                    self.high_quality_blocked_reply(
+                        parent_id="short_comment_for_no_replies"
+                    ),
                 ],
             },
         ]
@@ -289,7 +299,9 @@ class TestRedditTransform:
             f"<comment> {self.get_body()} </comment>"
         )
 
-        actual_content = transformer.transform_post_into_post_comments(document, Path("file_path"))
+        actual_content = transformer.transform_post_into_post_comments(
+            document, Path("file_path")
+        )
         assert len(actual_content) == 3
         assert actual_content[0]["page_content"].strip() == expected_content
         assert actual_content[1]["page_content"].strip() == expected_content_no_replies
@@ -301,7 +313,9 @@ class TestRedditTransform:
         failures = []
 
         def assert_score_set(scores: list[int], num_comments: int):
-            filtered_comments = t.filter_comments([self.comment_or_reply(score=s) for s in scores])
+            filtered_comments = t.filter_comments(
+                [self.comment_or_reply(score=s) for s in scores]
+            )
             if len(filtered_comments) != num_comments:
                 filtered_scores = [c["score"] for c in filtered_comments]
                 fail_str = f"\n**Failed**: {scores}\nlength: {len(scores)}\nexpected: {num_comments}\nactual: {len(filtered_comments)}\nres: {filtered_scores}"

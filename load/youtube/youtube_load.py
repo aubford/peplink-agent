@@ -11,7 +11,7 @@ class YoutubeLoad(BaseLoad):
     def __init__(self):
         super().__init__("youtube")
 
-    def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         combined_df = pd.concat(dfs)
         combined_df = dedupe_df_ids(combined_df)
         deduped = self.deduplication_pipeline.run(
@@ -23,14 +23,11 @@ class YoutubeLoad(BaseLoad):
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=3000, chunk_overlap=300, length_function=len
         )
-        split_docs = text_splitter.split_documents(documents)
+        split_docs = self._split_docs(documents, text_splitter)
         return split_docs
 
 
 loader = YoutubeLoad()
-
-# %%
-
 loader.load()
 
 # %%

@@ -21,9 +21,10 @@ def df_to_documents(df: pd.DataFrame) -> List[Document]:
     documents: List[Document] = []
     for _, row in df.iterrows():
         metadata = row.drop(["page_content", "id"]).to_dict()
-        metadata["record_id"] = row["id"]
         metadata = sanitize_metadata(metadata)
-        doc = Document(id=row["id"], page_content=row["page_content"], metadata=metadata)
+        doc = Document(
+            id=row["id"], page_content=row["page_content"], metadata=metadata
+        )
         documents.append(doc)
     return documents
 

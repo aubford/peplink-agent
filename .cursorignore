@@ -5,17 +5,17 @@ __pycache__/
 backup_data/
 data/
 logs/
-!langchain_pepwave_env/*
-!langchain_pepwave_env/lib/*
-!langchain_pepwave_env/lib/python3.12/*
-!langchain_pepwave_env/lib/python3.12/site-packages/*
-!langchain_pepwave_env/lib/python3.12/site-packages/pinecone*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/langchain*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/rapidfuzz*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/google*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/hugging*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/openai*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/pdf*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/praw*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/sentence_transformers*/**/*
-!langchain_pepwave_env/lib/python3.12/site-packages/youtube*/**/*
+# !langchain_pepwave_env/*
+# !langchain_pepwave_env/lib/*
+# !langchain_pepwave_env/lib/python3.12/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/pinecone*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/langchain*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/rapidfuzz*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/google*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/hugging*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/openai*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/pdf*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/praw*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/sentence_transformers*/**/*
+# !langchain_pepwave_env/lib/python3.12/site-packages/youtube*/**/*

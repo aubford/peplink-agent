@@ -105,7 +105,9 @@ class ForkedRedditPostsLoader(BaseLoader):
                 metadata=metadata,
             )
 
-    def handle_replace_more(self, post_comments: praw.models.CommentForest) -> praw.models.CommentForest:
+    def handle_replace_more(
+        self, post_comments: praw.models.CommentForest
+    ) -> praw.models.CommentForest:
         pause_coeff = 1
         while True:
             try:
@@ -118,8 +120,9 @@ class ForkedRedditPostsLoader(BaseLoader):
                 if pause_coeff > 16:
                     raise Exception("Failed to replace more comments after 5 retries")
 
-
-    def _get_comments(self, post_comments: praw.models.CommentForest, roots_only: bool = False) -> List[dict]:
+    def _get_comments(
+        self, post_comments: praw.models.CommentForest, roots_only: bool = False
+    ) -> List[dict]:
         self.handle_replace_more(post_comments)
         comments = []
         for comment in post_comments.list():

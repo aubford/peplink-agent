@@ -7,6 +7,7 @@ from util.util_main import (
     set_string_columns,
 )
 
+
 class WebTransform(BaseTransform):
     """Transform web page data from JSONL files into a structured DataFrame."""
 

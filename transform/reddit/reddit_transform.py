@@ -47,9 +47,9 @@ class RedditComment(TypedDict):
 
 class RedditTransform(BaseTransform):
     def __init__(self, folder_name: str, subject_matter: SubjectMatter):
-        super().__init__()
-        self.folder_name = folder_name
         self.subject_matter = subject_matter
+        self.folder_name = folder_name
+        super().__init__()
 
     def transform_file(self, file_path: Path) -> pd.DataFrame:
         post_and_comments = []
@@ -61,7 +61,9 @@ class RedditTransform(BaseTransform):
                     print("No Author: Skipping")
                     continue
 
-                post_and_comments.extend(self.transform_post_into_post_comments(data, file_path))
+                post_and_comments.extend(
+                    self.transform_post_into_post_comments(data, file_path)
+                )
         df = self.make_df(post_and_comments)
 
         # validate score is integer and not NaN or None
@@ -86,19 +88,27 @@ class RedditTransform(BaseTransform):
         # Count rows with None in any author_ column
         author_columns = [col for col in df.columns if col.startswith("author_")]
         rows_without_author_count = df[author_columns].isna().any(axis=1).sum()
-        print(f"{file_path}: Found {rows_without_author_count} rows with None values in author columns")
+        print(
+            f"{file_path}: Found {rows_without_author_count} rows with None values in author columns"
+        )
 
         return df
 
     @staticmethod
     def author_invalid(author):
-        invalid = not author or author.get("is_suspended", False) or author["is_blocked"]
+        invalid = (
+            not author or author.get("is_suspended", False) or author["is_blocked"]
+        )
         if invalid:
             print(f"Author invalid, skipping\n{author}")
         return invalid
 
     def is_quality_comment_or_reply(
-        self, comment: RedditComment, min_karma: int = 50, min_score: int = 2, min_length: int = 20
+        self,
+        comment: RedditComment,
+        min_karma: int = 50,
+        min_score: int = 2,
+        min_length: int = 20,
     ) -> bool:
         """
         Check if a comment or reply is of high quality. High quality comments and replies are either: (defaults)
@@ -120,7 +130,10 @@ class RedditTransform(BaseTransform):
         score = comment["score"]
         word_count = len(comment["body"].split())
         return word_count >= min_length and (
-            (author["comment_karma"] >= min_karma and (score >= min_score or word_count >= (min_length * 3) + 100))
+            (
+                author["comment_karma"] >= min_karma
+                and (score >= min_score or word_count >= (min_length * 3) + 100)
+            )
             or author.get("is_gold", False)
             or score >= min_score + 1
             or author["comment_karma"] > 1000
@@ -145,21 +158,29 @@ class RedditTransform(BaseTransform):
             str: A string in XML format representing the conversation in the comment section of the post.
         """
 
-        high_quality_replies = [comment for comment in comment["replies"] if self.is_quality_comment_or_reply(comment)]
+        high_quality_replies = [
+            comment
+            for comment in comment["replies"]
+            if self.is_quality_comment_or_reply(comment)
+        ]
 
         # If there are no high quality replies and the comment is not itself high quality, return None to be filtered out.
         # If a comment doesn't have quality replies, it needs to have enough content itself to potentially
         # have any information value, so we up the min length. We set the other params to initial since that filtering
         # has already been handled by filter_comments.
         if not high_quality_replies:
-            if self.is_quality_comment_or_reply(comment, min_karma=0, min_score=1, min_length=40):
+            if self.is_quality_comment_or_reply(
+                comment, min_karma=0, min_score=1, min_length=40
+            ):
                 return f"<comment> {comment['body']} </comment>"
             else:
                 return None
 
         # recursively prune the reply tree to only include high quality replies and their ancestors
         def is_quality_node(node: RedditComment) -> bool:
-            return node in high_quality_replies or any(is_quality_node(r) for r in node["replies"])
+            return node in high_quality_replies or any(
+                is_quality_node(r) for r in node["replies"]
+            )
 
         # check if the reply is a direct child of the comment to build a reply tree instead of forest
         def is_child_node(parent: RedditComment, descendant: RedditComment) -> bool:
@@ -235,7 +256,9 @@ class RedditTransform(BaseTransform):
         print(f"cutoff_index: {cutoff_index}")
         return sorted_comments[:cutoff_index]
 
-    def transform_post_into_post_comments(self, post: dict, file_path: Path) -> list[dict]:
+    def transform_post_into_post_comments(
+        self, post: dict, file_path: Path
+    ) -> list[dict]:
         """
         For each comment in the post, create a document with the page content string with this format:
 
@@ -246,7 +269,7 @@ class RedditTransform(BaseTransform):
         {Single comment and its replies from output of self.transform_comment}
 
         We use the comment as the first class citizen instead of the post since we are looking for answers to
-        questions as opposed to questions themselves. In a normative sample, the post is typically a question and comments are answers with 
+        questions as opposed to questions themselves. In a normative sample, the post is typically a question and comments are answers with
         each comment along with its post and replies documenting a single conversation about a given "answer" to the "question".
         We vet the reliability of comments and replies to comments by ensuring that they are from a reputable user or have been upvoted.
         If none of the comments have been upvoted, this is likely due to the post having little engagement, which doesn't necessarily mean
@@ -289,7 +312,9 @@ class RedditTransform(BaseTransform):
                     "post_author_comment_karma": author.get("comment_karma", 0),
                     "post_author_link_karma": author.get("link_karma", 0),
                     "post_author_verified": author.get("verified", None),
-                    "post_author_has_verified_email": author.get("has_verified_email", None),
+                    "post_author_has_verified_email": author.get(
+                        "has_verified_email", None
+                    ),
                     "post_author_has_subscribed": author.get("has_subscribed", None),
                     "post_author_is_employee": author.get("is_employee", None),
                     "comment_author_name": comment_author["name"],
@@ -301,20 +326,28 @@ class RedditTransform(BaseTransform):
                     "comment_author_comment_karma": comment_author["comment_karma"],
                     "comment_author_link_karma": comment_author["link_karma"],
                     "comment_author_verified": comment_author["verified"],
-                    "comment_author_has_verified_email": comment_author["has_verified_email"],
+                    "comment_author_has_verified_email": comment_author[
+                        "has_verified_email"
+                    ],
                     "comment_author_has_subscribed": comment_author["has_subscribed"],
                     "comment_author_is_employee": comment_author["is_employee"],
                 },
-                page_content=self.create_page_content(meta["title"], post["page_content"], transformed_comment_str),
+                page_content=self.create_page_content(
+                    meta["title"], post["page_content"], transformed_comment_str
+                ),
                 file_path=file_path,
                 doc_id=f"p_{meta['id']}_com_{comment['id']}",
             )
             post_comments.append(transformed_post)
         return post_comments
 
-    
+
 if __name__ == "__main__":
-    transformer = RedditTransform(folder_name="reddit", subject_matter=SubjectMatter.PEPWAVE)
+    transformer = RedditTransform(
+        folder_name="reddit", subject_matter=SubjectMatter.PEPWAVE
+    )
     transformer.transform()
-    general_transformer = RedditTransform(folder_name="reddit_general", subject_matter=SubjectMatter.IT_NETWORKING)
+    general_transformer = RedditTransform(
+        folder_name="reddit_general", subject_matter=SubjectMatter.IT_NETWORKING
+    )
     general_transformer.transform()

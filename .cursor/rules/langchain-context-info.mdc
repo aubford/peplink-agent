@@ -1,0 +1,16 @@
+---
+description: Use this when asked something about or related to the LangChain LLM app framework.
+globs: 
+---
+If you are asked about something that is about or related to LangChain, use these resources to learn about how a the LangChain framework works:
+
+## Directories
+
+Search these project directories for pertinent information:
+
+- `langchain_docs/` contains the LangChain documentation. Retrieve the files from this directory to get more context.
+- `langchain_docs/cookbook/` contains the LangChain "cookbook". This is a library of demo code that is helpful for learning how to use LangChain and best practices. Search for examples that may be related to the user question in this directory.
+
+## Rules
+
+Include "I researched the LangChain resources outlined in the Cursor rule." in your response so I know you used this rule.

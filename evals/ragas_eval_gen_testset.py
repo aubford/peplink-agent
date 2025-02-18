@@ -18,7 +18,9 @@ kg = KnowledgeGraph.load("evals/staged_knowledge_graph.json")
 generator_llm = LangchainLLMWrapper(ChatOpenAI(model_name=LLM_MODEL))
 generator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 
-generator = TestsetGenerator(llm=generator_llm, embedding_model=generator_embeddings, knowledge_graph=kg)
+generator = TestsetGenerator(
+    llm=generator_llm, embedding_model=generator_embeddings, knowledge_graph=kg
+)
 
 query_distribution = [
     (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 0.5),
@@ -29,7 +31,7 @@ query_distribution = [
 dataset = generator.generate(
     testset_size=TESTSET_SIZE,
     query_distribution=query_distribution,
-    with_debugging_logs=True
+    with_debugging_logs=True,
 )
 
 # upload to ragas app

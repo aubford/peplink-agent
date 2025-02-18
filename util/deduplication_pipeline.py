@@ -24,10 +24,18 @@ def prep_str_for_matching(s: str) -> str:
 
 class DeduplicationPipeline:
     def __init__(self, name: str, silent: bool = False):
-        self.logger = RotatingFileLogWriter(f"deduplication_pipeline-{name}", silent=silent)
-        self.filter_logger = RotatingFileLogger(f"dedupe-filter-{name}", silent=silent)
-        self.candidate_logger = RotatingFileLogger(f"dedupe-candidates-{name}", silent=silent)
-        self.duplicate_logger = RotatingFileLogger(f"dedupe-duplicates-{name}", silent=silent)
+        self.logger = RotatingFileLogWriter(
+            f"deduplication_pipeline-{name}", silent=silent
+        )
+        self.filter_logger = RotatingFileLogger(
+            f"dedupe-filter-{name}", silent=silent, log_to_console=False
+        )
+        self.candidate_logger = RotatingFileLogger(
+            f"dedupe-candidates-{name}", silent=silent, log_to_console=False
+        )
+        self.duplicate_logger = RotatingFileLogger(
+            f"dedupe-duplicates-{name}", silent=silent, log_to_console=False
+        )
 
     @timer("Tokenize documents")
     def _tokenize_documents(self, df: pd.DataFrame) -> List[TokenizedDoc]:
@@ -60,7 +68,9 @@ class DeduplicationPipeline:
         Returns filtered corpus with exact duplicates removed.
         This is a set comparison but uses bigrams to account for some word order.
         """
-        self.logger.log_and_print_header(f"Filter exact duplicates for: {len(docs)} docs")
+        self.logger.log_and_print_header(
+            f"Filter exact duplicates for: {len(docs)} docs"
+        )
         self.logger.log_and_print(f"N-Gram: 2, Threshold: {threshold}")
 
         # Ignore docs with too few unique tokens
@@ -73,10 +83,13 @@ class DeduplicationPipeline:
                 valid_indices.append(i)
 
         # Process only valid docs with MinHash
-        minhashes = MinHash.bulk([doc.get_encoded_tokens(ngram=2) for doc in valid_docs], num_perm=1024)
+        minhashes = MinHash.bulk(
+            [doc.get_encoded_tokens(ngram=2) for doc in valid_docs], num_perm=1024
+        )
         # Shift the minhashes by 1 word to account for bigram shifted overlap issue
         shifted_minhashes = MinHash.bulk(
-            [doc.get_encoded_tokens(ngram=2, shift=1) for doc in valid_docs], num_perm=1024
+            [doc.get_encoded_tokens(ngram=2, shift=1) for doc in valid_docs],
+            num_perm=1024,
         )
         # initialize the lsh
         lsh = MinHashLSH(threshold=threshold, num_perm=1024)
@@ -118,9 +131,13 @@ class DeduplicationPipeline:
             indices_to_remove.update(original_group)
 
         # Return filtered corpus
-        filtered_corpus = [doc for i, doc in enumerate(docs) if i not in indices_to_remove]
+        filtered_corpus = [
+            doc for i, doc in enumerate(docs) if i not in indices_to_remove
+        ]
 
-        self.logger.log_and_print(f"*Filtered corpus from {len(docs)} to {len(filtered_corpus)}")
+        self.logger.log_and_print(
+            f"*Filtered corpus from {len(docs)} to {len(filtered_corpus)}"
+        )
         return filtered_corpus
 
     @timer("Get candidates")
@@ -136,7 +153,9 @@ class DeduplicationPipeline:
         Returns pairs of documents that are potential duplicates using simple precision.
         This is a set comparison, so word order/count is irrelevant except for the ngram factor.
         """
-        self.logger.log_and_print_header(f"Get Candidates (precision) for: {len(docs)} docs")
+        self.logger.log_and_print_header(
+            f"Get Candidates (precision) for: {len(docs)} docs"
+        )
         self.logger.log_and_print(f"N-Gram: {ngram}, Threshold: {threshold}")
 
         candidates = []
@@ -162,13 +181,17 @@ class DeduplicationPipeline:
                     candidates.append((docs[i], docs[j]))
 
         if report:
-            self.logger.log_and_print(f"Simple Precision Comparisons: {len(similarities)}")
+            self.logger.log_and_print(
+                f"Simple Precision Comparisons: {len(similarities)}"
+            )
             if report == "plot":
                 plot_number_dist(similarities)
             elif report == "print":
                 self.logger.log_and_print(f"Simple Precisions: {similarities}")
 
-        self.logger.log_and_print(f"*Simple Precision Complete. Num candidates: {len(candidates)}")
+        self.logger.log_and_print(
+            f"*Simple Precision Complete. Num candidates: {len(candidates)}"
+        )
         return candidates
 
     def _log_sequence_matches(self, str1: str, str2: str) -> None:
@@ -223,29 +246,41 @@ class DeduplicationPipeline:
 
             return score
 
-        self.logger.log_and_print_header(f"Getting duplicates for: {len(candidate_pairs)} pairs")
+        self.logger.log_and_print_header(
+            f"Getting duplicates for: {len(candidate_pairs)} pairs"
+        )
         self.logger.log_and_print(f"Threshold: {threshold}")
         tokenized_docs_a, tokenized_docs_b = zip(*candidate_pairs)
         strings_a = [" ".join(doc.tokens) for doc in tokenized_docs_a]
         strings_b = [" ".join(doc.tokens) for doc in tokenized_docs_b]
 
-        distances = process.cpdist(strings_a, strings_b, scorer=_progress_scorer, workers=8)
+        distances = process.cpdist(
+            strings_a, strings_b, scorer=_progress_scorer, workers=8
+        )
         duplicates = set()
         for idx, (doc_a, doc_b) in enumerate(candidate_pairs):
             if distances[idx] > threshold:
-                self.duplicate_logger.info(get_write_pair_log_text(doc_a.original_text, doc_b.original_text))
+                self.duplicate_logger.info(
+                    get_write_pair_log_text(doc_a.original_text, doc_b.original_text)
+                )
                 self._log_sequence_matches(doc_a.original_text, doc_b.original_text)
                 self.duplicate_logger.info(
-                    get_write_pair_log_text(" ".join(doc_a.tokens), " ".join(doc_b.tokens), "Tokenized:")
+                    get_write_pair_log_text(
+                        " ".join(doc_a.tokens), " ".join(doc_b.tokens), "Tokenized:"
+                    )
                 )
-                self._log_sequence_matches(" ".join(doc_a.tokens), " ".join(doc_b.tokens))
+                self._log_sequence_matches(
+                    " ".join(doc_a.tokens), " ".join(doc_b.tokens)
+                )
 
                 if len(doc_a.tokens) < len(doc_b.tokens):
                     duplicates.add(doc_a.doc_id)
                 else:
                     duplicates.add(doc_b.doc_id)
 
-        self.logger.log_and_print(f"\n*Confirm Duplicates Complete: Found ({len(duplicates)}) duplicates")
+        self.logger.log_and_print(
+            f"\n*Confirm Duplicates Complete: Found ({len(duplicates)}) duplicates"
+        )
         return duplicates
 
     def _dedupe_df_ids(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -271,10 +306,16 @@ class DeduplicationPipeline:
             ngram=precision_ngram,
             report=report_candidates,
         )
-        duplicate_doc_ids = self._confirm_duplicates(duplicate_candidates, threshold=duplicate_threshold)
+        duplicate_doc_ids = self._confirm_duplicates(
+            duplicate_candidates, threshold=duplicate_threshold
+        )
 
-        filtered_docs_ids_deduped = [doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids]
-        self.logger.log_and_print(f"Filtered doc ids after deduplication: {len(filtered_docs_ids_deduped)}")
+        filtered_docs_ids_deduped = [
+            doc.doc_id for doc in filtered_docs if doc.doc_id not in duplicate_doc_ids
+        ]
+        self.logger.log_and_print(
+            f"Filtered doc ids after deduplication: {len(filtered_docs_ids_deduped)}"
+        )
 
         df_deduped = df[df["id"].isin(filtered_docs_ids_deduped)]
         self.logger.log_and_print(f"Rows after deduplication: {len(df_deduped)}")
@@ -291,7 +332,9 @@ class DeduplicationPipeline:
     ) -> pd.DataFrame:
         df = df.drop_duplicates(subset=["page_content"], keep="first")
         tokenized_docs = self._tokenize_documents(df)
-        filtered_docs = self.filter_exact_duplicates_minhash(tokenized_docs, threshold=0.95)
+        filtered_docs = self.filter_exact_duplicates_minhash(
+            tokenized_docs, threshold=0.95
+        )
         return self._apply_deduplication(
             df,
             filtered_docs,

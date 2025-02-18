@@ -42,7 +42,9 @@ class YouTubeTransform(BaseTransform):
                 video = self.add_required_columns(
                     columns={
                         # Snippet information
-                        "date": datetime.strptime(snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y-%m-%d"),
+                        "date": datetime.strptime(
+                            snippet["publishedAt"], "%Y-%m-%dT%H:%M:%SZ"
+                        ).strftime("%Y-%m-%d"),
                         "channel_id": snippet["channelId"],
                         "title": snippet["title"],
                         "description": snippet["description"],
@@ -65,7 +67,9 @@ class YouTubeTransform(BaseTransform):
         df = self.make_df(videos)
 
         set_string_columns(df, ["description"])
-        set_string_columns(df, ["title", "date", "channel_title", "duration", "channel_id"], False)
+        set_string_columns(
+            df, ["title", "date", "channel_title", "duration", "channel_id"], False
+        )
 
         df["word_count"] = get_column_word_count(df, "page_content")
 
@@ -81,9 +85,17 @@ class YouTubeTransform(BaseTransform):
         df["duration"] = df["duration"].dt.total_seconds().astype("int64")
 
         # clean count data
-        df["view_count"] = pd.to_numeric(df["view_count"], errors="coerce").fillna(0).astype("int64")
-        df["like_count"] = pd.to_numeric(df["like_count"], errors="coerce").fillna(0).astype("int64")
-        df["comment_count"] = pd.to_numeric(df["comment_count"], errors="coerce").fillna(0).astype("int64")
+        df["view_count"] = (
+            pd.to_numeric(df["view_count"], errors="coerce").fillna(0).astype("int64")
+        )
+        df["like_count"] = (
+            pd.to_numeric(df["like_count"], errors="coerce").fillna(0).astype("int64")
+        )
+        df["comment_count"] = (
+            pd.to_numeric(df["comment_count"], errors="coerce")
+            .fillna(0)
+            .astype("int64")
+        )
 
         return df
 

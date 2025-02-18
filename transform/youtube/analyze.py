@@ -10,29 +10,14 @@ pd.set_option("display.max_columns", None)
 # Initialize transformer
 transformer = YouTubeTransform()
 
-raw_dir = Path("data") / "youtube" / "raw"
-# file_path = Path("data/youtube/raw/youtube_video_item_MobileInternetResourceCenter__T_20241215_164803.jsonl")
 
+raw_dir = Path("data") / "youtube" / "raw"
 
 dfs = []
 for file_path in raw_dir.glob("*.jsonl"):
     dfs.append(transformer.transform_file(file_path))
 
 df = pd.concat(dfs, ignore_index=True)
-
-
-# %%
-
-df.info()
-display(df[df["like_count"].isna()])
-
-
-def print_column_transformation(column_name):
-    display(list(zip(df[column_name].unique(), dfc[column_name].unique()))[0:20])
-
-
-display(df[["comment_count", "like_count", "view_count"]].describe())
-# print(df['comment_count'].dtype)  # Should show Int64
 
 
 # %%

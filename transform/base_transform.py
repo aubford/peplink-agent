@@ -13,6 +13,7 @@ from util.document_utils import load_parquet_files, get_all_parquet_in_dir
 from enum import StrEnum
 import pymongo
 
+
 class SubjectMatter(StrEnum):
     PEPWAVE = "PEPWAVE"
     IT_NETWORKING = "IT_NETWORKING"
@@ -26,6 +27,10 @@ class BaseTransform(ABC):
     subject_matter: SubjectMatter = NotImplemented
 
     def __init__(self):
+        if not isinstance(self.subject_matter, SubjectMatter):
+            raise TypeError(
+                f"subject_matter must be an instance of SubjectMatter, got {type(self.subject_matter)}"
+            )
         self.row_count = None
         self.logger = RotatingFileLogger(f"transform__{self.folder_name}")
 
@@ -66,7 +71,9 @@ class BaseTransform(ABC):
                 df = self.transform_file(file_path)
                 output_path = parquet_dir / f"{file_path.stem}.parquet"
                 self.log_df(df, file_name)
-                df.to_parquet(output_path, index=True, compression="snappy", engine="pyarrow")
+                df.to_parquet(
+                    output_path, index=True, compression="snappy", engine="pyarrow"
+                )
 
             except Exception as e:
                 self.logger.error(f"Error processing {file_name}")
@@ -138,9 +145,9 @@ class BaseTransform(ABC):
         files = cls.get_artifact_file_paths()
         return load_parquet_files(files)
 
+
 class BaseMongoTransform(BaseTransform, ABC):
     """Base class for transformers that retrieve data from MongoDB."""
-
 
     def __init__(self, db_uri: str, db_name: str):
         super().__init__()
@@ -149,6 +156,7 @@ class BaseMongoTransform(BaseTransform, ABC):
         self.db = self.client[db_name]
 
     transform_file = NotImplemented
+
     @abstractmethod
     def transform_db(self) -> pd.DataFrame:
         """Retrieve data from MongoDB, transform, and save to parquet files."""
@@ -164,7 +172,9 @@ class BaseMongoTransform(BaseTransform, ABC):
             self.log_df(df, f"{self.folder_name}_{self.subject_matter}")
 
             output_path = parquet_dir / f"{self.folder_name}_{self.db_name}.parquet"
-            df.to_parquet(output_path, index=True, compression="snappy", engine="pyarrow")
+            df.to_parquet(
+                output_path, index=True, compression="snappy", engine="pyarrow"
+            )
 
         except Exception as e:
             self.logger.error(f"Error processing MongoDB data for {self.folder_name}")

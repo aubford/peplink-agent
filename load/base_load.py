@@ -13,17 +13,19 @@ from langchain.vectorstores import VectorStore
 from uuid import uuid4
 from util.deduplication_pipeline import DeduplicationPipeline
 from util.document_utils import df_to_documents
-from abc import ABC, abstractmethod
+from langchain.text_splitter import TextSplitter
 
 
-class BaseLoad(ABC):
+class BaseLoad:
     """Base class for all data transformers."""
 
     def __init__(self, folder_name: str):
         self.folder_name = folder_name
+        self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
         self.vector_store: VectorStore | None = None
-        self.staging_path = Path("load") / self.folder_name / "staging.parquet"
+        self.staging_folder = Path("load") / self.folder_name
+        self.staging_path = self.staging_folder / "staging.parquet"
         self.deduplication_pipeline = DeduplicationPipeline(self.folder_name)
 
     @property
@@ -31,62 +33,53 @@ class BaseLoad(ABC):
         """Get the global config singleton."""
         return global_config
 
-    @abstractmethod
-    def create_staging_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
-        pass
+    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+        return pd.concat(dfs)
 
-    @abstractmethod
     def load_docs(self, documents: List[Document]) -> List[Document]:
-        pass
+        return documents
 
     @staticmethod
     def _simple_dedupe(df: pd.DataFrame) -> None:
         df.drop_duplicates(subset=["page_content"], keep="first", inplace=True)
 
-    def _initialize_pinecone_index(self, versioned_index_name: str) -> None:
-        """Initialize or create Pinecone index. Note: DO NOT USE NAMESPACES!
-
-        Args:
-            versioned_index_name (str): The name of the index to upload to. We should version these so we can A/B test different index versions.
-        """
+    def _initialize_pinecone_index(self) -> None:
+        """Initialize or create Pinecone index. Note: DO NOT USE NAMESPACES!"""
         pc = Pinecone(api_key=self.config.get("PINECONE_API_KEY"))
 
         existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
 
-        if versioned_index_name not in existing_indexes:
+        if self.index_name not in existing_indexes:
             # Create new index
             pc.create_index(
-                name=versioned_index_name,
+                name=self.index_name,
                 dimension=1536,  # OpenAI embeddings dimension
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
-            self.logger.info(f"Created new Pinecone index: {versioned_index_name}")
+            self.logger.info(f"Created new Pinecone index: {self.index_name}")
 
         # Initialize the index
-        index = pc.Index(versioned_index_name)
+        index = pc.Index(self.index_name)
         vector_store = PineconeVectorStore(index=index, embedding=OpenAIEmbeddings())
-        self.logger.info(f"Initialized Pinecone vector store for index: {versioned_index_name}")
+        self.logger.info(
+            f"Initialized Pinecone vector store for index: {self.index_name}"
+        )
         self.vector_store = vector_store
 
-    def staging_to_vector_store(self, versioned_index_name: str) -> None:
-        """Upload staged documents to a new, versioned Pinecone index.
-
-        Args:
-            versioned_index_name (str): The name of the index to upload to. We should version these so we can A/B test different index versions.
-        """
-        timestamp = datetime.now().strftime("%y_%m_%d")
-        versioned_index_name = f"{versioned_index_name}__{timestamp}"
-
+    def staging_to_vector_store(self) -> None:
+        """Upload staged documents to a new, versioned Pinecone index. DON'T FORGET TO CHANGE VERSION IN .env!!!"""
         if self.vector_store is None:
-            self._initialize_pinecone_index(versioned_index_name)
+            self._initialize_pinecone_index()
         if not self.staging_path.exists():
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
 
         docs = self._parquet_to_documents(self.staging_path)
         self._log_documents(docs)
         self.vector_store.add_documents(docs)
-        self.logger.info(f"Uploaded {len(docs)} documents to Pinecone index: {versioned_index_name}")
+        self.logger.info(
+            f"Uploaded {len(docs)} documents to Pinecone index: {self.index_name}"
+        )
 
     def _stage_documents(self, docs: List[Document]) -> None:
         self._log_documents(docs)
@@ -94,7 +87,7 @@ class BaseLoad(ABC):
         records = []
         for doc in docs:
             record = {
-                "id": str(uuid4()),
+                "id": doc.id,
                 "page_content": doc.page_content,
                 "type": self.folder_name,
                 **doc.metadata,
@@ -105,14 +98,34 @@ class BaseLoad(ABC):
         df.to_parquet(self.staging_path)
         self.logger.info(f"Saved {len(docs)} documents to {self.staging_path}")
 
+    def _write_merged_df_artifact(self, df: pd.DataFrame) -> None:
+        df.to_parquet(self.staging_folder / "merged.parquet")
+        self.logger.info(
+            f"Saved {len(df)} documents to {self.staging_folder / 'merged.parquet'}"
+        )
+
+    @staticmethod
+    def _split_docs(docs: List[Document], splitter: TextSplitter) -> List[Document]:
+        split_docs = splitter.split_documents(docs)
+        for doc in split_docs:
+            # apply the ID from the original document as "record_id" so we can provide a unique uuid for each
+            # split document
+            doc.metadata["record_id"] = doc.id
+            doc.id = str(uuid4())
+        return split_docs
+
     def load(self) -> None:
         documents_dir = Path("data") / self.folder_name / "documents"
 
         if not documents_dir.exists():
-            raise FileNotFoundError(f"Documents directory does not exist: {documents_dir}")
+            raise FileNotFoundError(
+                f"Documents directory does not exist: {documents_dir}"
+            )
 
         if self.staging_path.exists():
-            raise FileNotFoundError(f"Staging data file already exists at {self.staging_path}")
+            raise FileNotFoundError(
+                f"Staging data file already exists at {self.staging_path}"
+            )
 
         dfs = []
         for file_path in documents_dir.glob("*"):
@@ -130,8 +143,9 @@ class BaseLoad(ABC):
                 raise e
 
         # Combine all dataframes and convert to documents
-        staging_df = self.create_staging_df(dfs)
+        staging_df = self.create_merged_df(dfs)
         self._simple_dedupe(staging_df)
+        self._write_merged_df_artifact(staging_df)
         all_documents = df_to_documents(staging_df)
         staging_docs = self.load_docs(all_documents)
         self._stage_documents(staging_docs)

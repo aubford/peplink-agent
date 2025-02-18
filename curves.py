@@ -1,4 +1,4 @@
-#%%
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -18,13 +18,13 @@ plt.plot(space, poly, label="poly")
 
 plt.plot(space, (pwr + poly) / 2, label="mix")
 
-plt.plot(space, np.log10(1 + 9*space), label="log10")
+plt.plot(space, np.log10(1 + 9 * space), label="log10")
 
 # basic_space = np.linspace(1, 100, 200)
 # plt.plot(basic_space, basic_space / (basic_space + 5), label="basic norm")
 
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 plt.minorticks_on()
-plt.grid(True, which='minor', linestyle=':', linewidth=0.2)
+plt.grid(True, which="minor", linestyle=":", linewidth=0.2)
 plt.yticks(np.arange(0, 1.1, 0.1))
 plt.legend()

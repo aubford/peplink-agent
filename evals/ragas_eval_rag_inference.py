@@ -17,14 +17,20 @@ from ragas.metrics import (
 # todo: figure out how to load the testset from cloud
 
 
-def evaluate_rag(dataset: list[Document], llm_model: str = "gpt-4o") -> EvaluationResult:
+def evaluate_rag(
+    dataset: list[Document], llm_model: str = "gpt-4o"
+) -> EvaluationResult:
     from inference.rag_inference import retrieval_chain
 
     # Run inference on all test samples
     for test_row in dataset:
-        result = retrieval_chain.invoke({"input": test_row.eval_sample.user_input, "chat_history": []})
+        result = retrieval_chain.invoke(
+            {"input": test_row.eval_sample.user_input, "chat_history": []}
+        )
         test_row.eval_sample.response = result["answer"]
-        test_row.eval_sample.retrieved_contexts = [doc.page_content for doc in result["context"]]
+        test_row.eval_sample.retrieved_contexts = [
+            doc.page_content for doc in result["context"]
+        ]
 
     result = evaluate(
         dataset=dataset,

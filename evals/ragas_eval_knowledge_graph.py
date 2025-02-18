@@ -39,7 +39,9 @@ def transform(kg: KnowledgeGraph, documents: list[Document]) -> None:
     kg_llm = LangchainLLMWrapper(ChatOpenAI(model_name=LLM))
     embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
     # Apply transformations to create relationships
-    transforms = default_transforms(documents=documents, llm=kg_llm, embedding_model=embeddings)
+    transforms = default_transforms(
+        documents=documents, llm=kg_llm, embedding_model=embeddings
+    )
 
     apply_transforms(kg, transforms)
     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
@@ -51,7 +53,13 @@ docs = get_prototyping_dataset()
 
 for doc in docs:
     knowledge_graph.nodes.append(
-        Node(type=NodeType.DOCUMENT, properties={"page_content": doc.page_content, "document_metadata": doc.metadata})
+        Node(
+            type=NodeType.DOCUMENT,
+            properties={
+                "page_content": doc.page_content,
+                "document_metadata": doc.metadata,
+            },
+        )
     )
 
 transform(knowledge_graph, docs)

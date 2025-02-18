@@ -2,7 +2,9 @@ import os
 import shutil
 import subprocess
 
-print("Also consider updating langchain via `pip install --upgrade -r requirements.txt`")
+print(
+    "Also consider updating langchain via `pip install --upgrade -r requirements.txt`"
+)
 
 
 def copy_folders(src_dir: str, dest_dir: str, folders: list) -> None:
@@ -46,7 +48,10 @@ else:
 
 # Convert .ipynb files to .py
 print("Converting .ipynb files to .py")
-conversion_command = f"find {destination_dir} " + r'-type f -name "*.ipynb" -exec jupyter nbconvert --to python {} \;'
+conversion_command = (
+    f"find {destination_dir} "
+    + r'-type f -name "*.ipynb" -exec jupyter nbconvert --to python {} \;'
+)
 subprocess.run(conversion_command, shell=True)
 
 # Delete .ipynb files

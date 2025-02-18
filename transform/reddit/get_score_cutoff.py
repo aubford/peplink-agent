@@ -6,7 +6,9 @@ from scipy.optimize import least_squares
 
 def log_score_cutoff_percentile():
     def print_cutoff_percent(scores: list[int]):
-        print(f"Preserve Percentile: {round(get_score_cutoff_percentile(scores) * 100)}%")
+        print(
+            f"Preserve Percentile: {round(get_score_cutoff_percentile(scores) * 100)}%"
+        )
 
     print_cutoff_percent([1, 2, 2])
     print_cutoff_percent([1, 1, 1, 1])
@@ -33,7 +35,9 @@ def log_score_cutoff_percentile():
 
 def log_distribution_factor(cv: float) -> float:
     cv_test_dist = np.linspace(0, 3)
-    plt.plot(cv_test_dist, get_distribution_factor(cv_test_dist), label="Distribution Factor")
+    plt.plot(
+        cv_test_dist, get_distribution_factor(cv_test_dist), label="Distribution Factor"
+    )
     plt.legend()
 
     print(f"get_distribution_factor(0): {round(get_distribution_factor(0), 3)}")
@@ -44,9 +48,9 @@ def log_distribution_factor(cv: float) -> float:
 
 def log_engagement_norm() -> float:
     plt.plot(np.linspace(0, 100, 1000), get_engagement_norm(np.linspace(0, 100, 1000)))
-    plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+    plt.grid(True, which="both", linestyle="--", linewidth=0.5)
     plt.minorticks_on()
-    plt.grid(True, which='minor', linestyle=':', linewidth=0.2)
+    plt.grid(True, which="minor", linestyle=":", linewidth=0.2)
     plt.yticks(np.arange(0, 1.1, 0.1))
     plt.legend()
 
@@ -126,10 +130,13 @@ def get_distribution_factor(cv: float) -> float:
     return _logistic_function(cv, B_fit, M_fit, nu_fit) - 0.025
 
 
-def _stretched_exponential(x: float, a: float, p: float, log_base: float = 2.2) -> float:
+def _stretched_exponential(
+    x: float, a: float, p: float, log_base: float = 2.2
+) -> float:
     """Automatically satisfies f(a)=0.5 and f(0)=0"""
-    k = (np.log(log_base) / (a ** p)) ** (1 / p)
+    k = (np.log(log_base) / (a**p)) ** (1 / p)
     return 1 - np.exp(-((k * x) ** p))
+
 
 def get_engagement_norm(engagement: int) -> float:
     """

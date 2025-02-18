@@ -1,0 +1,125 @@
+[
+  {
+    "_id": "623d09a71cc708fded3f8a57",
+    "postContent": "is it a combo modem/router? if so, enable bridge mode or pass thru or forward the port to the pepwave.",
+    "replyTo": "623c894192bfb2f7637fc12a",
+    "topicId": "623c88e192bfb2438a7fbef4",
+    "creator": {
+      "id": "6121d6716b1bec0690fd97e8",
+      "admin": false,
+      "moderator": false,
+      "star": true,
+      "leader": null,
+      "roles": [],
+      "name": "J S",
+      "about": ""
+    },
+    "bookmarks": [],
+    "lastModified": "2022-03-25T17:52:03.320Z",
+    "createdAt": "2022-03-25T00:15:35.701Z",
+    "numberOfViews": 19,
+    "numberOfLikes": 0,
+    "liked": false,
+    "read": false,
+    "replies": [
+      {
+        "_id": "623d0fab2fbb803b768f7a6a",
+        "postContent": "Thanks, the port mentioned in my post? 32015? the router has a range “starting port/ending port” for port forwarding. Would I do 32015-32016? then use the RCN modems public ip as the address for the other Pepwave unit?\n\nI appreciate any help or explanation as I’m not very confident on my networking and trying to learn more. Thanks. ",
+        "replyTo": "623d09a71cc708fded3f8a57",
+        "topicId": "623c88e192bfb2438a7fbef4",
+        "creator": {
+          "id": "6121d67e6b1bec0690fdaffa",
+          "admin": false,
+          "moderator": false,
+          "star": false,
+          "leader": null,
+          "roles": [],
+          "name": "Daniel Sherer",
+          "about": "New to the Pepwave series, but purchased a Max Transit Duo Cat 12 Pepwave for use with web streaming."
+        },
+        "bookmarks": [],
+        "lastModified": "2022-03-25T00:41:15.020Z",
+        "createdAt": "2022-03-25T00:41:15.020Z",
+        "numberOfViews": 24,
+        "numberOfLikes": 0,
+        "liked": false,
+        "read": false,
+        "replies": [
+          {
+            "_id": "623dd76f2fbb804881913802",
+            "postContent": "Hello,\n\nI was able to put my router in \"Bridge Mode\" and get the public IP address to populate on my Max Transit Duo. I am now able to remote into the pep wave and control devices on my home network. Still having a little bit of a trouble establishing a PepVPN with another Max Transit Duo but this is a step in the right direction.\n\n",
+            "replyTo": "623d0fab2fbb803b768f7a6a",
+            "topicId": "623c88e192bfb2438a7fbef4",
+            "creator": {
+              "id": "6121d67e6b1bec0690fdaffa",
+              "admin": false,
+              "moderator": false,
+              "star": false,
+              "leader": null,
+              "roles": [],
+              "name": "Daniel Sherer",
+              "about": "New to the Pepwave series, but purchased a Max Transit Duo Cat 12 Pepwave for use with web streaming."
+            },
+            "bookmarks": [],
+            "lastModified": "2022-03-25T14:53:35.627Z",
+            "createdAt": "2022-03-25T14:53:35.627Z",
+            "numberOfViews": 23,
+            "numberOfLikes": 0,
+            "liked": false,
+            "read": false,
+            "replies": [
+              {
+                "_id": "623f38bcc98d63e8db816e81",
+                "postContent": "And finally the PepVPN connection was established Between the two max transit units. The problem I had was just a stupid copy/paste error with the settings. It really is simple as long as you don’t have a typo in the public IP address!\n\nI’m glad it was something simple like that, because I was starting to lose my mind. ",
+                "replyTo": "623dd76f2fbb804881913802",
+                "topicId": "623c88e192bfb2438a7fbef4",
+                "creator": {
+                  "id": "6121d67e6b1bec0690fdaffa",
+                  "admin": false,
+                  "moderator": false,
+                  "star": false,
+                  "leader": null,
+                  "roles": [],
+                  "name": "Daniel Sherer",
+                  "about": "New to the Pepwave series, but purchased a Max Transit Duo Cat 12 Pepwave for use with web streaming."
+                },
+                "bookmarks": [],
+                "lastModified": "2022-03-26T16:01:00.972Z",
+                "createdAt": "2022-03-26T16:01:00.972Z",
+                "numberOfViews": 19,
+                "numberOfLikes": 1,
+                "liked": false,
+                "read": false,
+                "replies": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "_id": "623fdf0060ea8c220687f85a",
+    "postContent": "Hi, Dan!  I believe you have figured it out!  Which steps did you take to to achieve a connection?",
+    "replyTo": "623c894192bfb2f7637fc12a",
+    "topicId": "623c88e192bfb2438a7fbef4",
+    "creator": {
+      "id": "612e977a1913294da6935ee7",
+      "admin": false,
+      "moderator": false,
+      "star": false,
+      "leader": null,
+      "roles": [],
+      "name": "Robert Stephen",
+      "about": null
+    },
+    "bookmarks": [],
+    "lastModified": "2022-03-27T03:50:24.774Z",
+    "createdAt": "2022-03-27T03:50:24.774Z",
+    "numberOfViews": 16,
+    "numberOfLikes": 0,
+    "liked": false,
+    "read": false,
+    "replies": []
+  }
+]

@@ -33,6 +33,7 @@
 # %%
 import os
 from getpass import getpass
+
 os.environ["OPENAI_API_KEY"] = getpass("Please enter your OpenAI API key!")
 
 
@@ -102,6 +103,7 @@ from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
+
 generator_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o"))
 generator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 
@@ -128,7 +130,10 @@ for doc in docs:
     kg.nodes.append(
         Node(
             type=NodeType.DOCUMENT,
-            properties={"page_content": doc.page_content, "document_metadata": doc.metadata}
+            properties={
+                "page_content": doc.page_content,
+                "document_metadata": doc.metadata,
+            },
         )
     )
 kg
@@ -151,7 +156,9 @@ from ragas.testset.transforms import default_transforms, apply_transforms
 transformer_llm = generator_llm
 embedding_model = generator_embeddings
 
-default_transforms = default_transforms(documents=docs, llm=transformer_llm, embedding_model=embedding_model)
+default_transforms = default_transforms(
+    documents=docs, llm=transformer_llm, embedding_model=embedding_model
+)
 apply_transforms(kg, default_transforms)
 kg
 
@@ -171,7 +178,11 @@ ai_across_years_kg
 # %%
 from ragas.testset import TestsetGenerator
 
-generator = TestsetGenerator(llm=generator_llm, embedding_model=embedding_model, knowledge_graph=ai_across_years_kg)
+generator = TestsetGenerator(
+    llm=generator_llm,
+    embedding_model=embedding_model,
+    knowledge_graph=ai_across_years_kg,
+)
 
 
 # %% [markdown]
@@ -182,12 +193,17 @@ generator = TestsetGenerator(llm=generator_llm, embedding_model=embedding_model,
 # In essence, Ragas will use an LLM to generate a persona of someone who would interact with the data - and then use a scenario to construct a question from that data and persona.
 
 # %%
-from ragas.testset.synthesizers import default_query_distribution, SingleHopSpecificQuerySynthesizer, MultiHopAbstractQuerySynthesizer, MultiHopSpecificQuerySynthesizer
+from ragas.testset.synthesizers import (
+    default_query_distribution,
+    SingleHopSpecificQuerySynthesizer,
+    MultiHopAbstractQuerySynthesizer,
+    MultiHopSpecificQuerySynthesizer,
+)
 
 query_distribution = [
-        (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 0.5),
-        (MultiHopAbstractQuerySynthesizer(llm=generator_llm), 0.25),
-        (MultiHopSpecificQuerySynthesizer(llm=generator_llm), 0.25),
+    (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 0.5),
+    (MultiHopAbstractQuerySynthesizer(llm=generator_llm), 0.25),
+    (MultiHopSpecificQuerySynthesizer(llm=generator_llm), 0.25),
 ]
 
 
@@ -305,10 +321,11 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 # %% [markdown]
 # Now we can produce a node for retrieval!
 
+
 # %%
 def retrieve(state):
-  retrieved_docs = retriever.invoke(state["question"])
-  return {"context" : retrieved_docs}
+    retrieved_docs = retriever.invoke(state["question"])
+    return {"context": retrieved_docs}
 
 
 # %% [markdown]
@@ -346,12 +363,15 @@ llm = ChatOpenAI(model="gpt-4o-mini")
 # %% [markdown]
 # Then we can create a `generate` node!
 
+
 # %%
 def generate(state):
-  docs_content = "\n\n".join(doc.page_content for doc in state["context"])
-  messages = rag_prompt.format_messages(question=state["question"], context=docs_content)
-  response = llm.invoke(messages)
-  return {"response" : response.content}
+    docs_content = "\n\n".join(doc.page_content for doc in state["context"])
+    messages = rag_prompt.format_messages(
+        question=state["question"], context=docs_content
+    )
+    response = llm.invoke(messages)
+    return {"response": response.content}
 
 
 # %% [markdown]
@@ -364,10 +384,11 @@ from langgraph.graph import START, StateGraph
 from typing_extensions import List, TypedDict
 from langchain_core.documents import Document
 
+
 class State(TypedDict):
-  question: str
-  context: List[Document]
-  response: str
+    question: str
+    context: List[Document]
+    response: str
 
 
 # %% [markdown]
@@ -385,7 +406,7 @@ graph = graph_builder.compile()
 # Let's do a test to make sure it's doing what we'd expect.
 
 # %%
-response = graph.invoke({"question" : "How are LLM agents useful?"})
+response = graph.invoke({"question": "How are LLM agents useful?"})
 
 
 # %%
@@ -401,9 +422,11 @@ response["response"]
 
 # %%
 for test_row in dataset:
-  response = graph.invoke({"question" : test_row.eval_sample.user_input})
-  test_row.eval_sample.response = response["response"]
-  test_row.eval_sample.retrieved_contexts = [context.page_content for context in response["context"]]
+    response = graph.invoke({"question": test_row.eval_sample.user_input})
+    test_row.eval_sample.response = response["response"]
+    test_row.eval_sample.retrieved_contexts = [
+        context.page_content for context in response["context"]
+    ]
 
 
 # %%
@@ -433,12 +456,26 @@ evaluator_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o"))
 # Next up - we simply evaluate on our desired metrics!
 
 # %%
-from ragas.metrics import LLMContextRecall, Faithfulness, FactualCorrectness, ResponseRelevancy, ContextEntityRecall, NoiseSensitivity
+from ragas.metrics import (
+    LLMContextRecall,
+    Faithfulness,
+    FactualCorrectness,
+    ResponseRelevancy,
+    ContextEntityRecall,
+    NoiseSensitivity,
+)
 
 result = evaluate(
     dataset=evaluation_dataset,
-    metrics=[LLMContextRecall(), Faithfulness(), FactualCorrectness(), ResponseRelevancy(), ContextEntityRecall(), NoiseSensitivity()],
-    llm=evaluator_llm
+    metrics=[
+        LLMContextRecall(),
+        Faithfulness(),
+        FactualCorrectness(),
+        ResponseRelevancy(),
+        ContextEntityRecall(),
+        NoiseSensitivity(),
+    ],
+    llm=evaluator_llm,
 )
 result
 
@@ -466,20 +503,22 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 20})
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_cohere import CohereRerank
 
+
 def retrieve_adjusted(state):
-  compressor = CohereRerank(model="rerank-english-v3.0")
-  compression_retriever = ContextualCompressionRetriever(
-    base_compressor=compressor, base_retriever=retriever, search_kwargs={"k": 5}
-  )
-  retrieved_docs = compression_retriever.invoke(state["question"])
-  return {"context" : retrieved_docs}
+    compressor = CohereRerank(model="rerank-english-v3.0")
+    compression_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, base_retriever=retriever, search_kwargs={"k": 5}
+    )
+    retrieved_docs = compression_retriever.invoke(state["question"])
+    return {"context": retrieved_docs}
 
 
 # %%
 class State(TypedDict):
-  question: str
-  context: List[Document]
-  response: str
+    question: str
+    context: List[Document]
+    response: str
+
 
 graph_builder = StateGraph(State).add_sequence([retrieve_adjusted, generate])
 graph_builder.add_edge(START, "retrieve_adjusted")
@@ -487,21 +526,30 @@ graph = graph_builder.compile()
 
 
 # %%
-response = graph.invoke({"question" : "How are LLM agents useful?"})
+response = graph.invoke({"question": "How are LLM agents useful?"})
 response["response"]
 
 
 # %%
 for test_row in dataset:
-  response = graph.invoke({"question" : test_row.eval_sample.user_input})
-  test_row.eval_sample.response = response["response"]
-  test_row.eval_sample.retrieved_contexts = [context.page_content for context in response["context"]]
+    response = graph.invoke({"question": test_row.eval_sample.user_input})
+    test_row.eval_sample.response = response["response"]
+    test_row.eval_sample.retrieved_contexts = [
+        context.page_content for context in response["context"]
+    ]
 
 
 # %%
 result = evaluate(
     dataset=evaluation_dataset,
-    metrics=[LLMContextRecall(), Faithfulness(), FactualCorrectness(), ResponseRelevancy(), ContextEntityRecall(), NoiseSensitivity()],
-    llm=evaluator_llm
+    metrics=[
+        LLMContextRecall(),
+        Faithfulness(),
+        FactualCorrectness(),
+        ResponseRelevancy(),
+        ContextEntityRecall(),
+        NoiseSensitivity(),
+    ],
+    llm=evaluator_llm,
 )
 result
