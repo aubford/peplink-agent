@@ -1,8 +1,8 @@
 ---
-description: Use this when asked something about or related to the LangChain LLM app framework.
+description: Use this when asked something about or related to the LangChain framework or its components.
 globs: 
 ---
-If you are asked about something that is about or related to LangChain, use these resources to learn about how a the LangChain framework works:
+This question is related to LangChain, here are the resources you should utilize when answering this query.
 
 ## Directories
 
@@ -13,4 +13,4 @@ Search these project directories for pertinent information:
 
 ## Rules
 
-Include "I researched the LangChain resources outlined in the Cursor rule." in your response so I know you used this rule.
+Start your response with "I did thorough research into this project's LangChain resources to inform my answer."

@@ -21,14 +21,14 @@ class YoutubeLoad(BaseLoad):
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=3000, chunk_overlap=300, length_function=len
+            chunk_size=10000, chunk_overlap=3000
         )
         split_docs = self._split_docs(documents, text_splitter)
         return split_docs
 
 
 loader = YoutubeLoad()
-loader.load()
+loader.load_from_merged()
 
 # %%
 

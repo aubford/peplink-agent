@@ -2,7 +2,6 @@
 from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 import pandas as pd
 
 
@@ -22,15 +21,13 @@ class WebLoad(BaseLoad):
         return staging_df
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1500, chunk_overlap=100, length_function=len
-        )
+        text_splitter = self._get_default_text_splitter()
         split_docs = self._split_docs(documents, text_splitter)
         return split_docs
 
 
 loader = WebLoad()
-loader.load()
+loader.load_from_merged()
 
 # %%
 

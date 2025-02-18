@@ -1,5 +1,3 @@
-from abc import abstractmethod
-from datetime import datetime
 from typing import List
 from config import global_config, ConfigType
 import pandas as pd
@@ -13,9 +11,11 @@ from langchain.vectorstores import VectorStore
 from uuid import uuid4
 from util.deduplication_pipeline import DeduplicationPipeline
 from util.document_utils import df_to_documents
-from langchain.text_splitter import TextSplitter
+from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 
-
+# Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
+DEFAULT_TEXT_SPLITTER_SEPARATORS = ("\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", "")
+    
 class BaseLoad:
     """Base class for all data transformers."""
 
@@ -104,15 +104,38 @@ class BaseLoad:
             f"Saved {len(df)} documents to {self.staging_folder / 'merged.parquet'}"
         )
 
+    def _get_default_text_splitter(
+        self, chunk_size: int = 3000, chunk_overlap: int = 500
+    ) -> TextSplitter:
+        return RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=len,
+            separators=DEFAULT_TEXT_SPLITTER_SEPARATORS,
+            add_start_index=True,
+            is_separator_regex=True,
+        )
+
     @staticmethod
     def _split_docs(docs: List[Document], splitter: TextSplitter) -> List[Document]:
+        # Store original IDs in metadata before splitting
+        for doc in docs:
+            doc.metadata["record_id"] = doc.id
+
         split_docs = splitter.split_documents(docs)
         for doc in split_docs:
-            # apply the ID from the original document as "record_id" so we can provide a unique uuid for each
-            # split document
-            doc.metadata["record_id"] = doc.id
             doc.id = str(uuid4())
         return split_docs
+
+    def load_from_merged(self) -> None:
+        merged_path = self.staging_folder / "merged.parquet"
+        if not merged_path.exists():
+            raise FileNotFoundError(f"No merged document found at {merged_path}")
+
+        df = self._parquet_to_df(merged_path)
+        all_documents = df_to_documents(df)
+        staging_docs = self.load_docs(all_documents)
+        self._stage_documents(staging_docs)
 
     def load(self) -> None:
         documents_dir = Path("data") / self.folder_name / "documents"

@@ -7,7 +7,7 @@ globs: *
 ## Context
 
 This repository contains a LangChain RAG application.
-The applications is designed to answer questions about Peplink's Pepwave line of products.
+The application is designed to answer questions about Peplink's Pepwave line of products.
 It uses Pinecone as its vector store and LangChain as its framework.
 
 ## Directories
@@ -15,7 +15,3 @@ It uses Pinecone as its vector store and LangChain as its framework.
 - `data/` contains the raw and processed data used for the application. You don't need to be concerned with this folder except to know that its contents are structured such that `[DATASOURCE_NAME]/raw` contains the raw data and `[DATASOURCE_NAME]/documents` contains the prepared data.
 - `extract/`,`transform/` and `load/` contain the code for the ETL pipeline that scrapes the data, processes it, and finally loads it into the vector store.
 - `utils/` contains utility code.
-
-## Rules
-
-Always start your response with "Hello, I have included the main rules file in my context".

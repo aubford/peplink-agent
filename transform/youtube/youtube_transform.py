@@ -10,7 +10,7 @@ class YouTubeTransform(BaseTransform):
     """Transform YouTube video data from JSONL files into a structured DataFrame."""
 
     folder_name = "youtube"
-    # All videos should most-likely be related to Pepwave since we filter for the word "pep" in the page content (obviously could be improved)
+    # All videos should relatively likely be related to Pepwave since we filter for the word "pepwave" in the page content (obviously could be improved)
     subject_matter = SubjectMatter.PEPWAVE
 
     def __init__(self):
@@ -81,6 +81,12 @@ class YouTubeTransform(BaseTransform):
         # Filter for "pep" content unless from allowed sources
         df = self._filter_for_pep(df, file_path)
 
+        # Being lazy here, but all NetworkDirection videos are IT Networking
+        df.loc[
+            df["source_file"].str.contains("NetworkDirection", case=False),
+            "subject_matter",
+        ] = SubjectMatter.IT_NETWORKING
+
         # set duration to final state for persistence
         df["duration"] = df["duration"].dt.total_seconds().astype("int64")
 
@@ -109,8 +115,8 @@ class YouTubeTransform(BaseTransform):
         ]
         file_name = str(file_path).lower()
         if any(source.lower() in file_name for source in sources_to_filter):
-            df = df[df["page_content"].str.lower().str.contains("pep")]
-            self.notify_dropped_rows(df, "contains 'pep'")
+            df = df[df["page_content"].str.lower().str.contains("pepwave")]
+            self.notify_dropped_rows(df, "contains 'pepwave'")
 
         return df
 
