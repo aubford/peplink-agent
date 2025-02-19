@@ -1,4 +1,3 @@
-# %%
 from typing import List
 from load.base_load import BaseLoad
 import pandas as pd
@@ -19,11 +18,3 @@ class HtmlLoad(BaseLoad):
         )
         df["images"] = df["images"].apply(list)
         return df
-
-
-loader = HtmlLoad()
-loader.load()
-
-# %%
-
-# loader.staging_to_vector_store()
