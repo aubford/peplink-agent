@@ -90,9 +90,9 @@ class MongoPepwaveTransform(BaseMongoTransform):
         tags = f"\n\n## Tags: {', '.join(topic_tags)}" if topic_tags else ""
         if comment_replies:
             replies_formatted = format_replies(comment_replies)
-            return f"## Topic: {topic_title}\n\n{topic_content}\n\n## Comment:\n\n{comment['postContent']}\n\n## Replies:\n\n{replies_formatted}{tags}"
+            return f"## Pepwave Forum Topic: {topic_title}\n\n{topic_content}\n\n## Comment:\n\n{comment['postContent']}\n\n## Replies:\n\n{replies_formatted}{tags}"
         else:
-            return f"## Topic: {topic_title}\n\n{topic_content}\n\n## Comment:\n\n{comment['postContent']}{tags}"
+            return f"## Pepwave Forum Topic: {topic_title}\n\n{topic_content}\n\n## Comment:\n\n{comment['postContent']}{tags}"
 
     def count_total_replies(self, replies: List[Dict]) -> int:
         """

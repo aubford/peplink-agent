@@ -221,7 +221,7 @@ class RedditTransform(BaseTransform):
         """
         Create a page content string from a reddit post dict with this format:
         """
-        return f"## Reddit Post: {title}\n\n{page_content}\n\n## Comments:\n\n{comment}"
+        return f"## Reddit Post: {title}\n\n{page_content}\n\n## Comment:\n\n{comment}"
 
     @staticmethod
     def filter_comments(comments: list[RedditComment]) -> list[RedditComment]:

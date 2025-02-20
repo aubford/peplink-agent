@@ -20,7 +20,7 @@ def df_to_documents(df: pd.DataFrame) -> List[Document]:
     """Convert a DataFrame to a list of Document objects."""
     documents: List[Document] = []
     for _, row in df.iterrows():
-        metadata = row.drop(["page_content", "id"]).to_dict()
+        metadata = row.drop(["page_content"]).to_dict()
         metadata = sanitize_metadata(metadata)
         doc = Document(
             id=row["id"], page_content=row["page_content"], metadata=metadata
