@@ -92,10 +92,9 @@ class BaseLoad:
         records = []
         for doc in docs:
             record = {
+                **doc.metadata,
                 "id": doc.id,
                 "page_content": doc.page_content,
-                "type": self.folder_name,
-                **doc.metadata,
             }
             records.append(record)
 
@@ -171,6 +170,8 @@ class BaseLoad:
                 raise e
 
         # Combine all dataframes and convert to documents
+        for df in dfs:
+            df["type"] = self.folder_name
         staging_df = self.create_merged_df(dfs)
         self._simple_dedupe(staging_df)
         self._write_merged_df_artifact(staging_df)

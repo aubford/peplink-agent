@@ -114,6 +114,7 @@ def CREATE_KG(
 
 dataset_df = get_dataset_df(sample=True)
 
+
 # %% #####################################  ANALYZE DF #########################
 
 print(f"Total number of rows in dataset: {len(dataset_df)}")
@@ -143,12 +144,43 @@ reddit_df = RedditLoad.get_artifact(select_merged=True)
 reddit_general_df = RedditGeneralLoad.get_artifact(select_merged=True)
 html_df = HtmlLoad.get_artifact(select_merged=True)
 
-# Count rows with >500 words in page_content
-long_mongo_docs = mongo_df[mongo_df["page_content"].str.split().str.len() > 500]
-print(f"Number of documents with >500 words: {len(long_mongo_docs)}")
 
-# %%
-total_tokens = (
+# %% #####################################  YOUTUBE TOKENS #####################################
+total_youtube_tokens = (
     youtube_df["page_content"].apply(lambda x: num_tokens_from_string(x)).sum()
 )
-print(f"Total tokens: {total_tokens}")
+print(f"Total youtube tokens: {total_youtube_tokens}")
+
+# %% ##################################### FILTER MONGO #####################################
+
+# Count rows where page_content has significantly more words than topic_content
+long_mongo_docs = mongo_df[
+    (
+        mongo_df["page_content"].str.split().str.len()
+        - mongo_df["topic_content"].str.split().str.len()
+    )
+    > 175
+]
+print(f"Number of documents with >200 words minus topic length: {len(long_mongo_docs)}")
+print(long_mongo_docs["topic_category_name"].value_counts())
+
+# Filter out certain topic categories from long docs
+filtered_long_mongo_docs = long_mongo_docs[
+    ~long_mongo_docs["topic_category_name"].isin(
+        ["Feature Requests", "Beta Releases", "Announcements"]
+    )
+]
+print(
+    f"\n\nFiltered out {len(long_mongo_docs) - len(filtered_long_mongo_docs)} documents from unwanted categories\n"
+)
+long_mongo_docs = filtered_long_mongo_docs
+print(long_mongo_docs["topic_category_name"].value_counts())
+print(f"Final docs: {len(long_mongo_docs)}")
+
+
+# %% ################################### MAIN ###################################
+
+# youtube -> headline transform/splitter
+# mongo -> thin out rows randomly?
+# should we skip the general youtubes and reddits? probably not....
+# how to handle html?
