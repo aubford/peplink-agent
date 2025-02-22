@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
 
 
-def log_score_cutoff_percentile():
+def _log_score_cutoff_percentile():
     def print_cutoff_percent(scores: list[int]):
         print(
             f"Preserve Percentile: {round(get_score_cutoff_percentile(scores) * 100)}%"
@@ -33,43 +33,45 @@ def log_score_cutoff_percentile():
     print_cutoff_percent([50, 50, 50, 50, 1, 50, 50, 50, 50, 50])
 
 
-def log_distribution_factor(cv: float) -> float:
+def _log_distribution_factor(cv: float) -> float:
     cv_test_dist = np.linspace(0, 3)
     plt.plot(
-        cv_test_dist, get_distribution_factor(cv_test_dist), label="Distribution Factor"
+        cv_test_dist,
+        _get_distribution_factor(cv_test_dist),
+        label="Distribution Factor",
     )
     plt.legend()
 
-    print(f"get_distribution_factor(0): {round(get_distribution_factor(0), 3)}")
-    print(f"get_distribution_factor(1): {round(get_distribution_factor(1), 3)}")
-    print(f"get_distribution_factor(2): {round(get_distribution_factor(2), 3)}")
-    print(f"get_distribution_factor(3): {round(get_distribution_factor(3), 3)}")
+    print(f"get_distribution_factor(0): {round(_get_distribution_factor(0), 3)}")
+    print(f"get_distribution_factor(1): {round(_get_distribution_factor(1), 3)}")
+    print(f"get_distribution_factor(2): {round(_get_distribution_factor(2), 3)}")
+    print(f"get_distribution_factor(3): {round(_get_distribution_factor(3), 3)}")
 
 
-def log_engagement_norm() -> float:
-    plt.plot(np.linspace(0, 100, 1000), get_engagement_norm(np.linspace(0, 100, 1000)))
+def _log_engagement_norm() -> float:
+    plt.plot(np.linspace(0, 100, 1000), _get_engagement_norm(np.linspace(0, 100, 1000)))
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)
     plt.minorticks_on()
     plt.grid(True, which="minor", linestyle=":", linewidth=0.2)
     plt.yticks(np.arange(0, 1.1, 0.1))
     plt.legend()
 
-    print(f"get_engagement_norm(0): {get_engagement_norm(0)}")
-    print(f"get_engagement_norm(1): {get_engagement_norm(1)}")
-    print(f"get_engagement_norm(2): {get_engagement_norm(2)}")
-    print(f"get_engagement_norm(3): {get_engagement_norm(3)}")
-    print(f"get_engagement_norm(4): {get_engagement_norm(4)}")
-    print(f"get_engagement_norm(5): {get_engagement_norm(5)}")
-    print(f"get_engagement_norm(6): {get_engagement_norm(6)}")
-    print(f"get_engagement_norm(7): {get_engagement_norm(7)}")
-    print(f"get_engagement_norm(8): {get_engagement_norm(8)}")
-    print(f"get_engagement_norm(9): {get_engagement_norm(9)}")
-    print(f"get_engagement_norm(10): {get_engagement_norm(10)}")
-    print(f"get_engagement_norm(20): {get_engagement_norm(20)}")
-    print(f"get_engagement_norm(30): {get_engagement_norm(30)}")
-    print(f"get_engagement_norm(100): {get_engagement_norm(100)}")
-    print(f"get_engagement_norm(1000): {get_engagement_norm(1000)}")
-    print(f"get_engagement_norm(100000): {get_engagement_norm(10000000)}")
+    print(f"get_engagement_norm(0): {_get_engagement_norm(0)}")
+    print(f"get_engagement_norm(1): {_get_engagement_norm(1)}")
+    print(f"get_engagement_norm(2): {_get_engagement_norm(2)}")
+    print(f"get_engagement_norm(3): {_get_engagement_norm(3)}")
+    print(f"get_engagement_norm(4): {_get_engagement_norm(4)}")
+    print(f"get_engagement_norm(5): {_get_engagement_norm(5)}")
+    print(f"get_engagement_norm(6): {_get_engagement_norm(6)}")
+    print(f"get_engagement_norm(7): {_get_engagement_norm(7)}")
+    print(f"get_engagement_norm(8): {_get_engagement_norm(8)}")
+    print(f"get_engagement_norm(9): {_get_engagement_norm(9)}")
+    print(f"get_engagement_norm(10): {_get_engagement_norm(10)}")
+    print(f"get_engagement_norm(20): {_get_engagement_norm(20)}")
+    print(f"get_engagement_norm(30): {_get_engagement_norm(30)}")
+    print(f"get_engagement_norm(100): {_get_engagement_norm(100)}")
+    print(f"get_engagement_norm(1000): {_get_engagement_norm(1000)}")
+    print(f"get_engagement_norm(100000): {_get_engagement_norm(10000000)}")
 
 
 # space = np.linspace(0, 100)
@@ -100,7 +102,7 @@ def _logistic_function(x: float, B: float, M: float, nu: float) -> float:
     return 1.0 / (1.0 + np.exp(-B * (x - M))) ** (1.0 / nu)
 
 
-def get_distribution_factor(cv: float) -> float:
+def _get_distribution_factor(cv: float) -> float:
     """
     Single logistic-type formula satisfying:
       f(0) ≈ 0.01,
@@ -138,7 +140,7 @@ def _stretched_exponential(
     return 1 - np.exp(-((k * x) ** p))
 
 
-def get_engagement_norm(engagement: int) -> float:
+def _get_engagement_norm(engagement: int) -> float:
     """
     Engagement normalization to 0-1 range
     It should satisfy these constraints for engagement values:
@@ -151,7 +153,7 @@ def get_engagement_norm(engagement: int) -> float:
     return _stretched_exponential(engagement, 4.1, 0.52, 2)
 
 
-def scale_distribution_factor(dist: float, p: float = 0.5, k: float = 2.0) -> float:
+def _scale_distribution_factor(dist: float, p: float = 0.5, k: float = 2.0) -> float:
     """
     Scale the distribution factor by polynomial and power functions.
     """
@@ -176,13 +178,13 @@ def get_score_cutoff_percentile(scores: list[int]) -> float:
     std_dev = np.std(scores_array)
     cv = std_dev / (mean + 1e-8)
 
-    engagement_norm = get_engagement_norm(engagement)
+    engagement_norm = _get_engagement_norm(engagement)
     print(f"engagement_norm: {round(engagement_norm, 4)}")
 
-    distribution_factor = get_distribution_factor(cv)
+    distribution_factor = _get_distribution_factor(cv)
     print(f"cv: {round(cv, 4)}")
     print(f"distribution_factor: {round(distribution_factor, 4)}")
-    scaled_distribution_factor = scale_distribution_factor(distribution_factor)
+    scaled_distribution_factor = _scale_distribution_factor(distribution_factor)
     print(f"scaled_distribution_factor: {round(scaled_distribution_factor, 4)}")
 
     cutoff_percentile = engagement_norm * scaled_distribution_factor

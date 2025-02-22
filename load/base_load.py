@@ -14,7 +14,7 @@ from util.document_utils import df_to_documents
 from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
-DEFAULT_TEXT_SPLITTER_SEPARATORS = ("\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", "")
+DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", ""]
 
 class BaseLoad:
     """Base class for all data transformers."""

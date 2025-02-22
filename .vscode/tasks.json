@@ -3,7 +3,7 @@
   "tasks": [
     {
       "label": "Open in Jetbrains Python",
-      "command": "dataspell",
+      "command": "cursor-open-dataspell",
       "args": ["--line", "${lineNumber}", "${file}"],
       "runOptions": {
         "instanceLimit": 1
