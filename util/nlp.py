@@ -15,6 +15,7 @@ from textwrap import dedent
 import pandas as pd
 from functools import wraps
 from dataclasses import dataclass
+from typing import Set
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 100000000
@@ -72,6 +73,19 @@ def generate_random_texts(n: int, avg_length: int, mult: int = 100) -> List[str]
 
 
 ####### Tokenization ###########################################################
+DEFAULT_DISFLUENCIES = {
+    "um",
+    "uh",
+    "uhm",
+    "ok",
+    "okay",
+    "hmm",
+    "hm",
+    "well",
+    "so",
+}
+DEFAULT_STOP_WORDS = set(stopwords.words("english"))
+DEFAULT_STOP_WORDS.update(DEFAULT_DISFLUENCIES)
 
 
 def spacy_get_tokens(text: str) -> List[str]:
@@ -100,6 +114,15 @@ def nltk_get_pos_tag(tag: str) -> str:
     return tag_dict.get(tag[0], wordnet.NOUN)
 
 
+def nltk_tokenize(text: str, stop_words: Set[str] = DEFAULT_STOP_WORDS) -> list[str]:
+    tokens = nltk.wordpunct_tokenize(text.lower())
+    return [
+        token
+        for token in tokens
+        if token.isalnum() and len(token) > 1 and token not in stop_words
+    ]
+
+
 def nltk_get_lemmatized_tokens(text: str) -> List[str]:
     """
     Tokenize using NLTK, less strict with stop words
@@ -115,7 +138,6 @@ def nltk_get_lemmatized_tokens(text: str) -> List[str]:
             "go",
             "yeah",
             "ok",
-            "okay",
             "okay",
             "stuff",
             "really",
@@ -144,6 +166,32 @@ def nltk_get_lemmatized_tokens(text: str) -> List[str]:
 
 def chunk_wordset(wordset: List[str], ngram: int) -> List[str]:
     return [" ".join(wordset[i : i + ngram]) for i in range(0, len(wordset), ngram)]
+
+
+####### Transform #############################################################
+
+from flashtext import KeywordProcessor
+
+
+# %%
+
+
+def remove_keywords(text: str, keywords: list[str] = DEFAULT_DISFLUENCIES) -> str:
+    """
+    Remove keywords from text by replacing them with underscores and then removing the underscores and companion spaces or commas.
+    """
+    keyword_processor = KeywordProcessor()
+    for word in keywords:
+        keyword_processor.add_keyword(word, "__")
+    replaced_with_underscores = keyword_processor.replace_keywords(text)
+    return (
+        replaced_with_underscores.replace("__, ", "")
+        .replace("__,", "")
+        .replace(",__", "")
+        .replace(" __", "")
+        .replace("__ ", "")
+        .replace("__", "")
+    )
 
 
 ####### Similarity ############################################################

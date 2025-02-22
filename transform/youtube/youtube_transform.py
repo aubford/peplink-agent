@@ -3,6 +3,7 @@ import pandas as pd
 from pathlib import Path
 from transform.base_transform import BaseTransform, SubjectMatter
 from datetime import datetime
+from util.nlp import DEFAULT_DISFLUENCIES, remove_keywords
 from util.util_main import get_column_word_count, set_string_columns
 
 
@@ -15,6 +16,11 @@ class YouTubeTransform(BaseTransform):
 
     def __init__(self):
         super().__init__()
+
+    def _transform_page_content(self, page_content: str) -> str:
+        """Transform the page content to remove disfluencies, unnecessary newlines, and [Music] captions."""
+        page_content = page_content.replace("\n", " ").replace("[Music]", "")
+        return remove_keywords(page_content, DEFAULT_DISFLUENCIES)
 
     def transform_file(self, file_path: Path) -> pd.DataFrame:
         """Transform YouTube video data from a JSONL file.
@@ -56,7 +62,7 @@ class YouTubeTransform(BaseTransform):
                         "like_count": statistics["likeCount"],
                         "comment_count": statistics["commentCount"],
                     },
-                    page_content=data["page_content"],
+                    page_content=self._transform_page_content(data["page_content"]),
                     file_path=file_path,
                     doc_id=metadata["id"],
                 )
@@ -78,7 +84,7 @@ class YouTubeTransform(BaseTransform):
         df = df[(df["duration"] >= pd.Timedelta(minutes=3)) & (df["word_count"] >= 300)]
         self.notify_dropped_rows(df, ">3 min and >300 words")
 
-        # Filter for "pep" content unless from allowed sources
+        # Filter for pepwave content unless from allowed sources
         df = self._filter_for_pep(df, file_path)
 
         # Being lazy here, but all NetworkDirection videos are IT Networking
@@ -115,8 +121,8 @@ class YouTubeTransform(BaseTransform):
         ]
         file_name = str(file_path).lower()
         if any(source.lower() in file_name for source in sources_to_filter):
-            df = df[df["page_content"].str.lower().str.contains("pepwave")]
-            self.notify_dropped_rows(df, "contains 'pepwave'")
+            df = df[df["page_content"].str.lower().str.contains("pepwave|peplink")]
+            self.notify_dropped_rows(df, "contains 'pepwave' or 'peplink'")
 
         return df
 
