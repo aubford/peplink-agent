@@ -221,7 +221,7 @@ class RedditTransform(BaseTransform):
         """
         Create a page content string from a reddit post dict with this format:
         """
-        return f"## Reddit Post: {title}\n\n{page_content}\n\n## Comment:\n\n{comment}"
+        return f"## Reddit Post: {title}\n\n{page_content}\n\n## Comment and Replies:\n\n{comment}"
 
     @staticmethod
     def filter_comments(comments: list[RedditComment]) -> list[RedditComment]:
@@ -260,7 +260,7 @@ class RedditTransform(BaseTransform):
         self, post: dict, file_path: Path
     ) -> list[dict]:
         """
-        For each comment in the post, create a document with the page content string with this format:
+        For each comment in the post, create a document with the page content string in this format:
 
         {post["title"]}
 
@@ -269,11 +269,12 @@ class RedditTransform(BaseTransform):
         {Single comment and its replies from output of self.transform_comment}
 
         We use the comment as the first class citizen instead of the post since we are looking for answers to
-        questions as opposed to questions themselves. In a normative sample, the post is typically a question and comments are answers with
-        each comment along with its post and replies documenting a single conversation about a given "answer" to the "question".
-        We vet the reliability of comments and replies to comments by ensuring that they are from a reputable user or have been upvoted.
-        If none of the comments have been upvoted, this is likely due to the post having little engagement, which doesn't necessarily mean
-        we should skip it. This is where filter_comments comes in.
+        questions as opposed to questions themselves. In a representative sample, the post is typically a question and
+        the comments are answers with each comment along with its post and replies documenting a single conversation
+        about a given "answer" to the "question". We vet the reliability of comments and replies to comments by ensuring
+        that they are from a reputable user or have been upvoted. If none of the comments have been upvoted, this is
+        likely due to the post having little engagement, which doesn't necessarily mean we should skip it.
+        This is where filter_comments comes in.
         """
 
         meta = post["metadata"]

@@ -12,12 +12,6 @@ class MongoLoad(BaseLoad):
     def __init__(self):
         super().__init__()
 
-    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
-        df = pd.concat(dfs)
-        # Drop rows with less than 80 words
-        df = df[df["page_content"].str.strip().str.split(r"\s+").str.len() >= 80]
-        return df
-
     def load_docs(self, documents: List[Document]) -> List[Document]:
         # Remove unwanted metadata fields
         for doc in documents:

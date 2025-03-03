@@ -49,3 +49,4 @@ typing_extensions~=4.12.2
 ragas~=0.2.12
 black~=25.1.0
 pymongo~=4.11.1
+textstat~=0.7.5

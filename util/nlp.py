@@ -81,11 +81,12 @@ DEFAULT_DISFLUENCIES = {
     "okay",
     "hmm",
     "hm",
-    "well",
     "so",
+    "bye",
+    "you know",
 }
-DEFAULT_STOP_WORDS = set(stopwords.words("english"))
-DEFAULT_STOP_WORDS.update(DEFAULT_DISFLUENCIES)
+DEFAULT_STOPWORDS = set(stopwords.words("english"))
+DEFAULT_STOPWORDS.update(DEFAULT_DISFLUENCIES)
 
 
 def spacy_get_tokens(text: str) -> List[str]:
@@ -114,7 +115,7 @@ def nltk_get_pos_tag(tag: str) -> str:
     return tag_dict.get(tag[0], wordnet.NOUN)
 
 
-def nltk_tokenize(text: str, stop_words: Set[str] = DEFAULT_STOP_WORDS) -> list[str]:
+def nltk_tokenize(text: str, stop_words: set[str] = DEFAULT_STOPWORDS) -> list[str]:
     tokens = nltk.wordpunct_tokenize(text.lower())
     return [
         token
@@ -192,6 +193,12 @@ def remove_keywords(text: str, keywords: list[str] = DEFAULT_DISFLUENCIES) -> st
         .replace("__ ", "")
         .replace("__", "")
     )
+
+
+def get_keywords(text: str, keywords: list[str] = DEFAULT_STOPWORDS) -> list[str]:
+    keyword_processor = KeywordProcessor()
+    keyword_processor.add_keywords_from_list(keywords)
+    return keyword_processor.extract_keywords(text)
 
 
 ####### Similarity ############################################################
