@@ -1,86 +1,41 @@
-# %%
+import pandas as pd
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.documents import Document
-import pandas as pd
 from util.document_utils import df_to_documents
 from ragas.testset.graph import KnowledgeGraph, Node, NodeType
 from ragas.testset.transforms import default_transforms, apply_transforms
 from datetime import datetime
-from ragas.testset.transforms.extractors import (
-    EmbeddingExtractor,
-    HeadlinesExtractor,
-    SummaryExtractor,
-)
-from ragas.testset.transforms.extractors.llm_based import NERExtractor, ThemesExtractor
 from ragas.testset.transforms.base import BaseGraphTransformation
 from ragas.utils import num_tokens_from_string
 
 from load.reddit_general.reddit_general_load import RedditGeneralLoad
 from load.reddit.reddit_load import RedditLoad
 from load.html.html_load import HtmlLoad
-from load.web.web_load import WebLoad
 from load.youtube.youtube_load import YoutubeLoad
 from load.mongo.mongo_load import MongoLoad
 
-sample_size = 50
+from ragas.testset.graph import NodeType
+from ragas.testset.transforms.extractors import (
+    EmbeddingExtractor,
+    HeadlinesExtractor,
+    SummaryExtractor,
+)
+from ragas.testset.transforms.extractors.llm_based import NERExtractor, ThemesExtractor
+from ragas.testset.transforms.filters import CustomNodeFilter
+from ragas.testset.transforms.relationship_builders import (
+    CosineSimilarityBuilder,
+    OverlapScoreBuilder,
+)
+from ragas.testset.transforms.splitters import HeadlineSplitter
+from ragas.utils import num_tokens_from_string
+from ragas.testset.transforms import Parallel
+from evals.evals_utils import node_meta
+
 kg_llm = LangchainLLMWrapper(ChatOpenAI(model_name="gpt-4o-mini"))
 embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 latest_kg_path = "evals/output/kg_output_LATEST.json"
-latest_kg = KnowledgeGraph.load(latest_kg_path)
-
-
-def estimate_ragas_eval_cost(
-    documents: list[Document], num_test_cases: int = 200
-) -> None:
-    total_text = " ".join([doc.page_content for doc in documents])
-    doc_tokens = num_tokens_from_string(total_text)
-
-    # Estimate knowledge graph creation cost (processes each doc ~3 times)
-    kg_tokens = doc_tokens * 3
-
-    # Estimate test case generation (each test case uses ~1000 tokens)
-    testset_tokens = num_test_cases * 1000
-
-    # Estimate evaluation cost (6 metrics, each using ~500 tokens per test case)
-    eval_tokens = num_test_cases * 6 * 500
-
-    total_tokens = kg_tokens + testset_tokens + eval_tokens
-    estimated_cost = (
-        total_tokens / 1_000_000
-    ) * 0.15  # gpt-4o-mini rate $0.15/1M tokens
-
-    kg_cost = kg_tokens / 1_000_000 * 0.15
-    testset_cost = testset_tokens / 1_000_000 * 0.15
-    eval_cost = eval_tokens / 1_000_000 * 0.15
-
-    print(f"Total docs: {len(documents):,}")
-    print(f"Dataset tokens: {doc_tokens:,}")
-    print(f"Estimated tokens for knowledge graph: {kg_tokens:,}")
-    print(f"estimated cost for knowledge graph: ${kg_cost:.2f}")
-    print(f"Estimated tokens for test generation: {testset_tokens:,}")
-    print(f"estimated cost for test generation: ${testset_cost:.2f}")
-    print(f"Estimated tokens for evaluation: {eval_tokens:,}")
-    print(f"estimated cost for evaluation: ${eval_cost:.2f}")
-    print(f"Total estimated tokens: {total_tokens:,}")
-    print(f"Estimated cost: ${estimated_cost:.2f}")
-
-
-def get_dataset_df(sample: bool = False) -> pd.DataFrame:
-    dfs = [
-        HtmlLoad.get_artifact(select_merged=True),
-        MongoLoad.get_artifact(select_merged=True),
-        RedditLoad.get_artifact(select_merged=True),
-        RedditGeneralLoad.get_artifact(select_merged=True),
-        YoutubeLoad.get_artifact(select_merged=True),
-    ]
-
-    if sample:
-        dfs = [df.sample(sample_size) for df in dfs]
-
-    return pd.concat(dfs, ignore_index=True)
-
 
 def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
     knowledge_graph = KnowledgeGraph()
@@ -105,82 +60,77 @@ def CREATE_KG(
     num_docs = len(docs)
     print(f"Constructing KG with {num_docs} docs")
     kg = construct_kg_nodes(docs)
+    print(f"KG has {len(kg.nodes)} nodes")
     apply_transforms(kg, transforms)
     print(f"Transformed KG has {len(kg.nodes)} nodes")
     timestamp = datetime.now().strftime("%m_%d_%H_%M")
     kg.save(f"evals/output/kg_output__n_{num_docs}__{label}__{timestamp}.json")
     kg.save(latest_kg_path)
 
+################################### MAIN ###################################
 
-dataset_df = get_dataset_df(sample=True)
-
-
-# %% #####################################  ANALYZE DF #########################
-
-print(f"Total number of rows in dataset: {len(dataset_df)}")
-# Check for duplicate content and IDs
-duplicate_content = dataset_df[
-    dataset_df.duplicated(subset=["page_content"], keep=False)
-]
-duplicate_ids = dataset_df[dataset_df.duplicated(subset=["id"], keep=False)]
-
-print(f"\nDuplicate content rows: {len(duplicate_content)}")
-print(f"Duplicate ID rows: {len(duplicate_ids)}")
-
-# %% #####################################  CREATE KG #########################
-
-docs = df_to_documents(dataset_df)
-# CREATE_KG(
-#     dataset_df,
-#     default_transforms(documents=docs, llm=kg_llm, embedding_model=embeddings),
-#     "default_transforms",
-# )
-
-# %% #####################################  GET INDIVIDUAL DFS #########################
-
-mongo_df = MongoLoad.get_artifact(select_merged=True)
-youtube_df = YoutubeLoad.get_artifact(select_merged=True)
-reddit_df = RedditLoad.get_artifact(select_merged=True)
-reddit_general_df = RedditGeneralLoad.get_artifact(select_merged=True)
-html_df = HtmlLoad.get_artifact(select_merged=True)
-
-
-# %% #####################################  YOUTUBE TOKENS #####################################
-total_youtube_tokens = (
-    youtube_df["page_content"].apply(lambda x: num_tokens_from_string(x)).sum()
-)
-print(f"Total youtube tokens: {total_youtube_tokens}")
-
-# %% ##################################### FILTER MONGO #####################################
-
-# Count rows where page_content has significantly more words than topic_content
-long_mongo_docs = mongo_df[
-    (
-        mongo_df["page_content"].str.split().str.len()
-        - mongo_df["topic_content"].str.split().str.len()
-    )
-    > 175
-]
-print(f"Number of documents with >200 words minus topic length: {len(long_mongo_docs)}")
-print(long_mongo_docs["topic_category_name"].value_counts())
-
-# Filter out certain topic categories from long docs
-filtered_long_mongo_docs = long_mongo_docs[
-    ~long_mongo_docs["topic_category_name"].isin(
-        ["Feature Requests", "Beta Releases", "Announcements"]
-    )
-]
-print(
-    f"\n\nFiltered out {len(long_mongo_docs) - len(filtered_long_mongo_docs)} documents from unwanted categories\n"
-)
-long_mongo_docs = filtered_long_mongo_docs
-print(long_mongo_docs["topic_category_name"].value_counts())
-print(f"Final docs: {len(long_mongo_docs)}")
-
-
-# %% ################################### MAIN ###################################
-
-# youtube -> headline transform/splitter
 # mongo -> thin out rows randomly?
 # should we skip the general youtubes and reddits? probably not....
 # how to handle html?
+
+# create the pipeline then run it on the dataset while doing thorough debugging breakpoints.
+# Check for duplicates after the headline stage (and the others if this isn't the cause)
+# todo: Manually add headlines/themes using metadata?
+
+
+def filter_youtube(node):
+    return node_meta(node)["type"] == "youtube"
+
+
+def filter_min_tokens(node):
+    return num_tokens_from_string(node.properties["page_content"]) > 100
+
+
+def filter_chunks(node):
+    return node.type == NodeType.CHUNK
+
+
+def get_transforms():
+    headline_extractor = HeadlinesExtractor(
+        llm=kg_llm, filter_nodes=lambda node: filter_youtube(node)
+    )
+    splitter = HeadlineSplitter(
+        min_tokens=500, filter_nodes=lambda node: filter_youtube(node)
+    )
+
+    summary_extractor = SummaryExtractor(
+        llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node)
+    )
+
+    node_filter = CustomNodeFilter(
+        llm=kg_llm, filter_nodes=lambda node: filter_chunks(node)
+    )
+
+    summary_emb_extractor = EmbeddingExtractor(
+        embedding_model=embeddings,
+        property_name="summary_embedding",
+        embed_property_name="summary",
+        filter_nodes=lambda node: filter_min_tokens(node),
+    )
+    theme_extractor = ThemesExtractor(llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node))
+    ner_extractor = NERExtractor(llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node))
+
+    cosine_sim_builder = CosineSimilarityBuilder(
+        property_name="summary_embedding",
+        new_property_name="summary_similarity",
+        threshold=0.7,
+        filter_nodes=lambda node: filter_min_tokens(node),
+    )
+    ner_overlap_sim = OverlapScoreBuilder(threshold=0.01, filter_nodes=lambda node: filter_min_tokens(node))
+    return [
+        headline_extractor,
+        splitter,
+        summary_extractor,
+        node_filter,
+        Parallel(summary_emb_extractor, theme_extractor, ner_extractor),
+        Parallel(cosine_sim_builder, ner_overlap_sim),
+    ]
+
+
+sample_df = pd.read_parquet("evals/sample_df.parquet").sample()
+CREATE_KG(sample_df, get_transforms(), "sample_with_custom_transforms")

@@ -14,106 +14,154 @@ from load.web.web_load import WebLoad
 from load.youtube.youtube_load import YoutubeLoad
 from load.mongo.mongo_load import MongoLoad
 import json
+import numpy as np
 
 latest_kg_path = "evals/output/kg_output_LATEST.json"
 latest_nodes_path = "evals/output/__nodes_LATEST.json"
 isolated_nodes_path = "evals/output/__isolated_nodes.json"
 duplicate_nodes_path = "evals/output/__duplicate_nodes.json"
 
+"""
+Learnings from analysis of KG output:
+- Nodes w/ page_content less than 500 tokens are added as nodes to the KG but they are otherwise completely ignored by the algorithm. They have no relationships or computed properties.
+- Other nodes have headlines, summary and summary_embedding properties added to them and spawn chunk nodes. They also have relationships.
+"""
 
-# %% ##################  CREATE NODES-ONLY FILE ########################
-def extract_nodes_to_file(input_path: str, output_path: str) -> None:
-    """Extract nodes from knowledge graph JSON and save to new file."""
-    with open(input_path) as f:
-        kg_data = json.load(f)
-        nodes = kg_data["nodes"]
+
+def meta_prop(node: dict[str, any], prop: str) -> any:
+    return node["properties"]["document_metadata"][prop]
+
+
+def clean_node_properties(node: dict[str, any]) -> dict[str, any]:
+    """Clean node properties by removing summary embeddings and null/NaN values.
+
+    Args:
+        node: Node dictionary containing properties to clean
+
+    Returns:
+        Cleaned node dictionary with filtered properties
+    """
+    cleaned_node = node.copy()
+
+    # Remove summary_embedding if it exists
+    if "summary_embedding" in cleaned_node.get("properties", {}):
+        del cleaned_node["properties"]["summary_embedding"]
+
+    if "document_metadata" in cleaned_node["properties"]:
+        metadata = cleaned_node["properties"]["document_metadata"]
+        # Remove null and NaN values
+        cleaned_metadata = {
+            k: v
+            for k, v in metadata.items()
+            if v is not None and (not isinstance(v, float) or not pd.isna(v))
+        }
+        cleaned_node["properties"]["document_metadata"] = cleaned_metadata
+
+    return cleaned_node
+
+
+def clean_and_write_nodes(
+    nodes: list[dict[str, any]], output_path: str, is_rel: bool
+) -> None:
+    """Clean node list and write to JSON file.
+
+    Args:
+        nodes: List of node dictionaries to clean and save
+        output_path: Path to save the JSON file
+        is_rel: Whether the nodes are relationships
+    """
+    if is_rel:
+        cleaned_nodes = [
+            {
+                "source": clean_node_properties(node["source"]),
+                "target": clean_node_properties(node["target"]),
+                **node,
+            }
+            for node in nodes
+        ]
+    else:
+        cleaned_nodes = [clean_node_properties(node) for node in nodes]
 
     with open(output_path, "w") as f:
-        json.dump(nodes, f, indent=2)
+        json.dump({"cleaned_nodes": cleaned_nodes}, f, indent=2)
+
+    print(f"Saved {len(cleaned_nodes)} cleaned nodes to {output_path}")
 
 
-# Extract nodes from latest KG
-extract_nodes_to_file(latest_kg_path, latest_nodes_path)
-
-# %% ##################  COUNT TRANSFORMED NODES ########################
+##################  COUNT TRANSFORMED NODES ########################
 
 with open(latest_nodes_path) as f:
     nodes_list = json.load(f)
 
-nodes_with_multiple_props = sum(
-    1 for node in nodes_list if len(node.get("properties", {})) > 2
+# Count docs and chunks
+doc_count = sum(1 for node in nodes_list if node.get("type") == NodeType.DOCUMENT.value)
+chunk_count = sum(1 for node in nodes_list if node.get("type") == NodeType.CHUNK.value)
+
+# Count those with multiple properties
+doc_multi_props = sum(
+    1
+    for node in nodes_list
+    if node.get("type") == NodeType.DOCUMENT.value
+    and len(node.get("properties", {})) > 2
 )
-print(f"Total number of nodes: {len(nodes_list)}")
-print(f"Transformed nodes with >2 properties: {nodes_with_multiple_props}")
+chunk_multi_props = sum(
+    1
+    for node in nodes_list
+    if node.get("type") == NodeType.CHUNK.value and len(node.get("properties", {})) > 2
+)
+
+print(f"Documents: {doc_count} (with multiple props: {doc_multi_props})")
+print(f"Chunks: {chunk_count} (with multiple props: {chunk_multi_props})")
 
 
-# %% #################  VISUALIZER ######################################################################
-import matplotlib.pyplot as plt
-import networkx as nx
-from typing import Dict, Any
+##################  ANALYZE DOCUMENT NODES ###################################################
 
+with open(latest_nodes_path) as f:
+    nodes_list = json.load(f)
 
-def visualize_knowledge_graph(kg_data: Dict[str, Any]) -> None:
-    """Create a minimal visual representation of the knowledge graph.
+for node_type in [NodeType.DOCUMENT, NodeType.CHUNK]:
+    # Get all nodes of current type
+    nodes = [node for node in nodes_list if node.get("type") == node_type.value]
 
-    Args:
-        kg_data: Dictionary containing nodes and relationships data
-        max_nodes: Maximum number of nodes to display to prevent overcrowding
-    """
-    G = nx.DiGraph()
-
-    # Add nodes (limited to max_nodes)
-    nodes = kg_data["nodes"]
-    node_mapping = {}  # Map node objects to their IDs
-
+    # Get unique property key sets and collect page_content token counts
+    prop_key_sets = set()
+    token_counts = {}
     for node in nodes:
-        node_id = node.get("id", "")
-        node_type = node.get("type", "")
-        G.add_node(node_id, type=node_type)
-        node_mapping[str(node)] = node_id
+        prop_keys = frozenset(node.get("properties", {}).keys())
+        prop_key_sets.add(prop_keys)
 
-    # Add relationships only between included nodes
-    node_ids = {node.get("id", "") for node in nodes}
-    for rel in kg_data["relationships"]:
-        source_id = rel.get("source", {}).get("id", "")
-        target_id = rel.get("target", {}).get("id", "")
-        if source_id in node_ids and target_id in node_ids:
-            G.add_edge(source_id, target_id)
+        # Track token counts for this key combination
+        if prop_keys not in token_counts:
+            token_counts[prop_keys] = []
+        page_content = node.get("properties", {}).get("page_content", "")
+        token_counts[prop_keys].append(num_tokens_from_string(page_content))
 
-    # Ultra-high resolution setup
-    plt.figure(figsize=(60, 48), dpi=900)  # 3x original size in each dimension
-    pos = nx.spring_layout(G, k=6, iterations=200)  # Increased spacing parameters
+    # Print each unique combination with count and token count stats
+    print(f"\n{node_type.value} property key combinations:")
+    for prop_keys in sorted(prop_key_sets, key=lambda x: len(x)):
+        count = sum(
+            1
+            for node in nodes
+            if frozenset(node.get("properties", {}).keys()) == prop_keys
+        )
+        tokens = np.array(token_counts[prop_keys])
 
-    # Draw nodes with increased visibility
-    nx.draw(
-        G,
-        pos,
-        with_labels=False,
-        node_color="black",
-        node_size=1,  # Increased node size
-        arrows=False,
-        edge_color="gray",
-        width=0.2,  # Thinner edges for better clarity
-        alpha=0.4,  # Slightly increased opacity
-    )
-
-    plt.axis("off")
-    plt.tight_layout()
-
-    # Save ultra-high-res PNG
-    plt.savefig("evals/output/knowledge_graph.png", dpi=900, bbox_inches="tight")
-    plt.show()
+        print(
+            f"\nKeys ({count} nodes, tokens avg: {tokens.mean():.0f}, "
+            f"min: {tokens.min()}, max: {tokens.max()}):"
+        )
+        for key in sorted(prop_keys):
+            print(f"  - {key}")
 
 
-# Load and visualize the knowledge graph
-with open(latest_kg_path) as f:
-    kg_data = json.load(f)
-    visualize_knowledge_graph(kg_data)
+################## GET ISOLATED NODES ###################################################
 
-# %% ##################  ISOLATED NODES ###################################################
+print(
+    "-------------------------------- ISOLATED NODES --------------------------------"
+)
 
 
-def find_isolated_nodes(kg_data: Dict[str, Any]) -> list[Dict[str, Any]]:
+def find_isolated_nodes(kg_data: dict[str, any]) -> list[dict[str, any]]:
     """Find nodes that have no relationships in the knowledge graph.
 
     Args:
@@ -150,7 +198,7 @@ with open(isolated_nodes_path, "w") as f:
 
 print(f"Saved {len(isolated_nodes)} isolated nodes to {isolated_nodes_path}")
 
-# %% ##################  ANALYZE ISOLATED NODES ###################################################
+##################  ANALYZE ISOLATED NODES ###################################################
 
 with open(isolated_nodes_path, "r") as f:
     isolated_nodes = json.load(f)["isolated_nodes"]
@@ -169,8 +217,7 @@ with open(isolated_nodes_path, "r") as f:
     # Count frequency of each source file
     source_counts = {}
     for node in isolated_nodes:
-        metadata = node["properties"]["document_metadata"]
-        source_file = metadata["source_file"]
+        source_file = meta_prop(node, "source_file")
         key = f"{node['type']}__{source_file}"
         source_counts[key] = source_counts.get(key, 0) + 1
 
@@ -183,7 +230,7 @@ with open(isolated_nodes_path, "r") as f:
 # %% ##################  DUPLICATE NODES ###################################################
 
 
-def find_duplicate_id_nodes(kg_data: Dict[str, Any]) -> list[Dict[str, Any]]:
+def find_duplicate_id_nodes(kg_data: dict[str, any]) -> list[dict[str, any]]:
     """Find nodes with duplicate IDs in the knowledge graph.
 
     Args:
@@ -224,12 +271,11 @@ print("\nDuplicate ID nodes found. Saving to JSON file...")
 with open(duplicate_nodes_path, "w") as f:
     json.dump({"duplicate_nodes": duplicate_nodes}, f, indent=2)
 
-# %% ##################  COUNT SOURCE FILES ###################################################
+# %% ##################  COUNT SOURCE FILES of DUPLICATE NODES ###################################################
 
 dupe_source_counts = {}
 for node in duplicate_nodes:
-    metadata = node["properties"]["document_metadata"]
-    source_file = metadata["source_file"]
+    source_file = meta_prop(node, "source_file")
     key = f"{node['type']}__{source_file}"
     dupe_source_counts[key] = dupe_source_counts.get(key, 0) + 1
 
@@ -238,3 +284,135 @@ for source, count in sorted(
     dupe_source_counts.items(), key=lambda x: x[1], reverse=True
 ):
     print(f"{source}: {count}")
+
+
+# %% ##################  GET RELATIONSHIPS FOR DUPLICATE NODES ###################################################
+
+
+def find_relationships_for_nodes(
+    kg_data: dict[str, any], node_ids: set[str]
+) -> list[dict[str, any]]:
+    """Find all relationships where either source or target is in the given node IDs.
+
+    Args:
+        kg_data: Dictionary containing nodes and relationships data
+        node_ids: Set of node IDs to find relationships for
+
+    Returns:
+        List of relationship objects that involve the specified nodes
+    """
+    related = []
+    for rel in kg_data["relationships"]:
+        source_id = rel.get("source", {}).get("id", "")
+        target_id = rel.get("target", {}).get("id", "")
+        if source_id in node_ids or target_id in node_ids:
+            related.append(rel)
+    return related
+
+
+duplicate_ids = {duplicate_nodes[0]["id"]}
+duplicate_relationships = find_relationships_for_nodes(kg_data, duplicate_ids)
+
+print(
+    f"\nNumber of relationships involving duplicate nodes: {len(duplicate_relationships)}"
+)
+
+clean_and_write_nodes(
+    duplicate_relationships, "evals/output/__duplicate_relationships.json", is_rel=True
+)
+
+
+# %% ##################  GET DUPLICATE YOUTUBE NODES ###################################################
+youtube_dupes = [
+    node for node in duplicate_nodes if "youtube" in meta_prop(node, "source_file")
+]
+print(f"\nNumber of duplicate YouTube nodes: {len(youtube_dupes)}")
+
+# Save duplicate YouTube nodes to JSON file
+youtube_nodes_path = "evals/output/__duplicate_youtube_nodes.json"
+
+# Replace the YouTube dupes writing code with:
+clean_and_write_nodes(youtube_dupes, youtube_nodes_path)
+
+
+# %% ##################  CREATE NODES-ONLY FILE ########################
+def extract_nodes_to_file(input_path: str, output_path: str) -> None:
+    """Extract nodes from knowledge graph JSON and save to new file."""
+    with open(input_path) as f:
+        kg_data = json.load(f)
+        nodes = kg_data["nodes"]
+
+    with open(output_path, "w") as f:
+        json.dump(nodes, f, indent=2)
+
+
+# Extract nodes from latest KG
+extract_nodes_to_file(latest_kg_path, latest_nodes_path)
+
+
+# %% #################  VISUALIZER ######################################################################
+import matplotlib.pyplot as plt
+import networkx as nx
+from typing import Dict, Any
+
+
+def visualize_knowledge_graph(kg_data: Dict[str, Any]) -> None:
+    """Create a minimal visual representation of the knowledge graph.
+
+    Args:
+        kg_data: Dictionary containing nodes and relationships data
+        max_nodes: Maximum number of nodes to display to prevent overcrowding
+    """
+    G = nx.DiGraph()
+
+    # Add nodes (limited to max_nodes)
+    nodes = kg_data["nodes"]
+    node_mapping = {}  # Map node objects to their IDs
+
+    for node in nodes:
+        node_id = node.get("id", "")
+        node_type = node.get("type", "")
+        G.add_node(node_id, type=node_type)
+        node_mapping[str(node)] = node_id
+
+    # Add relationships only between included nodes
+    node_ids = {node.get("id", "") for node in nodes}
+    for rel in kg_data["relationships"]:
+        source_id = rel.get("source", {}).get("id", "")
+        target_id = rel.get("target", {}).get("id", "")
+        if source_id in node_ids and target_id in node_ids:
+            G.add_edge(source_id, target_id)
+
+    dpi = 600
+    # Ultra-high resolution setup
+    plt.figure(figsize=(60, 48), dpi=dpi)  # 3x original size in each dimension
+    pos = nx.spring_layout(G, k=6, iterations=200)  # Increased spacing parameters
+
+    # Draw nodes with increased visibility
+    nx.draw(
+        G,
+        pos,
+        with_labels=False,
+        node_color="black",
+        node_size=1,  # Increased node size
+        arrows=False,
+        edge_color="gray",
+        width=0.2,  # Thinner edges for better clarity
+        alpha=0.4,  # Slightly increased opacity
+    )
+
+    plt.axis("off")
+    plt.tight_layout()
+
+    # Save ultra-high-res PNG
+    plt.savefig("evals/output/knowledge_graph.png", dpi=dpi, bbox_inches="tight")
+    plt.show()
+
+
+# Load and visualize the knowledge graph
+with open(latest_kg_path) as f:
+    kg_data = json.load(f)
+    visualize_knowledge_graph(kg_data)
+
+
+# %%

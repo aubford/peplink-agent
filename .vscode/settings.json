@@ -1,8 +1,8 @@
 {
   "files.exclude": {
-    ".idea": false,
+    ".idea": true,
     "backup_data": false,
-    "**/__pycache__": false,
+    "**/__pycache__": true,
     "langchain_pepwave_env": true
   },
   "search.exclude": {
