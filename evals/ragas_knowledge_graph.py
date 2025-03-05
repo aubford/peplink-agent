@@ -32,6 +32,8 @@ from ragas.testset.transforms.splitters import HeadlineSplitter
 from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms import Parallel
 from evals.evals_utils import node_meta
+from langsmith import tracing_context
+
 
 kg_llm = LangchainLLMWrapper(ChatOpenAI(model_name="gpt-4o-mini"))
 embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
@@ -60,7 +62,7 @@ def clean_meta(doc: Document) -> Document:
     return doc
 
 
-def CREATE_KG(
+def create_kg(
     df: pd.DataFrame, transforms: list[BaseGraphTransformation], label: str
 ) -> None:
     docs = df_to_documents(df)
@@ -71,6 +73,7 @@ def CREATE_KG(
     print(f"KG has {len(kg.nodes)} nodes")
     apply_transforms(kg, transforms)
     print(f"Transformed KG has {len(kg.nodes)} nodes")
+    print(f"Transformed KG has {len(kg.relationships)} relationships")
     timestamp = datetime.now().strftime("%m_%d_%H_%M")
     kg.save(f"evals/output/kg_output__n_{num_docs}__{label}__{timestamp}.json")
 
@@ -146,5 +149,6 @@ def get_transforms():
     ]
 
 
-sample_df = pd.read_parquet("evals/sample_df.parquet")
-CREATE_KG(sample_df, get_transforms(), "sample_with_custom_transforms")
+with tracing_context(enabled=False):
+    sample_df = pd.read_parquet("evals/sample_df.parquet")
+    create_kg(sample_df, get_transforms(), "sample_with_custom_transforms")
