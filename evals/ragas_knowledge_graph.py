@@ -37,6 +37,7 @@ kg_llm = LangchainLLMWrapper(ChatOpenAI(model_name="gpt-4o-mini"))
 embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 latest_kg_path = "evals/output/kg_output_LATEST.json"
 
+
 def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
     knowledge_graph = KnowledgeGraph()
     for doc in docs:
@@ -53,10 +54,17 @@ def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
     return knowledge_graph
 
 
+def clean_meta(doc: Document) -> Document:
+    allowed_fields = ["id", "source_file", "subject_matter", "type"]
+    doc.metadata = {k: doc.metadata[k] for k in allowed_fields if k in doc.metadata}
+    return doc
+
+
 def CREATE_KG(
     df: pd.DataFrame, transforms: list[BaseGraphTransformation], label: str
 ) -> None:
     docs = df_to_documents(df)
+    docs = [clean_meta(doc) for doc in docs]
     num_docs = len(docs)
     print(f"Constructing KG with {num_docs} docs")
     kg = construct_kg_nodes(docs)
@@ -65,7 +73,7 @@ def CREATE_KG(
     print(f"Transformed KG has {len(kg.nodes)} nodes")
     timestamp = datetime.now().strftime("%m_%d_%H_%M")
     kg.save(f"evals/output/kg_output__n_{num_docs}__{label}__{timestamp}.json")
-    kg.save(latest_kg_path)
+
 
 ################################### MAIN ###################################
 
@@ -112,8 +120,12 @@ def get_transforms():
         embed_property_name="summary",
         filter_nodes=lambda node: filter_min_tokens(node),
     )
-    theme_extractor = ThemesExtractor(llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node))
-    ner_extractor = NERExtractor(llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node))
+    theme_extractor = ThemesExtractor(
+        llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node)
+    )
+    ner_extractor = NERExtractor(
+        llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node)
+    )
 
     cosine_sim_builder = CosineSimilarityBuilder(
         property_name="summary_embedding",
@@ -121,7 +133,9 @@ def get_transforms():
         threshold=0.7,
         filter_nodes=lambda node: filter_min_tokens(node),
     )
-    ner_overlap_sim = OverlapScoreBuilder(threshold=0.01, filter_nodes=lambda node: filter_min_tokens(node))
+    ner_overlap_sim = OverlapScoreBuilder(
+        threshold=0.01, filter_nodes=lambda node: filter_min_tokens(node)
+    )
     return [
         headline_extractor,
         splitter,
@@ -132,5 +146,5 @@ def get_transforms():
     ]
 
 
-sample_df = pd.read_parquet("evals/sample_df.parquet").sample()
+sample_df = pd.read_parquet("evals/sample_df.parquet")
 CREATE_KG(sample_df, get_transforms(), "sample_with_custom_transforms")
