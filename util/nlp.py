@@ -15,16 +15,12 @@ from textwrap import dedent
 import pandas as pd
 from functools import wraps
 from dataclasses import dataclass
-from typing import Set
 
-nlp = spacy.load("en_core_web_sm")
-nlp.max_length = 100000000
-
-# nltk.download("brown")
-# nltk.download("stopwords")
-# nltk.download("punkt")
-# nltk.download("punkt_tab")
-# nltk.download("wordnet")
+nltk.download("brown")
+nltk.download("stopwords")
+nltk.download("punkt")
+nltk.download("punkt_tab")
+nltk.download("wordnet")
 
 ####### ANALYSIS TOOLS #########################################################
 
@@ -90,6 +86,8 @@ DEFAULT_STOPWORDS.update(DEFAULT_DISFLUENCIES)
 
 
 def spacy_get_tokens(text: str) -> List[str]:
+    nlp = spacy.load("en_core_web_sm")
+    nlp.max_length = 100000000
     """Tokenize using spaCy's pipeline, more strict with stop words"""
     docs = nlp.pipe(
         [text.lower()], disable=["ner"]

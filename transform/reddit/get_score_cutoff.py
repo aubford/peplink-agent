@@ -135,7 +135,7 @@ def _get_distribution_factor(cv: float) -> float:
 def _stretched_exponential(
     x: float, a: float, p: float, log_base: float = 2.2
 ) -> float:
-    """Automatically satisfies f(a)=0.5 and f(0)=0"""
+    """Satisfies f(a)=0.5 and f(0)=0"""
     k = (np.log(log_base) / (a**p)) ** (1 / p)
     return 1 - np.exp(-((k * x) ** p))
 

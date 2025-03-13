@@ -88,7 +88,22 @@ def clean_and_write_nodes(
     print(f"Saved {len(cleaned_nodes)} cleaned nodes to {output_path}")
 
 
-##################  COUNT TRANSFORMED NODES ########################
+# %% ##################  CREATE NODES-ONLY FILE ########################
+def extract_nodes_to_file(input_path: str, output_path: str) -> None:
+    """Extract nodes from knowledge graph JSON and save to new file."""
+    with open(input_path) as f:
+        kg_data = json.load(f)
+        nodes = kg_data["nodes"]
+
+    with open(output_path, "w") as f:
+        json.dump(nodes, f, indent=2)
+
+
+# Extract nodes from latest KG
+extract_nodes_to_file(latest_kg_path, latest_nodes_path)
+
+
+# %% ##################  COUNT TRANSFORMED NODES ########################
 
 with open(latest_nodes_path) as f:
     nodes_list = json.load(f)
@@ -114,7 +129,7 @@ print(f"Documents: {doc_count} (with multiple props: {doc_multi_props})")
 print(f"Chunks: {chunk_count} (with multiple props: {chunk_multi_props})")
 
 
-##################  ANALYZE DOCUMENT NODES ###################################################
+# %% ##################  ANALYZE DOCUMENT NODES ###################################################
 
 with open(latest_nodes_path) as f:
     nodes_list = json.load(f)
@@ -154,7 +169,7 @@ for node_type in [NodeType.DOCUMENT, NodeType.CHUNK]:
             print(f"  - {key}")
 
 
-################## GET ISOLATED NODES ###################################################
+# %% ################## GET ISOLATED NODES ###################################################
 
 print(
     "-------------------------------- ISOLATED NODES --------------------------------"
@@ -198,7 +213,7 @@ with open(isolated_nodes_path, "w") as f:
 
 print(f"Saved {len(isolated_nodes)} isolated nodes to {isolated_nodes_path}")
 
-##################  ANALYZE ISOLATED NODES ###################################################
+# %% ##################  ANALYZE ISOLATED NODES ###################################################
 
 with open(isolated_nodes_path, "r") as f:
     isolated_nodes = json.load(f)["isolated_nodes"]
@@ -335,21 +350,6 @@ youtube_nodes_path = "evals/output/__duplicate_youtube_nodes.json"
 clean_and_write_nodes(youtube_dupes, youtube_nodes_path)
 
 
-# %% ##################  CREATE NODES-ONLY FILE ########################
-def extract_nodes_to_file(input_path: str, output_path: str) -> None:
-    """Extract nodes from knowledge graph JSON and save to new file."""
-    with open(input_path) as f:
-        kg_data = json.load(f)
-        nodes = kg_data["nodes"]
-
-    with open(output_path, "w") as f:
-        json.dump(nodes, f, indent=2)
-
-
-# Extract nodes from latest KG
-extract_nodes_to_file(latest_kg_path, latest_nodes_path)
-
-
 # %% #################  VISUALIZER ######################################################################
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -413,6 +413,3 @@ def visualize_knowledge_graph(kg_data: Dict[str, Any]) -> None:
 with open(latest_kg_path) as f:
     kg_data = json.load(f)
     visualize_knowledge_graph(kg_data)
-
-
-# %%

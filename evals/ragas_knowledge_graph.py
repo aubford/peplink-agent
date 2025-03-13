@@ -150,5 +150,5 @@ def get_transforms():
 
 
 with tracing_context(enabled=False):
-    sample_df = pd.read_parquet("evals/sample_df.parquet")
+    sample_df = pd.read_parquet("evals/sample_df_55.parquet")
     create_kg(sample_df, get_transforms(), "sample_with_custom_transforms")

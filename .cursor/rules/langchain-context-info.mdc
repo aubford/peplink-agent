@@ -1,6 +1,7 @@
 ---
-description: Use this when asked something about or related to the LangChain framework or its components.
+description: Use this when asked something related to the LangChain framework or its components.
 globs: 
+alwaysApply: false
 ---
 This question is related to LangChain, here are the resources you should utilize when answering this query.
 
