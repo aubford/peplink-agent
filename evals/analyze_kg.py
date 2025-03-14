@@ -1,5 +1,5 @@
 # %% ##########################################
-from ragas.testset.graph import NodeType, KnowledgeGraph
+from ragas.testset.graph import NodeType, KnowledgeGraph, Node, Relationship, UUIDEncoder
 from ragas.utils import num_tokens_from_string
 import pandas as pd
 import json
@@ -86,11 +86,11 @@ def clean_and_write_nodes(
 
     print(f"Saved {len(cleaned_nodes)} cleaned nodes to {output_path}")
     
-def get_single_node_and_its_relationships(kg_data: dict[str, t.Any], node_id: str) -> tuple[dict[str, t.Any], list[dict[str, t.Any]]]:
+def get_single_node_and_its_relationships(kg: KnowledgeGraph) -> tuple[Node, list[Relationship]]:
     """Get a single node and its relationships from the knowledge graph.
 
     Args:
-        kg_data: Dictionary containing nodes and relationships data
+        kg: KnowledgeGraph object
         node_id: ID of the node to get
 
     Returns:
@@ -99,22 +99,22 @@ def get_single_node_and_its_relationships(kg_data: dict[str, t.Any], node_id: st
         - relationships: List of relationship objects involving the node
     """
     # Find the node with the specified ID
-    node = None
-    for n in kg_data["nodes"]:
-        if n.get("id", "") == node_id:
-            node = n
-            break
-    
-    if node is None:
-        raise ValueError(f"Node with ID '{node_id}' not found in the knowledge graph")
+    nodes: list[Node] = kg.nodes
+    node = random.choice(nodes)
     
     # Find all relationships involving this node
-    relationships = find_relationships_for_nodes(kg_data, {node_id})
+    relationships = [
+        rel for rel in kg.relationships 
+        if str(rel.source.id) == str(node.id) or str(rel.target.id) == str(node.id)
+    ]
     
     return node, relationships
 
-################## GET SINGLE NODE AND ITS RELATIONSHIPS ########################
+################## SAMPLE SINGLE NODE AND ITS RELATIONSHIPS ########################
 # Get a random node and its relationships and print to json file
+node, relationships = get_single_node_and_its_relationships(kg)
+with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
+    json.dump({"node": node.model_dump(), "relationships": [rel.model_dump() for rel in relationships]}, f, cls=UUIDEncoder, indent=2)
 
 
 # %% ##################  CREATE NODES-ONLY FILE ########################

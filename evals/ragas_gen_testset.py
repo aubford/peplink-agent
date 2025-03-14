@@ -1,5 +1,5 @@
 from langsmith import tracing_context
-from ragas.testset import TestsetGenerator
+from ragas.testset import TestsetGenerator, Testset
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -11,6 +11,8 @@ from ragas.testset.synthesizers import (
     MultiHopSpecificQuerySynthesizer,
 )
 from ragas.testset.persona import Persona
+from ragas.testset.synthesizers.base import BaseSynthesizer
+from evals.ragas_mocks import MockMultiHopAbstractQuerySynthesizer
 import json
 import os
 import sys
@@ -21,7 +23,7 @@ load_dotenv()
 
 
 LLM_MODEL = "gpt-4o"
-TESTSET_SIZE = 1
+TESTSET_SIZE = 5
 evals_dir = Path(__file__).parent
 latest_kg_path = Path.joinpath(
     evals_dir,
@@ -29,6 +31,9 @@ latest_kg_path = Path.joinpath(
 )
 
 kg = KnowledgeGraph.load(Path(latest_kg_path))
+# generator_llm = LangchainLLMWrapper(MockLLM()) # type: ignore
+# generator_embeddings = LangchainEmbeddingsWrapper(MockEmbeddings())
+# MockSynth = MockMultiHopAbstractQuerySynthesizer(llm=generator_llm)
 
 
 generator_llm = LangchainLLMWrapper(ChatOpenAI(model_name=LLM_MODEL))
@@ -46,11 +51,18 @@ generator = TestsetGenerator(
     persona_list=[persona],
 )
 
-query_distribution = [
+query_distribution: list[tuple[BaseSynthesizer, float]] = [
     # (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 1),
     (MultiHopAbstractQuerySynthesizer(llm=generator_llm), 1),
     # (MultiHopSpecificQuerySynthesizer(llm=generator_llm), 1),
 ]
+
+
+# query_distribution: list[tuple[BaseSynthesizer, float]] = [
+#     # (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 1),
+#     (MockSynth, 1),
+#     # (MultiHopSpecificQuerySynthesizer(llm=generator_llm), 1),
+# ]
 
 # Generate the dataset
 dataset = generator.generate(
@@ -65,20 +77,20 @@ dataset = generator.generate(
 for sample in dataset.samples:
     # Clean the eval_sample fields that might contain problematic Unicode
     if hasattr(sample.eval_sample, "question"):
-        sample.eval_sample.question = sample.eval_sample.question.encode(
+        sample.eval_sample.question = sample.eval_sample.question.encode( # type: ignore
             "ascii", "replace"
         ).decode("ascii")
     if hasattr(sample.eval_sample, "ground_truth"):
-        sample.eval_sample.ground_truth = sample.eval_sample.ground_truth.encode(
+        sample.eval_sample.ground_truth = sample.eval_sample.ground_truth.encode( # type: ignore
             "ascii", "replace"
         ).decode("ascii")
-    if hasattr(sample.eval_sample, "contexts") and sample.eval_sample.contexts:
-        sample.eval_sample.contexts = [
+    if hasattr(sample.eval_sample, "contexts") and sample.eval_sample.contexts: # type: ignore
+        sample.eval_sample.contexts = [ # type: ignore
             ctx.encode("ascii", "replace").decode("ascii")
-            for ctx in sample.eval_sample.contexts
+            for ctx in sample.eval_sample.contexts # type: ignore
         ]
 
 # upload to ragas app
-dataset.upload()
+# dataset.upload()
 df = dataset.to_pandas()
 df.to_parquet(Path.joinpath(evals_dir, "ragas_testset.parquet"))

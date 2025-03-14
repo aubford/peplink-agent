@@ -1,2 +1,5 @@
-def node_meta(node: dict[str, any]) -> any:
+from ragas.testset.graph import Node
+import typing as t
+
+def node_meta(node: Node) -> dict[str, t.Any]:
     return node.properties["document_metadata"]
