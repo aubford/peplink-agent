@@ -1,25 +1,23 @@
 # %% ##########################################
-from langchain_core.documents import Document
-import pandas as pd
-from util.document_utils import df_to_documents
-from ragas.testset.graph import KnowledgeGraph, Node, NodeType
-from ragas.testset.transforms import default_transforms, apply_transforms
-from datetime import datetime
+from ragas.testset.graph import NodeType, KnowledgeGraph
 from ragas.utils import num_tokens_from_string
-
-from load.reddit_general.reddit_general_load import RedditGeneralLoad
-from load.reddit.reddit_load import RedditLoad
-from load.html.html_load import HtmlLoad
-from load.web.web_load import WebLoad
-from load.youtube.youtube_load import YoutubeLoad
-from load.mongo.mongo_load import MongoLoad
+import pandas as pd
 import json
 import numpy as np
+import typing as t
+import random
+import os
+from pathlib import Path
 
-latest_kg_path = "evals/output/kg_output_LATEST.json"
-latest_nodes_path = "evals/output/__nodes_LATEST.json"
-isolated_nodes_path = "evals/output/__isolated_nodes.json"
-duplicate_nodes_path = "evals/output/__duplicate_nodes.json"
+# Get the directory of the current file
+current_dir = Path(__file__).parent
+output_dir = current_dir / "output"
+
+# Update paths to be relative to the current file
+latest_kg_path = str(output_dir / "kg_output_LATEST.json")
+latest_nodes_path = str(output_dir / "__nodes_LATEST.json")
+isolated_nodes_path = str(output_dir / "__isolated_nodes.json")
+duplicate_nodes_path = str(output_dir / "__duplicate_nodes.json")
 
 """
 Learnings from analysis of KG output:
@@ -27,12 +25,13 @@ Learnings from analysis of KG output:
 - Other nodes have headlines, summary and summary_embedding properties added to them and spawn chunk nodes. They also have relationships.
 """
 
+kg = KnowledgeGraph.load(latest_kg_path)
 
-def meta_prop(node: dict[str, any], prop: str) -> any:
+def meta_prop(node: dict[str, dict[str, t.Any]], prop: str) -> t.Any:
     return node["properties"]["document_metadata"][prop]
 
 
-def clean_node_properties(node: dict[str, any]) -> dict[str, any]:
+def clean_node_properties(node: dict[str, t.Any]) -> dict[str, t.Any]:
     """Clean node properties by removing summary embeddings and null/NaN values.
 
     Args:
@@ -61,7 +60,7 @@ def clean_node_properties(node: dict[str, any]) -> dict[str, any]:
 
 
 def clean_and_write_nodes(
-    nodes: list[dict[str, any]], output_path: str, is_rel: bool
+    nodes: list[dict[str, t.Any]], output_path: str, is_rel: bool
 ) -> None:
     """Clean node list and write to JSON file.
 
@@ -86,6 +85,36 @@ def clean_and_write_nodes(
         json.dump({"cleaned_nodes": cleaned_nodes}, f, indent=2)
 
     print(f"Saved {len(cleaned_nodes)} cleaned nodes to {output_path}")
+    
+def get_single_node_and_its_relationships(kg_data: dict[str, t.Any], node_id: str) -> tuple[dict[str, t.Any], list[dict[str, t.Any]]]:
+    """Get a single node and its relationships from the knowledge graph.
+
+    Args:
+        kg_data: Dictionary containing nodes and relationships data
+        node_id: ID of the node to get
+
+    Returns:
+        Tuple containing (node, relationships) where:
+        - node: The node object with the specified ID
+        - relationships: List of relationship objects involving the node
+    """
+    # Find the node with the specified ID
+    node = None
+    for n in kg_data["nodes"]:
+        if n.get("id", "") == node_id:
+            node = n
+            break
+    
+    if node is None:
+        raise ValueError(f"Node with ID '{node_id}' not found in the knowledge graph")
+    
+    # Find all relationships involving this node
+    relationships = find_relationships_for_nodes(kg_data, {node_id})
+    
+    return node, relationships
+
+################## GET SINGLE NODE AND ITS RELATIONSHIPS ########################
+# Get a random node and its relationships and print to json file
 
 
 # %% ##################  CREATE NODES-ONLY FILE ########################
@@ -176,7 +205,7 @@ print(
 )
 
 
-def find_isolated_nodes(kg_data: dict[str, any]) -> list[dict[str, any]]:
+def find_isolated_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]:
     """Find nodes that have no relationships in the knowledge graph.
 
     Args:
@@ -245,7 +274,7 @@ with open(isolated_nodes_path, "r") as f:
 # %% ##################  DUPLICATE NODES ###################################################
 
 
-def find_duplicate_id_nodes(kg_data: dict[str, any]) -> list[dict[str, any]]:
+def find_duplicate_id_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]:
     """Find nodes with duplicate IDs in the knowledge graph.
 
     Args:
@@ -270,7 +299,7 @@ def find_duplicate_id_nodes(kg_data: dict[str, any]) -> list[dict[str, any]]:
             duplicate_nodes.extend(id_to_nodes[node_id])
 
     # Sort duplicate nodes by ID
-    duplicate_nodes.sort(key=lambda x: x["id"])
+    duplicate_nodes.sort(key=lambda x: x["id"])  # type: ignore
     return duplicate_nodes
 
 
@@ -305,8 +334,8 @@ for source, count in sorted(
 
 
 def find_relationships_for_nodes(
-    kg_data: dict[str, any], node_ids: set[str]
-) -> list[dict[str, any]]:
+    kg_data: dict[str, t.Any], node_ids: set[str]
+) -> list[dict[str, t.Any]]:
     """Find all relationships where either source or target is in the given node IDs.
 
     Args:
@@ -347,7 +376,7 @@ print(f"\nNumber of duplicate YouTube nodes: {len(youtube_dupes)}")
 youtube_nodes_path = "evals/output/__duplicate_youtube_nodes.json"
 
 # Replace the YouTube dupes writing code with:
-clean_and_write_nodes(youtube_dupes, youtube_nodes_path)
+clean_and_write_nodes(youtube_dupes, youtube_nodes_path, is_rel=False)
 
 
 # %% #################  VISUALIZER ######################################################################
