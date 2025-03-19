@@ -15,6 +15,6 @@ class MongoLoad(BaseLoad):
     def load_docs(self, documents: List[Document]) -> List[Document]:
         # Remove unwanted metadata fields
         for doc in documents:
-            doc.metadata.pop("topic_tags", None)
-            doc.metadata.pop("topic_category_id", None)
+            doc.metadata.pop("post_tags", None)
+            doc.metadata.pop("post_category_id", None)
         return documents

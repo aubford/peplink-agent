@@ -172,21 +172,15 @@ def get_score_cutoff_percentile(scores: list[int]) -> float:
     with max selectivity being only the 20% best comments.
     """
     scores_array = np.array(scores)
-    print(f"\n\nscores: {np.array2string(scores_array, separator=', ')}")
     engagement = np.sum(scores_array - 1)  # Total upvotes (excluding initial 1 point)
     mean = np.mean(scores_array)
     std_dev = np.std(scores_array)
     cv = std_dev / (mean + 1e-8)
 
     engagement_norm = _get_engagement_norm(engagement)
-    print(f"engagement_norm: {round(engagement_norm, 4)}")
 
     distribution_factor = _get_distribution_factor(cv)
-    print(f"cv: {round(cv, 4)}")
-    print(f"distribution_factor: {round(distribution_factor, 4)}")
     scaled_distribution_factor = _scale_distribution_factor(distribution_factor)
-    print(f"scaled_distribution_factor: {round(scaled_distribution_factor, 4)}")
 
     cutoff_percentile = engagement_norm * scaled_distribution_factor
-    print(f"cutoff_percentile: {round(cutoff_percentile, 4)}")
     return 1 - cutoff_percentile
