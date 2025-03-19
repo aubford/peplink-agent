@@ -31,11 +31,6 @@ Learnings from analysis of KG output:
 - Other nodes have headlines, summary and summary_embedding properties added to them and spawn chunk nodes. They also have relationships.
 """
 
-kg = KnowledgeGraph.load(latest_kg_path)
-kg_relationships = kg.relationships
-kg_nodes = kg.nodes
-kg_nodes = kg.nodes
-
 
 def meta_prop(node: dict[str, dict[str, t.Any]], prop: str) -> t.Any:
     return node["properties"]["document_metadata"][prop]
@@ -142,6 +137,57 @@ def get_single_node_and_its_relationships(
     return node, relationships_with_content
 
 
+def sample_one_document_node_and_one_chunk_and_relationships(
+    kg: KnowledgeGraph,
+) -> None:
+    # Find the node with the specified ID
+    document_nodes = [node for node in kg.nodes if node.type == NodeType.DOCUMENT.value]
+    chunk_nodes = [node for node in kg.nodes if node.type == NodeType.CHUNK.value]
+    nodes = [random.choice(document_nodes), random.choice(chunk_nodes)]
+
+    # Find all relationships involving this node
+    relationships = [
+        rel for rel in kg.relationships if rel.source in nodes or rel.target in nodes
+    ]
+
+    # Add page_content for source and target nodes
+    relationships_with_content = []
+    for rel in relationships:
+        source_content = rel.source.properties.get(
+            "page_content", "No page content available"
+        )
+        target_content = rel.target.properties.get(
+            "page_content", "No page content available"
+        )
+        relationships_with_content.append((rel, source_content, target_content))
+
+    relationships_data = []
+    for rel in relationships:
+        source_content = rel.source.properties.get(
+            "page_content", "**** No page content available ****"
+        )
+        target_content = rel.target.properties.get(
+            "page_content", "**** No page content available ****"
+        )
+        rel_data = rel.model_dump()
+        rel_data["source_content"] = source_content
+        rel_data["target_content"] = target_content
+        relationships_data.append(rel_data)
+
+    for node in nodes:
+        node.properties["summary_embedding"] = node.properties["summary_embedding"][:5]
+    with open(f"{output_dir}/__nodes_and_relationships_example.json", "w") as f:
+        json.dump(
+            {
+                "nodes": [node.model_dump() for node in nodes],
+                "relationships": relationships_data,
+            },
+            f,
+            cls=UUIDEncoder,
+            indent=2,
+        )
+
+
 # %% ################## SIMPLE KG ACCESS ########################
 kg_55 = KnowledgeGraph.load(
     f"{output_dir}/kg_output__n_55__sample_with_custom_transforms__03_05_14_56.json"
@@ -154,13 +200,11 @@ print(f"1000: {len(kg_1000.nodes)}")
 print(f"55: {len(kg_55.relationships)}")
 print(f"1000: {len(kg_1000.relationships)}")
 
-# %% ################## SAMPLE SINGLE NODE AND ITS RELATIONSHIPS ########################
+# %% ################## SAMPLE NODES AND ITS RELATIONSHIPS ########################
 # Get a random node and its relationships and print to json file
 sn_kg = KnowledgeGraph.load(f"{output_dir}/__strict_kg.json")
 # sn_kg = KnowledgeGraph.load(f"{output_dir}/kg_output__n_1112__sample_with_custom_transforms__03_04_22_21.json")
-node, relationships_with_content = get_single_node_and_its_relationships(
-    sn_kg, id="dd380401-a68c-429d-b322-5b92c2e7e69e"
-)
+node, relationships_with_content = get_single_node_and_its_relationships(sn_kg)
 
 # Prepare data for JSON serialization
 relationships_data = []
@@ -183,8 +227,12 @@ with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
         indent=2,
     )
 
+sample_one_document_node_and_one_chunk_and_relationships(sn_kg)
 
 # %% ############### WEED OUT LOW-QUALITY RELATIONSHIPS ########################
+kg = KnowledgeGraph.load(latest_kg_path)
+kg_relationships = kg.relationships
+kg_nodes = kg.nodes
 
 similarity_threshold = 0.91
 overlap_threshold = 0.15

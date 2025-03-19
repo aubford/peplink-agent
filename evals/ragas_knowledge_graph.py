@@ -35,7 +35,7 @@ from evals.evals_utils import node_meta
 from langsmith import tracing_context
 
 
-kg_llm = LangchainLLMWrapper(ChatOpenAI(model_name="gpt-4o-mini"))
+kg_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini"))
 embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 latest_kg_path = "evals/output/kg_output_LATEST.json"
 
@@ -57,8 +57,10 @@ def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
 
 
 def clean_meta(doc: Document) -> Document:
-    allowed_fields = ["id", "source_file", "subject_matter", "type"]
-    doc.metadata = {k: doc.metadata[k] for k in allowed_fields if k in doc.metadata}
+    # Filter out metadata fields with null-like values
+    doc.metadata = {
+        k: v for k, v in doc.metadata.items() if v is not None and not pd.isna(v)
+    }
     return doc
 
 
