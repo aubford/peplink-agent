@@ -53,3 +53,4 @@ pymongo~=4.11.1
 textstat~=0.7.5
 instructor~=1.7.2
 matplotlib~=3.10.1
+flashtext~=2.7

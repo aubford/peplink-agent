@@ -61,6 +61,10 @@ class RedditTransform(BaseTransform):
                     print("No Author: Skipping")
                     continue
 
+                if not data["page_content"]:
+                    print("No Post Content: Skipping")
+                    continue
+
                 post_and_comments.extend(
                     self.transform_post_into_post_comments(data, file_path)
                 )
@@ -81,6 +85,8 @@ class RedditTransform(BaseTransform):
                 "comment_author_name",
                 "post_author_id",
                 "comment_author_id",
+                "post_content",
+                "comment_content",
             ],
             False,
         )
@@ -91,6 +97,10 @@ class RedditTransform(BaseTransform):
         print(
             f"{file_path}: Found {rows_without_author_count} rows with None values in author columns"
         )
+
+        # Reorder columns to put specified columns first
+        first_cols = ["page_content", "post_title", "post_content", "comment_content"]
+        df = self.reorder_columns(df, first_cols)
 
         return df
 
@@ -221,7 +231,7 @@ class RedditTransform(BaseTransform):
         """
         Create a page content string from a reddit post dict with this format:
         """
-        return f"## Reddit Post: {title}\n\n{page_content}\n\n## Comment and Replies:\n\n{comment}"
+        return f"## Post\n\n ### Title: {title}\n\n ### Content:\n\n{page_content}\n\n ## Comments:\n\n{comment}"
 
     @staticmethod
     def filter_comments(comments: list[RedditComment]) -> list[RedditComment]:
@@ -253,7 +263,6 @@ class RedditTransform(BaseTransform):
         )
 
         cutoff_index = max(1, round(len(sorted_comments) * cutoff_percent))
-        print(f"cutoff_index: {cutoff_index}")
         return sorted_comments[:cutoff_index]
 
     def transform_post_into_post_comments(
@@ -300,6 +309,7 @@ class RedditTransform(BaseTransform):
                     "url": meta["url"],
                     "post_id": meta["id"],
                     "post_title": meta["title"],
+                    "post_content": post["page_content"],
                     "post_score": meta["score"],
                     "score": comment["score"],
                     "comment_date": comment["created_utc"],
@@ -318,6 +328,7 @@ class RedditTransform(BaseTransform):
                     ),
                     "post_author_has_subscribed": author.get("has_subscribed", None),
                     "post_author_is_employee": author.get("is_employee", None),
+                    "comment_content": comment["body"],
                     "comment_author_name": comment_author["name"],
                     "comment_author_id": comment_author["id"],
                     "comment_author_is_mod": comment_author["is_mod"],

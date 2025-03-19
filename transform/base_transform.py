@@ -31,7 +31,7 @@ class BaseTransform(ABC):
             raise TypeError(
                 f"subject_matter must be an instance of SubjectMatter, got {type(self.subject_matter)}"
             )
-        self.row_count = None
+        self.row_count = 0
         self.logger = RotatingFileLogger(f"transform__{self.folder_name}")
 
     def set_logger(self, name: str):
@@ -144,6 +144,21 @@ class BaseTransform(ABC):
         """
         files = cls.get_artifact_file_paths()
         return load_parquet_files(files)
+
+    @staticmethod
+    def reorder_columns(df: pd.DataFrame, first_cols: list[str]) -> pd.DataFrame:
+        """
+        Reorder DataFrame columns to put specified columns first, keeping remaining columns in their original order.
+
+        Args:
+            df: DataFrame to reorder
+            first_cols: List of column names to put first, in the desired order
+
+        Returns:
+            DataFrame with reordered columns
+        """
+        other_cols = [col for col in df.columns if col not in first_cols]
+        return df[first_cols + other_cols]
 
 
 class BaseMongoTransform(BaseTransform, ABC):

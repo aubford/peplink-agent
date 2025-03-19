@@ -6,6 +6,7 @@ backup_data
 *.parquet
 langchain_pepwave_env*/*
 evals/output
+tutorial/
 
 ### VisualStudioCode template
 !.vscode/settings.json

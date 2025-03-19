@@ -1,4 +1,3 @@
-# %%
 import nltk
 import time
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -73,13 +72,9 @@ DEFAULT_DISFLUENCIES = {
     "um",
     "uh",
     "uhm",
-    "ok",
-    "okay",
     "hmm",
     "hm",
-    "so",
     "bye",
-    "you know",
 }
 DEFAULT_STOPWORDS = set(stopwords.words("english"))
 DEFAULT_STOPWORDS.update(DEFAULT_DISFLUENCIES)
@@ -170,10 +165,6 @@ def chunk_wordset(wordset: List[str], ngram: int) -> List[str]:
 ####### Transform #############################################################
 
 from flashtext import KeywordProcessor
-
-
-# %%
-
 
 def remove_keywords(text: str, keywords: list[str] = DEFAULT_DISFLUENCIES) -> str:
     """

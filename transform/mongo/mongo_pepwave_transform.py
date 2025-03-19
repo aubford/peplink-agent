@@ -8,8 +8,9 @@ from sklearn.preprocessing import QuantileTransformer
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import matplotlib.pyplot as plt
 import nltk
-import json
 from pathlib import Path
+from matplotlib.ticker import MultipleLocator
+
 
 tokenizer = AutoTokenizer.from_pretrained(
     "shahrukhx01/question-vs-statement-classifier"
@@ -60,18 +61,18 @@ class MongoPepwaveTransform(BaseMongoTransform):
         if not topic:
             return None
         return {
-            "topic_id": str(topic["_id"]),
-            "topic_title": topic["title"],
-            "topic_content": topic["topicTextContent"],
-            "topic_category_id": topic["categoryId"],
-            "topic_category_name": topic["categoryName"],
-            "topic_created_at": topic["createdAt"],
-            "topic_last_modified": topic["lastModified"],
-            "topic_num_bookmarks": topic.get("numberOfBookmarks", 0),
-            "topic_num_flags": topic.get("numberOfFlags", 0),
-            "topic_num_likes": topic.get("numberOfLikes", 0),
-            "topic_num_views": topic.get("numberOfViews", 0),
-            "topic_tags": [tag["name"] for tag in topic.get("tags", [])],
+            "post_id": str(topic["_id"]),
+            "post_title": topic["title"],
+            "post_content": topic["topicTextContent"],
+            "post_category_id": topic["categoryId"],
+            "post_category_name": topic["categoryName"],
+            "post_created_at": topic["createdAt"],
+            "post_last_modified": topic["lastModified"],
+            "post_num_bookmarks": topic.get("numberOfBookmarks", 0),
+            "post_num_flags": topic.get("numberOfFlags", 0),
+            "post_num_likes": topic.get("numberOfLikes", 0),
+            "post_num_views": topic.get("numberOfViews", 0),
+            "post_tags": [tag["name"] for tag in topic.get("tags", [])],
         }
 
     def build_reply_tree(self, parent_id: str) -> list[dict]:
@@ -88,9 +89,9 @@ class MongoPepwaveTransform(BaseMongoTransform):
         """
         Generate the page_content string by prepending the topic and appending replies in hierarchical order.
         """
-        topic_title = topic["topic_title"]
-        topic_content = topic["topic_content"]
-        topic_tags = topic["topic_tags"]
+        post_title = topic["post_title"]
+        post_content = topic["post_content"]
+        post_tags = topic["post_tags"]
 
         def format_replies(replies: list[dict], depth: int = 0) -> str:
             formatted = ""
@@ -102,12 +103,12 @@ class MongoPepwaveTransform(BaseMongoTransform):
             return formatted
 
         comment_replies = comment.get("replies", [])
-        tags = f"\n\n## Tags: {", ".join(topic_tags)}" if topic_tags else ""
+        tags = f"\n\n## Tags: {", ".join(post_tags)}" if post_tags else ""
         if comment_replies:
             replies_formatted = format_replies(comment_replies)
-            return f"## Forum Topic: {topic_title}\n\n{topic_content}\n\n ## Comment:\n\n{comment['postContent']}\n\n ## Replies:\n\n{replies_formatted}{tags}"
+            return f"## Post\n\n ### Title: {post_title}\n\n ### Content:\n\n{post_content}\n\n ## Comments:\n\n<comment> {comment['postContent']} {replies_formatted}</comment>\n\n{tags}"
         else:
-            return f"## Forum Topic: {topic_title}\n\n{topic_content}\n\n ## Comment:\n\n{comment['postContent']}{tags}"
+            return f"## Post\n\n ### Title: {post_title}\n\n ### Content:\n\n{post_content}\n\n ## Comments:\n\n<comment> {comment['postContent']} </comment>{tags}"
 
     def _total_replies_and_likes(
         self, replies_tree: list[dict]
@@ -152,7 +153,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
         )
 
         # Add mean line
-        mean_score = np.mean(scores)
+        mean_score = float(np.mean(scores))
         plt.axvline(
             x=mean_score, color="g", linestyle="--", label=f"Mean ({mean_score:.2f})"
         )
@@ -212,11 +213,13 @@ class MongoPepwaveTransform(BaseMongoTransform):
             bins=bins,
             edgecolor="black",
             alpha=0.7,
-            range=(-20, zoom_upper_limit),
+            range=(-20.0, float(zoom_upper_limit)),
         )
-        plt.axvline(x=mean, color="g", linestyle="--", label=f"Mean ({mean:.2f})")
-        plt.axvline(x=mean + std, color="r", linestyle="--", label=f"Mean ± Std")
-        plt.axvline(x=mean - std, color="r", linestyle="--")
+        plt.axvline(
+            x=float(mean), color="g", linestyle="--", label=f"Mean ({mean:.2f})"
+        )
+        plt.axvline(x=float(mean + std), color="r", linestyle="--", label=f"Mean ± Std")
+        plt.axvline(x=float(mean - std), color="r", linestyle="--")
 
         plt.title(f"{title} (Max value: {max_value:.2f})")
         plt.xlabel(xlabel)
@@ -224,9 +227,8 @@ class MongoPepwaveTransform(BaseMongoTransform):
         plt.grid(True, alpha=0.3)
         plt.legend()
 
-        # Set major ticks every 10 and minor ticks every 2
-        plt.gca().xaxis.set_major_locator(plt.MultipleLocator(10))
-        plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(2))
+        plt.gca().xaxis.set_major_locator(MultipleLocator(10))
+        plt.gca().xaxis.set_minor_locator(MultipleLocator(2))
 
         plt.tight_layout()
         plt.show()
@@ -239,10 +241,10 @@ class MongoPepwaveTransform(BaseMongoTransform):
 
         - number_of_likes: Filter out low, importance weight: 10
         - total_reply_likes: Filter out low, importance weight: 6
-        - topic_num_likes: Filter out low, importance weight: 4
+        - post_num_likes: Filter out low, importance weight: 4
         - len(page_content): Filter out low, importance weight: 4
         - total_replies: Filter out low, importance weight: 4
-        - topic_num_views: Filter out low, importance weight: 2
+        - post_num_views: Filter out low, importance weight: 2
         - creator_is_star: Keep if true, ignore this feature if false, importance weight: 1
         - creator_is_leader: Keep if true, ignore this feature if false, importance weight: 1
 
@@ -257,13 +259,13 @@ class MongoPepwaveTransform(BaseMongoTransform):
 
         # The topic is usually a question, so we care more about the comment + replies length.
         def pc_length(c: dict) -> int:
-            topic_content_length = len(nltk_tokenize(c["topic_content"]))
-            return len(nltk_tokenize(c["page_content"])) - topic_content_length
+            post_content_length = len(nltk_tokenize(c["post_content"]))
+            return len(nltk_tokenize(c["page_content"])) - post_content_length
 
         page_content_lengths = np.array([pc_length(c) for c in comments])
-        self._plot_distribution(
-            page_content_lengths, "Page Content Length Distribution", "Length", 400
-        )
+        # self._plot_distribution(
+        #     page_content_lengths, "Page Content Length Distribution", "Length", 400
+        # )
 
         # At a certain point, content getting longer provides diminishing returns.
         # This applies compression to the longer end of the distribution that asymptotically approaches the upper_limit.
@@ -273,7 +275,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
         threshold = np.mean(page_content_lengths)
         upper_limit = np.std(page_content_lengths) * 1.2
 
-        def compress_long_lengths(length_arr: np.array) -> float:
+        def compress_long_lengths(length_arr: np.ndarray) -> np.ndarray:
             lengths_to_compress = length_arr - threshold
             return threshold + (
                 lengths_to_compress
@@ -306,13 +308,13 @@ class MongoPepwaveTransform(BaseMongoTransform):
                 "weight": 22,
                 "values": page_content_lengths_transformed,
             },
-            "topic_num_likes": {
+            "post_num_likes": {
                 "weight": 5,
-                "values": np.array([c["topic_num_likes"] for c in comments]),
+                "values": np.array([c["post_num_likes"] for c in comments]),
             },
-            "topic_num_views": {
+            "post_num_views": {
                 "weight": 3,
-                "values": np.array([c["topic_num_views"] for c in comments]),
+                "values": np.array([c["post_num_views"] for c in comments]),
             },
         }
 
@@ -353,7 +355,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
 
         mean_score = np.mean(scores)
         std_score = np.std(scores)
-        threshold = mean_score - std_score
+        threshold = float(mean_score - std_score)
 
         self._plot_score_distribution(scores, threshold)
 
@@ -380,8 +382,8 @@ class MongoPepwaveTransform(BaseMongoTransform):
             # classifier seems to get confused by urls
             if "http" in sentence:
                 continue
-            result = question_classifier(sentence)[0]
-            if result["label"] == "LABEL_1":
+            result = question_classifier(sentence)
+            if isinstance(result, list) and result[0].get("label") == "LABEL_1":
                 return True
         return False
 
@@ -395,7 +397,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
         Users typically use the reply button for the latest comment instead of replying to the original comment like
         they are supposed to, so we have to consider replies to comments to potentially be equally as valuable as the comment itself.
         """
-        if topic["topic_category_name"] in [
+        if topic["post_category_name"] in [
             "Feature Requests",
             "Beta Releases",
             "Announcements",
@@ -416,7 +418,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
         if self._contains_question(comment["postContent"]):
             token_threshold += comment_token_count + min(10, comment_token_count)
 
-        creator = comment.get("creator")
+        creator = comment["creator"]
         has_cred = creator["star"] or creator["leader"]
         if has_cred or comment["numberOfLikes"] > 0:
             token_threshold = max(1, token_threshold / (comment["numberOfLikes"] + 2))
@@ -465,6 +467,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
                     "creator_is_star": creator["star"],
                     "creator_is_leader": creator["leader"],
                     "creator_about": str(creator["about"]),
+                    "comment_content": comment["postContent"],
                     "total_replies": total_replies,
                     "total_reply_likes": total_reply_likes,
                     **topic,
@@ -482,11 +485,17 @@ class MongoPepwaveTransform(BaseMongoTransform):
             [
                 "creator_about",
                 "creator_name",
-                "topic_content",
-                "topic_title",
-                "topic_category_name",
+                "post_content",
+                "post_title",
+                "post_category_name",
+                "comment_content",
             ],
         )
+
+        # Reorder columns to put specified columns first
+        first_cols = ["page_content", "post_title", "post_content", "comment_content"]
+        df = self.reorder_columns(df, first_cols)
+
         return df
 
 

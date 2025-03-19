@@ -33,7 +33,7 @@ def _log_score_cutoff_percentile():
     print_cutoff_percent([50, 50, 50, 50, 1, 50, 50, 50, 50, 50])
 
 
-def _log_distribution_factor(cv: float) -> float:
+def _log_distribution_factor(cv: float):
     cv_test_dist = np.linspace(0, 3)
     plt.plot(
         cv_test_dist,
@@ -48,7 +48,7 @@ def _log_distribution_factor(cv: float) -> float:
     print(f"get_distribution_factor(3): {round(_get_distribution_factor(3), 3)}")
 
 
-def _log_engagement_norm() -> float:
+def _log_engagement_norm():
     plt.plot(np.linspace(0, 100, 1000), _get_engagement_norm(np.linspace(0, 100, 1000)))
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)
     plt.minorticks_on()
@@ -102,7 +102,7 @@ def _logistic_function(x: float, B: float, M: float, nu: float) -> float:
     return 1.0 / (1.0 + np.exp(-B * (x - M))) ** (1.0 / nu)
 
 
-def _get_distribution_factor(cv: float) -> float:
+def _get_distribution_factor(cv) -> float:
     """
     Single logistic-type formula satisfying:
       f(0) ≈ 0.01,
@@ -140,7 +140,7 @@ def _stretched_exponential(
     return 1 - np.exp(-((k * x) ** p))
 
 
-def _get_engagement_norm(engagement: int) -> float:
+def _get_engagement_norm(engagement) -> float:
     """
     Engagement normalization to 0-1 range
     It should satisfy these constraints for engagement values:
@@ -172,21 +172,15 @@ def get_score_cutoff_percentile(scores: list[int]) -> float:
     with max selectivity being only the 20% best comments.
     """
     scores_array = np.array(scores)
-    print(f"\n\nscores: {np.array2string(scores_array, separator=', ')}")
     engagement = np.sum(scores_array - 1)  # Total upvotes (excluding initial 1 point)
     mean = np.mean(scores_array)
     std_dev = np.std(scores_array)
     cv = std_dev / (mean + 1e-8)
 
     engagement_norm = _get_engagement_norm(engagement)
-    print(f"engagement_norm: {round(engagement_norm, 4)}")
 
     distribution_factor = _get_distribution_factor(cv)
-    print(f"cv: {round(cv, 4)}")
-    print(f"distribution_factor: {round(distribution_factor, 4)}")
     scaled_distribution_factor = _scale_distribution_factor(distribution_factor)
-    print(f"scaled_distribution_factor: {round(scaled_distribution_factor, 4)}")
 
     cutoff_percentile = engagement_norm * scaled_distribution_factor
-    print(f"cutoff_percentile: {round(cutoff_percentile, 4)}")
     return 1 - cutoff_percentile
