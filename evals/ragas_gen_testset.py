@@ -1,3 +1,4 @@
+from datetime import datetime
 from langsmith import tracing_context
 from ragas.testset import TestsetGenerator, Testset
 from ragas.llms import LangchainLLMWrapper
@@ -22,41 +23,44 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-LLM_MODEL = "gpt-4o"
-TESTSET_SIZE = 5
+LLM_MODEL = "gpt-4o-mini"
+TESTSET_SIZE = 10
 evals_dir = Path(__file__).parent
-latest_kg_path = Path.joinpath(
+kg_path = Path.joinpath(
     evals_dir,
     "output/kg_output__n_55__sample_with_custom_transforms__03_05_14_56.json",
 )
 
-kg = KnowledgeGraph.load(Path(latest_kg_path))
+kg = KnowledgeGraph.load(Path(kg_path))
+
 # generator_llm = LangchainLLMWrapper(MockLLM()) # type: ignore
 # generator_embeddings = LangchainEmbeddingsWrapper(MockEmbeddings())
 # MockSynth = MockMultiHopAbstractQuerySynthesizer(llm=generator_llm)
 
-
-generator_llm = LangchainLLMWrapper(ChatOpenAI(model_name=LLM_MODEL))
+generator_llm = LangchainLLMWrapper(ChatOpenAI(model=LLM_MODEL))
 generator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 
-persona = Persona(
+network_persona = Persona(
     name="Technical Network Engineer",
     role_description="A professional specializing in network configurations and troubleshooting, particularly with experience in WAN setups and integrating satellite internet systems like Starlink with networking hardware such as Peplink Balance and Juniper SRX. This individual actively participates in technical forums to share knowledge, solve problems, and seek advice on complex network-related issues.",
+)
+full_time_rv_persona = Persona(
+    name="Full-Time RV Owner",
+    role_description="A full-time RV owner who is interested in using Pepwave devices to connect to the internet while traveling.",
 )
 
 generator = TestsetGenerator(
     llm=generator_llm,
     embedding_model=generator_embeddings,
     knowledge_graph=kg,
-    persona_list=[persona],
+    persona_list=[network_persona, full_time_rv_persona],
 )
 
 query_distribution: list[tuple[BaseSynthesizer, float]] = [
-    # (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 1),
+    # (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 0.25),
     (MultiHopAbstractQuerySynthesizer(llm=generator_llm), 1),
-    # (MultiHopSpecificQuerySynthesizer(llm=generator_llm), 1),
+    # (MultiHopSpecificQuerySynthesizer(llm=generator_llm), 0.25),
 ]
-
 
 # query_distribution: list[tuple[BaseSynthesizer, float]] = [
 #     # (SingleHopSpecificQuerySynthesizer(llm=generator_llm), 1),
@@ -72,25 +76,7 @@ dataset = generator.generate(
     num_personas=1,
 )
 
-# Clean the dataset by ensuring all text fields are ASCII-compatible
-# This is a simple approach that replaces problematic characters
-for sample in dataset.samples:
-    # Clean the eval_sample fields that might contain problematic Unicode
-    if hasattr(sample.eval_sample, "question"):
-        sample.eval_sample.question = sample.eval_sample.question.encode( # type: ignore
-            "ascii", "replace"
-        ).decode("ascii")
-    if hasattr(sample.eval_sample, "ground_truth"):
-        sample.eval_sample.ground_truth = sample.eval_sample.ground_truth.encode( # type: ignore
-            "ascii", "replace"
-        ).decode("ascii")
-    if hasattr(sample.eval_sample, "contexts") and sample.eval_sample.contexts: # type: ignore
-        sample.eval_sample.contexts = [ # type: ignore
-            ctx.encode("ascii", "replace").decode("ascii")
-            for ctx in sample.eval_sample.contexts # type: ignore
-        ]
-
-# upload to ragas app
-# dataset.upload()
 df = dataset.to_pandas()
-df.to_parquet(Path.joinpath(evals_dir, "ragas_testset.parquet"))
+current_date = datetime.now().strftime("%Y-%m-%d-%H-%M")
+df.to_parquet(Path.joinpath(evals_dir, f"ragas_testset_{current_date}.parquet"))
+dataset.upload()

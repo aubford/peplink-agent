@@ -105,9 +105,9 @@ class MongoPepwaveTransform(BaseMongoTransform):
         tags = f"\n\n## Tags: {", ".join(topic_tags)}" if topic_tags else ""
         if comment_replies:
             replies_formatted = format_replies(comment_replies)
-            return f"## Pepwave Forum Topic: {topic_title}\n\n{topic_content}\n\n ## Comment:\n\n{comment['postContent']}\n\n ## Replies:\n\n{replies_formatted}{tags}"
+            return f"## Forum Topic: {topic_title}\n\n{topic_content}\n\n ## Comment:\n\n{comment['postContent']}\n\n ## Replies:\n\n{replies_formatted}{tags}"
         else:
-            return f"## Pepwave Forum Topic: {topic_title}\n\n{topic_content}\n\n ## Comment:\n\n{comment['postContent']}{tags}"
+            return f"## Forum Topic: {topic_title}\n\n{topic_content}\n\n ## Comment:\n\n{comment['postContent']}{tags}"
 
     def _total_replies_and_likes(
         self, replies_tree: list[dict]

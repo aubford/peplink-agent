@@ -1,5 +1,11 @@
 # %% ##########################################
-from ragas.testset.graph import NodeType, KnowledgeGraph, Node, Relationship, UUIDEncoder
+from ragas.testset.graph import (
+    NodeType,
+    KnowledgeGraph,
+    Node,
+    Relationship,
+    UUIDEncoder,
+)
 from ragas.utils import num_tokens_from_string
 import pandas as pd
 import json
@@ -26,6 +32,10 @@ Learnings from analysis of KG output:
 """
 
 kg = KnowledgeGraph.load(latest_kg_path)
+kg_relationships = kg.relationships
+kg_nodes = kg.nodes
+kg_nodes = kg.nodes
+
 
 def meta_prop(node: dict[str, dict[str, t.Any]], prop: str) -> t.Any:
     return node["properties"]["document_metadata"][prop]
@@ -85,37 +95,128 @@ def clean_and_write_nodes(
         json.dump({"cleaned_nodes": cleaned_nodes}, f, indent=2)
 
     print(f"Saved {len(cleaned_nodes)} cleaned nodes to {output_path}")
-    
-def get_single_node_and_its_relationships(kg: KnowledgeGraph) -> tuple[Node, list[Relationship]]:
+
+
+def get_single_node_and_its_relationships(
+    kg: KnowledgeGraph, id: str | None = None
+) -> tuple[Node, list[tuple[Relationship, str, str]]]:
     """Get a single node and its relationships from the knowledge graph.
 
     Args:
         kg: KnowledgeGraph object
-        node_id: ID of the node to get
 
     Returns:
-        Tuple containing (node, relationships) where:
-        - node: The node object with the specified ID
-        - relationships: List of relationship objects involving the node
+        Tuple containing (node, relationships_with_content) where:
+        - node: A randomly selected node object
+        - relationships_with_content: List of tuples containing (relationship, source_content, target_content)
+          where source_content and target_content are the page_content of the source and target nodes
     """
     # Find the node with the specified ID
     nodes: list[Node] = kg.nodes
-    node = random.choice(nodes)
-    
+    if id:
+        print(f"Finding node with ID: {id}")
+        node = next((node for node in nodes if str(node.id) == str(id)), None)
+        if node is None:
+            raise ValueError(f"Node with ID {id} not found")
+    else:
+        node = random.choice(nodes)
+
     # Find all relationships involving this node
     relationships = [
-        rel for rel in kg.relationships 
+        rel
+        for rel in kg.relationships
         if str(rel.source.id) == str(node.id) or str(rel.target.id) == str(node.id)
     ]
-    
-    return node, relationships
 
-################## SAMPLE SINGLE NODE AND ITS RELATIONSHIPS ########################
+    # Add page_content for source and target nodes
+    relationships_with_content = []
+    for rel in relationships:
+        source_content = rel.source.properties.get(
+            "page_content", "No page content available"
+        )
+        target_content = rel.target.properties.get(
+            "page_content", "No page content available"
+        )
+        relationships_with_content.append((rel, source_content, target_content))
+
+    return node, relationships_with_content
+
+
+# %% ################## SIMPLE KG ACCESS ########################
+kg_55 = KnowledgeGraph.load(
+    f"{output_dir}/kg_output__n_55__sample_with_custom_transforms__03_05_14_56.json"
+)
+kg_1000 = KnowledgeGraph.load(
+    f"{output_dir}/kg_output__n_1112__sample_with_custom_transforms__03_04_22_21.json"
+)
+print(f"55: {len(kg_55.nodes)}")
+print(f"1000: {len(kg_1000.nodes)}")
+print(f"55: {len(kg_55.relationships)}")
+print(f"1000: {len(kg_1000.relationships)}")
+
+# %% ################## SAMPLE SINGLE NODE AND ITS RELATIONSHIPS ########################
 # Get a random node and its relationships and print to json file
-node, relationships = get_single_node_and_its_relationships(kg)
-with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
-    json.dump({"node": node.model_dump(), "relationships": [rel.model_dump() for rel in relationships]}, f, cls=UUIDEncoder, indent=2)
+sn_kg = KnowledgeGraph.load(f"{output_dir}/__strict_kg.json")
+# sn_kg = KnowledgeGraph.load(f"{output_dir}/kg_output__n_1112__sample_with_custom_transforms__03_04_22_21.json")
+node, relationships_with_content = get_single_node_and_its_relationships(
+    sn_kg, id="dd380401-a68c-429d-b322-5b92c2e7e69e"
+)
 
+# Prepare data for JSON serialization
+relationships_data = []
+for rel, source_content, target_content in relationships_with_content:
+    rel_data = rel.model_dump()
+    rel_data["source_content"] = source_content
+    rel_data["target_content"] = target_content
+    relationships_data.append(rel_data)
+
+with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
+    node_dump = node.model_dump()
+    del node_dump["properties"]["summary_embedding"]
+    node_dump["properties"]["page_content"] = node_dump["properties"]["page_content"][
+        :100
+    ]
+    json.dump(
+        {"node": node_dump, "relationships": relationships_data},
+        f,
+        cls=UUIDEncoder,
+        indent=2,
+    )
+
+
+# %% ############### WEED OUT LOW-QUALITY RELATIONSHIPS ########################
+
+similarity_threshold = 0.91
+overlap_threshold = 0.15
+passing_sim_relationships = [
+    rel
+    for rel in kg_relationships
+    if "summary_similarity" not in rel.properties
+    or 0.99 > rel.properties["summary_similarity"] > similarity_threshold
+]
+passing_overlap_relationships = [
+    rel
+    for rel in passing_sim_relationships
+    if "entities_overlap_score" not in rel.properties
+    or rel.properties["entities_overlap_score"] > overlap_threshold
+    and len(rel.properties["overlapped_items"]) > 2
+]
+# Prune any nodes that have no relationships
+connected_nodes = [rel.source for rel in passing_overlap_relationships] + [
+    rel.target for rel in passing_overlap_relationships
+]
+non_isolated_nodes = [node for node in kg_nodes if node in connected_nodes]
+
+print(f"kg_relationships: {len(kg_relationships)}")
+print(f"after sim filter: {len(passing_sim_relationships)}")
+print(f"after overlap filter: {len(passing_overlap_relationships)}")
+print(f"start nodes: {len(kg_nodes)}")
+print(f"filtered nodes: {len(non_isolated_nodes)}")
+
+filtered_kg = KnowledgeGraph(
+    nodes=non_isolated_nodes, relationships=passing_overlap_relationships
+)
+filtered_kg.save(f"{output_dir}/__strict_kg.json")
 
 # %% ##################  CREATE NODES-ONLY FILE ########################
 def extract_nodes_to_file(input_path: str, output_path: str) -> None:
