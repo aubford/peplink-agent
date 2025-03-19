@@ -84,8 +84,7 @@ class MongoPepwaveTransform(BaseMongoTransform):
             reply["replies"] = self.build_reply_tree(reply["_id"])
         return replies
 
-    @staticmethod
-    def _generate_page_content(comment: dict, topic: dict) -> str:
+    def _generate_page_content(self, comment: dict, topic: dict) -> str:
         """
         Generate the page_content string by prepending the topic and appending replies in hierarchical order.
         """
@@ -93,22 +92,15 @@ class MongoPepwaveTransform(BaseMongoTransform):
         post_content = topic["post_content"]
         post_tags = topic["post_tags"]
 
-        def format_replies(replies: list[dict], depth: int = 0) -> str:
-            formatted = ""
-            for reply in replies:
-                indent = "  " * depth
-                formatted += f"{indent}<reply>\n{reply['postContent']}\n"
-                formatted += format_replies(reply.get("replies", []), depth + 1)
-                formatted += f"{indent}</reply>\n"
-            return formatted
+        formatted_comment = self.format_comment_xml(
+            comment["postContent"],
+            comment.get("replies", []),
+            content_key="postContent",
+        )
 
-        comment_replies = comment.get("replies", [])
-        tags = f"\n\n## Tags: {", ".join(post_tags)}" if post_tags else ""
-        if comment_replies:
-            replies_formatted = format_replies(comment_replies)
-            return f"## Post\n\n ### Title: {post_title}\n\n ### Content:\n\n{post_content}\n\n ## Comments:\n\n<comment> {comment['postContent']} {replies_formatted}</comment>\n\n{tags}"
-        else:
-            return f"## Post\n\n ### Title: {post_title}\n\n ### Content:\n\n{post_content}\n\n ## Comments:\n\n<comment> {comment['postContent']} </comment>{tags}"
+        return self.create_page_content(
+            post_title, post_content, formatted_comment, post_tags
+        )
 
     def _total_replies_and_likes(
         self, replies_tree: list[dict]

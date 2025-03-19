@@ -191,7 +191,7 @@ class RedditTransform(BaseTransform):
             if self.is_quality_comment_or_reply(
                 comment, min_karma=0, min_score=1, min_length=40
             ):
-                return f"<comment> \n{comment['body']}\n</comment>"
+                return self.format_comment_xml(comment["body"])
             else:
                 return None
 
@@ -218,30 +218,9 @@ class RedditTransform(BaseTransform):
 
         pruned_comment_tree = prune_reply_tree(comment)
 
-        def build_xml(reply_comment: RedditComment, depth: int = 0) -> str:
-            indent = "  " * depth
-            xml = f"\n{indent}<reply> \n{indent}{reply_comment['body']}"
-            if reply_comment["replies"]:
-                xml += "\n"
-                for r in reply_comment["replies"]:
-                    xml += build_xml(r, depth + 1)
-                xml += f"\n{indent}</reply>"
-            else:
-                xml += f"\n{indent}</reply>"
-            return xml
-
-        xml_str = f"<comment> \n{pruned_comment_tree['body']}"
-        for reply in pruned_comment_tree["replies"]:
-            xml_str += build_xml(reply, depth=1)
-        xml_str += "\n</comment>"
-        return xml_str
-
-    @staticmethod
-    def create_page_content(title: str, page_content: str, comment: str) -> str:
-        """
-        Create a page content string from a reddit post dict with this format:
-        """
-        return f"## Post\n\n### Title: {title}\n\n### Content:\n\n{page_content}\n\n## Comments:\n\n{comment}"
+        return self.format_comment_xml(
+            pruned_comment_tree["body"], pruned_comment_tree["replies"]
+        )
 
     @staticmethod
     def filter_comments(comments: list[RedditComment]) -> list[RedditComment]:

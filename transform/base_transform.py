@@ -160,6 +160,49 @@ class BaseTransform(ABC):
         other_cols = [col for col in df.columns if col not in first_cols]
         return df[first_cols + other_cols]
 
+    @staticmethod
+    def create_page_content(
+        title: str, content: str, comments: str, tags: list[str] | None = None
+    ) -> str:
+        """Format forum content"""
+        formatted_content = f"## Post\n\n### Title: {title}\n\n### Content:\n\n{content}\n\n## Comments:\n\n{comments}"
+
+        if tags and len(tags) > 0:
+            formatted_content += f"\n\n## Tags: {', '.join(tags)}"
+
+        return formatted_content
+
+    @staticmethod
+    def format_comment_xml(
+        comment_content: str,
+        replies: list[dict] | None = None,
+        content_key: str = "body",
+    ) -> str:
+        """Format forum comment"""
+        if not replies:
+            return f"<comment> \n{comment_content}\n</comment>"
+
+        def build_xml_for_reply(reply: dict, depth: int = 0) -> str:
+            indent = "  " * depth
+            xml = f"\n{indent}<reply> \n{indent}{reply[content_key]}"
+
+            nested_replies = reply.get("replies", [])
+            if nested_replies:
+                xml += "\n"
+                for r in nested_replies:
+                    xml += build_xml_for_reply(r, depth + 1)
+                xml += f"\n{indent}</reply>"
+            else:
+                xml += f"\n{indent}</reply>"
+            return xml
+
+        xml_str = f"<comment> \n{comment_content}"
+        for reply in replies:
+            xml_str += build_xml_for_reply(reply, depth=1)
+        xml_str += "\n</comment>"
+
+        return xml_str
+
 
 class BaseMongoTransform(BaseTransform, ABC):
     """Base class for transformers that retrieve data from MongoDB."""
