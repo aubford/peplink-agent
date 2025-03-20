@@ -16,6 +16,29 @@ from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
 DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", ""]
 
+
+class DeduplicationLockPipeline:
+    """Reuse previous deduplication results to save time."""
+
+    def __init__(self, lock_file_path: Path):
+        df = pd.read_parquet(lock_file_path)
+        df = df.set_index("id", drop=False, verify_integrity=True)
+        self.valid_ids = set(df.index)
+
+    def run(self, df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+        """
+        Filter the input dataframe to only include rows with IDs in the valid_ids set.
+        These IDs represent documents that were previously processed by the deduplication pipeline.
+        """
+        original_count = len(df)
+        df = df[df.index.isin(self.valid_ids)]
+        retained_count = len(df)
+        print(
+            f"Deduplication lock: Kept {retained_count} documents out of {original_count} original documents."
+        )
+        return df
+
+
 class BaseLoad:
     """Base class for all data transformers."""
 
@@ -31,7 +54,12 @@ class BaseLoad:
         self.vector_store: VectorStore | None = None
         self.staging_folder = Path("load") / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
-        self.deduplication_pipeline = DeduplicationPipeline(self.folder_name)
+        deduplication_lock_path = self.staging_folder / "deduplication_lock.parquet"
+        self.deduplication_pipeline = (
+            DeduplicationLockPipeline(deduplication_lock_path)
+            if deduplication_lock_path.exists()
+            else DeduplicationPipeline(self.folder_name)
+        )
 
     @property
     def config(self) -> ConfigType:
@@ -39,9 +67,11 @@ class BaseLoad:
         return global_config
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+        """Merge all datasets into a single dataframe and perform operations like deduplication."""
         return pd.concat(dfs)
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
+        """Perform final operations like text splitting and output final product for upload to vector store."""
         return documents
 
     @staticmethod
@@ -81,6 +111,8 @@ class BaseLoad:
 
         docs = self._parquet_to_documents(self.staging_path)
         self._log_documents(docs)
+        if self.vector_store is None:
+            raise ValueError("Vector store initialization failed")
         self.vector_store.add_documents(docs)
         self.logger.info(
             f"Uploaded {len(docs)} documents to Pinecone index: {self.index_name}"
@@ -142,6 +174,10 @@ class BaseLoad:
         self._stage_documents(staging_docs)
 
     def load(self) -> None:
+        """
+        Generates the staged.parquet file that should be a local record of what was uploaded to the
+        vector store. It should reflect the current vector store state for that dataset exactly.
+        """
         documents_dir = Path("data") / self.folder_name / "documents"
 
         if not documents_dir.exists():
@@ -174,10 +210,58 @@ class BaseLoad:
             df["type"] = self.folder_name
         staging_df = self.create_merged_df(dfs)
         self._simple_dedupe(staging_df)
+        self._normalize_columns(staging_df)
         self._write_merged_df_artifact(staging_df)
         all_documents = df_to_documents(staging_df)
         staging_docs = self.load_docs(all_documents)
         self._stage_documents(staging_docs)
+
+    def _normalize_columns(
+        self,
+        df: pd.DataFrame,
+    ) -> None:
+        """
+        Rename the following columns to be consistent across all datasets:
+        section, post_title -> title
+        post_content, description -> lead_content
+        comment_content -> primary_content
+        like_count, number_of_likes -> score
+        creator_id, comment_author_id, channel_id -> author_id
+        creator_name, comment_author_name, channel_title -> author_name
+
+        Keep the original columns as well.
+        """
+        # Map original column names to standardized names
+        column_mappings = {
+            "section": "title",  # html
+            "post_title": "title",  # mongo/reddit
+            "post_content": "lead_content",  # mongo/reddit
+            "description": "lead_content",  # youtube
+            "like_count": "score",  # youtube
+            "number_of_likes": "score",  # mongo
+            "creator_id": "author_id",  # mongo
+            "comment_author_id": "author_id",  # reddit
+            "channel_id": "author_id",  # youtube
+            "creator_name": "author_name",  # mongo
+            "comment_author_name": "author_name",  # reddit
+            "channel_title": "author_name",  # youtube
+        }
+
+        df["primary_content"] = (
+            df["comment_content"]
+            if "comment_content" in df.columns
+            else df["page_content"]
+        )
+
+        # Iterate through mappings and add standardized columns while preserving originals
+        for original_col, standard_col in column_mappings.items():
+            if original_col in df.columns and standard_col not in df.columns:
+                df[standard_col] = df[original_col]
+            elif original_col in df.columns and standard_col in df.columns:
+                # If both columns exist, don't overwrite the standard column
+                self.logger.info(
+                    f"Both {original_col} and {standard_col} exist, keeping existing {standard_col}"
+                )
 
     @staticmethod
     def _parquet_to_df(file_path: Path) -> pd.DataFrame:

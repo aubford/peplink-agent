@@ -34,7 +34,7 @@ from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms import Parallel
 from evals.evals_utils import node_meta
 
-kg_llm = LangchainLLMWrapper(ChatOpenAI(model_name="gpt-4o-mini"))
+kg_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini"))
 embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 latest_kg_path = "evals/output/kg_output_LATEST.json"
 
@@ -94,10 +94,10 @@ def get_dataset_df(sample_individual: bool = False) -> pd.DataFrame:
 
 def get_slim_dataset_df() -> pd.DataFrame:
     dfs = [
-        HtmlLoad.get_artifact(select_merged=True).sample(5),
-        MongoLoad.get_artifact(select_merged=True).sample(30),
-        RedditLoad.get_artifact(select_merged=True).sample(10),
-        YoutubeLoad.get_artifact(select_merged=True).sample(10),
+        HtmlLoad.get_artifact(select_merged=True).sample(3),
+        MongoLoad.get_artifact(select_merged=True).sample(3),
+        RedditLoad.get_artifact(select_merged=True).sample(3),
+        YoutubeLoad.get_artifact(select_merged=True).sample(3),
     ]
 
     return pd.concat(dfs, ignore_index=True)
