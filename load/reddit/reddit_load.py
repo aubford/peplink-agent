@@ -1,9 +1,11 @@
 # %%
+from pydantic import BaseModel
 from load.base_load import BaseLoad
 from langchain.docstore.document import Document
 import json
 from openai import OpenAI
-from typing import List, Dict, Any, Optional, Literal, Union
+from openai.lib._parsing._completions import type_to_response_format_param
+from typing import List, Dict, Any, Literal, Union
 import time
 import os
 from dotenv import load_dotenv
@@ -14,12 +16,10 @@ load_dotenv()
 
 class RedditLoad(BaseLoad):
     folder_name = "reddit"
-    system_prompt = "Complete this!!"
 
     def __init__(self):
-        super().__init__()  # Call BaseLoad constructor with no arguments
-        # Create the BatchManager after BaseLoad initialization so staging_folder is available
-        self.batch_manager = BatchManager(Path(self.staging_folder), self.system_prompt)
+        super().__init__()
+        self.batch_manager = BatchManager(self.staging_folder)
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         """Merge all datasets into a single dataframe and perform operations like deduplication."""
@@ -39,8 +39,7 @@ class BatchManager:
 
     def __init__(
         self,
-        base_path: Union[str, Path],
-        system_prompt: str,
+        base_path: Path,
         endpoint: ValidEndpoints = "/v1/chat/completions",
     ):
         """
@@ -56,18 +55,18 @@ class BatchManager:
         self.client = OpenAI(api_key=api_key)
 
         # Ensure base_path is a Path object and exists
-        self.base_path = Path(base_path)
-        self.base_path.mkdir(parents=True, exist_ok=True)
-        self.file_name = self.base_path / "batchfile.jsonl"
-        self.output_file_name = self.base_path / "batch_results.jsonl"
-        self.status_file_name = self.base_path / "batch_status.json"
-        self.system_prompt = system_prompt
+        base_path.mkdir(parents=True, exist_ok=True)
+        self.file_name = base_path / "batchfile.jsonl"
+        self.output_file_name = base_path / "batch_results.jsonl"
+        self.status_file_name = base_path / "batch_status.json"
         self.endpoint: ValidEndpoints = endpoint
         self.batch_id = None
 
     def create_batch_tasks(
         self,
         items: List[Dict[str, str]],
+        system_prompt: str,
+        schema: type[BaseModel],
         model: str = "gpt-4o-mini",
         temperature: float = 0.2,
         max_tokens: int = 5000,
@@ -96,13 +95,15 @@ class BatchManager:
                     "temperature": temperature,
                     "max_tokens": max_tokens,
                     "messages": [
-                        {"role": "system", "content": self.system_prompt},
+                        {"role": "system", "content": system_prompt},
                         {"role": "user", "content": item["prompt"]},
                     ],
+                    "response_format": type_to_response_format_param(schema),
                 },
             }
             tasks.append(task)
 
+        self.create_batch_file(tasks)
         return tasks
 
     def create_batch_file(self, tasks: List[Dict[str, Any]]) -> Path:
@@ -252,9 +253,11 @@ class BatchManager:
 
         return results
 
-    def run_complete_batch(
+    def run_batch_and_job(
         self,
         items: List[Dict[str, str]],
+        schema: dict[str, Any],
+        system_prompt: BaseModel,
         model: str = "gpt-4o-mini",
         temperature: float = 0.2,
         max_tokens: int = 300,
@@ -266,21 +269,22 @@ class BatchManager:
             items: List of dictionaries with 'id' and 'prompt' properties to process
             model: OpenAI model to use
             temperature: Temperature parameter for generation
+            schema: Schema for the response
+            system_prompt: System prompt for the batch
             max_tokens: Maximum tokens to generate
 
         Returns:
             Dictionary with batch job information for later status checking
         """
-        # Create tasks
-        tasks = self.create_batch_tasks(
+        # Create tasks and batchfile
+        self.create_batch_tasks(
             items=items,
+            system_prompt=system_prompt,
+            schema=schema,
             model=model,
             temperature=temperature,
             max_tokens=max_tokens,
         )
-
-        # Create batch file using the instance's file_name
-        self.create_batch_file(tasks)
 
         # Create batch job
         batch_job = self.create_batch_job()
