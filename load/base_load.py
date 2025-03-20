@@ -54,6 +54,7 @@ class BaseLoad:
         self.vector_store: VectorStore | None = None
         self.staging_folder = Path("load") / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
+        self.generated_data_path = self.staging_folder / "generated_data.parquet"
         deduplication_lock_path = self.staging_folder / "deduplication_lock.parquet"
         self.deduplication_pipeline = (
             DeduplicationLockPipeline(deduplication_lock_path)
