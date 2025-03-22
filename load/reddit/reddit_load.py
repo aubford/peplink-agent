@@ -1,9 +1,9 @@
-# %%
 from pydantic import BaseModel
 from load.base_load import BaseLoad
 from langchain.docstore.document import Document
 import json
 from openai import OpenAI
+# noinspection PyProtectedMember
 from openai.lib._parsing._completions import type_to_response_format_param
 from typing import List, Dict, Any, Literal, Union
 import time
@@ -11,8 +11,65 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 from pathlib import Path
+import spacy
 
 load_dotenv()
+
+
+class RedditData(BaseModel):
+    id: str
+    type: str
+    primary_content: str
+    title: str
+    lead_content: str
+    author_id: str
+    author_name: str
+    page_content: str
+    score: int
+
+    post_title: str
+    post_content: str
+    comment_content: str
+
+    source_file: str
+    subject_matter: str
+    subreddit: str
+    category: str
+    url: str
+    post_score: int
+    comment_date: int
+    post_id: str
+    post_author_name: str
+    post_author_id: str
+    post_author_is_mod: bool
+    post_author_is_gold: bool
+    post_author_is_blocked: bool
+    post_author_total_karma: str
+    post_author_comment_karma: str
+    post_author_link_karma: str
+    post_author_verified: str
+    post_author_has_verified_email: str
+    post_author_has_subscribed: str
+    post_author_is_employee: str
+    comment_author_name: str
+    comment_author_id: str
+    comment_author_is_mod: bool
+    comment_author_is_gold: bool
+    comment_author_is_blocked: bool
+    comment_author_total_karma: int
+    comment_author_comment_karma: int
+    comment_author_link_karma: int
+    comment_author_verified: bool
+    comment_author_has_verified_email: bool
+    comment_author_has_subscribed: bool
+    comment_author_is_employee: bool
+
+
+class ModelResponse(BaseModel):
+    summary: str  # summary of post information
+    is_informative: bool  # if false we will filter it out
+    themes: list[str]  # themes of the post
+
 
 class RedditLoad(BaseLoad):
     folder_name = "reddit"
@@ -23,7 +80,66 @@ class RedditLoad(BaseLoad):
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
         """Merge all datasets into a single dataframe and perform operations like deduplication."""
-        return pd.concat(dfs)
+        df = pd.concat(dfs)
+        self.ner(df)
+        return df
+
+    def make_prompt(self, reddit_post: RedditData) -> str:
+        """Make a prompt for the LLM."""
+        pass
+
+    def extract_entities(self, text: str) -> str:
+        nlp = spacy.load("en_core_web_trf")
+        if not text or pd.isna(text):
+            return ""
+
+        doc = nlp(text)
+        entities = [
+            ent.text
+            for ent in doc.ents
+            if ent.label_
+            in {
+                "URL",
+                "FAC",
+                "ORG",
+                "GPE",
+                "PRODUCT",
+                "LOC",
+                "WORK_OF_ART",
+                "EVENT",
+                "LAW",
+            }
+        ]
+
+        return ", ".join(entities) if entities else ""
+
+    def ner(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Use SpaCy NER feature to extract an "entities" column from the text in the primary_content and lead_content columns.
+        The "entities" column contains a string that is a list of entities separated by commas.
+        """
+
+        # Process both columns and combine the entities
+        df["primary_entities"] = df["comment_content"].apply(self.extract_entities)
+        df["lead_entities"] = df["post_content"].apply(self.extract_entities)
+
+        # Combine entities from both columns, removing duplicates
+        def combine_entities(row):
+            all_entities = []
+            if row["primary_entities"]:
+                all_entities.extend(row["primary_entities"].split(", "))
+            if row["lead_entities"]:
+                all_entities.extend(row["lead_entities"].split(", "))
+
+            unique_entities = set(entity for entity in all_entities if entity)
+            return ", ".join(unique_entities)
+
+        df["entities"] = df.apply(combine_entities, axis=1)
+
+        # Drop intermediate columns
+        df = df.drop(columns=["primary_entities", "lead_entities"], errors="ignore")
+
+        return df
 
 
 ValidEndpoints = Literal["/v1/chat/completions", "/v1/embeddings", "/v1/completions"]
@@ -73,12 +189,6 @@ class BatchManager:
     ) -> List[Dict]:
         """
         Create a list of batch tasks from item dictionaries.
-
-        Args:
-            items: List of dictionaries with 'id' and 'prompt' properties to process
-            model: OpenAI model to use
-            temperature: Temperature parameter for generation
-            max_tokens: Maximum tokens to generate
 
         Returns:
             List of task dictionaries ready for batch processing
@@ -160,9 +270,6 @@ class BatchManager:
         """
         Retrieve the status of a batch job.
 
-        Args:
-            batch_id: ID of the batch job
-
         Returns:
             Batch job status object
         """
@@ -180,9 +287,6 @@ class BatchManager:
         """
         Check the status of a batch job and retrieve results if complete.
         This is an on-demand method with no waiting or polling.
-
-        Args:
-            batch_id: ID of the batch job to check
 
         Returns:
             Dictionary containing status information and results if complete
@@ -231,7 +335,6 @@ class BatchManager:
 
         Args:
             batch_job: Completed batch job object
-            output_file_name: Optional file name to save the results (without path)
 
         Returns:
             List of result dictionaries
@@ -256,8 +359,8 @@ class BatchManager:
     def run_batch_and_job(
         self,
         items: List[Dict[str, str]],
-        schema: dict[str, Any],
-        system_prompt: BaseModel,
+        schema: type[BaseModel],
+        system_prompt: str,
         model: str = "gpt-4o-mini",
         temperature: float = 0.2,
         max_tokens: int = 300,

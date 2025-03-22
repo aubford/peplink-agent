@@ -15,16 +15,10 @@ import pandas as pd
 from functools import wraps
 from dataclasses import dataclass
 
-nltk.download("brown")
-nltk.download("stopwords")
-nltk.download("punkt")
-nltk.download("punkt_tab")
-nltk.download("wordnet")
-
 ####### ANALYSIS TOOLS #########################################################
 
 
-def timer(func_name: str = None):
+def timer(func_name: str | None = None):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -166,7 +160,8 @@ def chunk_wordset(wordset: List[str], ngram: int) -> List[str]:
 
 from flashtext import KeywordProcessor
 
-def remove_keywords(text: str, keywords: list[str] = DEFAULT_DISFLUENCIES) -> str:
+
+def remove_keywords(text: str, keywords: set[str] = DEFAULT_DISFLUENCIES) -> str:
     """
     Remove keywords from text by replacing them with underscores and then removing the underscores and companion spaces or commas.
     """
@@ -184,7 +179,7 @@ def remove_keywords(text: str, keywords: list[str] = DEFAULT_DISFLUENCIES) -> st
     )
 
 
-def get_keywords(text: str, keywords: list[str] = DEFAULT_STOPWORDS) -> list[str]:
+def get_keywords(text: str, keywords: set[str] = DEFAULT_STOPWORDS) -> list[str]:
     keyword_processor = KeywordProcessor()
     keyword_processor.add_keywords_from_list(keywords)
     return keyword_processor.extract_keywords(text)
@@ -245,7 +240,7 @@ def get_duplicate_candidates_cosine(tokenized_corpus: List[List[str]]) -> set[in
 
     for i in range(len(texts)):
         for j in range(i + 1, len(texts)):
-            if cosine_similarity(tfidf[i : i + 1], tfidf[j : j + 1])[0, 0] > 0.8:
+            if cosine_similarity(tfidf[i : i + 1], tfidf[j : j + 1])[0, 0] > 0.8:  # type: ignore
                 candidates.add(i)
                 candidates.add(j)
     return candidates
@@ -264,7 +259,7 @@ class TokenizedDoc:
         self.df_row = df_row
         self.tokens = nltk_get_lemmatized_tokens(self.original_text)
 
-    def get_chunked_tokens(self, ngram: int = 1, shift: int = None) -> List[str]:
+    def get_chunked_tokens(self, ngram: int = 1, shift: int | None = None) -> list[str]:
         if ngram == 1:
             return self.tokens
         tokens = self.tokens
@@ -272,7 +267,9 @@ class TokenizedDoc:
             tokens = tokens[shift:]
         return chunk_wordset(tokens, ngram)
 
-    def get_encoded_tokens(self, ngram: int = 1, shift: int = None) -> List[bytes]:
+    def get_encoded_tokens(
+        self, ngram: int = 1, shift: int | None = None
+    ) -> list[bytes]:
         if ngram == 1:
             return [token.encode("utf8") for token in self.tokens]
         return [token.encode("utf8") for token in self.get_chunked_tokens(ngram, shift)]

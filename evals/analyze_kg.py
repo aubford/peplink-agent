@@ -529,65 +529,29 @@ clean_and_write_nodes(youtube_dupes, youtube_nodes_path, is_rel=False)
 
 
 # %% #################  VISUALIZER ######################################################################
-import matplotlib.pyplot as plt
-import networkx as nx
-from typing import Dict, Any
+from pyvis.network import Network
+
+net = Network("1800px", "1200px")
 
 
-def visualize_knowledge_graph(kg_data: Dict[str, Any]) -> None:
-    """Create a minimal visual representation of the knowledge graph.
-
-    Args:
-        kg_data: Dictionary containing nodes and relationships data
-        max_nodes: Maximum number of nodes to display to prevent overcrowding
-    """
-    G = nx.DiGraph()
-
-    # Add nodes (limited to max_nodes)
-    nodes = kg_data["nodes"]
-    node_mapping = {}  # Map node objects to their IDs
-
-    for node in nodes:
-        node_id = node.get("id", "")
-        node_type = node.get("type", "")
-        G.add_node(node_id, type=node_type)
-        node_mapping[str(node)] = node_id
-
-    # Add relationships only between included nodes
-    node_ids = {node.get("id", "") for node in nodes}
-    for rel in kg_data["relationships"]:
-        source_id = rel.get("source", {}).get("id", "")
-        target_id = rel.get("target", {}).get("id", "")
-        if source_id in node_ids and target_id in node_ids:
-            G.add_edge(source_id, target_id)
-
-    dpi = 600
-    # Ultra-high resolution setup
-    plt.figure(figsize=(60, 48), dpi=dpi)  # 3x original size in each dimension
-    pos = nx.spring_layout(G, k=6, iterations=200)  # Increased spacing parameters
-
-    # Draw nodes with increased visibility
-    nx.draw(
-        G,
-        pos,
-        with_labels=False,
-        node_color="black",
-        node_size=1,  # Increased node size
-        arrows=False,
-        edge_color="gray",
-        width=0.2,  # Thinner edges for better clarity
-        alpha=0.4,  # Slightly increased opacity
+def visualize_knowledge_graph() -> None:
+    kg_data = KnowledgeGraph.load(latest_kg_path)
+    # Add nodes to the network
+    net.add_nodes([str(node.id) for node in kg_data.nodes])
+    # Add edges using node IDs (as strings) instead of Node objects
+    for r in kg_data.relationships:
+        net.add_edge(str(r.source.id), str(r.target.id))
+    # net.toggle_physics(False)
+    net.force_atlas_2based(
+        gravity=-50,
+        central_gravity=0.01,
+        spring_length=1000,
+        spring_strength=0.08,
+        damping=0.4,
+        overlap=1,
     )
-
-    plt.axis("off")
-    plt.tight_layout()
-
-    # Save ultra-high-res PNG
-    plt.savefig("evals/output/knowledge_graph.png", dpi=dpi, bbox_inches="tight")
-    plt.show()
+    net.show_buttons(filter_=["physics"])
+    net.show("visualizer.html", notebook=False)
 
 
-# Load and visualize the knowledge graph
-with open(latest_kg_path) as f:
-    kg_data = json.load(f)
-    visualize_knowledge_graph(kg_data)
+visualize_knowledge_graph()
