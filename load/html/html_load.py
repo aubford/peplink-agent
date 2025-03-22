@@ -24,6 +24,22 @@ class HtmlLoad(BaseLoad):
         df["settings_entity_list"] = df["settings_entities"].apply(
             self.flatten_entities
         )
+
+        # Create a frequency count for all entities across the dataframe
+        all_entities = df["settings_entity_list"].explode().value_counts()
+
+        # Keep only entities that appear exactly once in the entire dataframe
+        unique_entities = all_entities[all_entities == 1].index.tolist()
+
+        # Filter out entities that don't contain any letters (like "5 - 600")
+        unique_entities = [
+            entity for entity in unique_entities if any(c.isalpha() for c in entity)
+        ]
+
+        # Filter each row's entity list to only include truly unique entities
+        df["settings_entity_list"] = df["settings_entity_list"].apply(
+            lambda x: [entity for entity in x if entity in unique_entities]
+        )
         return df
 
     def clean_text(self, text: str) -> str:
@@ -168,4 +184,8 @@ class HtmlLoad(BaseLoad):
             A set of all unique settings entities for use in nlp tasks.
         """
         df = self.get_artifact(select_merged=True)
-        return set(df["settings_entity_list"].explode().unique())
+        # Explode the lists and filter out any NaN values (from empty lists)
+        exploded = df["settings_entity_list"].explode()
+        # Only keep actual string values (removes NaN)
+        valid_entities = exploded[exploded.notna()]
+        return set(valid_entities)
