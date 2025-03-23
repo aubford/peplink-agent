@@ -1,19 +1,15 @@
 from pydantic import BaseModel
 from load.base_load import BaseLoad
-from langchain.docstore.document import Document
 import json
 from openai import OpenAI
+
 # noinspection PyProtectedMember
 from openai.lib._parsing._completions import type_to_response_format_param
-from typing import List, Dict, Any, Literal, Union
+from typing import List, Dict, Any, Literal
 import time
 import os
-from dotenv import load_dotenv
 import pandas as pd
 from pathlib import Path
-import spacy
-
-load_dotenv()
 
 
 class RedditData(BaseModel):
@@ -77,11 +73,12 @@ class RedditLoad(BaseLoad):
     def __init__(self):
         super().__init__()
         self.batch_manager = BatchManager(self.staging_folder)
+        self.nlp = self._init_spacy()
 
     def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
-        """Merge all datasets into a single dataframe and perform operations like deduplication."""
+        """Merge all datasets into a single dataframe and perform operations."""
         df = pd.concat(dfs)
-        self.ner(df)
+        df = self.ner(df)
         return df
 
     def make_prompt(self, reddit_post: RedditData) -> str:
@@ -89,12 +86,13 @@ class RedditLoad(BaseLoad):
         pass
 
     def extract_entities(self, text: str) -> str:
-        nlp = spacy.load("en_core_web_trf")
+        """Use SpaCy NER to extract entities from text, including custom PEPWAVE_SETTINGS_ENTITY."""
         if not text or pd.isna(text):
             return ""
 
-        doc = nlp(text)
-        entities = [
+        # Process the text with the pipeline that includes our EntityRuler
+        doc = self.nlp(text)
+        entities: set[str] = {
             ent.text
             for ent in doc.ents
             if ent.label_
@@ -107,9 +105,10 @@ class RedditLoad(BaseLoad):
                 "LOC",
                 "WORK_OF_ART",
                 "EVENT",
-                "LAW",
+                "PEPWAVE_SETTINGS_ENTITY",  # Our custom entity type
             }
-        ]
+            and any(c.isalpha() for c in ent.text)
+        }
 
         return ", ".join(entities) if entities else ""
 
@@ -137,7 +136,7 @@ class RedditLoad(BaseLoad):
         df["entities"] = df.apply(combine_entities, axis=1)
 
         # Drop intermediate columns
-        df = df.drop(columns=["primary_entities", "lead_entities"], errors="ignore")
+        df = df.drop(columns=["primary_entities", "lead_entities"])
 
         return df
 

@@ -38,8 +38,6 @@ kg_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini"))
 embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 latest_kg_path = "evals/output/kg_output_LATEST.json"
 
-# %%
-
 
 def estimate_ragas_eval_cost(
     documents: list[Document], num_test_cases: int = 200

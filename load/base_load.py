@@ -12,9 +12,29 @@ from uuid import uuid4
 from util.deduplication_pipeline import DeduplicationPipeline
 from util.document_utils import df_to_documents
 from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
+import spacy
+from load.html.html_util import get_settings_entities
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
 DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", ""]
+
+"""Columns in both merged.parquet and staging.parquet
+
+- id: Id and index. Same between merged.parquet and staging.parquet except for youtube.
+- page_content: The main content.
+- type: The folder name of the data source in load dir (html, reddit, reddit_general, youtube, mongo).
+- source_file: The file name from the data/ folder.
+- subject_matter: The subject matter type of the data source (PEPWAVE, IT_NETWORKING, MOBILE_INTERNET).
+
+Standardized columns:
+- title: Html section, post title, video title.
+- primary_content: YouTube transcript, comment content, html section content.
+Not in HTML:
+- lead_content: YouTube description, topic content.
+- score: YouTube video likes, comment likes.
+- author_id: YouTube channel id, comment author id.
+- author_name: YouTube channel title, comment author name.
+"""
 
 
 class DeduplicationLockPipeline:
@@ -43,6 +63,7 @@ class BaseLoad:
     """Base class for all data transformers."""
 
     folder_name: str = NotImplemented
+    this_dir: Path = Path(__file__).parent
 
     def __init__(self):
         if not isinstance(self.folder_name, str):
@@ -52,7 +73,7 @@ class BaseLoad:
         self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
         self.vector_store: VectorStore | None = None
-        self.staging_folder = Path("load") / self.folder_name
+        self.staging_folder = self.this_dir / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
         self.generated_data_path = self.staging_folder / "generated_data.parquet"
         deduplication_lock_path = self.staging_folder / "deduplication_lock.parquet"
@@ -61,6 +82,11 @@ class BaseLoad:
             if deduplication_lock_path.exists()
             else DeduplicationPipeline(self.folder_name)
         )
+
+    # todo
+    def apply_generated_data(self):
+        """Apply the generated data from LLM to the staging file."""
+        pass
 
     @property
     def config(self) -> ConfigType:
@@ -74,6 +100,18 @@ class BaseLoad:
     def load_docs(self, documents: List[Document]) -> List[Document]:
         """Perform final operations like text splitting and output final product for upload to vector store."""
         return documents
+
+    def _init_spacy(self):
+        """Initialize SpaCy model."""
+        nlp = spacy.load("en_core_web_trf")
+        ruler = nlp.add_pipe("entity_ruler", before="ner")
+        all_entities = get_settings_entities()
+        patterns = [
+            {"label": "PEPWAVE_SETTINGS_ENTITY", "pattern": entity, "id": "LOWER"}
+            for entity in all_entities
+        ]
+        ruler.add_patterns(patterns)
+        return nlp
 
     @staticmethod
     def _simple_dedupe(df: pd.DataFrame) -> None:
@@ -157,7 +195,7 @@ class BaseLoad:
     def _split_docs(docs: List[Document], splitter: TextSplitter) -> List[Document]:
         # Store original IDs in metadata before splitting
         for doc in docs:
-            doc.metadata["record_id"] = doc.id
+            doc.metadata["parent_doc_id"] = doc.id
 
         split_docs = splitter.split_documents(docs)
         for doc in split_docs:
@@ -179,17 +217,18 @@ class BaseLoad:
         Generates the staged.parquet file that should be a local record of what was uploaded to the
         vector store. It should reflect the current vector store state for that dataset exactly.
         """
-        documents_dir = Path("data") / self.folder_name / "documents"
+        documents_dir = self.config.root_dir / "data" / self.folder_name / "documents"
 
         if not documents_dir.exists():
             raise FileNotFoundError(
                 f"Documents directory does not exist: {documents_dir}"
             )
 
-        if self.staging_path.exists():
-            raise FileNotFoundError(
-                f"Staging data file already exists at {self.staging_path}"
-            )
+        # todo: reset!!!!!
+        # if self.staging_path.exists():
+        #     raise FileNotFoundError(
+        #         f"Staging data file already exists at {self.staging_path}"
+        #     )
 
         dfs = []
         for file_path in documents_dir.glob("*"):
@@ -304,7 +343,7 @@ class BaseLoad:
             FileNotFoundError: If staging.parquet does not exist
         """
         filename = "merged.parquet" if select_merged else "staging.parquet"
-        staging_path = Path("load") / cls.folder_name / filename
+        staging_path = cls.this_dir / cls.folder_name / filename
         if not staging_path.exists():
             raise FileNotFoundError(f"No staging file found at {staging_path}")
         return pd.read_parquet(staging_path)

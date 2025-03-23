@@ -4,6 +4,8 @@ import pandas as pd
 import re
 import json
 from bs4 import BeautifulSoup
+import os
+from pathlib import Path
 
 
 class HtmlLoad(BaseLoad):
@@ -27,7 +29,6 @@ class HtmlLoad(BaseLoad):
 
         # Create a frequency count for all entities across the dataframe
         all_entities = df["settings_entity_list"].explode().value_counts()
-
         # Keep only entities that appear exactly once in the entire dataframe
         unique_entities = all_entities[all_entities == 1].index.tolist()
 
@@ -35,6 +36,14 @@ class HtmlLoad(BaseLoad):
         unique_entities = [
             entity for entity in unique_entities if any(c.isalpha() for c in entity)
         ]
+
+        # Write unique entities to settings_entities.json
+        unique_entities_path = self.staging_folder / "settings_entities.json"
+        with open(unique_entities_path, 'w', encoding='utf-8') as f:
+            json.dump(unique_entities, f, indent=2, ensure_ascii=False)
+        self.logger.info(
+            f"Saved {len(unique_entities)} unique settings entities to {unique_entities_path}"
+        )
 
         # Filter each row's entity list to only include truly unique entities
         df["settings_entity_list"] = df["settings_entity_list"].apply(
@@ -176,16 +185,17 @@ class HtmlLoad(BaseLoad):
             print(f"Error serializing table entities: {e}")
             return "{}"
 
-    def get_all_settings_entities(self) -> set[str]:
+    @classmethod
+    def get_all_settings_entities(cls) -> set[str]:
         """
         Get all unique settings_entities from the merged artifact.
 
         Returns:
             A set of all unique settings entities for use in nlp tasks.
         """
-        df = self.get_artifact(select_merged=True)
+        df = cls.get_artifact(select_merged=True)
         # Explode the lists and filter out any NaN values (from empty lists)
         exploded = df["settings_entity_list"].explode()
-        # Only keep actual string values (removes NaN)
+        # Only keep actual string values (removes NaN from empty arrays)
         valid_entities = exploded[exploded.notna()]
         return set(valid_entities)
