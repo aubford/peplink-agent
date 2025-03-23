@@ -38,7 +38,9 @@ kg = KnowledgeGraph.load(Path(kg_path))
 # MockSynth = MockMultiHopAbstractQuerySynthesizer(llm=generator_llm)
 
 generator_llm = LangchainLLMWrapper(ChatOpenAI(model=LLM_MODEL))
-generator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
+generator_embeddings = LangchainEmbeddingsWrapper(
+    OpenAIEmbeddings(model="text-embedding-3-large")
+)
 
 network_persona = Persona(
     name="Technical Network Engineer",

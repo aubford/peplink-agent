@@ -1,8 +1,6 @@
 # %%
 import pandas as pd
 from ragas.llms import LangchainLLMWrapper
-from ragas.embeddings import LangchainEmbeddingsWrapper
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.documents import Document
 from util.document_utils import df_to_documents
 from ragas.testset.graph import KnowledgeGraph, Node, NodeType
@@ -33,11 +31,6 @@ from ragas.testset.transforms.splitters import HeadlineSplitter
 from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms import Parallel
 from evals.evals_utils import node_meta
-
-kg_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini"))
-embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
-latest_kg_path = "evals/output/kg_output_LATEST.json"
-
 
 def estimate_ragas_eval_cost(
     documents: list[Document], num_test_cases: int = 200

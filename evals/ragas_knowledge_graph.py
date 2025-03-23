@@ -36,7 +36,9 @@ from langsmith import tracing_context
 
 
 kg_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini"))
-embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
+embeddings = LangchainEmbeddingsWrapper(
+    OpenAIEmbeddings(model="text-embedding-3-large")
+)
 latest_kg_path = "evals/output/kg_output_LATEST.json"
 
 

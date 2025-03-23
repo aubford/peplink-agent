@@ -18,7 +18,7 @@ from load.html.html_util import get_settings_entities
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
 DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", ""]
 
-"""Columns in both merged.parquet and staging.parquet
+"""Standard columns in both merged.parquet and staging.parquet
 
 - id: Id and index. Same between merged.parquet and staging.parquet except for youtube.
 - page_content: The main content.
@@ -26,7 +26,7 @@ DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " "
 - source_file: The file name from the data/ folder.
 - subject_matter: The subject matter type of the data source (PEPWAVE, IT_NETWORKING, MOBILE_INTERNET).
 
-Standardized columns:
+Normalized columns:
 - title: Html section, post title, video title.
 - primary_content: YouTube transcript, comment content, html section content.
 Not in HTML:
@@ -34,6 +34,18 @@ Not in HTML:
 - score: YouTube video likes, comment likes.
 - author_id: YouTube channel id, comment author id.
 - author_name: YouTube channel title, comment author name.
+"""
+
+"""Columns from data augmentation:
+- entities: Entities in the primary_content and lead_content.
+From LLM:
+- themes: Themes of the post.
+- is_useful: Whether the post contains useful technical information.
+- summary: Summary of the post.
+
+- summary_embedding: Embedding of the summary. (use embedding extractor w/ text-embedding-3-small)
+- title_embedding: Embedding of the title column. (filter out short titles)
+
 """
 
 
@@ -72,7 +84,7 @@ class BaseLoad:
             )
         self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
-        self.vector_store: VectorStore | None = None
+        self.vector_store: PineconeVectorStore | None = None
         self.staging_folder = self.this_dir / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
         self.generated_data_path = self.staging_folder / "generated_data.parquet"
@@ -127,15 +139,16 @@ class BaseLoad:
             # Create new index
             pc.create_index(
                 name=self.index_name,
-                dimension=1536,  # OpenAI embeddings dimension
-                metric="cosine",
+                dimension=3072,  # OpenAI embeddings dimension for text-embedding-3-large
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
             self.logger.info(f"Created new Pinecone index: {self.index_name}")
 
         # Initialize the index
         index = pc.Index(self.index_name)
-        vector_store = PineconeVectorStore(index=index, embedding=OpenAIEmbeddings())
+        vector_store = PineconeVectorStore(
+            index=index, embedding=OpenAIEmbeddings(model="text-embedding-3-large")
+        )
         self.logger.info(
             f"Initialized Pinecone vector store for index: {self.index_name}"
         )
