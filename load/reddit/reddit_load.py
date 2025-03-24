@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from load.base_load import BaseLoad
+from load.base_load import BaseLoad, ForumSyntheticDataPrompt
 import json
 from openai import OpenAI
 
@@ -82,8 +82,19 @@ class RedditLoad(BaseLoad):
         return df
 
     def make_prompt(self, reddit_post: RedditData) -> str:
-        """Make a prompt for the LLM."""
-        pass
+        """
+        Make a prompt for the LLM using the ForumSyntheticDataPrompt class.
+
+        Args:
+            reddit_post: The RedditData object containing post and comment information.
+
+        Returns:
+            Formatted prompt string for the LLM.
+        """
+        return ForumSyntheticDataPrompt.create_prompt(
+            lead_content=reddit_post.post_content,
+            primary_content=reddit_post.comment_content,
+        )
 
     def extract_entities(self, text: str) -> str:
         """Use SpaCy NER to extract entities from text, including custom PEPWAVE_SETTINGS_ENTITY."""
