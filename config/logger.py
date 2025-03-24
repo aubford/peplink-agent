@@ -19,10 +19,11 @@ class RotatingFileLogger(logging.Logger):
         super().__init__(name)
         self.setLevel(log_level)
         self.silent = silent
+        self.root_dir = Path(__file__).parent.parent
 
         if not self.silent:
             # Create logs directory if it doesn't exist
-            log_dir = Path("logs")
+            log_dir = self.root_dir / "logs"
             log_dir.mkdir(exist_ok=True)
 
             # Create common formatter
@@ -72,10 +73,11 @@ class RotatingFileLogWriter(logging.Logger):
         super().__init__(name)
         self.setLevel(logging.DEBUG)
         self.silent = silent
+        self.root_dir = Path(__file__).parent.parent
 
         if not self.silent:
             # Create logs directory if it doesn't exist
-            log_dir = Path("logs")
+            log_dir = self.root_dir / "logs"
             log_dir.mkdir(exist_ok=True)
 
             self.file_handler = RotatingFileHandler(
