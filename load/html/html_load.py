@@ -21,7 +21,7 @@ class HtmlLoad(BaseLoad):
         df.loc[mask, "page_content"] = (
             df.loc[mask, "section"] + "\n\n" + df.loc[mask, "page_content"]
         )
-        df["images"] = df["images"].apply(list)
+        df["images"] = df["images"].apply(list).apply(json.dumps)
         df["settings_entities"] = df["page_content"].apply(self.get_entities_from_table)
         df["settings_entity_list"] = df["settings_entities"].apply(
             self.flatten_entities
@@ -49,6 +49,7 @@ class HtmlLoad(BaseLoad):
         df["settings_entity_list"] = df["settings_entity_list"].apply(
             lambda x: [entity for entity in x if entity in unique_entities]
         )
+        df["settings_entity_list"] = df["settings_entity_list"].apply(json.dumps)
         return df
 
     def clean_text(self, text: str) -> str:

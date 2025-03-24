@@ -26,7 +26,7 @@ DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " "
 - source_file: The file name from the data/ folder.
 - subject_matter: The subject matter type of the data source (PEPWAVE, IT_NETWORKING, MOBILE_INTERNET).
 
-Normalized columns:
+Normalized Columns:
 - title: Html section, post title, video title.
 - primary_content: YouTube transcript, comment content, html section content.
 Not in HTML:
@@ -36,16 +36,20 @@ Not in HTML:
 - author_name: YouTube channel title, comment author name.
 """
 
-"""Columns from data augmentation:
-- entities: Entities in the primary_content and lead_content.
+"""Synthetic Columns:
+- entities: Entities in primary_content and lead_content. (HTML: Only primary_content)
+    - When comparing a non-HTML with HTML: Compare with both HTML.entities and HTML.settings_entity_list.
+    - Don't compare HTML with itself?
+    - Always try to find an HTML relationship via this column.
 From LLM:
-- themes: Themes of the post.
-- is_useful: Whether the post contains useful technical information.
-- summary: Summary of the post.
-
-- summary_embedding: Embedding of the summary. (use embedding extractor w/ text-embedding-3-small)
-- title_embedding: Embedding of the title column. (filter out short titles)
-
+- themes: Themes from primary_content and lead_content. (EX: HTML)
+- is_useful: Whether the primary_content contains useful technical information.
+- summary: (EX: HTML)
+    - For YouTube: Summary of the primary_content.
+    - For forums: Summary of the primary_content and lead_content. Use special prompt to explain the two documents and how to summarize them.
+- summary_embedding: Embedding of the summary. (use embedding extractor)
+- title_embedding: Embedding of the title column. (filter out short titles) (use embedding extractor)
+- lead_content_embedding: Embedding of the lead_content. (use embedding extractor) (EX: HTML)
 """
 
 
