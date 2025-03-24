@@ -103,6 +103,7 @@ class BaseLoad:
         )
         self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
         self.batch_manager = BatchManager(self.staging_folder)
+        self.nlp = self._init_spacy()
 
     def apply_synth_data_to_staging(self):
         """Apply the generated data from LLM to the staging file."""
@@ -193,6 +194,78 @@ class BaseLoad:
         ]
         ruler.add_patterns(patterns)
         return nlp
+
+    def extract_entities(self, text: str) -> str:
+        """Use SpaCy NER to extract entities from text, including custom PEPWAVE_SETTINGS_ENTITY."""
+        if not text or pd.isna(text):
+            return ""
+
+        # Process the text with the pipeline that includes our EntityRuler
+        doc = self.nlp(text)
+        entities: set[str] = {
+            ent.text
+            for ent in doc.ents
+            if ent.label_
+            in {
+                "URL",
+                "FAC",
+                "ORG",
+                "GPE",
+                "PRODUCT",
+                "LOC",
+                "WORK_OF_ART",
+                "EVENT",
+                "PEPWAVE_SETTINGS_ENTITY",  # Our custom entity type
+            }
+            and any(c.isalpha() for c in ent.text)
+        }
+
+        return ", ".join(entities) if entities else ""
+
+    def ner(
+        self,
+        df: pd.DataFrame,
+        primary_content_col: str = "primary_content",
+        lead_content_col: str = "lead_content",
+    ) -> pd.DataFrame:
+        """
+        Use SpaCy NER feature to extract an "entities" column from the text in the specified columns.
+        The "entities" column contains a string that is a list of entities separated by commas.
+
+        Args:
+            df: The dataframe to process
+            primary_content_col: Column name for primary content
+            lead_content_col: Column name for lead content (optional - can be None)
+
+        Returns:
+            DataFrame with added entities column
+        """
+        # Process primary content column
+        df["primary_entities"] = df[primary_content_col].apply(self.extract_entities)
+
+        # Process lead content column if it exists
+        if lead_content_col in df.columns:
+            df["lead_entities"] = df[lead_content_col].apply(self.extract_entities)
+        else:
+            df["lead_entities"] = ""
+
+        # Combine entities from both columns, removing duplicates
+        def combine_entities(row):
+            all_entities = []
+            if row["primary_entities"]:
+                all_entities.extend(row["primary_entities"].split(", "))
+            if row["lead_entities"]:
+                all_entities.extend(row["lead_entities"].split(", "))
+
+            unique_entities = set(entity for entity in all_entities if entity)
+            return ", ".join(unique_entities)
+
+        df["entities"] = df.apply(combine_entities, axis=1)
+
+        # Drop intermediate columns
+        df = df.drop(columns=["primary_entities", "lead_entities"])
+
+        return df
 
     @staticmethod
     def _simple_dedupe(df: pd.DataFrame) -> None:

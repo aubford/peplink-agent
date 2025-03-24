@@ -19,6 +19,7 @@ class YoutubeLoad(BaseLoad):
         deduped = self.deduplication_pipeline.run(
             combined_df, precision_threshold=0.75, precision_ngram=1
         )
+        deduped = self.ner(deduped)
         return deduped
 
     def load_docs(self, documents: List[Document]) -> List[Document]:
