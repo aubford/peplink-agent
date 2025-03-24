@@ -17,5 +17,4 @@ def get_settings_entities() -> List[str]:
 
     with open(json_path, 'r') as f:
         entities = json.load(f)
-        print(entities)
         return entities

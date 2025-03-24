@@ -7,6 +7,7 @@ backup_data
 langchain_pepwave_env*/*
 evals/output
 tutorial/
+load/**/*.jsonl
 
 ### VisualStudioCode template
 !.vscode/settings.json

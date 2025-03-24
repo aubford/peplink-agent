@@ -1,3 +1,4 @@
+from langchain.docstore.document import Document
 from pydantic import BaseModel
 from load.base_load import BaseLoad
 import json
@@ -67,15 +68,14 @@ class ModelResponse(BaseModel):
     themes: list[str]  # themes of the post
 
 
-class ForumSyntheticDataPrompt:
+class ForumSyntheticDataMixin:
     """
-    Class to generate prompts for OpenAI API to extract structured data from forum posts.
+    Mixin class to generate prompts for OpenAI API to extract structured data from forum posts.
     The prompt facilitates transformation of a document's primary_content and lead_content
     into a structured format for analysis.
     """
 
-    @staticmethod
-    def create_system_prompt() -> str:
+    def create_system_prompt(self) -> str:
         """Creates the system prompt that instructs the model on its task."""
         return """You are an expert technical content analyzer specializing in IT networking and Pepwave products.
 Your task is to analyze forum conversations and extract key information.
@@ -99,8 +99,7 @@ Important guidelines:
 - Base your analysis only on the provided content, do not make assumptions.
 """
 
-    @staticmethod
-    def create_prompt(lead_content: str, primary_content: str) -> str:
+    def create_prompt(self, lead_content: str, primary_content: str) -> str:
         """Creates a prompt that includes the forum post content."""
 
         return f"""# Forum Post (Original Post/Question)
@@ -112,8 +111,7 @@ Important guidelines:
 Analyze this conversation according to the guidelines provided.
 """
 
-    @staticmethod
-    def get_examples() -> list[dict]:
+    def get_examples(self) -> list[dict]:
         """
         Provides examples of conversations and ideal responses.
 
@@ -168,8 +166,7 @@ Analyze this conversation according to the guidelines provided.
             },
         ]
 
-    @staticmethod
-    def create_system_prompt_with_examples(num_examples: int = 2) -> str:
+    def create_system_prompt_with_examples(self, num_examples: int = 2) -> str:
         """
         Creates a system prompt that includes both instructions and examples.
 
@@ -179,8 +176,8 @@ Analyze this conversation according to the guidelines provided.
         Returns:
             Complete system prompt with instructions and examples
         """
-        base_prompt = ForumSyntheticDataPrompt.create_system_prompt()
-        examples = ForumSyntheticDataPrompt.get_examples()
+        base_prompt = self.create_system_prompt()
+        examples = self.get_examples()
 
         # Limit to the requested number of examples
         examples = examples[: min(num_examples, len(examples))]
@@ -191,7 +188,7 @@ Analyze this conversation according to the guidelines provided.
 
         for i, example in enumerate(examples, 1):
             # Format the example conversation
-            example_prompt = ForumSyntheticDataPrompt.create_prompt(
+            example_prompt = self.create_prompt(
                 lead_content=example["lead_content"],
                 primary_content=example["primary_content"],
             )
@@ -216,19 +213,13 @@ Analyze this conversation according to the guidelines provided.
         return base_prompt + examples_text
 
 
-class RedditLoad(BaseLoad):
+class RedditLoad(BaseLoad, ForumSyntheticDataMixin):
     folder_name = "reddit"
 
     def __init__(self):
         super().__init__()
         self.batch_manager = BatchManager(self.staging_folder)
         self.nlp = self._init_spacy()
-
-    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
-        """Merge all datasets into a single dataframe and perform operations."""
-        df = pd.concat(dfs)
-        df = self.ner(df)
-        return df
 
     def extract_entities(self, text: str) -> str:
         """Use SpaCy NER to extract entities from text, including custom PEPWAVE_SETTINGS_ENTITY."""
@@ -284,6 +275,52 @@ class RedditLoad(BaseLoad):
         df = df.drop(columns=["primary_entities", "lead_entities"])
 
         return df
+
+    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+        """Merge all datasets into a single dataframe and perform operations."""
+        df = pd.concat(dfs)
+        df = self.ner(df)
+        return df
+
+    def load_docs(self, documents: List[Document]) -> List[Document]:
+        """
+        Process documents using the BatchManager and ForumSyntheticDataMixin.
+
+        Args:
+            documents: List of documents to process
+
+        Returns:
+            Processed documents with additional metadata
+        """
+        # Create batch items from documents
+        batch_items = []
+        for doc in documents:
+            if not doc.id:
+                raise ValueError("Document ID is required for batch processing")
+            lead_content = doc.metadata.get("lead_content", "")
+            primary_content = doc.metadata.get("primary_content", "")
+
+            batch_items.append(
+                {
+                    "id": doc.id,
+                    "prompt": self.create_prompt(lead_content, primary_content),
+                }
+            )
+
+        # If we have batch items, create and run a batch job
+        if batch_items:
+            system_prompt = self.create_system_prompt_with_examples(num_examples=2)
+            self.batch_manager.create_batch_tasks(
+                items=batch_items,
+                schema=ModelResponse,
+                system_prompt=system_prompt,
+                model="gpt-4o-mini",
+                temperature=0.2,
+                max_tokens=2040,
+            )
+            self.batch_manager.test_batchfile()
+
+        return documents
 
 
 ValidEndpoints = Literal["/v1/chat/completions", "/v1/embeddings", "/v1/completions"]
@@ -404,6 +441,7 @@ class BatchManager:
             endpoint=self.endpoint,
             completion_window="24h",
         )
+        print(f"Batch job created: {batch_job.id}")
         self.write_status_file(batch_job)
 
         self.batch_id = batch_job.id
@@ -503,8 +541,8 @@ class BatchManager:
     def run_batch_and_job(
         self,
         items: List[Dict[str, str]],
-        schema: type[BaseModel],
         system_prompt: str,
+        schema: type[BaseModel],
         model: str = "gpt-4o-mini",
         temperature: float = 0.2,
         max_tokens: int = 300,
@@ -623,12 +661,15 @@ class BatchManager:
                 # Add a small delay to avoid rate limits
                 time.sleep(0.5)
 
-            return {
+            result = {
                 "status": "success",
                 "message": f"Successfully tested {len(results)} tasks",
                 "results": results,
                 "total_tasks_in_file": sum(1 for _ in open(self.file_name, "r")),
             }
+            print("Test Batchfile Success!!!!!!!!!!")
+            print(result)
+            return result
 
         except Exception as e:
             return {
