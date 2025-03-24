@@ -14,6 +14,8 @@ from util.document_utils import df_to_documents
 from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 import spacy
 from load.html.html_util import get_settings_entities
+from load.batch_manager import BatchManager
+import json
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
 DEFAULT_TEXT_SPLITTER_SEPARATORS = ["\n\n", "\n", r"(?<=[.!?])\s+(?=[A-Z])", " ", ""]
@@ -38,19 +40,19 @@ Not in HTML:
 
 """Synthetic Columns:
 - entities: Entities in primary_content and lead_content. (HTML: Only primary_content)
+    Inference:
     - When comparing a non-HTML with HTML: Compare with both HTML.entities and HTML.settings_entity_list.
     - Don't compare HTML with itself?
     - Always try to find an HTML relationship via this column.
-From LLM:
-- themes: Themes from primary_content and lead_content. (EX: HTML)
+From LLM: (EX: HTML)
+- themes: Themes from primary_content and lead_content. 
 - is_useful: Whether the primary_content contains useful technical information.
-- summary: (EX: HTML)
+- technical_summary:
     - For YouTube: Summary of the primary_content.
     - For forums: Summary of the primary_content and lead_content. Use special prompt to explain the two documents and how to summarize them.
 From Embedding Model:
-- summary_embedding: Embedding of the summary. (use embedding extractor)
+- technical_summary_embedding: Embedding of the technical_summary. (use embedding extractor)
 - title_embedding: Embedding of the title column. (filter out short titles) (use embedding extractor)
-- lead_content_embedding: Embedding of the lead_content. (use embedding extractor) (EX: HTML)
 """
 
 
@@ -92,23 +94,80 @@ class BaseLoad:
         self.vector_store: PineconeVectorStore | None = None
         self.staging_folder = self.this_dir / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
-        self.generated_data_path = self.staging_folder / "synth_data.parquet"
+        self.synth_data_path = self.staging_folder / "synth_data.parquet"
         deduplication_lock_path = self.staging_folder / "deduplication_lock.parquet"
         self.deduplication_pipeline = (
             DeduplicationLockPipeline(deduplication_lock_path)
             if deduplication_lock_path.exists()
             else DeduplicationPipeline(self.folder_name)
         )
+        self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
+        self.batch_manager = BatchManager(self.staging_folder)
 
-    def apply_generated_data_to_staging(self):
+    def apply_synth_data_to_staging(self):
         """Apply the generated data from LLM to the staging file."""
-        generated_data = pd.read_parquet(self.generated_data_path)
+        synthetic_data = pd.read_parquet(self.synth_data_path)
         # merge with staging
         staging = pd.read_parquet(self.staging_path)
-        staging.drop(columns=generated_data.columns, inplace=True, errors="ignore")
+        staging.drop(columns=synthetic_data.columns, inplace=True, errors="ignore")
 
-        merged = pd.merge(staging, generated_data, left_index=True, right_index=True)
+        merged = pd.merge(staging, synthetic_data, left_index=True, right_index=True)
+        # generate the title embeddings
+        merged = self._generate_embeddings(merged, "title")
         merged.to_parquet(self.staging_path)
+
+    def create_synth_data_from_batch_results(self) -> None:
+        """
+        Create a parquet file from the batch results JSON file.
+        Extracts content from each result and flattens into a dataframe structure.
+        """
+        output_file_name = self.batch_manager.output_file_name
+        if not output_file_name.exists():
+            raise FileNotFoundError(f"Results file not found at {output_file_name}")
+
+        with open(output_file_name) as f:
+            data = json.load(f)
+
+        # Extract and process the data
+        processed_data = []
+        for item in data:
+            record = {
+                'id': item['custom_id'],
+            }
+
+            # Extract message content and parse it
+            try:
+                message = item['response']['body']['choices'][0]['message']
+                content = json.loads(message['content'])
+                record.update(content)
+            except (KeyError, json.JSONDecodeError) as e:
+                self.logger.error(
+                    f"Error processing item {item.get('custom_id', 'unknown')}: {e}"
+                )
+                continue
+
+            processed_data.append(record)
+
+        # Create DataFrame and save as parquet
+        df = pd.DataFrame(processed_data)
+        # Convert themes column from list to JSON string if it exists
+        if 'themes' in df.columns:
+            df['themes'] = df['themes'].apply(
+                lambda x: json.dumps(x) if isinstance(x, list) else x
+            )
+        df = df.set_index("id", verify_integrity=True)
+        # get embeddings for title and technical_summary columns
+        df = self._generate_embeddings(df, "technical_summary")
+        df.to_parquet(self.synth_data_path)
+        self.logger.info(f"Synthetic data saved to {self.synth_data_path}")
+
+    def _generate_embeddings(self, df, column_name):
+        """Generate embeddings for a specific column in a dataframe."""
+        texts = df[column_name].tolist()
+        self.logger.info(f"Generating embeddings for {len(texts)} {column_name}s")
+        embeddings = self.embedding_model.embed_documents(texts)
+        df[f"{column_name}_embedding"] = embeddings
+        return df
 
     @property
     def config(self) -> ConfigType:
@@ -156,9 +215,7 @@ class BaseLoad:
 
         # Initialize the index
         index = pc.Index(self.index_name)
-        vector_store = PineconeVectorStore(
-            index=index, embedding=OpenAIEmbeddings(model="text-embedding-3-large")
-        )
+        vector_store = PineconeVectorStore(index=index, embedding=self.embedding_model)
         self.logger.info(
             f"Initialized Pinecone vector store for index: {self.index_name}"
         )

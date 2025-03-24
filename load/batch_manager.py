@@ -45,7 +45,7 @@ class BatchManager:
         self.file_name = batch_path / "batchfile.jsonl"
         self.output_file_name = batch_path / "batch_results.json"
         self.status_file_name = batch_path / "batch_status.json"
-        self.data_path = base_path / "synth_data.parquet"
+        self.synth_data_path = base_path / "synth_data.parquet"
         self.endpoint: ValidEndpoints = endpoint
 
         # Load batch_id from status file if it exists
@@ -235,7 +235,7 @@ class BatchManager:
 
         return results
 
-    def create_synth_data(self) -> None:
+    def create_synth_data_from_batch_results(self) -> None:
         """
         Create a parquet file from the batch results JSON file.
         Extracts content from each result and flattens into a dataframe structure.
@@ -275,8 +275,8 @@ class BatchManager:
             lambda x: json.dumps(x) if isinstance(x, list) else x
         )
         df = df.set_index("id", verify_integrity=True)
-        df.to_parquet(self.data_path)
-        print(f"Synthetic data saved to {self.data_path}")
+        df.to_parquet(self.synth_data_path)
+        print(f"Synthetic data saved to {self.synth_data_path}")
 
     def run_batch_and_job(
         self,

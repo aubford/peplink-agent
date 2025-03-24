@@ -2,7 +2,6 @@ from langchain.docstore.document import Document
 from pydantic import BaseModel
 from load.base_load import BaseLoad
 import pandas as pd
-from load.batch_manager import BatchManager
 
 
 class RedditData(BaseModel):
@@ -205,7 +204,6 @@ class RedditLoad(BaseLoad, ForumSyntheticDataMixin):
 
     def __init__(self):
         super().__init__()
-        self.batch_manager = BatchManager(self.staging_folder)
         self.nlp = self._init_spacy()
 
     def extract_entities(self, text: str) -> str:
