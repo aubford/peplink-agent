@@ -92,7 +92,7 @@ class BaseLoad:
         self.vector_store: PineconeVectorStore | None = None
         self.staging_folder = self.this_dir / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
-        self.generated_data_path = self.staging_folder / "generated_data.parquet"
+        self.generated_data_path = self.staging_folder / "synth_data.parquet"
         deduplication_lock_path = self.staging_folder / "deduplication_lock.parquet"
         self.deduplication_pipeline = (
             DeduplicationLockPipeline(deduplication_lock_path)
@@ -100,10 +100,15 @@ class BaseLoad:
             else DeduplicationPipeline(self.folder_name)
         )
 
-    # todo
-    def apply_generated_data(self):
+    def apply_generated_data_to_staging(self):
         """Apply the generated data from LLM to the staging file."""
-        pass
+        generated_data = pd.read_parquet(self.generated_data_path)
+        # merge with staging
+        staging = pd.read_parquet(self.staging_path)
+        staging.drop(columns=generated_data.columns, inplace=True, errors="ignore")
+
+        merged = pd.merge(staging, generated_data, left_index=True, right_index=True)
+        merged.to_parquet(self.staging_path)
 
     @property
     def config(self) -> ConfigType:

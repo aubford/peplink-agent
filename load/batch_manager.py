@@ -43,8 +43,9 @@ class BatchManager:
         batch_path.mkdir(parents=True, exist_ok=True)
 
         self.file_name = batch_path / "batchfile.jsonl"
-        self.output_file_name = batch_path / "batch_results.jsonl"
+        self.output_file_name = batch_path / "batch_results.json"
         self.status_file_name = batch_path / "batch_status.json"
+        self.data_path = base_path / "synth_data.parquet"
         self.endpoint: ValidEndpoints = endpoint
 
         # Load batch_id from status file if it exists
@@ -222,18 +223,60 @@ class BatchManager:
         result_file_id = batch_job.output_file_id
         result_content = self.client.files.content(result_file_id).content
 
-        # Save the result file if name is provided
-        if self.output_file_name:
-            with open(self.output_file_name, "wb") as file:
-                file.write(result_content)
-
         # Parse the results
         results = []
         for line in result_content.decode("utf-8").strip().split("\n"):
             if line:
                 results.append(json.loads(line))
 
+        # Save as JSON file
+        with open(self.output_file_name, "w") as file:
+            json.dump(results, file, indent=2)
+
         return results
+
+    def create_synth_data(self) -> None:
+        """
+        Create a parquet file from the batch results JSON file.
+        Extracts content from each result and flattens into a dataframe structure.
+        """
+        import pandas as pd
+
+        if not self.output_file_name.exists():
+            raise FileNotFoundError(
+                f"Results file not found at {self.output_file_name}"
+            )
+
+        with open(self.output_file_name) as f:
+            data = json.load(f)
+
+        # Extract and process the data
+        processed_data = []
+        for item in data:
+            record = {
+                'id': item['custom_id'],
+            }
+
+            # Extract message content and parse it
+            try:
+                message = item['response']['body']['choices'][0]['message']
+                content = json.loads(message['content'])
+                record.update(content)
+            except (KeyError, json.JSONDecodeError) as e:
+                print(f"Error processing item {item['id']}: {e}")
+                continue
+
+            processed_data.append(record)
+
+        # Create DataFrame and save as parquet
+        df = pd.DataFrame(processed_data)
+        # Convert themes column from list to JSON string if it exists
+        df['themes'] = df['themes'].apply(
+            lambda x: json.dumps(x) if isinstance(x, list) else x
+        )
+        df = df.set_index("id", verify_integrity=True)
+        df.to_parquet(self.data_path)
+        print(f"Synthetic data saved to {self.data_path}")
 
     def run_batch_and_job(
         self,
