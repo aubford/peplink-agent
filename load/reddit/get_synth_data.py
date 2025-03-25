@@ -1,6 +1,5 @@
 # %%
 from load.reddit.reddit_load import RedditLoad
-
 loader = RedditLoad()
 
 # %% Check batch job status

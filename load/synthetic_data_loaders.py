@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
-from langchain.document_loaders import Document
+from langchain_core.documents import Document
 from load.batch_manager import BatchManager
 
 
@@ -73,6 +73,9 @@ class SyntheticDataLoader(ABC):
 
     def create_batch_job(self, documents: list[Document]):
         """Create a batch job for processing documents."""
+        # todo: undo
+        documents = documents[:30]
+
         if self.batch_manager is None:
             raise ValueError("batch_manager must be set before creating a batch job")
 
@@ -103,8 +106,7 @@ class SyntheticDataLoader(ABC):
                 max_tokens=2040,
             )
         self.batch_manager.test_batchfile()
-        # todo: undo
-        # self.batch_manager.create_batch_job()
+        self.batch_manager.create_batch_job()
 
 
 class ForumSyntheticDataLoader(SyntheticDataLoader):
@@ -127,7 +129,7 @@ Together, these form a single conversation turn between two forum users.
 
 Analyze this conversation and provide a structured output containing:
 1. A list of technical themes discussed.
-2. A summary of the technical facts that can be gleaned from the conversation. Provide this in the form of sentences, not lists or other special formatting.
+2. A summary of the technical facts that can be gleaned from the conversation. Provide this in the form of a paragraph. Do not use lists or other special formatting.
 3. An assessment of whether there is useful technical information related to Pepwave products or IT networking.
 
 Important guidelines:
@@ -223,7 +225,7 @@ You will be provided with an excerpt of a transcript of a YouTube video.
 
 Analyze this content and provide a structured output containing:
 1. A list of technical themes discussed in the video.
-2. A concise summary of the most useful technical facts that can be gleaned from the video transcript. Provide this in the form of sentences, not lists or other special formatting.
+2. A concise summary of the most useful technical facts that can be gleaned from the video transcript. Provide this in the form of a paragraph. Do not use lists or other special formatting.
 3. An assessment of whether there is enough useful technical information related to Pepwave products or IT networking to be worth watching.
 
 Important guidelines:
@@ -248,49 +250,30 @@ Analyze this content according to the guidelines provided.
     def _get_examples(self) -> list[dict]:
         """
         Provides examples of YouTube content and ideal responses.
+        Note: For YouTube, we only use the primary_content field (video transcript)
+        and ignore the lead_content field.
 
         Returns:
             List of example dictionaries.
         """
         return [
             {
-                "lead_content": "In this video, I do a deep dive into the Pepwave MAX Transit Duo CAT12 router. I'll show you the unboxing, setup process, and how to configure it for optimal performance in an RV or mobile setup. We'll look at antenna connection, cellular settings, and Wi-Fi configuration.",
-                "primary_content": "Hello everyone welcome to my channel today I'm going to be walking you through the Pepwave MAX Transit Duo CAT12 router which is a great solution for mobile internet especially for RVs boats and other mobile applications so let's get started first let's look at what comes in the box you get the router itself two cellular SIM card slots power adapter and mounting brackets I've already mounted mine in my RV's technology cabinet now let's talk about the antennas this unit requires external antennas for best performance you'll need to connect them to the ports labeled cell on the back of the router I'm using MIMO antennas which really help boost performance in fringe areas now let's go through the configuration process I've connected to the router using the default IP address 192.168.50.1 and the default password is admin the first thing I recommend is going to the SIM card settings under Network Mobile settings here you can set up your carrier details APN settings and also enable band locking which can really help improve your connection in certain areas for example if you're in a rural location you might want to lock to bands 12 13 or 71 depending on your carrier as these lower frequencies provide better range and building penetration another useful feature is the Wi-Fi as WAN capability which allows you to connect to campground Wi-Fi and use that as your primary connection while keeping cellular as backup you configure this under Network Wi-Fi WAN and just scan for available networks the SpeedFusion technology in these devices is really amazing for combining connections I use it to bond my cellular connection with the campground Wi-Fi for increased reliability especially when I'm on video calls for work if you're having issues with your connection make sure to check signal strength under the Status page this will help you determine if repositioning your antennas might help that's it for the basic setup and configuration of the Pepwave MAX Transit Duo I hope this helps you get the most out of your mobile internet setup if you have any questions drop them in the comments below",
+                "primary_content": "but this is the puma 221 right here you can get up to 7 db gain increase with this unit and when i say up to seven it it it increases the gain different on different frequencies across the cellular bands and for wi-fi and with the br1 because i don't think i mentioned this and i should have it's a single band wi-fi which means you're going to have access to to the 2.4 band which is a great band it's a band that that operates great at further distances away but this is not a dual band wi-fi now we do have dual band wi-fi where you get access to the 2.4 and the five gigahertz wi-fi bands but again this is a single band here anyway the puma 221 this would be something that you would mount on the roof of your rv and it's called a five in one because there's basically five cables into one so you're gonna have two that are going to be your cellular connection so you would basically just unscrew these two paddle antennas and screw these in you're going to have two wi-fi's but because this is a single router then one of these is actually not going to be used you'll just use one of these and then you're going to have your your gps connection right here now if you if you up front did not activate the failover license to get wi-fi then both of these wi-fi connections would not be connected to this unit but we sell it with them because we feel like that even if you did not get the wi-fi immediately that down the road you might want it so if you had put this antenna up you just want the availability of it so that's the the puma 221 and it is a a great option the other thing that you'll see that we have as a recommendation is we do have the pointing antenna and this is a directional antenna and this is a two in one that that you can see here and this is for cellular only so this would be something that while the puma is omnidirectional it sees in all directions the the pointing x-pole is directional so you would need to point this into the direction of where the cell tower is and oftentimes a directional antenna can be great because it it basically eliminates other noise that might be coming from the 360 degrees and it just focuses in in one area",
                 "expected_output": {
                     "themes": [
-                        "Pepwave MAX Transit Duo CAT12",
-                        "RV/mobile internet setup",
-                        "antenna configuration",
-                        "cellular settings",
-                        "band locking",
-                        "Wi-Fi as WAN",
-                        "SpeedFusion technology",
-                        "signal optimization",
+                        "Antenna Types and Directionality",
+                        "Router Compatibility",
+                        "Antenna Gain and Performance",
+                        "Router Connectivity Options",
+                        "Poynting XPOL",
+                        "Upgrade and Flexibility Considerations",
+                        "Puma 221",
                     ],
-                    "technical_summary": "The Pepwave MAX Transit Duo CAT12 router is designed for mobile internet applications like RVs and boats. For optimal performance, it requires external MIMO antennas connected to the ports labeled 'cell'. The router can be configured through its web interface at 192.168.50.1. Important settings include SIM card configuration under Network > Mobile settings, where users can set carrier details, APN settings, and enable band locking for better performance in rural areas by selecting lower frequency bands (12, 13, or 71). The device supports Wi-Fi as WAN capability, allowing users to connect to external Wi-Fi networks as a primary connection while keeping cellular as backup. Its SpeedFusion technology allows bonding cellular and Wi-Fi connections for increased reliability during video calls.",
+                    "technical_summary": "The Puma 221 is a roof-mounted, omnidirectional 5-in-1 antenna designed for mobile applications such as RVs, offering up to 7 dB of signal gain across cellular and Wi-Fi frequencies. It includes two cellular connectors, two Wi-Fi connectors (with only one used on single-band routers like the Peplink BR1, which supports 2.4 GHz Wi-Fi only), and one GPS connector. The included Wi-Fi connectors are present even if the failover Wi-Fi license is not activated, allowing for future upgrade flexibility. In contrast, the Poynting XPOL antenna is a 2-in-1, directional, cellular-only antenna that must be aimed toward a nearby cell tower. This directional design enhances signal quality by focusing reception and minimizing interference from other directions.",
                     "is_useful": True,
                 },
             },
             {
-                "lead_content": "I created this quick video to show how I set up my mobile internet solution in my van. Using a cellular router for remote work.",
-                "primary_content": "Hey guys I wanted to show you my internet setup for my van so I can work remotely from anywhere first thing I want to mention is I got this little router it's a Peplink Balance One works really nicely but kind of expensive I paid about 600 bucks for it but totally worth it for reliable internet I've mounted it here near my electrical system it's connected to a small inverter which powers it from my solar setup I've got two SIM cards in it one from Verizon and one from AT&T so if one carrier doesn't have good coverage in an area I can switch to the other one thing that's been super helpful is I added these cell antennas on the roof of the van they connect directly to the router and boost my signal a lot especially when I'm in remote areas to set everything up I just went into the admin page and created two profiles one for each carrier the great thing is I can set it to automatically switch between carriers based on signal strength no manual switching needed when I get to a coffee shop or somewhere with WiFi I can set the router to use that as the primary connection and keep the cellular as backup the battery usage isn't too bad it draws about 10 watts so with my solar system I can easily keep it running all day while working it's been super reliable for zoom calls and uploading large files which I need for my job that's my quick tour of my mobile internet setup let me know if you have any questions in the comments",
-                "expected_output": {
-                    "themes": [
-                        "mobile internet solutions",
-                        "Peplink Balance One",
-                        "van life networking",
-                        "dual SIM configuration",
-                        "cellular antennas",
-                        "automatic carrier switching",
-                        "power consumption",
-                        "remote work setup",
-                    ],
-                    "technical_summary": "This video demonstrates a mobile internet setup using a Peplink Balance One router in a van. The router is connected to a small inverter powered by a solar system and contains two SIM cards (Verizon and AT&T) for redundancy. Roof-mounted cellular antennas are connected directly to the router to boost signal in remote areas. The router is configured with two profiles (one for each carrier) and can automatically switch between carriers based on signal strength. When Wi-Fi is available, the router can use it as the primary connection with cellular as backup. The router draws approximately 10 watts of power, making it sustainable for all-day use with a solar power system.",
-                    "is_useful": True,
-                },
-            },
-            {
-                "lead_content": "Technology Fail! Watch what happened when I tried to set up my new router",
                 "primary_content": "Hey what's up everyone so today I tried to set up my new router and it was a complete disaster first of all the box was really hard to open I don't know why companies make packaging so difficult to get into anyway I finally got it open and I was excited to try this new expensive router I heard about so I plug everything in and guess what nothing happened absolutely nothing the lights didn't even come on so I checked all the connections tried a different outlet all that stuff still nothing so I called customer service and was on hold for like 45 minutes which was super annoying the guy on the phone was asking me a bunch of questions that I already tried and then he tells me oh it sounds like you got a defective unit I was like yeah no kidding so now I have to pack it all up send it back and wait for a replacement which is going to take another week at least just wanted to vent about this whole experience because I was planning to use this weekend to set up my new home network and now that's not happening anyway that's my story of tech fails for today hope your day is going better than mine",
                 "expected_output": {
                     "themes": [
@@ -298,7 +281,7 @@ Analyze this content according to the guidelines provided.
                         "defective hardware",
                         "customer service experience",
                     ],
-                    "technical_summary": "The video recounts an experience with a defective router that wouldn't power on despite trying different outlets and checking connections. After a long customer service call, it was determined to be a defective unit that needed to be returned and replaced.",
+                    "technical_summary": "There is no useful technical information in this video.",
                     "is_useful": False,
                 },
             },

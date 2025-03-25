@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Any
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from pathlib import Path
 
 

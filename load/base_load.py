@@ -2,7 +2,7 @@ from typing import List
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
@@ -240,6 +240,7 @@ class BaseLoad:
         Returns:
             DataFrame with added entities column
         """
+        df = df.copy()
         # Process primary content column
         df["primary_entities"] = df[primary_content_col].apply(self.extract_entities)
 
@@ -403,16 +404,15 @@ class BaseLoad:
             df["type"] = self.folder_name
         staging_df = self.create_merged_df(dfs)
         self._simple_dedupe(staging_df)
-        self._normalize_columns(staging_df)
         self._write_merged_df_artifact(staging_df)
         all_documents = df_to_documents(staging_df)
         staging_docs = self.load_docs(all_documents)
         self._stage_documents(staging_docs)
 
-    def _normalize_columns(
+    def normalize_columns(
         self,
         df: pd.DataFrame,
-    ) -> None:
+    ) -> pd.DataFrame:
         """
         Rename the following columns to be consistent across all datasets:
         section, post_title -> title
@@ -422,8 +422,17 @@ class BaseLoad:
         creator_id, comment_author_id, channel_id -> author_id
         creator_name, comment_author_name, channel_title -> author_name
 
-        Keep the original columns as well.
+        Creates a copy to avoid mutating the original DataFrame.
+
+        Args:
+            df: The DataFrame to normalize
+
+        Returns:
+            New DataFrame with standardized columns added
         """
+        # Create a copy at the beginning
+        df = df.copy()
+
         # Map original column names to standardized names
         column_mappings = {
             "section": "title",  # html
@@ -455,6 +464,7 @@ class BaseLoad:
                 self.logger.info(
                     f"Both {original_col} and {standard_col} exist, keeping existing {standard_col}"
                 )
+        return df
 
     @staticmethod
     def _parquet_to_df(file_path: Path) -> pd.DataFrame:

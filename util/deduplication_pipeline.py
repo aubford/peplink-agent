@@ -48,7 +48,9 @@ class DeduplicationPipeline:
         self.logger.log_and_print(f"*Tokenization Complete: {len(tokenized_docs)}")
         return tokenized_docs
 
-    def _log_duplicate_group(self, group: List[int], docs: List[TokenizedDoc]) -> None:
+    def _log_duplicate_group(
+        self, group: List[int] | Set[int], docs: List[TokenizedDoc]
+    ) -> None:
         group_docs = [docs[i] for i in group]
         self.filter_logger.info(
             f"Group:\n{'\n'.join([

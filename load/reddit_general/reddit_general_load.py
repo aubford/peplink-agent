@@ -1,7 +1,8 @@
 # %%
+from typing import List
+from langchain_core.documents import Document
 from load.base_load import BaseLoad
 from load.synthetic_data_loaders import ForumSyntheticDataLoader, ModelResponse
-from langchain.docstore.document import Document
 import pandas as pd
 
 
@@ -14,6 +15,7 @@ class RedditGeneralLoad(BaseLoad, ForumSyntheticDataLoader):
     def create_merged_df(self, dfs: list[pd.DataFrame]) -> pd.DataFrame:
         """Merge all datasets into a single dataframe and perform operations."""
         df = pd.concat(dfs)
+        df = self.normalize_columns(df)
         df = self.ner(df)
         return df
 

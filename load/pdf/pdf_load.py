@@ -1,5 +1,5 @@
 from typing import List
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 from load.base_load import BaseLoad
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PDFPlumberLoader

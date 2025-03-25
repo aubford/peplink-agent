@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import os
 from pathlib import Path
 
-
+# todo: get entities for primary_content
 class HtmlLoad(BaseLoad):
     folder_name = "html"
 
@@ -50,6 +50,7 @@ class HtmlLoad(BaseLoad):
             lambda x: [entity for entity in x if entity in unique_entities]
         )
         df["settings_entity_list"] = df["settings_entity_list"].apply(json.dumps)
+        df = self.normalize_columns(df)
         return df
 
     def clean_text(self, text: str) -> str:
