@@ -1,13 +1,13 @@
 # %%
-from load.reddit.reddit_load import RedditLoad
+from load.reddit_general.reddit_general_load import RedditGeneralLoad
 
-loader = RedditLoad()
+loader = RedditGeneralLoad()
 
 # %% Check batch job status
 loader.batch_manager.check_batch_and_get_results()
 
 # %% Create synth data and apply to staging
-loader.batch_manager.create_synth_data_from_batch_results()
+loader.create_synth_data_from_batch_results()
 
 # %%
 loader.apply_synth_data_to_staging()

@@ -1,13 +1,13 @@
 # %%
-from load.reddit.reddit_load import RedditLoad
+from load.youtube.youtube_load import YoutubeLoad
 
-loader = RedditLoad()
+loader = YoutubeLoad()
 
 # %% Check batch job status
 loader.batch_manager.check_batch_and_get_results()
 
 # %% Create synth data and apply to staging
-loader.batch_manager.create_synth_data_from_batch_results()
+loader.create_synth_data_from_batch_results()
 
 # %%
 loader.apply_synth_data_to_staging()

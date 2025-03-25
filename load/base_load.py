@@ -45,14 +45,14 @@ Not in HTML:
     - Don't compare HTML with itself?
     - Always try to find an HTML relationship via this column.
 From LLM: (EX: HTML)
-- themes: Themes from primary_content and lead_content. 
+- themes: Themes from primary_content and lead_content. (YouTube: Only primary_content)
 - is_useful: Whether the primary_content contains useful technical information.
 - technical_summary:
     - For YouTube: Summary of the primary_content.
     - For forums: Summary of the primary_content and lead_content. Use special prompt to explain the two documents and how to summarize them.
 From Embedding Model:
-- technical_summary_embedding: Embedding of the technical_summary. (use embedding extractor)
-- title_embedding: Embedding of the title column. (filter out short titles) (use embedding extractor)
+- technical_summary_embedding: Embedding of the technical_summary.
+- title_embedding: Embedding of the title column. (filter out short titles)
 """
 
 

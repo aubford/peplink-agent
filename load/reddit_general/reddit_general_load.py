@@ -1,11 +1,11 @@
 # %%
 from load.base_load import BaseLoad
-from load.forum_synthetic_data_mixin import ForumSyntheticDataMixin, ModelResponse
+from load.synthetic_data_loaders import ForumSyntheticDataLoader, ModelResponse
 from langchain.docstore.document import Document
 import pandas as pd
 
 
-class RedditGeneralLoad(BaseLoad, ForumSyntheticDataMixin):
+class RedditGeneralLoad(BaseLoad, ForumSyntheticDataLoader):
     folder_name = "reddit_general"
 
     def __init__(self):
@@ -19,7 +19,7 @@ class RedditGeneralLoad(BaseLoad, ForumSyntheticDataMixin):
 
     def load_docs(self, documents: list[Document]) -> list[Document]:
         """
-        Process documents using the BatchManager and ForumSyntheticDataMixin.
+        Process documents using ForumSyntheticDataLoader.
 
         Args:
             documents: List of documents to process
@@ -27,32 +27,5 @@ class RedditGeneralLoad(BaseLoad, ForumSyntheticDataMixin):
         Returns:
             Processed documents with additional metadata
         """
-        # Create batch items from documents
-        batch_items = []
-        for doc in documents:
-            if not doc.id:
-                raise ValueError("Document ID is required for batch processing")
-            lead_content = doc.metadata.get("lead_content", "")
-            primary_content = doc.metadata.get("primary_content", "")
-
-            batch_items.append(
-                {
-                    "id": doc.id,
-                    "prompt": self.create_prompt(lead_content, primary_content),
-                }
-            )
-
-        # If we have batch items, create and run a batch job
-        if batch_items:
-            system_prompt = self.create_system_prompt_with_examples()
-            self.batch_manager.create_batch_tasks(
-                items=batch_items,
-                schema=ModelResponse,
-                system_prompt=system_prompt,
-                model="gpt-4o-mini",
-                temperature=0.2,
-                max_tokens=2040,
-            )
-            self.batch_manager.test_batchfile()
-
+        self.create_batch_job(documents)
         return documents

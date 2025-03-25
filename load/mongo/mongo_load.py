@@ -3,10 +3,11 @@
 from typing import List
 from langchain.docstore.document import Document
 from load.base_load import BaseLoad
+from load.synthetic_data_loaders import ForumSyntheticDataLoader, ModelResponse
 import pandas as pd
 
 
-class MongoLoad(BaseLoad):
+class MongoLoad(BaseLoad, ForumSyntheticDataLoader):
     folder_name = "mongo"
 
     def __init__(self):
@@ -18,7 +19,18 @@ class MongoLoad(BaseLoad):
         df = self.ner(df)
         return df
 
-    def load_docs(self, documents: List[Document]) -> List[Document]:
+    def load_docs(self, documents: list[Document]) -> list[Document]:
+        """
+        Process documents using ForumSyntheticDataLoader.
+
+        Args:
+            documents: List of documents to process
+
+        Returns:
+            Processed documents with additional metadata
+        """
+        self.create_batch_job(documents)
+
         # Remove unwanted metadata fields
         for doc in documents:
             doc.metadata.pop("post_tags", None)

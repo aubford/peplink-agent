@@ -1,10 +1,11 @@
 from langchain.docstore.document import Document
 from pydantic import BaseModel
 from load.base_load import BaseLoad
-from load.forum_synthetic_data_mixin import ForumSyntheticDataMixin, ModelResponse
+from load.synthetic_data_loaders import ForumSyntheticDataLoader, ModelResponse
 import pandas as pd
 
-class RedditLoad(BaseLoad, ForumSyntheticDataMixin):
+
+class RedditLoad(BaseLoad, ForumSyntheticDataLoader):
     folder_name = "reddit"
 
     def __init__(self):
@@ -18,40 +19,13 @@ class RedditLoad(BaseLoad, ForumSyntheticDataMixin):
 
     def load_docs(self, documents: list[Document]) -> list[Document]:
         """
-        Process documents using the BatchManager and ForumSyntheticDataMixin.
+        Create a batch job for documents.
 
         Args:
             documents: List of documents to process
 
         Returns:
-            Processed documents with additional metadata
+            Documents.
         """
-        # Create batch items from documents
-        batch_items = []
-        for doc in documents:
-            if not doc.id:
-                raise ValueError("Document ID is required for batch processing")
-            lead_content = doc.metadata.get("lead_content", "")
-            primary_content = doc.metadata.get("primary_content", "")
-
-            batch_items.append(
-                {
-                    "id": doc.id,
-                    "prompt": self.create_prompt(lead_content, primary_content),
-                }
-            )
-
-        # If we have batch items, create and run a batch job
-        if batch_items:
-            system_prompt = self.create_system_prompt_with_examples()
-            self.batch_manager.create_batch_tasks(
-                items=batch_items,
-                schema=ModelResponse,
-                system_prompt=system_prompt,
-                model="gpt-4o-mini",
-                temperature=0.2,
-                max_tokens=2040,
-            )
-            self.batch_manager.test_batchfile()
-
+        self.create_batch_job(documents)
         return documents
