@@ -1,15 +1,8 @@
-# %%
-from load.youtube.youtube_load import YoutubeLoad
+from load.mongo.mongo_load import MongoLoad
 
-loader = YoutubeLoad()
-
-# %% Check batch job status
+loader = MongoLoad()
 loader.batch_manager.check_batch_and_get_results()
-
-# %% Create synth data and apply to staging
 loader.create_synth_data_from_batch_results()
-
-# %%
 loader.apply_synth_data_to_staging()
 
 # %% Uncomment to load to vector store

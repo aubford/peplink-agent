@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import os
 from pathlib import Path
 
-# todo: get entities for primary_content
+# todo: create normal entities column by getting entities from primary_content
 class HtmlLoad(BaseLoad):
     folder_name = "html"
 
