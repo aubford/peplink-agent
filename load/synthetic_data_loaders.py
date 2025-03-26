@@ -49,7 +49,7 @@ class SyntheticDataLoader(ABC):
             # Format the example conversation
             example_prompt = self.create_prompt(
                 primary_content=example["primary_content"],
-                lead_content=example["lead_content"],
+                lead_content=example.get("lead_content", ""),
             )
 
             # Format the expected output
@@ -73,9 +73,6 @@ class SyntheticDataLoader(ABC):
 
     def create_batch_job(self, documents: list[Document]):
         """Create a batch job for processing documents."""
-        # todo: undo
-        documents = documents[:30]
-
         if self.batch_manager is None:
             raise ValueError("batch_manager must be set before creating a batch job")
 
@@ -128,16 +125,17 @@ You will be provided with a forum conversation consisting of:
 Together, these form a single conversation turn between two forum users.
 
 Analyze this conversation and provide a structured output containing:
-1. A list of technical themes discussed.
-2. A summary of the technical facts that can be gleaned from the conversation. Provide this in the form of a paragraph. Do not use lists or other special formatting.
-3. An assessment of whether there is useful technical information related to Pepwave products or IT networking.
+1. "themes": A list of technical themes discussed.
+2. "technical_summary": A summary of the most useful technical information that can be gleaned from the conversation. Report only the technical facts presented in the conversation, do not discuss the conversation itself. Statements made as part of an inquiry should not be considered technical facts. Provide this in the form of a paragraph. No lists or special formatting.
+3. "is_useful": An assessment of whether there is useful technical information related to Pepwave products or IT networking.
 
 Important guidelines:
 - Focus only on technical content and information in your analysis.
-- "Useful technical information" means factual statements, not questions asking for information.
+- "Useful technical information" means factual statements, not questions or inquiries.
 - Be specific and precise in identifying themes.
-- Provide a concise, factual summary that captures the key technical points.
 - Base your analysis only on the provided content, do not make assumptions.
+
+REMEMBER, DO NOT REFER TO THE CONVERSATION ITSELF IN YOUR SUMMARY OR THEMES, ONLY THE TECHINCAL FACTS!
 """
 
     def create_prompt(self, primary_content: str, lead_content: str) -> str:
@@ -219,14 +217,14 @@ class YouTubeSyntheticDataLoader(SyntheticDataLoader):
     def _create_system_prompt(self) -> str:
         """Creates the system prompt that instructs the model on its task."""
         return """You are an expert technical content analyzer specializing in IT networking and Pepwave products.
-Your task is to analyze YouTube video content and extract key information.
+Your task is to analyze a YouTube video transcript and extract key information.
 
 You will be provided with an excerpt of a transcript of a YouTube video.
 
 Analyze this content and provide a structured output containing:
-1. A list of technical themes discussed in the video.
-2. A concise summary of the most useful technical facts that can be gleaned from the video transcript. Provide this in the form of a paragraph. Do not use lists or other special formatting.
-3. An assessment of whether there is enough useful technical information related to Pepwave products or IT networking to be worth watching.
+1. "themes": A list of technical themes discussed in the video.
+2. "technical_summary": A concise summary of the most useful technical information that can be gleaned from the video transcript. Report only the technical facts presented in the video, do not discuss the video itself. Provide this in the form of a paragraph. No lists or special formatting.
+3. "is_useful": An assessment of whether there is enough useful technical information related to Pepwave products or IT networking to be worth watching the video.
 
 Important guidelines:
 - Focus only on technical content and information in your analysis.
@@ -235,6 +233,8 @@ Important guidelines:
 - Provide a concise, factual summary that captures the key technical points.
 - Base your analysis only on the provided content, do not make assumptions.
 - YouTube transcripts are often imperfect, so do your best to extract meaning despite potential transcription errors.
+
+REMEMBER, DO NOT REFER TO THE VIDEO ITSELF IN YOUR SUMMARY OR THEMES, ONLY THE TECHINCAL FACTS!
 """
 
     def create_prompt(self, primary_content: str, lead_content: str = "") -> str:
@@ -274,6 +274,21 @@ Analyze this content according to the guidelines provided.
                 },
             },
             {
+                "primary_content": "Getting reliable internet connectivity at sea has a number of specific challenges particular to this difficult and ever-changing environment. So, what are your challenges? Network availability and speed of connections vary based on the vessel’s location. Peplink combines any connection to ensure connectivity is always available. Incumbent satellite solutions can no longer accommodate the rising bandwidth requirements for streaming IPTV, access to email and company servers as well as cloud services. To avoid data cost spiraling out of control, Peplink can automatically prioritize data usage to lower cost connections, such as port WiFi before LTE, or satellite. Here is an example. This is a 55 meter motor yacht. We installed a Pepwave HD4 MBX directly beneath where the antennas are. The MBX is capable of combining the bandwidth of up to four cellular links into an unbreakable, high-speed SD-WAN connection. It supports interchangeable LTE cellular modules which can be simply upgraded to 5G or any future mobile technologies. It can receive Cellular offshore to minimize satellite bandwidth cost and also supports WiFi near marina facilities. The HD4 MBX also comes with 8x PoE outputs to power your IP phones, cameras, and access points. To reduce cable needs on the yacht, we installed a Peplink SD-Switch to provide additional ports for your extra devices. The whole system is fully manageable with InControl2 to remotely monitor, troubleshoot and configure your network. To avoid changing SIM cards up the mast we added an SIM Injector, which adds up to 150 meters of flexibility between the router and the SIM cards, enabling you to place the cellular router in the best location for cellular reception. The SIM Injector adds up to 8 SIM cards. If you cross international boundaries, you can also use it to switch between multiple SIM cards, preventing roaming charges and maintaining unbreakable connectivity. Reliable Internet connectivity can provide enhanced enjoyment onboard and increased navigational capabilities by providing reliable access to online resources such as nautical charts, weather reports and information about the nearest marina, additionally connectivity for the guests and crew is becoming something that is expected onboard. Internet Radio, TV, news and social media as well as secure corporate communications are essential at sea. Peplink provides unbreakable maritime connectivity.",
+                "expected_output": {
+                    "themes": [
+                        "Maritime Connectivity",
+                        "SD-WAN Solutions",
+                        "High-Speed Internet",
+                        "Marine Networking",
+                        "Peplink Products",
+                        "Maritime Applications",
+                    ],
+                    "technical_summary": "To confront the challenge of getting reliable internet at sea, Pepwave combines multiple cellular connections to provide a reliability and speed and can automatically prioritize lower cost connections to reduce costs. The Pepwave HD4 MBX is a high-performance SD-WAN router with a modular architecture that supports Wifi and comes with 8x PoE outputs. The system is fully manageable with InControl2, allowing for remote monitoring, troubleshooting, and configuration. Adding a SIM injector adds up to 8 SIM cards that can be switched on demand when crossing international boundaries or to prevent roaming charges while at sea.",
+                    "is_useful": True,
+                },
+            },
+            {
                 "primary_content": "Hey what's up everyone so today I tried to set up my new router and it was a complete disaster first of all the box was really hard to open I don't know why companies make packaging so difficult to get into anyway I finally got it open and I was excited to try this new expensive router I heard about so I plug everything in and guess what nothing happened absolutely nothing the lights didn't even come on so I checked all the connections tried a different outlet all that stuff still nothing so I called customer service and was on hold for like 45 minutes which was super annoying the guy on the phone was asking me a bunch of questions that I already tried and then he tells me oh it sounds like you got a defective unit I was like yeah no kidding so now I have to pack it all up send it back and wait for a replacement which is going to take another week at least just wanted to vent about this whole experience because I was planning to use this weekend to set up my new home network and now that's not happening anyway that's my story of tech fails for today hope your day is going better than mine",
                 "expected_output": {
                     "themes": [
@@ -281,7 +296,7 @@ Analyze this content according to the guidelines provided.
                         "defective hardware",
                         "customer service experience",
                     ],
-                    "technical_summary": "There is no useful technical information in this video.",
+                    "technical_summary": "There is no useful technical information in this content.",
                     "is_useful": False,
                 },
             },

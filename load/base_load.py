@@ -108,6 +108,13 @@ class BaseLoad:
     def apply_synth_data_to_staging(self):
         """Apply the generated data from LLM to the staging file."""
         synthetic_data = pd.read_parquet(self.synth_data_path)
+        # Filter out rows where is_useful is False
+        original_count = len(synthetic_data)
+        synthetic_data = synthetic_data[synthetic_data["is_useful"] == True]
+        filtered_count = len(synthetic_data)
+        print(
+            f"Filtered out {original_count - filtered_count} non-useful documents, {filtered_count} remaining."
+        )
         # merge with staging
         staging = pd.read_parquet(self.staging_path)
         staging.drop(columns=synthetic_data.columns, inplace=True, errors="ignore")
@@ -115,6 +122,7 @@ class BaseLoad:
         merged = pd.merge(staging, synthetic_data, left_index=True, right_index=True)
         # generate the title embeddings
         merged = self._generate_embeddings(merged, "title")
+        merged = self._generate_embeddings(merged, "technical_summary")
         merged.to_parquet(self.staging_path)
 
     def create_synth_data_from_batch_results(self) -> None:
@@ -157,8 +165,6 @@ class BaseLoad:
                 lambda x: json.dumps(x) if isinstance(x, list) else x
             )
         df = df.set_index("id", verify_integrity=True)
-        # get embeddings for title and technical_summary columns
-        df = self._generate_embeddings(df, "technical_summary")
         df.to_parquet(self.synth_data_path)
         self.logger.info(f"Synthetic data saved to {self.synth_data_path}")
 
