@@ -8,6 +8,9 @@
       <excludeFolder url="file://$MODULE_DIR$/langchain_pepwave_env" />
       <excludeFolder url="file://$MODULE_DIR$/logs" />
       <excludeFolder url="file://$MODULE_DIR$/langchain_docs" />
+      <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/evals/lib" />
+      <excludeFolder url="file://$MODULE_DIR$/evals/output" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at ~/workspace/langchain-pepwave_and_ragas/langchain-pepwave/langchain_pepwave_env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -41,5 +41,5 @@ class YoutubeLoad(BaseLoad, YouTubeSyntheticDataLoader):
         for doc in split_docs:
             doc.metadata["primary_content"] = doc.page_content
 
-        self.create_batch_job(split_docs)
+        self.create_batch_job(split_docs, max_tokens=800)
         return split_docs

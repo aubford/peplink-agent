@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from langchain_core.documents import Document
 from load.batch_manager import BatchManager
+from openai.lib._parsing._completions import type_to_response_format_param
+from pathlib import Path
+import tiktoken
+import json
 
 
 class ModelResponse(BaseModel):
@@ -71,7 +75,8 @@ class SyntheticDataLoader(ABC):
 
         return base_prompt + examples_text
 
-    def create_batch_job(self, documents: list[Document]):
+    # max_tokens counts towards the total tokens used for the batch job even if the response is shorter
+    def create_batch_job(self, documents: list[Document], max_tokens: int = 500):
         """Create a batch job for processing documents."""
         if self.batch_manager is None:
             raise ValueError("batch_manager must be set before creating a batch job")
@@ -100,10 +105,109 @@ class SyntheticDataLoader(ABC):
                 system_prompt=system_prompt,
                 model="gpt-4o-mini",
                 temperature=0.2,
-                max_tokens=2040,
+                max_tokens=max_tokens,
             )
         self.batch_manager.test_batchfile()
         self.batch_manager.create_batch_job()
+
+    def create_capped_batchfiles(
+        self, documents: list[Document], max_tokens: int = 500
+    ) -> list[str]:
+        """
+        Create batch files ensuring no file exceeds 18M tokens. Returns paths to created batch files.
+
+        Args:
+            documents: List of documents to process
+            max_tokens: Maximum tokens for model response (default: 300)
+
+        Returns:
+            List of paths to created batch files
+        """
+        if self.batch_manager is None:
+            raise ValueError("batch_manager must be set before creating batch files")
+
+        # Create batch items from documents
+        batch_items = []
+        for doc in documents:
+            if not doc.id:
+                raise ValueError("Document ID is required for batch processing")
+            lead_content = doc.metadata.get("lead_content", "")
+            primary_content = doc.metadata.get("primary_content", "")
+
+            batch_items.append(
+                {
+                    "id": doc.id,
+                    "prompt": self.create_prompt(primary_content, lead_content),
+                }
+            )
+
+        if not batch_items:
+            return []
+
+        # Get system prompt
+        system_prompt = self.create_system_prompt_with_examples()
+
+        # Create tasks with full configuration
+        tasks = []
+        for item in batch_items:
+            task = {
+                "custom_id": item["id"],
+                "method": "POST",
+                "url": self.batch_manager.endpoint,
+                "body": {
+                    "model": "gpt-4o-mini",
+                    "temperature": 0.2,
+                    "max_tokens": max_tokens,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": item["prompt"]},
+                    ],
+                    "response_format": type_to_response_format_param(ModelResponse),
+                },
+            }
+            tasks.append(task)
+
+        enc = tiktoken.get_encoding("cl100k_base")
+
+        # Split tasks into chunks that don't exceed 8M tokens
+        MAX_TOKENS = 8_000_000
+        current_chunk = []
+        current_tokens = 0
+        chunks = []
+
+        for task in tasks:
+            # Count tokens in this task
+            task_tokens = (
+                len(enc.encode(task["body"]["messages"][0]["content"]))  # System prompt
+                + len(enc.encode(task["body"]["messages"][1]["content"]))  # User prompt
+                + task["body"]["max_tokens"]  # Max response tokens
+            )
+
+            # If adding this task would exceed limit, save current chunk and start new one
+            if current_tokens + task_tokens > MAX_TOKENS:
+                if current_chunk:  # Only append if there are tasks in the chunk
+                    chunks.append(current_chunk)
+                current_chunk = [task]
+                current_tokens = task_tokens
+            else:
+                current_chunk.append(task)
+                current_tokens += task_tokens
+
+        # Add the last chunk if it has any tasks
+        if current_chunk:
+            chunks.append(current_chunk)
+
+        batch_files = []
+        batch_path = Path(self.batch_manager.file_name).parent
+
+        for i, chunk in enumerate(chunks):
+            file_path = batch_path / f"batchfile_{i}.jsonl"
+            with open(file_path, "w") as f:
+                for task in chunk:
+                    f.write(json.dumps(task) + "\n")
+            batch_files.append(str(file_path))
+
+        return batch_files
 
 
 class ForumSyntheticDataLoader(SyntheticDataLoader):

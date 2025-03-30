@@ -1,34 +1,19 @@
 import pandas as pd
+import typing as t
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.documents import Document
 from util.document_utils import df_to_documents
 from ragas.testset.graph import KnowledgeGraph, Node, NodeType
-from ragas.testset.transforms import default_transforms, apply_transforms
+from ragas.testset.transforms import apply_transforms
 from datetime import datetime
 from ragas.testset.transforms.base import BaseGraphTransformation
 from ragas.utils import num_tokens_from_string
-
-from load.reddit_general.reddit_general_load import RedditGeneralLoad
-from load.reddit.reddit_load import RedditLoad
-from load.html.html_load import HtmlLoad
-from load.youtube.youtube_load import YoutubeLoad
-from load.mongo.mongo_load import MongoLoad
-
-from ragas.testset.graph import NodeType
-from ragas.testset.transforms.extractors import (
-    EmbeddingExtractor,
-    HeadlinesExtractor,
-    SummaryExtractor,
-)
-from ragas.testset.transforms.extractors.llm_based import NERExtractor, ThemesExtractor
-from ragas.testset.transforms.filters import CustomNodeFilter
 from ragas.testset.transforms.relationship_builders import (
     CosineSimilarityBuilder,
     OverlapScoreBuilder,
 )
-from ragas.testset.transforms.splitters import HeadlineSplitter
 from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms import Parallel
 from evals.evals_utils import node_meta
@@ -43,6 +28,13 @@ latest_kg_path = "evals/output/kg_output_LATEST.json"
 
 
 def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
+    """Apply the following columns from df to nodes.properties:
+    - entities: List[str]
+    - themes: List[str]
+    - title_embedding: List[float]
+    - technical_summary: str
+    - technical_summary_embedding: List[float]
+    """
     knowledge_graph = KnowledgeGraph()
     for doc in docs:
         knowledge_graph.nodes.append(
@@ -51,6 +43,13 @@ def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
                 properties={
                     "page_content": doc.page_content,
                     "document_metadata": doc.metadata,
+                    "entities": doc.metadata["entities"],
+                    "themes": doc.metadata["themes"],
+                    "title_embedding": doc.metadata["title_embedding"],
+                    "technical_summary": doc.metadata["technical_summary"],
+                    "technical_summary_embedding": doc.metadata[
+                        "technical_summary_embedding"
+                    ],
                 },
             )
         )
@@ -84,75 +83,41 @@ def create_kg(
 
 ################################### MAIN ###################################
 
-# mongo -> thin out rows randomly?
-# should we skip the general youtubes and reddits? probably not....
-# how to handle html?
+"""
+1. Create relationships for all properties:
+- entities
+- themes
+- title_embedding
+- technical_summary
+- technical_summary_embedding
+2. Normalize the scores for each between 0 and 1
+3. Create a new KG that merges relationships with same source and target into a single relationship with a score based 
+on a heuristic combining them.
+4. Filter out low scoring relationships (take the top half)?
+"""
 
-# create the pipeline then run it on the dataset while doing thorough debugging breakpoints.
-# Check for duplicates after the headline stage (and the others if this isn't the cause)
-# todo: Manually add headlines/themes using metadata?
+with tracing_context(enabled=False):
 
+    def filter_youtube(node):
+        return node_meta(node)["type"] == "youtube"
 
-def filter_youtube(node):
-    return node_meta(node)["type"] == "youtube"
+    def filter_min_tokens(node, property_name: str, min_tokens: int = 100):
+        return num_tokens_from_string(node.properties[property_name]) > min_tokens
 
+    def get_transforms() -> t.List[BaseGraphTransformation]:
+        cosine_sim_builder = CosineSimilarityBuilder(
+            property_name="technical_summary_embedding",
+            new_property_name="summary_similarity",
+            threshold=0.9,
+            filter_nodes=lambda node: filter_min_tokens(node, "technical_summary", 100),
+        )
+        ner_overlap_sim = OverlapScoreBuilder(
+            threshold=0.5,
+            filter_nodes=lambda node: len(node.properties["entities"]) > 3,
+        )
+        transforms = Parallel(cosine_sim_builder, ner_overlap_sim)
+        return transforms  # type: ignore
 
-def filter_min_tokens(node):
-    return num_tokens_from_string(node.properties["page_content"]) > 100
-
-
-def filter_chunks(node):
-    return node.type == NodeType.CHUNK
-
-
-def get_transforms():
-    headline_extractor = HeadlinesExtractor(
-        llm=kg_llm, filter_nodes=lambda node: filter_youtube(node)
-    )
-    splitter = HeadlineSplitter(
-        min_tokens=500, filter_nodes=lambda node: filter_youtube(node)
-    )
-
-    summary_extractor = SummaryExtractor(
-        llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node)
-    )
-
-    node_filter = CustomNodeFilter(
-        llm=kg_llm, filter_nodes=lambda node: filter_chunks(node)
-    )
-
-    summary_emb_extractor = EmbeddingExtractor(
-        embedding_model=embeddings,
-        property_name="summary_embedding",
-        embed_property_name="summary",
-        filter_nodes=lambda node: filter_min_tokens(node),
-    )
-    theme_extractor = ThemesExtractor(
-        llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node)
-    )
-    ner_extractor = NERExtractor(
-        llm=kg_llm, filter_nodes=lambda node: filter_min_tokens(node)
-    )
-
-    cosine_sim_builder = CosineSimilarityBuilder(
-        property_name="summary_embedding",
-        new_property_name="summary_similarity",
-        threshold=0.7,
-        filter_nodes=lambda node: filter_min_tokens(node),
-    )
-    ner_overlap_sim = OverlapScoreBuilder(
-        threshold=0.01, filter_nodes=lambda node: filter_min_tokens(node)
-    )
-    return [
-        headline_extractor,
-        splitter,
-        summary_extractor,
-        node_filter,
-        Parallel(summary_emb_extractor, theme_extractor, ner_extractor),
-        Parallel(cosine_sim_builder, ner_overlap_sim),
-    ]
-
-
-sample_df = pd.read_parquet("evals/sample_df.parquet")
-sample_df = sample_df.iloc[0:5]
-create_kg(sample_df, get_transforms(), "sample_with_custom_transforms")
+    sample_df = pd.read_parquet("evals/sample_df.parquet")
+    sample_df = sample_df.iloc[0:5]
+    create_kg(sample_df, get_transforms(), "sample_with_custom_transforms")

@@ -42,6 +42,7 @@ class BatchManager:
         batch_path = base_path / "batch"
         batch_path.mkdir(parents=True, exist_ok=True)
 
+        self.batch_path = batch_path
         self.file_name = batch_path / "batchfile.jsonl"
         self.output_file_name = batch_path / "batch_results.json"
         self.status_file_name = batch_path / "batch_status.json"
