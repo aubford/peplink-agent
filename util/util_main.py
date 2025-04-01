@@ -2,6 +2,7 @@ from typing import Dict, Any, List
 from langchain_core.documents import Document
 import pandas as pd
 from pathlib import Path
+import json
 
 
 def serialize_document(document: Document) -> Dict[str, Any]:
@@ -45,7 +46,7 @@ def print_replace(text: str) -> None:
     print(f"{text}", end="\r", flush=True)
 
 
-def get_column_word_count(df: pd.DataFrame, column: str) -> pd.DataFrame:
+def get_column_word_count(df: pd.DataFrame, column: str) -> pd.Series:
     """
     Calculate word count for a text column in a DataFrame.
 
@@ -120,3 +121,37 @@ def dedupe_df_ids(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates(subset=["id"]).set_index(
         "id", drop=False, verify_integrity=True
     )
+
+
+def serialize_df_for_parquet(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepare a dataframe for parquet serialization by converting complex data types to JSON strings.
+
+        Args:
+            df: The dataframe to prepare
+
+        Returns:
+        A copy of the dataframe with complex types serialized
+    """
+    # Create a copy to avoid modifying the original dataframe
+    df = df.copy()
+
+    # Convert lists, sets, and other JSON serializable types to JSON strings
+    for col in df.columns:
+        if df[col].apply(lambda x: isinstance(x, (list, set, dict))).any():
+            df[col] = df[col].apply(
+                lambda x: (
+                    json.dumps(list(x))
+                    if isinstance(x, set)
+                    else json.dumps(x) if isinstance(x, (list, dict)) else x
+                )
+            )
+
+    return df
+
+
+def to_serialized_parquet(df: pd.DataFrame, path: Path) -> pd.DataFrame:
+    df = serialize_df_for_parquet(df)
+    df.to_parquet(path)
+    print(f"Saved {len(df)} documents to {path}")
+    return df

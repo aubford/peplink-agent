@@ -236,49 +236,6 @@ class BatchManager:
 
         return results
 
-    def create_synth_data_from_batch_results(self) -> None:
-        """
-        Create a parquet file from the batch results JSON file.
-        Extracts content from each result and flattens into a dataframe structure.
-        """
-        import pandas as pd
-
-        if not self.output_file_name.exists():
-            raise FileNotFoundError(
-                f"Results file not found at {self.output_file_name}"
-            )
-
-        with open(self.output_file_name) as f:
-            data = json.load(f)
-
-        # Extract and process the data
-        processed_data = []
-        for item in data:
-            record = {
-                'id': item['custom_id'],
-            }
-
-            # Extract message content and parse it
-            try:
-                message = item['response']['body']['choices'][0]['message']
-                content = json.loads(message['content'])
-                record.update(content)
-            except (KeyError, json.JSONDecodeError) as e:
-                print(f"Error processing item {item['id']}: {e}")
-                continue
-
-            processed_data.append(record)
-
-        # Create DataFrame and save as parquet
-        df = pd.DataFrame(processed_data)
-        # Convert themes column from list to JSON string if it exists
-        df['themes'] = df['themes'].apply(
-            lambda x: json.dumps(x) if isinstance(x, list) else x
-        )
-        df = df.set_index("id", verify_integrity=True)
-        df.to_parquet(self.synth_data_path)
-        print(f"Synthetic data saved to {self.synth_data_path}")
-
     def run_batch_and_job(
         self,
         items: List[Dict[str, str]],

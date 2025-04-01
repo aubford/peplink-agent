@@ -27,5 +27,5 @@ class RedditGeneralLoad(BaseLoad, ForumSyntheticDataLoader):
         Returns:
             Processed documents with additional metadata
         """
-        self.create_batch_job(documents)
+        self.create_batchfile(documents)
         return documents

@@ -1,4 +1,3 @@
-from typing import List
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
@@ -7,7 +6,6 @@ from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
 from config.logger import RotatingFileLogger
-from langchain.vectorstores import VectorStore
 from uuid import uuid4
 from util.deduplication_pipeline import DeduplicationPipeline
 from util.document_utils import df_to_documents
@@ -15,6 +13,7 @@ from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 import spacy
 from load.html.html_util import get_settings_entities
 from load.batch_manager import BatchManager
+from util.util_main import serialize_df_for_parquet, to_serialized_parquet
 import json
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
@@ -103,7 +102,7 @@ class BaseLoad:
         )
         self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
         self.batch_manager = BatchManager(self.staging_folder)
-        self.nlp = self._init_spacy()
+        self.init_spacy()
 
     def apply_synth_data_to_staging(self):
         """Apply the generated data from LLM to the staging file."""
@@ -123,7 +122,7 @@ class BaseLoad:
         # generate the title embeddings
         merged = self._generate_embeddings(merged, "title")
         merged = self._generate_embeddings(merged, "technical_summary")
-        merged.to_parquet(self.staging_path)
+        to_serialized_parquet(merged, self.staging_path)
 
     def create_synth_data_from_batch_results(self) -> None:
         """
@@ -159,14 +158,8 @@ class BaseLoad:
 
         # Create DataFrame and save as parquet
         df = pd.DataFrame(processed_data)
-        # Convert themes column from list to JSON string if it exists
-        if 'themes' in df.columns:
-            df['themes'] = df['themes'].apply(
-                lambda x: json.dumps(x) if isinstance(x, list) else x
-            )
         df = df.set_index("id", verify_integrity=True)
-        df.to_parquet(self.synth_data_path)
-        self.logger.info(f"Synthetic data saved to {self.synth_data_path}")
+        to_serialized_parquet(df, self.synth_data_path)
 
     def _generate_embeddings(self, df, column_name):
         """Generate embeddings for a specific column in a dataframe."""
@@ -181,15 +174,15 @@ class BaseLoad:
         """Get the global config singleton."""
         return global_config
 
-    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+    def create_merged_df(self, dfs: list[pd.DataFrame]) -> pd.DataFrame:
         """Merge all datasets into a single dataframe and perform operations like deduplication."""
         return pd.concat(dfs)
 
-    def load_docs(self, documents: List[Document]) -> List[Document]:
+    def load_docs(self, documents: list[Document]) -> list[Document]:
         """Perform final operations like text splitting, synthetic data generation, and output final product for upload to vector store."""
         return documents
 
-    def _init_spacy(self):
+    def init_spacy(self):
         """Initialize SpaCy model."""
         nlp = spacy.load("en_core_web_trf")
         ruler = nlp.add_pipe("entity_ruler", before="ner")
@@ -199,12 +192,12 @@ class BaseLoad:
             for entity in all_entities
         ]
         ruler.add_patterns(patterns)
-        return nlp
+        self.nlp = nlp
 
-    def extract_entities(self, text: str) -> str:
+    def extract_entities(self, text: str) -> list[str]:
         """Use SpaCy NER to extract entities from text, including custom PEPWAVE_SETTINGS_ENTITY."""
         if not text or pd.isna(text):
-            return ""
+            return []
 
         # Process the text with the pipeline that includes our EntityRuler
         doc = self.nlp(text)
@@ -226,7 +219,7 @@ class BaseLoad:
             and any(c.isalpha() for c in ent.text)
         }
 
-        return ", ".join(entities) if entities else ""
+        return list(entities)
 
     def ner(
         self,
@@ -236,7 +229,7 @@ class BaseLoad:
     ) -> pd.DataFrame:
         """
         Use SpaCy NER feature to extract an "entities" column from the text in the specified columns.
-        The "entities" column contains a string that is a list of entities separated by commas.
+        The "entities" column contains a list of identified entities.
 
         Args:
             df: The dataframe to process
@@ -254,18 +247,17 @@ class BaseLoad:
         if lead_content_col in df.columns:
             df["lead_entities"] = df[lead_content_col].apply(self.extract_entities)
         else:
-            df["lead_entities"] = ""
+            df["lead_entities"] = df.apply(lambda _: [], axis=1)
 
         # Combine entities from both columns, removing duplicates
         def combine_entities(row):
             all_entities = []
             if row["primary_entities"]:
-                all_entities.extend(row["primary_entities"].split(", "))
+                all_entities.extend(row["primary_entities"])
             if row["lead_entities"]:
-                all_entities.extend(row["lead_entities"].split(", "))
+                all_entities.extend(row["lead_entities"])
 
-            unique_entities = set(entity for entity in all_entities if entity)
-            return ", ".join(unique_entities)
+            return list(set(all_entities))
 
         df["entities"] = df.apply(combine_entities, axis=1)
 
@@ -317,7 +309,7 @@ class BaseLoad:
             f"Uploaded {len(docs)} documents to Pinecone index: {self.index_name}"
         )
 
-    def _stage_documents(self, docs: List[Document]) -> None:
+    def _stage_documents(self, docs: list[Document]) -> None:
         self._log_documents(docs)
 
         records = []
@@ -330,14 +322,10 @@ class BaseLoad:
             records.append(record)
 
         df = pd.DataFrame(records).set_index("id", drop=False, verify_integrity=True)
-        df.to_parquet(self.staging_path)
-        self.logger.info(f"Saved {len(docs)} documents to {self.staging_path}")
+        to_serialized_parquet(df, self.staging_folder / "staging.parquet")
 
     def _write_merged_df_artifact(self, df: pd.DataFrame) -> None:
-        df.to_parquet(self.staging_folder / "merged.parquet")
-        self.logger.info(
-            f"Saved {len(df)} documents to {self.staging_folder / 'merged.parquet'}"
-        )
+        to_serialized_parquet(df, self.staging_folder / "merged.parquet")
 
     def _get_default_text_splitter(
         self, chunk_size: int = 3000, chunk_overlap: int = 500
@@ -352,7 +340,7 @@ class BaseLoad:
         )
 
     @staticmethod
-    def _split_docs(docs: List[Document], splitter: TextSplitter) -> List[Document]:
+    def _split_docs(docs: list[Document], splitter: TextSplitter) -> list[Document]:
         # Store original IDs in metadata before splitting
         for doc in docs:
             doc.metadata["parent_doc_id"] = doc.id
@@ -485,11 +473,11 @@ class BaseLoad:
 
         return df
 
-    def _parquet_to_documents(self, file_path: Path) -> List[Document]:
+    def _parquet_to_documents(self, file_path: Path) -> list[Document]:
         df = self._parquet_to_df(file_path)
         return df_to_documents(df)
 
-    def _log_documents(self, docs: List[Document]) -> None:
+    def _log_documents(self, docs: list[Document]) -> None:
         doc = docs[0]
         self.logger.info("=" * 100)
         self.logger.info(f"\n\nFinal documents: {len(docs)}")

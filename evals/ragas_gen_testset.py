@@ -19,11 +19,12 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+from util.util_main import to_serialized_parquet
 
 load_dotenv()
 
 
-LLM_MODEL = "gpt-4o-mini"
+LLM_MODEL = "gpt-4o"
 TESTSET_SIZE = 10
 evals_dir = Path(__file__).parent
 kg_path = Path.joinpath(
@@ -80,5 +81,7 @@ dataset = generator.generate(
 
 df = dataset.to_pandas()
 current_date = datetime.now().strftime("%Y-%m-%d-%H-%M")
-df.to_parquet(Path.joinpath(evals_dir, f"ragas_testset_{current_date}.parquet"))
+to_serialized_parquet(
+    df, Path.joinpath(evals_dir, f"ragas_testset_{current_date}.parquet")
+)
 dataset.upload()

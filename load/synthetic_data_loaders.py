@@ -76,7 +76,7 @@ class SyntheticDataLoader(ABC):
         return base_prompt + examples_text
 
     # max_tokens counts towards the total tokens used for the batch job even if the response is shorter
-    def create_batch_job(self, documents: list[Document], max_tokens: int = 500):
+    def create_batchfile(self, documents: list[Document], max_tokens: int = 500):
         """Create a batch job for processing documents."""
         if self.batch_manager is None:
             raise ValueError("batch_manager must be set before creating a batch job")
@@ -108,7 +108,6 @@ class SyntheticDataLoader(ABC):
                 max_tokens=max_tokens,
             )
         self.batch_manager.test_batchfile()
-        self.batch_manager.create_batch_job()
 
     def create_capped_batchfiles(
         self, documents: list[Document], max_tokens: int = 500

@@ -27,5 +27,5 @@ class RedditLoad(BaseLoad, ForumSyntheticDataLoader):
         Returns:
             Documents.
         """
-        self.create_batch_job(documents)
+        self.create_batchfile(documents)
         return documents

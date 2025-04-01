@@ -12,7 +12,6 @@ import json
 import numpy as np
 import typing as t
 import random
-import os
 from pathlib import Path
 
 # Get the directory of the current file
@@ -20,11 +19,11 @@ current_dir = Path(__file__).parent
 output_dir = current_dir / "output"
 
 # Update paths to be relative to the current file
-latest_kg_path = str(output_dir / "kg_output_LATEST.json")
+latest_kg_path = str(output_dir / "kg_output__LATEST.json")
 latest_nodes_path = str(output_dir / "__nodes_LATEST.json")
 isolated_nodes_path = str(output_dir / "__isolated_nodes.json")
 duplicate_nodes_path = str(output_dir / "__duplicate_nodes.json")
-
+latest_relationships_path = str(output_dir / "__relationships_LATEST.json")
 """
 Learnings from analysis of KG output:
 - Nodes w/ page_content less than 500 tokens are added as nodes to the KG but they are otherwise completely ignored by the algorithm. They have no relationships or computed properties.
@@ -188,19 +187,65 @@ def sample_one_document_node_and_one_chunk_and_relationships(
         )
 
 
-# %% ################## SIMPLE KG ACCESS ########################
-kg_55 = KnowledgeGraph.load(
-    f"{output_dir}/kg_output__n_55__sample_with_custom_transforms__03_05_14_56.json"
-)
-kg_1000 = KnowledgeGraph.load(
-    f"{output_dir}/kg_output__n_1112__sample_with_custom_transforms__03_04_22_21.json"
-)
-print(f"55: {len(kg_55.nodes)}")
-print(f"1000: {len(kg_1000.nodes)}")
-print(f"55: {len(kg_55.relationships)}")
-print(f"1000: {len(kg_1000.relationships)}")
+# %% ################## CREATE NODES-ONLY FILE ######################################################################################################################################
+def extract_nodes_to_file(input_path: str, output_path: str) -> None:
+    """Extract nodes from knowledge graph JSON and save to new file."""
+    with open(input_path) as f:
+        kg_data = json.load(f)
+        nodes = kg_data["nodes"]
 
-# %% ################## SAMPLE NODES AND ITS RELATIONSHIPS ########################
+    with open(output_path, "w") as f:
+        json.dump(nodes, f, indent=2)
+
+
+# Extract nodes from latest KG
+extract_nodes_to_file(latest_kg_path, latest_nodes_path)
+
+
+# %% ################## CREATE RELATIONSHIPS-ONLY FILE ######################################################################################################################################
+def extract_relationships_to_file(input_path: str, output_path: str) -> None:
+    """Extract relationships from knowledge graph JSON and save to new file."""
+    with open(input_path) as f:
+        kg_data = json.load(f)
+        relationships = kg_data["relationships"]
+        nodes = kg_data["nodes"]
+
+    # Create a dictionary mapping node IDs to nodes for faster lookup
+    node_map = {node["id"]: node for node in nodes}
+
+    transformed_relationships = []
+    for rel in relationships:
+        source_node = node_map[rel["source"]]
+        target_node = node_map[rel["target"]]
+        transformed_relationships.append(
+            {
+                "TYPE": next(
+                    (
+                        key.upper().replace('_', ' ')
+                        for key, value in rel["properties"].items()
+                        if isinstance(value, float)
+                    )
+                ),
+                "id": rel["id"],
+                "source_id": rel["source"],
+                "target_id": rel["target"],
+                "source_page_content": source_node["properties"]["page_content"],
+                "target_page_content": target_node["properties"]["page_content"],
+                "source_title": source_node["properties"]["document_metadata"]["title"],
+                "target_title": target_node["properties"]["document_metadata"]["title"],
+                "properties": rel["properties"],
+            }
+        )
+
+    with open(output_path, "w") as f:
+        json.dump(transformed_relationships, f, indent=2)
+
+
+# Extract relationships from latest KG
+extract_relationships_to_file(latest_kg_path, latest_relationships_path)
+
+
+# %% ################## SAMPLE NODES AND ITS RELATIONSHIPS ######################################################################################################################################
 # Get a random node and its relationships and print to json file
 sn_kg = KnowledgeGraph.load(f"{output_dir}/__strict_kg.json")
 # sn_kg = KnowledgeGraph.load(f"{output_dir}/kg_output__n_1112__sample_with_custom_transforms__03_04_22_21.json")
@@ -229,7 +274,7 @@ with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
 
 sample_one_document_node_and_one_chunk_and_relationships(sn_kg)
 
-# %% ############### WEED OUT LOW-QUALITY RELATIONSHIPS ########################
+# %% ############### WEED OUT LOW-QUALITY RELATIONSHIPS ######################################################################################################################################
 kg = KnowledgeGraph.load(latest_kg_path)
 kg_relationships = kg.relationships
 kg_nodes = kg.nodes
@@ -266,22 +311,7 @@ filtered_kg = KnowledgeGraph(
 )
 filtered_kg.save(f"{output_dir}/__strict_kg.json")
 
-# %% ##################  CREATE NODES-ONLY FILE ########################
-def extract_nodes_to_file(input_path: str, output_path: str) -> None:
-    """Extract nodes from knowledge graph JSON and save to new file."""
-    with open(input_path) as f:
-        kg_data = json.load(f)
-        nodes = kg_data["nodes"]
-
-    with open(output_path, "w") as f:
-        json.dump(nodes, f, indent=2)
-
-
-# Extract nodes from latest KG
-extract_nodes_to_file(latest_kg_path, latest_nodes_path)
-
-
-# %% ##################  COUNT TRANSFORMED NODES ########################
+# %% ################## COUNT TRANSFORMED NODES ######################################################################################################################################
 
 with open(latest_nodes_path) as f:
     nodes_list = json.load(f)
@@ -307,7 +337,7 @@ print(f"Documents: {doc_count} (with multiple props: {doc_multi_props})")
 print(f"Chunks: {chunk_count} (with multiple props: {chunk_multi_props})")
 
 
-# %% ##################  ANALYZE DOCUMENT NODES ###################################################
+# %% ##################  ANALYZE DOCUMENT NODES ######################################################################################################################################
 
 with open(latest_nodes_path) as f:
     nodes_list = json.load(f)
@@ -366,12 +396,12 @@ def find_isolated_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]:
     # Get all nodes that participate in relationships
     connected_nodes = set()
     for rel in kg_data["relationships"]:
-        connected_nodes.add(rel.get("source", {}).get("id", ""))
-        connected_nodes.add(rel.get("target", {}).get("id", ""))
+        connected_nodes.add(rel["source"])
+        connected_nodes.add(rel["target"])
 
     # Find complete node objects that don't appear in any relationships
     isolated_nodes = [
-        node for node in kg_data["nodes"] if node.get("id", "") not in connected_nodes
+        node for node in kg_data["nodes"] if node["id"] not in connected_nodes
     ]
 
     return isolated_nodes
@@ -391,7 +421,7 @@ with open(isolated_nodes_path, "w") as f:
 
 print(f"Saved {len(isolated_nodes)} isolated nodes to {isolated_nodes_path}")
 
-# %% ##################  ANALYZE ISOLATED NODES ###################################################
+# %% ##################  ANALYZE ISOLATED NODES ######################################################################################################################################
 
 with open(isolated_nodes_path, "r") as f:
     isolated_nodes = json.load(f)["isolated_nodes"]
@@ -420,7 +450,7 @@ with open(isolated_nodes_path, "r") as f:
     ):
         print(f"{source}: {count}")
 
-# %% ##################  DUPLICATE NODES ###################################################
+# %% ##################  DUPLICATE NODES ######################################################################################################################################
 
 
 def find_duplicate_id_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]:
@@ -458,13 +488,8 @@ with open(latest_kg_path) as f:
     duplicate_nodes = find_duplicate_id_nodes(kg_data)
 
 print(f"Number of duplicate ID nodes: {len(duplicate_nodes)}")
-print("\nDuplicate ID nodes found. Saving to JSON file...")
 
-# Save duplicate ID nodes to JSON file
-with open(duplicate_nodes_path, "w") as f:
-    json.dump({"duplicate_nodes": duplicate_nodes}, f, indent=2)
-
-# %% ##################  COUNT SOURCE FILES of DUPLICATE NODES ###################################################
+# %% ##################  COUNT SOURCE FILES of DUPLICATE NODES ######################################################################################################################################
 
 dupe_source_counts = {}
 for node in duplicate_nodes:
@@ -479,7 +504,7 @@ for source, count in sorted(
     print(f"{source}: {count}")
 
 
-# %% ##################  GET RELATIONSHIPS FOR DUPLICATE NODES ###################################################
+# %% ##################  GET RELATIONSHIPS FOR DUPLICATE NODES ######################################################################################################################################
 
 
 def find_relationships_for_nodes(
@@ -515,20 +540,7 @@ clean_and_write_nodes(
 )
 
 
-# %% ##################  GET DUPLICATE YOUTUBE NODES ###################################################
-youtube_dupes = [
-    node for node in duplicate_nodes if "youtube" in meta_prop(node, "source_file")
-]
-print(f"\nNumber of duplicate YouTube nodes: {len(youtube_dupes)}")
-
-# Save duplicate YouTube nodes to JSON file
-youtube_nodes_path = "evals/output/__duplicate_youtube_nodes.json"
-
-# Replace the YouTube dupes writing code with:
-clean_and_write_nodes(youtube_dupes, youtube_nodes_path, is_rel=False)
-
-
-# %% #################  VISUALIZER ######################################################################
+# %% #################  VISUALIZER ######################################################################################################################################
 from pyvis.network import Network
 
 net = Network("1800px", "1200px")

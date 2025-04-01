@@ -1,3 +1,5 @@
+from pathlib import Path
+import numpy as np
 import pandas as pd
 import typing as t
 from ragas.llms import LangchainLLMWrapper
@@ -20,11 +22,7 @@ from evals.evals_utils import node_meta
 from langsmith import tracing_context
 
 
-kg_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini"))
-embeddings = LangchainEmbeddingsWrapper(
-    OpenAIEmbeddings(model="text-embedding-3-large")
-)
-latest_kg_path = "evals/output/kg_output_LATEST.json"
+this_file_path = Path(__file__).parent
 
 
 def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
@@ -37,19 +35,24 @@ def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
     """
     knowledge_graph = KnowledgeGraph()
     for doc in docs:
+        # Convert entities from comma-separated string to list if it's a string
+        entities = doc.metadata["entities"]
+        if isinstance(entities, str):
+            entities = [entity.strip() for entity in entities.split(",")]
+
         knowledge_graph.nodes.append(
             Node(
                 type=NodeType.DOCUMENT,
                 properties={
                     "page_content": doc.page_content,
                     "document_metadata": doc.metadata,
-                    "entities": doc.metadata["entities"],
-                    "themes": doc.metadata["themes"],
-                    "title_embedding": doc.metadata["title_embedding"],
-                    "technical_summary": doc.metadata["technical_summary"],
-                    "technical_summary_embedding": doc.metadata[
-                        "technical_summary_embedding"
-                    ],
+                    "entities": entities,
+                    "themes": doc.metadata.get("themes", []),
+                    "title_embedding": doc.metadata.get("title_embedding", []),
+                    "technical_summary": doc.metadata.get("technical_summary", ""),
+                    "technical_summary_embedding": doc.metadata.get(
+                        "technical_summary_embedding", []
+                    ),
                 },
             )
         )
@@ -57,11 +60,18 @@ def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
     return knowledge_graph
 
 
+def is_valid_metadata(v):
+    if v is None:
+        return False
+    try:
+        return not pd.isna(v)
+    finally:
+        return True
+
+
 def clean_meta(doc: Document) -> Document:
     # Filter out metadata fields with null-like values
-    doc.metadata = {
-        k: v for k, v in doc.metadata.items() if v is not None and not pd.isna(v)
-    }
+    doc.metadata = {k: v for k, v in doc.metadata.items() if is_valid_metadata(v)}
     return doc
 
 
@@ -78,7 +88,9 @@ def create_kg(
     print(f"Transformed KG has {len(kg.nodes)} nodes")
     print(f"Transformed KG has {len(kg.relationships)} relationships")
     timestamp = datetime.now().strftime("%m_%d_%H_%M")
-    kg.save(f"evals/output/kg_output__n_{num_docs}__{label}__{timestamp}.json")
+    kg.save(
+        f"{this_file_path}/output/kg_output__n_{num_docs}__{label}__{timestamp}.json"
+    )
 
 
 ################################### MAIN ###################################
@@ -98,26 +110,45 @@ on a heuristic combining them.
 
 with tracing_context(enabled=False):
 
-    def filter_youtube(node):
-        return node_meta(node)["type"] == "youtube"
+    def filter_out_html(node):
+        return node_meta(node)["type"] != "html"
 
     def filter_min_tokens(node, property_name: str, min_tokens: int = 100):
         return num_tokens_from_string(node.properties[property_name]) > min_tokens
 
     def get_transforms() -> t.List[BaseGraphTransformation]:
         cosine_sim_builder = CosineSimilarityBuilder(
+            property_name="title_embedding",
+            new_property_name="title_similarity",
+            threshold=0.9,
+            filter_nodes=filter_out_html,
+        )
+        summary_cosine_sim_builder = CosineSimilarityBuilder(
             property_name="technical_summary_embedding",
             new_property_name="summary_similarity",
             threshold=0.9,
-            filter_nodes=lambda node: filter_min_tokens(node, "technical_summary", 100),
+            filter_nodes=filter_out_html,
         )
-        ner_overlap_sim = OverlapScoreBuilder(
+        themes_overlap_sim = OverlapScoreBuilder(
+            property_name="themes",
+            new_property_name="themes_overlap_score",
+            threshold=0.5,
+            filter_nodes=lambda node: len(node.properties["themes"]) > 3
+            and filter_out_html(node),
+        )
+        entities_overlap_sim = OverlapScoreBuilder(
+            property_name="entities",
+            new_property_name="entities_overlap_score",
             threshold=0.5,
             filter_nodes=lambda node: len(node.properties["entities"]) > 3,
         )
-        transforms = Parallel(cosine_sim_builder, ner_overlap_sim)
+        transforms = Parallel(
+            cosine_sim_builder,
+            summary_cosine_sim_builder,
+            entities_overlap_sim,
+            themes_overlap_sim,
+        )
         return transforms  # type: ignore
 
-    sample_df = pd.read_parquet("evals/sample_df.parquet")
-    sample_df = sample_df.iloc[0:5]
-    create_kg(sample_df, get_transforms(), "sample_with_custom_transforms")
+    sample_df = pd.read_parquet(this_file_path / "sample_df.parquet")
+    create_kg(sample_df, get_transforms(), "subsample_with_four_transforms")

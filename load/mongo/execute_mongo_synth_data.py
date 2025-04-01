@@ -1,13 +1,13 @@
 # %%
 from load.mongo.mongo_load import MongoLoad
 
-loader = MongoLoad()
-output_file = loader.batch_manager.output_file_name
+m_loader = MongoLoad()
+output_file = m_loader.batch_manager.output_file_name
 
 
 def merge_batch_results() -> None:
     """Merge all batch_results_*.jsonl files into a single JSONL file."""
-    batch_files = sorted(loader.batch_manager.batch_path.glob("batch_results_*.jsonl"))
+    batch_files = sorted(m_loader.batch_manager.batch_path.glob("batch_results_*.jsonl"))
 
     with open(output_file, 'w') as outfile:
         outfile.write('[')
@@ -22,11 +22,15 @@ def merge_batch_results() -> None:
                     outfile.write('\n' + line.strip())
         outfile.write('\n]')
 
-merge_batch_results()
 
 # %%
-loader.create_synth_data_from_batch_results()
-loader.apply_synth_data_to_staging()
+merge_batch_results()
+
+#%%
+m_loader.create_synth_data_from_batch_results()
+
+# %%
+m_loader.apply_synth_data_to_staging()
 
 # %% Uncomment to load to vector store
 # loader.staging_to_vector_store()

@@ -10,7 +10,7 @@
       <excludeFolder url="file://$MODULE_DIR$/langchain_docs" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/evals/lib" />
-      <excludeFolder url="file://$MODULE_DIR$/evals/output" />
+      <excludeFolder url="file://$MODULE_DIR$/backup_data/evals-output__25-03-30/output" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 virtualenv at ~/workspace/langchain-pepwave_and_ragas/langchain-pepwave/langchain_pepwave_env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

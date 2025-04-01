@@ -1,20 +1,18 @@
-from typing import List, Dict, Any
+from langchain_core.documents import Document
 from load.base_load import BaseLoad
 import pandas as pd
 import re
 import json
 from bs4 import BeautifulSoup
-import os
-from pathlib import Path
 
-# todo: create normal entities column by getting entities from primary_content
+
 class HtmlLoad(BaseLoad):
     folder_name = "html"
 
     def __init__(self):
         super().__init__()
 
-    def create_merged_df(self, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+    def create_merged_df(self, dfs: list[pd.DataFrame]) -> pd.DataFrame:
         df = pd.concat(dfs)
         # Add section as header in page_content.  Do this here instead of transform so we can experiment.
         mask = df["section"].str.strip().astype(bool)
@@ -26,6 +24,7 @@ class HtmlLoad(BaseLoad):
         df["settings_entity_list"] = df["settings_entities"].apply(
             self.flatten_entities
         )
+        df["all_settings_entities"] = df["settings_entity_list"]
 
         # Create a frequency count for all entities across the dataframe
         all_entities = df["settings_entity_list"].explode().value_counts()
@@ -49,8 +48,35 @@ class HtmlLoad(BaseLoad):
         df["settings_entity_list"] = df["settings_entity_list"].apply(
             lambda x: [entity for entity in x if entity in unique_entities]
         )
-        df["settings_entity_list"] = df["settings_entity_list"].apply(json.dumps)
+
         df = self.normalize_columns(df)
+        # need to init spacy since we just created the settings_entities.json file it uses
+        self.init_spacy()
+        # Run NER to create the "entities" column
+        df = self.ner(df)
+        # Merge the newly created "entities" column with "all_settings_entities"
+        df["entities"] = df.apply(
+            lambda row: list(set(row["entities"] + row["settings_entity_list"])),
+            axis=1,
+        )
+
+        # Remove <table> elements from primary_content column
+        df["primary_content"] = df["primary_content"].apply(
+            lambda text: (
+                re.sub(r'<table.*?</table>', '', text, flags=re.DOTALL)
+                if isinstance(text, str)
+                else text
+            )
+        )
+        # Remove all HTML tags from primary_content
+        df["primary_content"] = df["primary_content"].apply(
+            lambda text: (
+                re.sub(r'<.*?>', '', text, flags=re.DOTALL)
+                if isinstance(text, str)
+                else text
+            )
+        )
+        df = self._generate_embeddings(df, "primary_content")
         return df
 
     def clean_text(self, text: str) -> str:
@@ -190,7 +216,7 @@ class HtmlLoad(BaseLoad):
     @classmethod
     def get_all_settings_entities(cls) -> set[str]:
         """
-        Get all unique settings_entities from the merged artifact.
+        Utility method to get all unique settings_entities from the merged artifact.
 
         Returns:
             A set of all unique settings entities for use in nlp tasks.
