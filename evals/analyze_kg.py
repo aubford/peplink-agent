@@ -1,4 +1,4 @@
-# %% ##########################################
+# %% TOP
 from ragas.testset.graph import (
     NodeType,
     KnowledgeGraph,
@@ -19,7 +19,9 @@ current_dir = Path(__file__).parent
 output_dir = current_dir / "output"
 
 # Update paths to be relative to the current file
-latest_kg_path = str(output_dir / "kg_output__LATEST.json")
+latest_kg_path = str(
+    output_dir / "kg_output__n_200__subsample_with_four_transforms__04_01_15_39.json"
+)
 latest_nodes_path = str(output_dir / "__nodes_LATEST.json")
 isolated_nodes_path = str(output_dir / "__isolated_nodes.json")
 duplicate_nodes_path = str(output_dir / "__duplicate_nodes.json")
@@ -187,12 +189,34 @@ def sample_one_document_node_and_one_chunk_and_relationships(
         )
 
 
-# %% ################## CREATE NODES-ONLY FILE ######################################################################################################################################
+################## CREATE NODES-ONLY FILE ######################################################################################################################################
 def extract_nodes_to_file(input_path: str, output_path: str) -> None:
     """Extract nodes from knowledge graph JSON and save to new file."""
     with open(input_path) as f:
         kg_data = json.load(f)
         nodes = kg_data["nodes"]
+
+    # Truncate all vector/embedding lists to 2 elements
+    for node in nodes:
+        for key, value in node.get("properties", {}).items():
+            if (
+                isinstance(value, list)
+                and len(value) > 2
+                and all(isinstance(x, (int, float)) for x in value[:5])
+            ):
+                node["properties"][key] = value[:2]
+
+            # Process nested document_metadata properties
+            if key == "document_metadata" and isinstance(value, dict):
+                for meta_key, meta_value in value.items():
+                    if (
+                        isinstance(meta_value, list)
+                        and len(meta_value) > 2
+                        and all(isinstance(x, (int, float)) for x in meta_value[:5])
+                    ):
+                        node["properties"]["document_metadata"][meta_key] = meta_value[
+                            :2
+                        ]
 
     with open(output_path, "w") as f:
         json.dump(nodes, f, indent=2)
@@ -202,7 +226,7 @@ def extract_nodes_to_file(input_path: str, output_path: str) -> None:
 extract_nodes_to_file(latest_kg_path, latest_nodes_path)
 
 
-# %% ################## CREATE RELATIONSHIPS-ONLY FILE ######################################################################################################################################
+################## CREATE RELATIONSHIPS-ONLY FILE ######################################################################################################################################
 def extract_relationships_to_file(input_path: str, output_path: str) -> None:
     """Extract relationships from knowledge graph JSON and save to new file."""
     with open(input_path) as f:
@@ -233,6 +257,10 @@ def extract_relationships_to_file(input_path: str, output_path: str) -> None:
                 "target_page_content": target_node["properties"]["page_content"],
                 "source_title": source_node["properties"]["document_metadata"]["title"],
                 "target_title": target_node["properties"]["document_metadata"]["title"],
+                "source_themes": source_node["properties"]["themes"],
+                "target_themes": target_node["properties"]["themes"],
+                "source_entities": source_node["properties"]["entities"],
+                "target_entities": target_node["properties"]["entities"],
                 "properties": rel["properties"],
             }
         )

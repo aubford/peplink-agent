@@ -1,23 +1,27 @@
 {
   "files.exclude": {
-    ".idea": false,
-    "backup_data": false,
-    "**/__pycache__": false,
-    "langchain_pepwave_env": false
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.idea": true,
+    "**/backup_data": true,
+    "**/__pycache__": true,
+    "**/langchain_pepwave_env": true
   },
   "search.exclude": {
     ".vscode": true,
     "data": true,
-    "langchain_pepwave_env": true,
-    "*.parquet": true
+    "**/langchain_pepwave_env": true,
+    "*.parquet": true,
+    "**/venv": true
   },
   "editor.wordWrapColumn": 120,
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  },
-  "python.testing.pytestArgs": [
-    "tests"
-  ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "pythonTestExplorer.testFramework": "pytest",
+  "wolf.disableHotModeWarning": true,
+  "editor.formatOnType": true
 }

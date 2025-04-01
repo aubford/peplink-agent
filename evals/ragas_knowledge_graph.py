@@ -65,7 +65,7 @@ def is_valid_metadata(v):
         return False
     try:
         return not pd.isna(v)
-    finally:
+    except:
         return True
 
 
@@ -120,26 +120,26 @@ with tracing_context(enabled=False):
         cosine_sim_builder = CosineSimilarityBuilder(
             property_name="title_embedding",
             new_property_name="title_similarity",
-            threshold=0.9,
+            threshold=0.8,
             filter_nodes=filter_out_html,
         )
         summary_cosine_sim_builder = CosineSimilarityBuilder(
             property_name="technical_summary_embedding",
             new_property_name="summary_similarity",
-            threshold=0.9,
+            threshold=0.8,
             filter_nodes=filter_out_html,
         )
         themes_overlap_sim = OverlapScoreBuilder(
             property_name="themes",
             new_property_name="themes_overlap_score",
-            threshold=0.5,
+            threshold=0.2,
             filter_nodes=lambda node: len(node.properties["themes"]) > 3
             and filter_out_html(node),
         )
         entities_overlap_sim = OverlapScoreBuilder(
             property_name="entities",
             new_property_name="entities_overlap_score",
-            threshold=0.5,
+            threshold=0.2,
             filter_nodes=lambda node: len(node.properties["entities"]) > 3,
         )
         transforms = Parallel(
