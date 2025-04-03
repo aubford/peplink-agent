@@ -1,4 +1,3 @@
-# %%
 import pandas as pd
 import json
 from load.reddit_general.reddit_general_load import RedditGeneralLoad
@@ -167,7 +166,7 @@ def normalize_entities_and_themes(
     return df
 
 
-dataset_df_sample = get_slim_dataset_df(40)
+dataset_df_sample = get_slim_dataset_df(100)
 
 # Normalize entities and themes in the sample dataframe
 dataset_df_sample = normalize_entities_and_themes(dataset_df_sample)
@@ -176,18 +175,3 @@ dataset_df_sample = normalize_entities_and_themes(dataset_df_sample)
 to_serialized_parquet(dataset_df_sample, Path("evals/sample_df.parquet"))
 
 print('done')
-
-
-# %% #####################################  ANALYZE DF #########################
-
-dataset_df = get_dataset_df()
-
-print(f"Total number of rows in dataset: {len(dataset_df)}")
-# Check for duplicate content and IDs
-duplicate_content = dataset_df[
-    dataset_df.duplicated(subset=["page_content"], keep=False)
-]
-duplicate_ids = dataset_df[dataset_df.duplicated(subset=["id"], keep=False)]
-
-print(f"\nDuplicate content rows: {len(duplicate_content)}")
-print(f"Duplicate ID rows: {len(duplicate_ids)}")

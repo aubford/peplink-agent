@@ -40,6 +40,10 @@ class YoutubeLoad(BaseLoad, YouTubeSyntheticDataLoader):
         # primary content should be the split page content for YouTube
         for doc in split_docs:
             doc.metadata["primary_content"] = doc.page_content
+            entities = doc.metadata["entities"]
+            doc.metadata["entities"] = [
+                entity for entity in entities if entity in doc.page_content
+            ]
 
         self.create_batchfile(split_docs, max_tokens=800)
         return split_docs

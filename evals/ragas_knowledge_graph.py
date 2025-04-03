@@ -56,7 +56,6 @@ def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
                 },
             )
         )
-    print(f"Constructed KG has {len(knowledge_graph.nodes)} nodes")
     return knowledge_graph
 
 
@@ -75,6 +74,33 @@ def clean_meta(doc: Document) -> Document:
     return doc
 
 
+def count_relationship_types(kg: KnowledgeGraph) -> None:
+    relationship_types = {}
+    for rel in kg.relationships:
+        rel_type = rel.type
+        if rel_type in relationship_types:
+            relationship_types[rel_type] += 1
+        else:
+            relationship_types[rel_type] = 1
+    # Separate relationships into sibling and non-sibling types
+    sibling_types = {}
+    non_sibling_types = {}
+
+    for rel_type, count in relationship_types.items():
+        if rel_type.startswith("sibling_"):
+            sibling_types[rel_type] = count
+        else:
+            non_sibling_types[rel_type] = count
+
+    relationship_types = {**non_sibling_types, **sibling_types}  # Reorder for display
+    print("\nRelationships:")
+    for rel_type, count in non_sibling_types.items():
+        print(f"  {rel_type}: {count}")
+    print("\nSibling relationships:")
+    for rel_type, count in sibling_types.items():
+        print(f"  {rel_type}: {count}")
+
+
 def create_kg(
     df: pd.DataFrame, transforms: list[BaseGraphTransformation], label: str
 ) -> None:
@@ -87,10 +113,12 @@ def create_kg(
     apply_transforms(kg, transforms)
     print(f"Transformed KG has {len(kg.nodes)} nodes")
     print(f"Transformed KG has {len(kg.relationships)} relationships")
+    count_relationship_types(kg)
     timestamp = datetime.now().strftime("%m_%d_%H_%M")
     kg.save(
         f"{this_file_path}/output/kg_output__n_{num_docs}__{label}__{timestamp}.json"
     )
+    kg.save(f"{this_file_path}/output/kg_output__LATEST.json")
 
 
 ################################### MAIN ###################################
@@ -113,40 +141,60 @@ with tracing_context(enabled=False):
     def filter_out_html(node):
         return node_meta(node)["type"] != "html"
 
-    def filter_min_tokens(node, property_name: str, min_tokens: int = 100):
-        return num_tokens_from_string(node.properties[property_name]) > min_tokens
+    def filter_title_sim(node):
+        return (
+            filter_out_html(node)
+            and num_tokens_from_string(node_meta(node)["title"]) > 6
+            and "webinar" not in node_meta(node)["title"].lower()
+        )
+
+    def filter_overlap(node, property_name: str, min_items: int = 2):
+        return len(node.properties[property_name]) > min_items and filter_out_html(node)
 
     def get_transforms() -> t.List[BaseGraphTransformation]:
         cosine_sim_builder = CosineSimilarityBuilder(
             property_name="title_embedding",
             new_property_name="title_similarity",
             threshold=0.8,
-            filter_nodes=filter_out_html,
+            filter_nodes=filter_title_sim,
         )
         summary_cosine_sim_builder = CosineSimilarityBuilder(
             property_name="technical_summary_embedding",
             new_property_name="summary_similarity",
-            threshold=0.8,
+            threshold=0.76,
             filter_nodes=filter_out_html,
         )
+        overlap_threshold = 0.2
         themes_overlap_sim = OverlapScoreBuilder(
             property_name="themes",
             new_property_name="themes_overlap_score",
-            threshold=0.2,
-            filter_nodes=lambda node: len(node.properties["themes"]) > 3
-            and filter_out_html(node),
+            distance_threshold=0.9,
+            noise_threshold=0.05,
+            threshold=overlap_threshold,
+            filter_nodes=lambda node: filter_overlap(node, "themes", 2),
         )
         entities_overlap_sim = OverlapScoreBuilder(
             property_name="entities",
             new_property_name="entities_overlap_score",
-            threshold=0.2,
-            filter_nodes=lambda node: len(node.properties["entities"]) > 3,
+            distance_threshold=0.93,
+            noise_threshold=0.07,
+            threshold=overlap_threshold,
+            filter_nodes=lambda node: filter_overlap(node, "entities", 3),
+        )
+        html_overlap_sim = OverlapScoreBuilder(
+            property_name="entities",
+            new_property_name="html_overlap_score",
+            distance_threshold=0.92,
+            threshold=0.01,
+            noise_threshold=0.09,
+            target_cross_source=lambda node: node_meta(node)["type"] == "html",
         )
         transforms = Parallel(
             cosine_sim_builder,
             summary_cosine_sim_builder,
             entities_overlap_sim,
             themes_overlap_sim,
+            html_overlap_sim,
         )
         return transforms  # type: ignore
 
