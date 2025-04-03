@@ -2,9 +2,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import typing as t
-from ragas.llms import LangchainLLMWrapper
-from ragas.embeddings import LangchainEmbeddingsWrapper
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.documents import Document
 from util.document_utils import df_to_documents
 from ragas.testset.graph import KnowledgeGraph, Node, NodeType

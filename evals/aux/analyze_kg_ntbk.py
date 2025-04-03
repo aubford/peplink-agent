@@ -13,26 +13,21 @@ import numpy as np
 import typing as t
 import random
 from pathlib import Path
+from evals.analytics_utils import (
+    extract_nodes_to_file,
+    extract_relationships_to_file,
+    meta_prop,
+)
 
 # Get the directory of the current file
-current_dir = Path(__file__).parent
-output_dir = current_dir / "output"
+evals_dir = Path(__file__).parent.parent
+output_dir = evals_dir / "output"
 
-# Update paths to be relative to the current file
-latest_kg_path = str(output_dir / "kg_output__LATEST.json")
-latest_nodes_path = str(output_dir / "__nodes_LATEST.json")
-isolated_nodes_path = str(output_dir / "__isolated_nodes.json")
-duplicate_nodes_path = str(output_dir / "__duplicate_nodes.json")
-latest_relationships_path = str(output_dir / "__relationships_LATEST.json")
-"""
-Learnings from analysis of KG output:
-- Nodes w/ page_content less than 500 tokens are added as nodes to the KG but they are otherwise completely ignored by the algorithm. They have no relationships or computed properties.
-- Other nodes have headlines, summary and summary_embedding properties added to them and spawn chunk nodes. They also have relationships.
-"""
-
-
-def meta_prop(node: dict[str, dict[str, t.Any]], prop: str) -> t.Any:
-    return node["properties"]["document_metadata"].get(prop, None)
+target_kg_path = output_dir / "kg_output__LATEST.json"
+latest_nodes_path = output_dir / "__nodes_LATEST.json"
+latest_relationships_path = output_dir / "__relationships_LATEST.json"
+isolated_nodes_path = output_dir / "__isolated_nodes.json"
+duplicate_nodes_path = output_dir / "__duplicate_nodes.json"
 
 
 def clean_node_properties(node: dict[str, t.Any]) -> dict[str, t.Any]:
@@ -219,125 +214,15 @@ def get_node_metadata(node: dict[str, t.Any]) -> dict[str, t.Any]:
 
 
 ################## CREATE NODES-ONLY FILE ######################################################################################################################################
-def extract_nodes_to_file(input_path: str, output_path: str) -> None:
-    """Extract nodes from knowledge graph JSON and save to new file."""
-    print(f"Extracting nodes from {input_path} to {output_path}")
-    with open(input_path) as f:
-        kg_data = json.load(f)
-        nodes = kg_data["nodes"]
-
-    # Truncate all vector/embedding lists to 2 elements
-    for node in nodes:
-        truncate_embedding_lists(node)
-
-    with open(output_path, "w") as f:
-        json.dump(nodes, f, indent=2)
-
 
 # Extract nodes from latest KG
-extract_nodes_to_file(latest_kg_path, latest_nodes_path)
+extract_nodes_to_file(target_kg_path, latest_nodes_path)
 
 
 ################## CREATE RELATIONSHIPS-ONLY FILE ######################################################################################################################################
-def extract_relationships_to_file(input_path: str, output_path: str) -> None:
-    """Extract relationships from knowledge graph JSON and save to new file."""
-    print(f"Extracting relationships from {input_path} to {output_path}")
-    with open(input_path) as f:
-        kg_data = json.load(f)
-        relationships = kg_data["relationships"]
-        nodes = kg_data["nodes"]
-
-    # Create a dictionary mapping node IDs to nodes for faster lookup
-    node_map = {node["id"]: node for node in nodes}
-
-    transformed_relationships = []
-    for rel in relationships:
-        source_node = node_map[rel["source"]]
-        target_node = node_map[rel["target"]]
-        display_type = next(
-            (
-                key.upper().replace('_', ' ')
-                for key, value in rel["properties"].items()
-                if isinstance(value, float)
-            )
-        )
-
-        if "sibling" in rel["type"]:
-            continue
-
-        base_dict = {
-            "TYPE": display_type,
-            "source_page_content": source_node["properties"]["page_content"],
-            "target_page_content": target_node["properties"]["page_content"],
-            "source_doc_type": source_node["properties"]["document_metadata"]["type"],
-            "target_doc_type": target_node["properties"]["document_metadata"]["type"],
-            "source_parent": meta_prop(source_node, "post_id")
-            or meta_prop(source_node, "parent_doc_id"),
-            "target_parent": meta_prop(target_node, "post_id")
-            or meta_prop(target_node, "parent_doc_id"),
-            "source_title": meta_prop(source_node, "title"),
-            "target_title": meta_prop(target_node, "title"),
-            # "id": rel["id"],
-            # "source_id": rel["source"],
-            # "target_id": rel["target"],
-        }
-
-        if display_type == "ENTITIES OVERLAP SCORE":
-            transformed_relationships.append(
-                {
-                    **base_dict,
-                    "score": rel["properties"]["entities_overlap_score"],
-                    "source_entities": source_node["properties"]["entities"],
-                    "target_entities": target_node["properties"]["entities"],
-                    "overlapped_items": rel["properties"]["overlapped_items"],
-                    "num_noisy_items": rel["properties"]["num_noisy_items"],
-                }
-            )
-        elif display_type == "HTML OVERLAP SCORE":
-            transformed_relationships.append(
-                {
-                    **base_dict,
-                    "score": rel["properties"]["html_overlap_score"],
-                    "source_entities": source_node["properties"]["entities"],
-                    "target_entities": target_node["properties"]["entities"],
-                    "overlapped_items": rel["properties"]["overlapped_items"],
-                    "num_noisy_items": rel["properties"]["num_noisy_items"],
-                }
-            )
-        elif display_type == "THEMES OVERLAP SCORE":
-            transformed_relationships.append(
-                {
-                    **base_dict,
-                    "score": rel["properties"]["themes_overlap_score"],
-                    "source_themes": source_node["properties"]["themes"],
-                    "target_themes": target_node["properties"]["themes"],
-                    "overlapped_items": rel["properties"]["overlapped_items"],
-                    "num_noisy_items": rel["properties"]["num_noisy_items"],
-                }
-            )
-        elif display_type == "TITLE SIMILARITY":
-            transformed_relationships.append(
-                {
-                    **base_dict,
-                    "score": rel["properties"]["title_similarity"],
-                }
-            )
-        elif display_type == "SUMMARY SIMILARITY":
-            transformed_relationships.append(
-                {
-                    **base_dict,
-                    "score": rel["properties"]["summary_similarity"],
-                    "source_summary": source_node["properties"]["technical_summary"],
-                    "target_summary": target_node["properties"]["technical_summary"],
-                }
-            )
-
-    with open(output_path, "w") as f:
-        json.dump(transformed_relationships, f, indent=2)
-
 
 # Extract relationships from latest KG
-extract_relationships_to_file(latest_kg_path, latest_relationships_path)
+extract_relationships_to_file(target_kg_path, latest_relationships_path)
 
 
 # %% ################## SAMPLE NODES AND ITS RELATIONSHIPS ######################################################################################################################################
@@ -370,7 +255,7 @@ with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
 sample_one_document_node_and_one_chunk_and_relationships(sn_kg)
 
 # %% ############### WEED OUT LOW-QUALITY RELATIONSHIPS ######################################################################################################################################
-kg = KnowledgeGraph.load(latest_kg_path)
+kg = KnowledgeGraph.load(target_kg_path)
 kg_relationships = kg.relationships
 kg_nodes = kg.nodes
 
@@ -503,7 +388,7 @@ def find_isolated_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]:
 
 
 # Load and analyze the knowledge graph
-with open(latest_kg_path) as f:
+with open(target_kg_path) as f:
     kg_data = json.load(f)
     isolated_nodes = find_isolated_nodes(kg_data)
 
@@ -578,7 +463,7 @@ def find_duplicate_id_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]
 
 
 # Load and analyze the knowledge graph
-with open(latest_kg_path) as f:
+with open(target_kg_path) as f:
     kg_data = json.load(f)
     duplicate_nodes = find_duplicate_id_nodes(kg_data)
 
@@ -642,7 +527,7 @@ net = Network("1800px", "1200px")
 
 
 def visualize_knowledge_graph() -> None:
-    kg_data = KnowledgeGraph.load(latest_kg_path)
+    kg_data = KnowledgeGraph.load(target_kg_path)
     # Add nodes to the network
     net.add_nodes([str(node.id) for node in kg_data.nodes])
     # Add edges using node IDs (as strings) instead of Node objects
