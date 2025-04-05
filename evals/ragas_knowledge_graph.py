@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -173,6 +174,29 @@ def merge_kg_relationships(kg: KnowledgeGraph):
     return kg
 
 
+def _gen_relationships_parquet(kg: KnowledgeGraph, name: str) -> None:
+    # Prepare data with list comprehension for better performance
+    data = []
+    for rel in kg.relationships:
+        # Base relationship data
+        rel_data = {
+            "source_id": str(rel.source.id),
+            "target_id": str(rel.target.id),
+            "relationship_type": rel.type,
+            "bidirectional": rel.bidirectional,
+        }
+        rel_data.update(rel.properties)
+        data.append(rel_data)
+
+    # Create DataFrame from collected data
+    df = pd.DataFrame(data)
+    # Convert overlapped_items lists to JSON strings if present
+    df['overlapped_items'] = df['overlapped_items'].apply(
+        lambda x: json.dumps(x) if isinstance(x, list) else x
+    )
+    df.to_parquet(f"{this_file_path}/output/__relationships_{name}__LATEST.parquet")
+
+
 def create_kg(
     df: pd.DataFrame, transforms: list[BaseGraphTransformation], label: str
 ) -> None:
@@ -183,16 +207,20 @@ def create_kg(
     kg = construct_kg_nodes(docs)
     print(f"KG has {len(kg.nodes)} nodes", flush=True)
     apply_transforms(kg, transforms)
+    _gen_relationships_parquet(kg, "TRANSFORMED")
     print(f"Transformed KG has {len(kg.nodes)} nodes", flush=True)
     print(f"Transformed KG has {len(kg.relationships)} relationships", flush=True)
     count_relationship_types(kg)
     kg = merge_kg_relationships(kg)
+    _gen_relationships_parquet(kg, "MERGED")
     count_relationship_types(kg)
-    timestamp = datetime.now().strftime("%m_%d_%H_%M")
-    kg.save(
-        f"{this_file_path}/output/kg_output__n_{num_docs}__{label}__{timestamp}.json"
-    )
+    # timestamp = datetime.now().strftime("%m_%d_%H_%M")
+    # kg.save(
+    #     f"{this_file_path}/output/kg_output__n_{num_docs}__{label}__{timestamp}.json"
+    # )
+    print(f"Saving KG.....", flush=True)
     kg.save(f"{this_file_path}/output/kg_output__LATEST.json")
+    print(f"KG saved.", flush=True)
 
 
 ################################### MAIN ###################################
@@ -225,6 +253,15 @@ with tracing_context(enabled=False):
     def filter_overlap(node, property_name: str, min_items: int = 2):
         return len(node.properties[property_name]) > min_items and filter_out_html(node)
 
+    def filter_themes_overlap(node):
+        return filter_overlap(node, "themes", 2)
+
+    def filter_entities_overlap(node):
+        return filter_overlap(node, "entities", 3)
+
+    def target_html_filter(node):
+        return node_meta(node)["type"] == "html"
+
     def get_transforms() -> t.List[BaseGraphTransformation]:
         cosine_sim_builder = CosineSimilarityBuilder(
             property_name="title_embedding",
@@ -235,7 +272,7 @@ with tracing_context(enabled=False):
         summary_cosine_sim_builder = CosineSimilarityBuilder(
             property_name="technical_summary_embedding",
             new_property_name="summary_similarity",
-            threshold=0.76,
+            threshold=0.8,
             filter_nodes=filter_out_html,
         )
         overlap_threshold = 0.2
@@ -245,7 +282,7 @@ with tracing_context(enabled=False):
             distance_threshold=0.9,
             noise_threshold=0.05,
             threshold=overlap_threshold,
-            filter_nodes=lambda node: filter_overlap(node, "themes", 2),
+            filter_nodes=filter_themes_overlap,
         )
         entities_overlap_sim = OverlapScoreBuilder(
             property_name="entities",
@@ -253,7 +290,7 @@ with tracing_context(enabled=False):
             distance_threshold=0.93,
             noise_threshold=0.07,
             threshold=overlap_threshold,
-            filter_nodes=lambda node: filter_overlap(node, "entities", 3),
+            filter_nodes=filter_entities_overlap,
         )
         html_overlap_sim = OverlapScoreBuilder(
             property_name="entities",
@@ -261,7 +298,7 @@ with tracing_context(enabled=False):
             distance_threshold=0.92,
             threshold=0.01,
             noise_threshold=0.09,
-            target_cross_source=lambda node: node_meta(node)["type"] == "html",
+            target_cross_source=target_html_filter,
         )
         transforms = Parallel(
             cosine_sim_builder,

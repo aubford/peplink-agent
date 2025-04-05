@@ -166,12 +166,10 @@ def normalize_entities_and_themes(
     return df
 
 
-dataset_df_sample = get_slim_dataset_df(100)
+dataset_df_sample = get_dataset_df(sample_individual=True)
 
 # Normalize entities and themes in the sample dataframe
 dataset_df_sample = normalize_entities_and_themes(dataset_df_sample)
 
 # Save the sample dataframe to a parquet file
 to_serialized_parquet(dataset_df_sample, Path("evals/sample_df.parquet"))
-
-print('done')
