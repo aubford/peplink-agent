@@ -213,6 +213,8 @@ def get_node_metadata(node: dict[str, t.Any]) -> dict[str, t.Any]:
     return truncate_embedding_lists(node)["properties"]["document_metadata"]
 
 
+# %%
+
 ################## CREATE NODES-ONLY FILE ######################################################################################################################################
 
 # Extract nodes from latest KG
@@ -224,6 +226,60 @@ extract_nodes_to_file(target_kg_path, latest_nodes_path)
 # Extract relationships from latest KG
 extract_relationships_to_file(target_kg_path, latest_relationships_path)
 
+# %% ################## GET ALL NODES THAT HAVE MORE THAN ONE NON-SIBLING RELATIONSHIP ######################################################################################################################################
+
+
+def get_nodes_with_multiple_relationships(
+    relationships: list[Relationship],
+) -> None:
+    """Find all nodes with more than one relationship and return their counts.
+
+    Args:
+        relationships: List of relationship dictionaries
+
+    Returns:
+        Dictionary with node ids as keys and count of relationships as values
+    """
+    node_relationship_counts = {}
+
+    # Count relationships for each node
+    for rel in relationships:
+        print(rel.type)
+        if "sibling" in rel.type:
+            continue
+        source_id = rel.source.id
+        target_id = rel.target.id
+
+        # Count source node
+        if source_id:
+            node_relationship_counts[source_id] = (
+                node_relationship_counts.get(source_id, 0) + 1
+            )
+
+        # Count target node
+        if target_id:
+            node_relationship_counts[target_id] = (
+                node_relationship_counts.get(target_id, 0) + 1
+            )
+
+    # Filter to only nodes with multiple relationships
+    multi_rel_nodes = {
+        node_id: count
+        for node_id, count in node_relationship_counts.items()
+        if count > 1
+    }
+
+    print(f"Number of nodes with multiple relationships: {len(multi_rel_nodes)}")
+    # Print each node with multiple relationships, sorted by count in descending order
+    sorted_nodes = sorted(multi_rel_nodes.items(), key=lambda x: x[1], reverse=True)
+    for node_id, count in sorted_nodes:
+        print(f"{node_id}: {count}")
+
+
+kg = KnowledgeGraph.load(target_kg_path)
+relationships_list = kg.relationships
+
+get_nodes_with_multiple_relationships(relationships_list)
 
 # %% ################## SAMPLE NODES AND ITS RELATIONSHIPS ######################################################################################################################################
 # Get a random node and its relationships and print to json file

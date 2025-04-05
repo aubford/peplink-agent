@@ -151,7 +151,7 @@ def extract_relationships_to_file(input_path: Path, output_path: Path) -> None:
                     "target_summary": target_node["properties"]["technical_summary"],
                 }
             )
-        elif display_type == "MULTI":
+        else:
             transformed_relationships.append(
                 {
                     **base_dict,
