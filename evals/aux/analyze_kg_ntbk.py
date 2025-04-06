@@ -17,6 +17,7 @@ from evals.analytics_utils import (
     extract_nodes_to_file,
     extract_relationships_to_file,
     meta_prop,
+    gen_nodes_parquet,
 )
 
 # Get the directory of the current file
@@ -56,34 +57,6 @@ def clean_node_properties(node: dict[str, t.Any]) -> dict[str, t.Any]:
         cleaned_node["properties"]["document_metadata"] = cleaned_metadata
 
     return cleaned_node
-
-
-def clean_and_write_nodes(
-    nodes: list[dict[str, t.Any]], output_path: str, is_rel: bool
-) -> None:
-    """Clean node list and write to JSON file.
-
-    Args:
-        nodes: List of node dictionaries to clean and save
-        output_path: Path to save the JSON file
-        is_rel: Whether the nodes are relationships
-    """
-    if is_rel:
-        cleaned_nodes = [
-            {
-                "source": clean_node_properties(node["source"]),
-                "target": clean_node_properties(node["target"]),
-                **node,
-            }
-            for node in nodes
-        ]
-    else:
-        cleaned_nodes = [clean_node_properties(node) for node in nodes]
-
-    with open(output_path, "w") as f:
-        json.dump({"cleaned_nodes": cleaned_nodes}, f, indent=2)
-
-    print(f"Saved {len(cleaned_nodes)} cleaned nodes to {output_path}")
 
 
 def get_single_node_and_its_relationships(
@@ -220,8 +193,14 @@ def get_node_metadata(node: dict[str, t.Any]) -> dict[str, t.Any]:
 # Extract nodes from latest KG
 extract_nodes_to_file(target_kg_path, latest_nodes_path)
 
+# %%
 
-################## CREATE RELATIONSHIPS-ONLY FILE ######################################################################################################################################
+kg = KnowledgeGraph.load(target_kg_path)
+# %%
+gen_nodes_parquet(kg, output_dir / "__nodes_LATEST.parquet")
+
+
+# %% ################## CREATE RELATIONSHIPS-ONLY FILE ######################################################################################################################################
 
 # Extract relationships from latest KG
 extract_relationships_to_file(target_kg_path, latest_relationships_path)
@@ -280,72 +259,6 @@ kg = KnowledgeGraph.load(target_kg_path)
 relationships_list = kg.relationships
 
 get_nodes_with_multiple_relationships(relationships_list)
-
-# %% ################## SAMPLE NODES AND ITS RELATIONSHIPS ######################################################################################################################################
-# Get a random node and its relationships and print to json file
-sn_kg = KnowledgeGraph.load(f"{output_dir}/__strict_kg.json")
-# sn_kg = KnowledgeGraph.load(f"{output_dir}/kg_output__n_1112__sample_with_custom_transforms__03_04_22_21.json")
-node, relationships_with_content = get_single_node_and_its_relationships(sn_kg)
-
-# Prepare data for JSON serialization
-relationships_data = []
-for rel, source_content, target_content in relationships_with_content:
-    rel_data = rel.model_dump()
-    rel_data["source_content"] = source_content
-    rel_data["target_content"] = target_content
-    relationships_data.append(rel_data)
-
-with open(f"{output_dir}/__single_node_and_relationships.json", "w") as f:
-    node_dump = node.model_dump()
-    del node_dump["properties"]["summary_embedding"]
-    node_dump["properties"]["page_content"] = node_dump["properties"]["page_content"][
-        :100
-    ]
-    json.dump(
-        {"node": node_dump, "relationships": relationships_data},
-        f,
-        cls=UUIDEncoder,
-        indent=2,
-    )
-
-sample_one_document_node_and_one_chunk_and_relationships(sn_kg)
-
-# %% ############### WEED OUT LOW-QUALITY RELATIONSHIPS ######################################################################################################################################
-kg = KnowledgeGraph.load(target_kg_path)
-kg_relationships = kg.relationships
-kg_nodes = kg.nodes
-
-similarity_threshold = 0.91
-overlap_threshold = 0.15
-passing_sim_relationships = [
-    rel
-    for rel in kg_relationships
-    if "summary_similarity" not in rel.properties
-    or 0.99 > rel.properties["summary_similarity"] > similarity_threshold
-]
-passing_overlap_relationships = [
-    rel
-    for rel in passing_sim_relationships
-    if "entities_overlap_score" not in rel.properties
-    or rel.properties["entities_overlap_score"] > overlap_threshold
-    and len(rel.properties["overlapped_items"]) > 2
-]
-# Prune any nodes that have no relationships
-connected_nodes = [rel.source for rel in passing_overlap_relationships] + [
-    rel.target for rel in passing_overlap_relationships
-]
-non_isolated_nodes = [node for node in kg_nodes if node in connected_nodes]
-
-print(f"kg_relationships: {len(kg_relationships)}")
-print(f"after sim filter: {len(passing_sim_relationships)}")
-print(f"after overlap filter: {len(passing_overlap_relationships)}")
-print(f"start nodes: {len(kg_nodes)}")
-print(f"filtered nodes: {len(non_isolated_nodes)}")
-
-filtered_kg = KnowledgeGraph(
-    nodes=non_isolated_nodes, relationships=passing_overlap_relationships
-)
-filtered_kg.save(f"{output_dir}/__strict_kg.json")
 
 # %% ################## COUNT TRANSFORMED NODES ######################################################################################################################################
 
@@ -485,96 +398,6 @@ with open(isolated_nodes_path, "r") as f:
         source_counts.items(), key=lambda x: x[1], reverse=True
     ):
         print(f"{source}: {count}")
-
-# %% ##################  DUPLICATE NODES ######################################################################################################################################
-
-
-def find_duplicate_id_nodes(kg_data: dict[str, t.Any]) -> list[dict[str, t.Any]]:
-    """Find nodes with duplicate IDs in the knowledge graph.
-
-    Args:
-        kg_data: Dictionary containing nodes and relationships data
-
-    Returns:
-        List of node objects that have duplicate IDs, including all instances
-    """
-    id_counts = {}
-    id_to_nodes = {}
-
-    # First pass: count IDs and collect nodes
-    for node in kg_data["nodes"]:
-        node_id = node["id"]
-        id_counts[node_id] = id_counts.get(node_id, 0) + 1
-        id_to_nodes.setdefault(node_id, []).append(node)
-
-    # Collect all nodes that have duplicate IDs
-    duplicate_nodes = []
-    for node_id, count in id_counts.items():
-        if count > 1:
-            duplicate_nodes.extend(id_to_nodes[node_id])
-
-    # Sort duplicate nodes by ID
-    duplicate_nodes.sort(key=lambda x: x["id"])  # type: ignore
-    return duplicate_nodes
-
-
-# Load and analyze the knowledge graph
-with open(target_kg_path) as f:
-    kg_data = json.load(f)
-    duplicate_nodes = find_duplicate_id_nodes(kg_data)
-
-print(f"Number of duplicate ID nodes: {len(duplicate_nodes)}")
-
-# %% ##################  COUNT SOURCE FILES of DUPLICATE NODES ######################################################################################################################################
-
-dupe_source_counts = {}
-for node in duplicate_nodes:
-    source_file = meta_prop(node, "source_file")
-    key = f"{node['type']}__{source_file}"
-    dupe_source_counts[key] = dupe_source_counts.get(key, 0) + 1
-
-print("\nSource file counts:")
-for source, count in sorted(
-    dupe_source_counts.items(), key=lambda x: x[1], reverse=True
-):
-    print(f"{source}: {count}")
-
-
-# %% ##################  GET RELATIONSHIPS FOR DUPLICATE NODES ######################################################################################################################################
-
-
-def find_relationships_for_nodes(
-    kg_data: dict[str, t.Any], node_ids: set[str]
-) -> list[dict[str, t.Any]]:
-    """Find all relationships where either source or target is in the given node IDs.
-
-    Args:
-        kg_data: Dictionary containing nodes and relationships data
-        node_ids: Set of node IDs to find relationships for
-
-    Returns:
-        List of relationship objects that involve the specified nodes
-    """
-    related = []
-    for rel in kg_data["relationships"]:
-        source_id = rel.get("source", {}).get("id", "")
-        target_id = rel.get("target", {}).get("id", "")
-        if source_id in node_ids or target_id in node_ids:
-            related.append(rel)
-    return related
-
-
-duplicate_ids = {duplicate_nodes[0]["id"]}
-duplicate_relationships = find_relationships_for_nodes(kg_data, duplicate_ids)
-
-print(
-    f"\nNumber of relationships involving duplicate nodes: {len(duplicate_relationships)}"
-)
-
-clean_and_write_nodes(
-    duplicate_relationships, "evals/output/__duplicate_relationships.json", is_rel=True
-)
-
 
 # %% #################  VISUALIZER ######################################################################################################################################
 from pyvis.network import Network

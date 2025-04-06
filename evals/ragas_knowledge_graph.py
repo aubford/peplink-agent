@@ -1,13 +1,12 @@
 import json
 from pathlib import Path
-import numpy as np
 import pandas as pd
 import typing as t
 from langchain_core.documents import Document
 from util.document_utils import df_to_documents
 from ragas.testset.graph import KnowledgeGraph, Node, NodeType, Relationship
 from ragas.testset.transforms import apply_transforms
-from datetime import datetime
+from evals.analytics_utils import gen_nodes_parquet
 from ragas.testset.transforms.base import BaseGraphTransformation
 from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms.relationship_builders import (
@@ -220,6 +219,7 @@ def create_kg(
     # )
     print(f"Saving KG.....", flush=True)
     kg.save(f"{this_file_path}/output/kg_output__LATEST.json")
+    gen_nodes_parquet(kg, this_file_path / "output/__nodes_LATEST.parquet")
     print(f"KG saved.", flush=True)
 
 

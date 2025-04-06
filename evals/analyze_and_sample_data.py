@@ -166,7 +166,7 @@ def normalize_entities_and_themes(
     return df
 
 
-dataset_df_sample = get_dataset_df(sample_individual=True)
+dataset_df_sample = get_dataset_df()
 
 # Normalize entities and themes in the sample dataframe
 dataset_df_sample = normalize_entities_and_themes(dataset_df_sample)

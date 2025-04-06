@@ -2,6 +2,9 @@ import json
 import typing as t
 from pathlib import Path
 
+import pandas as pd
+from ragas.testset.graph import KnowledgeGraph
+
 # Get the directory of the current file
 current_dir = Path(__file__).parent
 output_dir = current_dir / "output"
@@ -57,6 +60,23 @@ def extract_nodes_to_file(input_path: Path, output_path: Path) -> None:
 
     with open(output_path, "w") as f:
         json.dump(nodes, f, indent=2)
+
+
+def gen_nodes_parquet(kg: KnowledgeGraph, path: Path) -> None:
+    data = []
+    for node in kg.nodes:
+        properties = node.properties
+        metadata = properties.pop("document_metadata")
+        properties = {**properties, **metadata}
+        properties = {k: v for k, v in properties.items() if "embed" not in k}
+        data.append(
+            {
+                "node_id": str(node.id),
+                **properties,
+            }
+        )
+    df = pd.DataFrame(data)
+    df.to_parquet(path)
 
 
 def extract_relationships_to_file(input_path: Path, output_path: Path) -> None:
