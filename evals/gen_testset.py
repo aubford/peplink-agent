@@ -7,6 +7,16 @@ import random
 import numpy as np
 from typing import Optional
 
+"""
+TODO:
+- Add sibling relationships to the clusters
+    - 1. Ask LLM if it's a good cluster
+    - 2. If so, find the most common node
+    - 3. Append all the siblings of that node to the cluster
+- Handicap same-data-type relationships
+"""
+
+
 load_dotenv()
 
 network_persona = Persona(
@@ -28,13 +38,13 @@ df = pd.read_parquet(output_dir / "__relationships_MERGED__LATEST.parquet")
 sibling_df = df[df['relationship_type'].str.contains('sibling')]
 main_df = df[~df['relationship_type'].str.contains('sibling')]
 
-print(f"info: {df.info()}")
+# print(f"info: {df.info()}")
 print(
-    f"\n\nrelationship_type value counts:\n {sibling_df['relationship_type'].value_counts()}"
+    f"\n\nrelationship_type value counts:\n {main_df['relationship_type'].value_counts()}"
 )
-print(
-    f"\nnon-sibling relationship_type value counts:\n {main_df['relationship_type'].value_counts()}"
-)
+
+
+cluster_dfs_sample: list[pd.DataFrame] = []
 
 
 def find_relationship_clusters(
@@ -62,13 +72,20 @@ def find_relationship_clusters(
     # Create a shuffled copy of the dataframe
     graph_df = relationship_df.sample(frac=1.0, random_state=random_seed)
     # create simplified graph df
-    graph_df = graph_df[
-        ['source_id', 'target_id', 'relationship_type']
-    ].drop_duplicates()
+    graph_df = graph_df.drop(columns=["bidirectional", "num_noisy_items"])
+    graph_df = graph_df.drop_duplicates(
+        subset=['source_id', 'target_id', 'relationship_type']
+    )
     # create separate df for merged relationships
     multi_df = graph_df[graph_df['relationship_type'] == 'multi']
-    # remove merged relationships from graph_df
-    graph_df = graph_df.drop(multi_df.index)
+    # Sort graph_df so that rows in multi_df come first, preserving relative order within each group
+    is_in_multi = graph_df.index.isin(multi_df.index)
+    graph_df = pd.concat(
+        [
+            graph_df[is_in_multi],
+            graph_df[~is_in_multi],
+        ]
+    )
 
     clusters: set = set()
     while len(clusters) < n and len(graph_df) > 1:
@@ -99,13 +116,26 @@ def find_relationship_clusters(
             graph_df = graph_df.drop(filtered_neighbors.index, errors="ignore")
             cluster_df = pd.concat([cluster_df, filtered_neighbors])
 
+        cluster_dfs_sample.append(cluster_df)
         node_ids = pd.unique(cluster_df[["source_id", "target_id"]].values.ravel())
         clusters.add(frozenset(node_ids))
 
     return clusters
 
 
-# %% ########################## FIND RELATIONSHIP CLUSTERS ######################################################################################################################################
+def tack_on_node_col(
+    clusters_df: pd.DataFrame, nodes_df: pd.DataFrame, col: str
+) -> pd.DataFrame:
+    clusters_df[f"source_{col}"] = clusters_df["source_id"].map(
+        nodes_df.set_index("node_id")[col]
+    )
+    clusters_df[f"target_{col}"] = clusters_df["target_id"].map(
+        nodes_df.set_index("node_id")[col]
+    )
+    return clusters_df
+
+
+########################## FIND RELATIONSHIP CLUSTERS ######################################################################################################################################
 
 relationship_clusters: set[frozenset[str]] = find_relationship_clusters(main_df, 50, 5)
 print("\n" + "-" * 100 + "\n")
@@ -124,20 +154,30 @@ print(
 )
 print(f"Total unique IDs across all clusters: {len(all_unique_ids)}")
 
-# %%
-
 nodes_df = pd.read_parquet(output_dir / "__nodes_LATEST.parquet")
-node_clusters = [
-    nodes_df[nodes_df['node_id'].isin(cluster)] for cluster in relationship_clusters
-]
+for i, cdf in enumerate(cluster_dfs_sample):
+    cdf["cluster"] = i
 
-first_cluster_df = node_clusters[0]
-first_cluster_df.to_parquet(output_dir / "testset_cluster_0.parquet")
-
-# Create a text document with each page content separated by double newlines
-with open(output_dir / "testset_cluster_0_content.txt", "w") as f:
-    joiner = "\n\n" + "=" * 100 + "\n\n"
-    f.write(joiner.join(first_cluster_df["page_content"].tolist()))
+sample_df = pd.concat(cluster_dfs_sample)
+sample_df = tack_on_node_col(sample_df, nodes_df, "page_content")
+sample_df = tack_on_node_col(sample_df, nodes_df, "title")
+sample_df = tack_on_node_col(sample_df, nodes_df, "technical_summary")
+sample_df.to_parquet(output_dir / f"__clusters_sample.parquet")
 
 
 # %%
+
+# nodes_df = pd.read_parquet(output_dir / "__nodes_LATEST.parquet")
+# node_clusters = [
+#     nodes_df[nodes_df['node_id'].isin(cluster)] for cluster in relationship_clusters
+# ]
+
+# # Sample a random cluster
+# sample_cluster_index = random.randint(0, len(node_clusters) - 1)
+# sample_cluster_df = node_clusters[sample_cluster_index]
+# sample_cluster_df.to_parquet(output_dir / "testset_cluster_0.parquet")
+
+# # Create a text document with each page content separated by double newlines
+# with open(output_dir / "testset_cluster_0_content.txt", "w") as f:
+#     joiner = "\n\n" + "=" * 100 + "\n\n"
+#     f.write(joiner.join(sample_cluster_df["page_content"].tolist()))

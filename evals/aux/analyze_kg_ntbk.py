@@ -14,7 +14,6 @@ import typing as t
 import random
 from pathlib import Path
 from evals.analytics_utils import (
-    extract_nodes_to_file,
     extract_relationships_to_file,
     meta_prop,
     gen_nodes_parquet,
@@ -190,13 +189,7 @@ def get_node_metadata(node: dict[str, t.Any]) -> dict[str, t.Any]:
 
 ################## CREATE NODES-ONLY FILE ######################################################################################################################################
 
-# Extract nodes from latest KG
-extract_nodes_to_file(target_kg_path, latest_nodes_path)
-
-# %%
-
 kg = KnowledgeGraph.load(target_kg_path)
-# %%
 gen_nodes_parquet(kg, output_dir / "__nodes_LATEST.parquet")
 
 

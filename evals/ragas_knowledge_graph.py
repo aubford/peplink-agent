@@ -296,8 +296,8 @@ with tracing_context(enabled=False):
             property_name="entities",
             new_property_name="html_overlap_score",
             distance_threshold=0.92,
-            threshold=0.01,
-            noise_threshold=0.09,
+            threshold=0.03,
+            noise_threshold=0.11,
             target_cross_source=target_html_filter,
         )
         transforms = Parallel(

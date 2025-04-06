@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from ragas.testset.graph import KnowledgeGraph
+from util.util_main import to_serialized_parquet
 
 # Get the directory of the current file
 current_dir = Path(__file__).parent
@@ -76,7 +77,7 @@ def gen_nodes_parquet(kg: KnowledgeGraph, path: Path) -> None:
             }
         )
     df = pd.DataFrame(data)
-    df.to_parquet(path)
+    to_serialized_parquet(df, path)
 
 
 def extract_relationships_to_file(input_path: Path, output_path: Path) -> None:
