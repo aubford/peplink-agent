@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Merge Documents Loader
-#
+# 
 # Merge the documents returned from a set of specified data loaders.
 
 # In[1]:
@@ -41,3 +41,4 @@ docs_all = loader_all.load()
 
 
 len(docs_all)
+

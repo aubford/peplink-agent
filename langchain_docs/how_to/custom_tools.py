@@ -2,36 +2,36 @@
 # coding: utf-8
 
 # # How to create tools
-#
+# 
 # When constructing an [agent](/docs/concepts/agents/), you will need to provide it with a list of [Tools](/docs/concepts/tools/) that it can use. Besides the actual function that is called, the Tool consists of several components:
-#
+# 
 # | Attribute     | Type                            | Description                                                                                                                                                                    |
 # |---------------|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 # | name          | str                             | Must be unique within a set of tools provided to an LLM or agent.                                                                                                              |
 # | description   | str                             | Describes what the tool does. Used as context by the LLM or agent.                                                                                                             |
 # | args_schema   | pydantic.BaseModel | Optional but recommended, and required if using callback handlers. It can be used to provide more information (e.g., few-shot examples) or validation for expected parameters. |
 # | return_direct | boolean                         | Only relevant for agents. When True, after invoking the given tool, the agent will stop and return the result direcly to the user.                                             |
-#
+# 
 # LangChain supports the creation of tools from:
-#
+# 
 # 1. Functions;
 # 2. LangChain [Runnables](/docs/concepts/runnables);
 # 3. By sub-classing from [BaseTool](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.base.BaseTool.html) -- This is the most flexible method, it provides the largest degree of control, at the expense of more effort and code.
-#
-# Creating tools from functions may be sufficient for most use cases, and can be done via a simple [@tool decorator](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.tool.html#langchain_core.tools.tool). If more configuration is needed-- e.g., specification of both sync and async implementations-- one can also use the [StructuredTool.from_function](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.structured.StructuredTool.html#langchain_core.tools.structured.StructuredTool.from_function) class method.
-#
+# 
+# Creating tools from functions may be sufficient for most use cases, and can be done via a simple [@tool decorator](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.convert.tool.html). If more configuration is needed-- e.g., specification of both sync and async implementations-- one can also use the [StructuredTool.from_function](https://python.langchain.com/api_reference/core/tools/langchain_core.tools.structured.StructuredTool.html#langchain_core.tools.structured.StructuredTool.from_function) class method.
+# 
 # In this guide we provide an overview of these methods.
-#
+# 
 # :::tip
-#
+# 
 # Models will perform better if the tools have well chosen names, descriptions and JSON schemas.
 # :::
 
 # ## Creating tools from functions
-#
+# 
 # ### @tool decorator
-#
-# This `@tool` decorator is the simplest way to define a custom tool. The decorator uses the function name as the tool name by default, but this can be overridden by passing a string as the first argument. Additionally, the decorator will use the function's docstring as the tool's description - so a docstring MUST be provided.
+# 
+# This `@tool` decorator is the simplest way to define a custom tool. The decorator uses the function name as the tool name by default, but this can be overridden by passing a string as the first argument. Additionally, the decorator will use the function's docstring as the tool's description - so a docstring MUST be provided. 
 
 # In[1]:
 
@@ -137,7 +137,7 @@ print(foo.args_schema.model_json_schema())
 # :::
 
 # ### StructuredTool
-#
+# 
 # The `StructuredTool.from_function` class method provides a bit more configurability than the `@tool` decorator, without requiring much additional code.
 
 # In[6]:
@@ -193,9 +193,9 @@ print(calculator.args)
 
 
 # ## Creating tools from Runnables
-#
+# 
 # LangChain [Runnables](/docs/concepts/runnables) that accept string or `dict` input can be converted to tools using the [as_tool](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html#langchain_core.runnables.base.Runnable.as_tool) method, which allows for the specification of names, descriptions, and additional schema information for arguments.
-#
+# 
 # Example usage:
 
 # In[8]:
@@ -223,19 +223,20 @@ as_tool.args
 # See [this guide](/docs/how_to/convert_runnable_to_tool) for more detail.
 
 # ## Subclass BaseTool
-#
+# 
 # You can define a custom tool by sub-classing from `BaseTool`. This provides maximal control over the tool definition, but requires writing more code.
 
-# In[9]:
+# In[ ]:
 
 
-from typing import Optional, Type
+from typing import Optional
 
 from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
 from langchain_core.tools import BaseTool
+from langchain_core.tools.base import ArgsSchema
 from pydantic import BaseModel, Field
 
 
@@ -249,7 +250,7 @@ class CalculatorInput(BaseModel):
 class CustomCalculatorTool(BaseTool):
     name: str = "Calculator"
     description: str = "useful for when you need to answer questions about math"
-    args_schema: Type[BaseModel] = CalculatorInput
+    args_schema: Optional[ArgsSchema] = CalculatorInput
     return_direct: bool = True
 
     def _run(
@@ -287,14 +288,14 @@ print(await multiply.ainvoke({"a": 2, "b": 3}))
 
 
 # ## How to create async tools
-#
+# 
 # LangChain Tools implement the [Runnable interface 🏃](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.base.Runnable.html).
-#
+# 
 # All Runnables expose the `invoke` and `ainvoke` methods (as well as other methods like `batch`, `abatch`, `astream` etc).
-#
+# 
 # So even if you only provide an `sync` implementation of a tool, you could still use the `ainvoke` interface, but there
 # are some important things to know:
-#
+# 
 # * LangChain's by default provides an async implementation that assumes that the function is expensive to compute, so it'll delegate execution to another thread.
 # * If you're working in an async codebase, you should create async tools rather than sync tools, to avoid incuring a small overhead due to that thread.
 # * If you need both sync and async implementations, use `StructuredTool.from_function` or sub-class from `BaseTool`.
@@ -361,16 +362,16 @@ except NotImplementedError:
     print("Raised not implemented error. You should not be doing this.")
 
 
-# ## Handling Tool Errors
-#
+# ## Handling Tool Errors 
+# 
 # If you're using tools with agents, you will likely need an error handling strategy, so the agent can recover from the error and continue execution.
-#
-# A simple strategy is to throw a `ToolException` from inside the tool and specify an error handler using `handle_tool_error`.
-#
+# 
+# A simple strategy is to throw a `ToolException` from inside the tool and specify an error handler using `handle_tool_error`. 
+# 
 # When the error handler is specified, the exception will be caught and the error handler will decide which output to return from the tool.
-#
+# 
 # You can set `handle_tool_error` to `True`, a string value, or a function. If it's a function, the function should take a `ToolException` as a parameter and return a value.
-#
+# 
 # Please note that only raising a `ToolException` won't be effective. You need to first set the `handle_tool_error` of the tool because its default value is `False`.
 
 # In[14]:
@@ -428,17 +429,17 @@ get_weather_tool.invoke({"city": "foobar"})
 
 
 # ## Returning artifacts of Tool execution
-#
+# 
 # Sometimes there are artifacts of a tool's execution that we want to make accessible to downstream components in our chain or agent, but that we don't want to expose to the model itself. For example if a tool returns custom objects like Documents, we may want to pass some view or metadata about this output to the model without passing the raw output to the model. At the same time, we may want to be able to access this full output elsewhere, for example in downstream tools.
-#
+# 
 # The Tool and [ToolMessage](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.tool.ToolMessage.html) interfaces make it possible to distinguish between the parts of the tool output meant for the model (this is the ToolMessage.content) and those parts which are meant for use outside the model (ToolMessage.artifact).
-#
+# 
 # :::info Requires ``langchain-core >= 0.2.19``
-#
+# 
 # This functionality was added in ``langchain-core == 0.2.19``. Please make sure your package is up to date.
-#
+# 
 # :::
-#
+# 
 # If we want our tool to distinguish between message content and other artifacts, we need to specify `response_format="content_and_artifact"` when defining our tool and make sure that we return a tuple of (content, artifact):
 
 # In[18]:
@@ -524,3 +525,4 @@ rand_gen.invoke(
         "type": "tool_call",
     }
 )
+

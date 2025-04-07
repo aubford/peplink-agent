@@ -1,402 +1,469 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+---
+sidebar_label: VDMS
+---
 # # Intel's Visual Data Management System (VDMS)
-#
-# >Intel's [VDMS](https://github.com/IntelLabs/vdms) is a storage solution for efficient access of big-”visual”-data that aims to achieve cloud scale by searching for relevant visual data via visual metadata stored as a graph and enabling machine friendly enhancements to visual data for faster access. VDMS is licensed under MIT.
-#
+# 
+# This notebook covers how to get started with VDMS as a vector store.
+# 
+# >Intel's [Visual Data Management System (VDMS)](https://github.com/IntelLabs/vdms) is a storage solution for efficient access of big-”visual”-data that aims to achieve cloud scale by searching for relevant visual data via visual metadata stored as a graph and enabling machine friendly enhancements to visual data for faster access. VDMS is licensed under MIT. For more information on `VDMS`, visit [this page](https://github.com/IntelLabs/vdms/wiki), and find the LangChain API reference [here](https://python.langchain.com/api_reference/community/vectorstores/langchain_community.vectorstores.vdms.VDMS.html).
+# 
 # VDMS supports:
 # * K nearest neighbor search
 # * Euclidean distance (L2) and inner product (IP)
-# * Libraries for indexing and computing distances: TileDBDense, TileDBSparse, FaissFlat (Default), FaissIVFFlat, Flinng
+# * Libraries for indexing and computing distances: FaissFlat (Default), FaissHNSWFlat, FaissIVFFlat, Flinng, TileDBDense, TileDBSparse
 # * Embeddings for text, images, and video
 # * Vector and metadata searches
-#
-# VDMS has server and client components. To setup the server, see the [installation instructions](https://github.com/IntelLabs/vdms/blob/master/INSTALL.md) or use the [docker image](https://hub.docker.com/r/intellabs/vdms).
-#
-# This notebook shows how to use VDMS as a vector store using the docker image.
-#
-# You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
-# To begin, install the Python packages for the VDMS client and Sentence Transformers:
+
+# ## Setup
+# 
+# To access VDMS vector stores you'll need to install the `langchain-vdms` integration package and deploy a VDMS server via the publicly available Docker image.
+# For simplicity, this notebook will deploy a VDMS server on local host using port 55555.
 
 # In[1]:
 
 
-# Pip install necessary package
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet pip vdms sentence-transformers langchain-huggingface > /dev/null",
-)
+get_ipython().run_line_magic('pip', 'install -qU "langchain-vdms>=0.1.3"')
+get_ipython().system('docker run --no-healthcheck --rm -d -p 55555:55555 --name vdms_vs_test_nb intellabs/vdms:latest')
+get_ipython().system('sleep 5')
 
 
-# ## Start VDMS Server
-# Here we start the VDMS server with port 55555.
+# ### Credentials
+# 
+
+# You can use `VDMS` without any credentials.
+# 
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[2]:
 
 
-get_ipython().system(
-    "docker run --rm -d -p 55555:55555 --name vdms_vs_test_nb intellabs/vdms:latest"
-)
+# os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
+# os.environ["LANGSMITH_TRACING"] = "true"
 
 
-# ## Basic Example (using the Docker Container)
-#
-# In this basic example, we demonstrate adding documents into VDMS and using it as a vector database.
-#
-# You can run the VDMS Server in a Docker container separately to use with LangChain which connects to the server via the VDMS Python Client.
-#
-# VDMS has the ability to handle multiple collections of documents, but the LangChain interface expects one, so we need to specify the name of the collection . The default collection name used by LangChain is "langchain".
-#
+# ## Initialization
+# Use the VDMS Client to connect to a VDMS vectorstore using FAISS IndexFlat indexing (default) and Euclidean distance (default) as the distance metric for similarity search.
+# 
+# import EmbeddingTabs from "@theme/EmbeddingTabs";
+# 
+# <EmbeddingTabs/>
 
-# In[3]:
+# In[ ]:
 
 
-import time
-import warnings
+# | output: false
+# | echo: false
 
-warnings.filterwarnings("ignore")
-
-from langchain_community.document_loaders.text import TextLoader
-from langchain_community.vectorstores import VDMS
-from langchain_community.vectorstores.vdms import VDMS_Client
+get_ipython().system(' pip install -qU langchain-huggingface')
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_text_splitters.character import CharacterTextSplitter
 
-time.sleep(2)
-DELIMITER = "-" * 50
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
 
-# Connect to VDMS Vector Store
-vdms_client = VDMS_Client(host="localhost", port=55555)
-
-
-# Here are some helper functions for printing results.
 
 # In[4]:
 
 
-def print_document_details(doc):
-    print(f"Content:\n\t{doc.page_content}\n")
-    print("Metadata:")
-    for key, value in doc.metadata.items():
-        if value != "Missing property":
-            print(f"\t{key}:\t{value}")
+from langchain_vdms.vectorstores import VDMS, VDMS_Client
+
+collection_name = "test_collection_faiss_L2"
+
+vdms_client = VDMS_Client(host="localhost", port=55555)
+
+vector_store = VDMS(
+    client=vdms_client,
+    embedding=embeddings,
+    collection_name=collection_name,
+    engine="FaissFlat",
+    distance_strategy="L2",
+)
 
 
-def print_results(similarity_results, score=True):
-    print(f"{DELIMITER}\n")
-    if score:
-        for doc, score in similarity_results:
-            print(f"Score:\t{score}\n")
-            print_document_details(doc)
-            print(f"{DELIMITER}\n")
-    else:
-        for doc in similarity_results:
-            print_document_details(doc)
-            print(f"{DELIMITER}\n")
-
-
-def print_response(list_of_entities):
-    for ent in list_of_entities:
-        for key, value in ent.items():
-            if value != "Missing property":
-                print(f"\n{key}:\n\t{value}")
-        print(f"{DELIMITER}\n")
-
-
-# ### Load Document and Obtain Embedding Function
-# Here we load the most recent State of the Union Address and split the document into chunks.
-#
-# LangChain vector stores use a string/keyword `id` for bookkeeping documents. By default, `id` is a uuid but here we're defining it as an integer cast as a string. Additional metadata is also provided with the documents and the HuggingFaceEmbeddings are used for this example as the embedding function.
+# ## Manage vector store
+# 
+# ### Add items to vector store
 
 # In[5]:
 
 
-# load the document and split it into chunks
-document_path = "../../how_to/state_of_the_union.txt"
-raw_documents = TextLoader(document_path).load()
+import logging
 
-# split it into chunks
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-docs = text_splitter.split_documents(raw_documents)
-ids = []
-for doc_idx, doc in enumerate(docs):
-    ids.append(str(doc_idx + 1))
-    docs[doc_idx].metadata["id"] = str(doc_idx + 1)
-    docs[doc_idx].metadata["page_number"] = int(doc_idx + 1)
-    docs[doc_idx].metadata["president_included"] = (
-        "president" in doc.page_content.lower()
-    )
-print(f"# Documents: {len(docs)}")
+logging.basicConfig()
+logging.getLogger("langchain_vdms.vectorstores").setLevel(logging.INFO)
 
+from langchain_core.documents import Document
 
-# create the open-source embedding function
-model_name = "sentence-transformers/all-mpnet-base-v2"
-embedding = HuggingFaceEmbeddings(model_name=model_name)
-print(
-    f"# Embedding Dimensions: {len(embedding.embed_query('This is a test document.'))}"
+document_1 = Document(
+    page_content="I had chocolate chip pancakes and scrambled eggs for breakfast this morning.",
+    metadata={"source": "tweet"},
+    id=1,
 )
 
+document_2 = Document(
+    page_content="The weather forecast for tomorrow is cloudy and overcast, with a high of 62 degrees.",
+    metadata={"source": "news"},
+    id=2,
+)
 
-# ### Similarity Search using Faiss Flat and Euclidean Distance (Default)
-#
-# In this section, we add the documents to VDMS using FAISS IndexFlat indexing (default) and Euclidena distance (default) as the distance metric for simiarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson`.
+document_3 = Document(
+    page_content="Building an exciting new project with LangChain - come check it out!",
+    metadata={"source": "tweet"},
+    id=3,
+)
+
+document_4 = Document(
+    page_content="Robbers broke into the city bank and stole $1 million in cash.",
+    metadata={"source": "news"},
+    id=4,
+)
+
+document_5 = Document(
+    page_content="Wow! That was an amazing movie. I can't wait to see it again.",
+    metadata={"source": "tweet"},
+    id=5,
+)
+
+document_6 = Document(
+    page_content="Is the new iPhone worth the price? Read this review to find out.",
+    metadata={"source": "website"},
+    id=6,
+)
+
+document_7 = Document(
+    page_content="The top 10 soccer players in the world right now.",
+    metadata={"source": "website"},
+    id=7,
+)
+
+document_8 = Document(
+    page_content="LangGraph is the best framework for building stateful, agentic applications!",
+    metadata={"source": "tweet"},
+    id=8,
+)
+
+document_9 = Document(
+    page_content="The stock market is down 500 points today due to fears of a recession.",
+    metadata={"source": "news"},
+    id=9,
+)
+
+document_10 = Document(
+    page_content="I have a bad feeling I am going to get deleted :(",
+    metadata={"source": "tweet"},
+    id=10,
+)
+
+documents = [
+    document_1,
+    document_2,
+    document_3,
+    document_4,
+    document_5,
+    document_6,
+    document_7,
+    document_8,
+    document_9,
+    document_10,
+]
+
+doc_ids = [str(i) for i in range(1, 11)]
+vector_store.add_documents(documents=documents, ids=doc_ids)
+
+
+# If an id is provided multiple times, `add_documents` does not check whether the ids are unique. For this reason, use `upsert` to delete existing id entries prior to adding.
 
 # In[6]:
 
 
-# add data
-collection_name = "my_collection_faiss_L2"
-db_FaissFlat = VDMS.from_documents(
-    docs,
-    client=vdms_client,
-    ids=ids,
-    collection_name=collection_name,
-    embedding=embedding,
-)
+vector_store.upsert(documents, ids=doc_ids)
 
-# Query (No metadata filtering)
-k = 3
-query = "What did the president say about Ketanji Brown Jackson"
-returned_docs = db_FaissFlat.similarity_search(query, k=k, filter=None)
-print_results(returned_docs, score=False)
 
+# ### Update items in vector store
+# 
 
 # In[7]:
 
 
-# Query (with filtering)
-k = 3
-constraints = {"page_number": [">", 30], "president_included": ["==", True]}
-query = "What did the president say about Ketanji Brown Jackson"
-returned_docs = db_FaissFlat.similarity_search(query, k=k, filter=constraints)
-print_results(returned_docs, score=False)
+updated_document_1 = Document(
+    page_content="I had chocolate chip pancakes and fried eggs for breakfast this morning.",
+    metadata={"source": "tweet"},
+    id=1,
+)
+
+updated_document_2 = Document(
+    page_content="The weather forecast for tomorrow is sunny and warm, with a high of 82 degrees.",
+    metadata={"source": "news"},
+    id=2,
+)
+
+vector_store.update_documents(
+    ids=doc_ids[:2],
+    documents=[updated_document_1, updated_document_2],
+    batch_size=2,
+)
 
 
-# ### Similarity Search using Faiss IVFFlat and Inner Product (IP) Distance
-#
-# In this section, we add the documents to VDMS using Faiss IndexIVFFlat indexing and IP as the distance metric for similarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson` and also return the score along with the document.
-#
+# ### Delete items from vector store
+# 
 
 # In[8]:
 
 
-db_FaissIVFFlat = VDMS.from_documents(
-    docs,
-    client=vdms_client,
-    ids=ids,
-    collection_name="my_collection_FaissIVFFlat_IP",
-    embedding=embedding,
-    engine="FaissIVFFlat",
-    distance_strategy="IP",
-)
-# Query
-k = 3
-query = "What did the president say about Ketanji Brown Jackson"
-docs_with_score = db_FaissIVFFlat.similarity_search_with_score(query, k=k, filter=None)
-print_results(docs_with_score)
+vector_store.delete(ids=doc_ids[-1])
 
 
-# ### Similarity Search using FLINNG and IP Distance
-#
-# In this section, we add the documents to VDMS using Filters to Identify Near-Neighbor Groups (FLINNG) indexing and IP as the distance metric for similarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson` and also return the score along with the document.
+# ## Query vector store
+# 
+# Once your vector store has been created and the relevant documents have been added you will most likely wish to query it during the running of your chain or agent.
+# 
+# ### Query directly
+# 
+# Performing a simple similarity search can be done as follows:
 
 # In[9]:
 
 
-db_Flinng = VDMS.from_documents(
-    docs,
-    client=vdms_client,
-    ids=ids,
-    collection_name="my_collection_Flinng_IP",
-    embedding=embedding,
-    engine="Flinng",
-    distance_strategy="IP",
+results = vector_store.similarity_search(
+    "LangChain provides abstractions to make working with LLMs easy",
+    k=2,
+    filter={"source": ["==", "tweet"]},
 )
-# Query
-k = 3
-query = "What did the president say about Ketanji Brown Jackson"
-docs_with_score = db_Flinng.similarity_search_with_score(query, k=k, filter=None)
-print_results(docs_with_score)
+for doc in results:
+    print(f"* ID={doc.id}: {doc.page_content} [{doc.metadata}]")
 
 
-# ### Similarity Search using TileDBDense and Euclidean Distance
-#
-# In this section, we add the documents to VDMS using TileDB Dense indexing and L2 as the distance metric for similarity search. We search for three documents (`k=3`) related to the query `What did the president say about Ketanji Brown Jackson` and also return the score along with the document.
-#
-#
+# If you want to execute a similarity search and receive the corresponding scores you can run:
 
 # In[10]:
 
 
-db_tiledbD = VDMS.from_documents(
-    docs,
-    client=vdms_client,
-    ids=ids,
-    collection_name="my_collection_tiledbD_L2",
-    embedding=embedding,
-    engine="TileDBDense",
-    distance_strategy="L2",
+results = vector_store.similarity_search_with_score(
+    "Will it be hot tomorrow?", k=1, filter={"source": ["==", "news"]}
 )
-
-k = 3
-query = "What did the president say about Ketanji Brown Jackson"
-docs_with_score = db_tiledbD.similarity_search_with_score(query, k=k, filter=None)
-print_results(docs_with_score)
+for doc, score in results:
+    print(f"* [SIM={score:3f}] {doc.page_content} [{doc.metadata}]")
 
 
-# ### Update and Delete
-#
-# While building toward a real application, you want to go beyond adding data, and also update and delete data.
-#
-# Here is a basic example showing how to do so.  First, we will update the metadata for the document most relevant to the query by adding a date.
+# If you want to execute a similarity search using an embedding you can run:
 
 # In[11]:
 
 
-from datetime import datetime
-
-doc = db_FaissFlat.similarity_search(query)[0]
-print(f"Original metadata: \n\t{doc.metadata}")
-
-# Update the metadata for a document by adding last datetime document read
-datetime_str = datetime(2024, 5, 1, 14, 30, 0).isoformat()
-doc.metadata["last_date_read"] = {"_date": datetime_str}
-print(f"new metadata: \n\t{doc.metadata}")
-print(f"{DELIMITER}\n")
-
-# Update document in VDMS
-id_to_update = doc.metadata["id"]
-db_FaissFlat.update_document(collection_name, id_to_update, doc)
-response, response_array = db_FaissFlat.get(
-    collection_name,
-    constraints={
-        "id": ["==", id_to_update],
-        "last_date_read": [">=", {"_date": "2024-05-01T00:00:00"}],
-    },
+results = vector_store.similarity_search_by_vector(
+    embedding=embeddings.embed_query("I love green eggs and ham!"), k=1
 )
-
-# Display Results
-print(f"UPDATED ENTRY (id={id_to_update}):")
-print_response([response[0]["FindDescriptor"]["entities"][0]])
+for doc in results:
+    print(f"* {doc.page_content} [{doc.metadata}]")
 
 
-# Next we will delete the last document by ID (id=42).
+# ### Query by turning into retriever
+# 
+# You can also transform the vector store into a retriever for easier usage in your chains.
 
 # In[12]:
 
 
-print("Documents before deletion: ", db_FaissFlat.count(collection_name))
-
-id_to_remove = ids[-1]
-db_FaissFlat.delete(collection_name=collection_name, ids=[id_to_remove])
-print(
-    f"Documents after deletion (id={id_to_remove}): {db_FaissFlat.count(collection_name)}"
+retriever = vector_store.as_retriever(
+    search_type="similarity",
+    search_kwargs={"k": 3},
 )
+results = retriever.invoke("Stealing from the bank is a crime")
+for doc in results:
+    print(f"* {doc.page_content} [{doc.metadata}]")
 
-
-# ## Other Information
-# VDMS supports various types of visual data and operations. Some of the capabilities are integrated in the LangChain interface but additional workflow improvements will be added as VDMS is under continuous development.
-#
-# Addtional capabilities integrated into LangChain are below.
-#
-# ### Similarity search by vector
-# Instead of searching by string query, you can also search by embedding/vector.
 
 # In[13]:
 
 
-embedding_vector = embedding.embed_query(query)
-returned_docs = db_FaissFlat.similarity_search_by_vector(embedding_vector)
+retriever = vector_store.as_retriever(
+    search_type="similarity_score_threshold",
+    search_kwargs={
+        "k": 1,
+        "score_threshold": 0.0,  # >= score_threshold
+    },
+)
+results = retriever.invoke("Stealing from the bank is a crime")
+for doc in results:
+    print(f"* {doc.page_content} [{doc.metadata}]")
 
-# Print Results
-print_document_details(returned_docs[0])
-
-
-# ### Filtering on metadata
-#
-# It can be helpful to narrow down the collection before working with it.
-#
-# For example, collections can be filtered on metadata using the get method. A dictionary is used to filter metadata. Here we retrieve the document where `id = 2` and remove it from the vector store.
 
 # In[14]:
 
 
-response, response_array = db_FaissFlat.get(
-    collection_name,
-    limit=1,
-    include=["metadata", "embeddings"],
-    constraints={"id": ["==", "2"]},
+retriever = vector_store.as_retriever(
+    search_type="mmr",
+    search_kwargs={"k": 1, "fetch_k": 10},
 )
-
-# Delete id=2
-db_FaissFlat.delete(collection_name=collection_name, ids=["2"])
-
-print("Deleted entry:")
-print_response([response[0]["FindDescriptor"]["entities"][0]])
-
-
-# ### Retriever options
-#
-# This section goes over different options for how to use VDMS as a retriever.
-#
-#
-# #### Simiarity Search
-#
-# Here we use similarity search in the retriever object.
-#
-
-# In[15]:
-
-
-retriever = db_FaissFlat.as_retriever()
-relevant_docs = retriever.invoke(query)[0]
-
-print_document_details(relevant_docs)
-
-
-# #### Maximal Marginal Relevance Search (MMR)
-#
-# In addition to using similarity search in the retriever object, you can also use `mmr`.
-
-# In[16]:
-
-
-retriever = db_FaissFlat.as_retriever(search_type="mmr")
-relevant_docs = retriever.invoke(query)[0]
-
-print_document_details(relevant_docs)
-
-
-# We can also use MMR directly.
-
-# In[17]:
-
-
-mmr_resp = db_FaissFlat.max_marginal_relevance_search_with_score(query, k=2, fetch_k=10)
-print_results(mmr_resp)
+results = retriever.invoke(
+    "Stealing from the bank is a crime", filter={"source": ["==", "news"]}
+)
+for doc in results:
+    print(f"* {doc.page_content} [{doc.metadata}]")
 
 
 # ### Delete collection
 # Previously, we removed documents based on its `id`. Here, all documents are removed since no ID is provided.
 
+# In[15]:
+
+
+print("Documents before deletion: ", vector_store.count())
+
+vector_store.delete(collection_name=collection_name)
+
+print("Documents after deletion: ", vector_store.count())
+
+
+# ## Usage for retrieval-augmented generation
+# 
+# For guides on how to use this vector store for retrieval-augmented generation (RAG), see the following sections:
+# 
+# - [Multi-modal RAG using VDMS](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_vdms.ipynb)
+# - [Visual RAG using VDMS](https://github.com/langchain-ai/langchain/blob/master/cookbook/visual_RAG_vdms.ipynb)
+# - [Tutorials](/docs/tutorials/)
+# - [How-to: Question and answer with RAG](https://python.langchain.com/docs/how_to/#qa-with-rag)
+# - [Retrieval conceptual docs](https://python.langchain.com/docs/concepts/#retrieval)
+
+# ## Similarity Search using other engines
+# 
+# VDMS supports various libraries for indexing and computing distances: FaissFlat (Default), FaissHNSWFlat, FaissIVFFlat, Flinng, TileDBDense, and TileDBSparse.
+# By default, the vectorstore uses FaissFlat. Below we show a few examples using the other engines.
+
+# ### Similarity Search using Faiss HNSWFlat and Euclidean Distance
+# 
+# Here, we add the documents to VDMS using Faiss IndexHNSWFlat indexing and L2 as the distance metric for similarity search. We search for three documents (`k=3`) related to a query and also return the score along with the document.
+
+# In[16]:
+
+
+db_FaissHNSWFlat = VDMS.from_documents(
+    documents,
+    client=vdms_client,
+    ids=doc_ids,
+    collection_name="my_collection_FaissHNSWFlat_L2",
+    embedding=embeddings,
+    engine="FaissHNSWFlat",
+    distance_strategy="L2",
+)
+# Query
+k = 3
+query = "LangChain provides abstractions to make working with LLMs easy"
+docs_with_score = db_FaissHNSWFlat.similarity_search_with_score(query, k=k, filter=None)
+
+for res, score in docs_with_score:
+    print(f"* [SIM={score:3f}] {res.page_content} [{res.metadata}]")
+
+
+# ### Similarity Search using Faiss IVFFlat and Inner Product (IP) Distance
+# 
+# We add the documents to VDMS using Faiss IndexIVFFlat indexing and IP as the distance metric for similarity search. We search for three documents (`k=3`) related to a query and also return the score along with the document.
+
+# In[17]:
+
+
+db_FaissIVFFlat = VDMS.from_documents(
+    documents,
+    client=vdms_client,
+    ids=doc_ids,
+    collection_name="my_collection_FaissIVFFlat_IP",
+    embedding=embeddings,
+    engine="FaissIVFFlat",
+    distance_strategy="IP",
+)
+
+k = 3
+query = "LangChain provides abstractions to make working with LLMs easy"
+docs_with_score = db_FaissIVFFlat.similarity_search_with_score(query, k=k, filter=None)
+for res, score in docs_with_score:
+    print(f"* [SIM={score:3f}] {res.page_content} [{res.metadata}]")
+
+
+# ### Similarity Search using FLINNG and IP Distance
+# 
+# In this section, we add the documents to VDMS using Filters to Identify Near-Neighbor Groups (FLINNG) indexing and IP as the distance metric for similarity search. We search for three documents (`k=3`) related to a query and also return the score along with the document.
+
 # In[18]:
 
 
-print("Documents before deletion: ", db_FaissFlat.count(collection_name))
+db_Flinng = VDMS.from_documents(
+    documents,
+    client=vdms_client,
+    ids=doc_ids,
+    collection_name="my_collection_Flinng_IP",
+    embedding=embeddings,
+    engine="Flinng",
+    distance_strategy="IP",
+)
+# Query
+k = 3
+query = "LangChain provides abstractions to make working with LLMs easy"
+docs_with_score = db_Flinng.similarity_search_with_score(query, k=k, filter=None)
+for res, score in docs_with_score:
+    print(f"* [SIM={score:3f}] {res.page_content} [{res.metadata}]")
 
-db_FaissFlat.delete(collection_name=collection_name)
 
-print("Documents after deletion: ", db_FaissFlat.count(collection_name))
-
-
-# ## Stop VDMS Server
+# ## Filtering on metadata
+# 
+# It can be helpful to narrow down the collection before working with it.
+# 
+# For example, collections can be filtered on metadata using the `get_by_constraints` method. A dictionary is used to filter metadata. Here we retrieve the document where `langchain_id = "2"` and remove it from the vector store.
+# 
+# ***NOTE:*** `id` was generated as additional metadata as an integer while `langchain_id` (the internal ID) is an unique string for each entry.
 
 # In[19]:
 
 
-get_ipython().system("docker kill vdms_vs_test_nb")
+response, response_array = db_FaissIVFFlat.get_by_constraints(
+    db_FaissIVFFlat.collection_name,
+    limit=1,
+    include=["metadata", "embeddings"],
+    constraints={"langchain_id": ["==", "2"]},
+)
+
+# Delete id=2
+db_FaissIVFFlat.delete(collection_name=db_FaissIVFFlat.collection_name, ids=["2"])
+
+print("Deleted entry:")
+for doc in response:
+    print(f"* ID={doc.id}: {doc.page_content} [{doc.metadata}]")
 
 
-# In[ ]:
+# In[20]:
+
+
+response, response_array = db_FaissIVFFlat.get_by_constraints(
+    db_FaissIVFFlat.collection_name,
+    include=["metadata"],
+)
+for doc in response:
+    print(f"* ID={doc.id}: {doc.page_content} [{doc.metadata}]")
+
+
+# Here we use `id` to filter for a range of IDs since it is an integer.
+
+# In[21]:
+
+
+response, response_array = db_FaissIVFFlat.get_by_constraints(
+    db_FaissIVFFlat.collection_name,
+    include=["metadata", "embeddings"],
+    constraints={"source": ["==", "news"]},
+)
+for doc in response:
+    print(f"* ID={doc.id}: {doc.page_content} [{doc.metadata}]")
+
+
+# ## Stop VDMS Server
+
+# In[22]:
+
+
+get_ipython().system('docker kill vdms_vs_test_nb')
+
+
+# ## API reference
+# 
+# TODO: add API reference
+
+# 

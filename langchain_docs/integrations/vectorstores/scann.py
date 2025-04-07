@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # ScaNN
-#
+# 
 # ScaNN (Scalable Nearest Neighbors) is a method for efficient vector similarity search at scale.
-#
+# 
 # ScaNN includes search space pruning and quantization for Maximum Inner Product Search and also supports other distance functions such as Euclidean distance. The implementation is optimized for x86 processors with AVX2 support. See its [Google Research github](https://github.com/google-research/google-research/tree/master/scann) for more details.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # ## Installation
@@ -15,11 +15,11 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  scann")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  scann')
 
 
 # ## Retrieval Demo
-#
+# 
 # Below we show how to use ScaNN in conjunction with Huggingface Embeddings.
 
 # In[ ]:
@@ -47,9 +47,9 @@ docs[0]
 
 
 # ## RetrievalQA Demo
-#
+# 
 # Next, we demonstrate using ScaNN in conjunction with Google PaLM API.
-#
+# 
 # You can obtain an API key from https://developers.generativeai.google/tutorials/setup
 
 # In[ ]:
@@ -86,3 +86,4 @@ print(qa.run("What did the president say about Michael Phelps?"))
 
 db.save_local("/tmp/db", "state_of_union")
 restored_db = ScaNN.load_local("/tmp/db", embeddings, index_name="state_of_union")
+

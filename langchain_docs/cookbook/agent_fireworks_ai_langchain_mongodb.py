@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mongodb-developer/GenAI-Showcase/blob/main/notebooks/agents/agent_fireworks_ai_langchain_mongodb.ipynb)
-#
+# 
 # [![View Article](https://img.shields.io/badge/View%20Article-blue)](https://www.mongodb.com/developer/products/atlas/agent-fireworksai-mongodb-langchain/)
 
 # ## Install Libraries
@@ -10,9 +10,7 @@
 # In[ ]:
 
 
-get_ipython().system(
-    "pip install langchain langchain_openai langchain-fireworks langchain-mongodb arxiv pymupdf datasets pymongo"
-)
+get_ipython().system('pip install langchain langchain_openai langchain-fireworks langchain-mongodb arxiv pymupdf datasets pymongo')
 
 
 # ## Set Evironment Variables
@@ -32,7 +30,7 @@ MONGO_URI = os.environ.get("MONGO_URI")
 
 
 # ## Data Ingestion into MongoDB Vector Database
-#
+# 
 
 # In[2]:
 
@@ -79,7 +77,7 @@ print("Data ingestion into MongoDB completed")
 
 
 # ## Create Vector Search Index Defintion
-#
+# 
 # ```
 # {
 #   "fields": [
@@ -116,12 +114,12 @@ retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"
 
 
 # ### Optional: Creating a retrevier with compression capabilities using LLMLingua
-#
+# 
 
 # In[ ]:
 
 
-get_ipython().system("pip install langchain_community llmlingua")
+get_ipython().system('pip install langchain_community llmlingua')
 
 
 # In[9]:
@@ -344,3 +342,4 @@ agent_executor.invoke(
 
 
 agent_executor.invoke({"input": "What paper did we speak about from our chat history?"})
+

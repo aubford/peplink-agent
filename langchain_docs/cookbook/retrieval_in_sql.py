@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Incoporating semantic similarity in tabular databases
-#
+# 
 # In this notebook we will cover how to run semantic search over a specific table column within a single SQL query, combining tabular query with RAG.
-#
-#
+# 
+# 
 # ### Overall workflow
-#
+# 
 # 1. Generating embeddings for a specific column
 # 2. Storing the embeddings in a new column (if column has low cardinality, it's better to use another table containing unique values and their embeddings)
 # 3. Querying using standard SQL queries with [PGVector](https://github.com/pgvector/pgvector) extension which allows using L2 distance (`<->`), Cosine distance (`<=>` or cosine similarity using `1 - <=>`) and Inner product (`<#>`)
 # 4. Running standard SQL query
-#
+# 
 # ### Requirements
-#
+# 
 # We will need a PostgreSQL database with [pgvector](https://github.com/pgvector/pgvector) extension enabled. For this example, we will use a `Chinook` database using a local PostgreSQL server.
 
 # In[1]:
@@ -247,9 +247,9 @@ full_chain.invoke(
 # What is substantially different in implementing this method is that we have combined:
 # - Semantic search (songs that have titles with some semantic meaning)
 # - Traditional tabular querying (running JOIN statements to filter track based on genre)
-#
+# 
 # This is something we _could_ potentially achieve using metadata filtering, but it's more complex to do so (we would need to use a vector database containing the embeddings, and use metadata filtering based on genre).
-#
+# 
 # However, for other use cases metadata filtering **wouldn't be enough**.
 
 # ### Example 2: Combining filters
@@ -265,7 +265,7 @@ full_chain.invoke(
 
 
 # So we have result for 3 albums with most amount of songs in top 150 saddest ones. This **wouldn't** be possible using only standard metadata filtering. Without this _hybdrid query_, we would need some postprocessing to get the result.
-#
+# 
 # Another similar exmaple:
 
 # In[30]:
@@ -293,13 +293,13 @@ print(
 
 
 # ### Example 3: Combining two separate semantic searches
-#
+# 
 # One interesting aspect of this approach which is **substantially different from using standar RAG** is that we can even **combine** two semantic search filters:
 # - _Get 5 saddest songs..._
 # - _**...obtained from albums with "lovely" titles**_
-#
+# 
 # This could generalize to **any kind of combined RAG** (paragraphs discussing _X_ topic belonging from books about _Y_, replies to a tweet about _ABC_ topic that express _XYZ_ feeling)
-#
+# 
 # We will combine semantic search on songs and album titles, so we need to do the same for `Album` table:
 # 1. Generate the embeddings
 # 2. Add them to the table as a new column (which we need to add in the table)

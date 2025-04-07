@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # IBM watsonx.ai
-#
+# 
 # >[WatsonxLLM](https://ibm.github.io/watsonx-ai-python-sdk/fm_extensions.html#langchain) is a wrapper for IBM [watsonx.ai](https://www.ibm.com/products/watsonx-ai) foundation models.
-#
+# 
 # This example shows how to communicate with `watsonx.ai` models using `LangChain`.
 
 # ## Overview
-#
+# 
 # ### Integration details
 # | Class | Package | Local | Serializable | [JS support](https://js.langchain.com/docs/integrations/llms/ibm/) | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
 # | [WatsonxLLM](https://python.langchain.com/api_reference/ibm/llms/langchain_ibm.llms.WatsonxLLM.html) | [langchain-ibm](https://python.langchain.com/api_reference/ibm/index.html) | ❌ | ❌ | ✅ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain-ibm?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-ibm?style=flat-square&label=%20) |
 
 # ## Setup
-#
+# 
 # To access IBM watsonx.ai models you'll need to create an IBM watsonx.ai account, get an API key, and install the `langchain-ibm` integration package.
-#
+# 
 # ### Credentials
-#
+# 
 # The cell below defines the credentials required to work with watsonx Foundation Model inferencing.
-#
+# 
 # **Action:** Provide the IBM Cloud user API key. For details, see
 # [Managing user API keys](https://cloud.ibm.com/docs/account?topic=account-userapikey&interface=ui).
 
@@ -35,7 +35,7 @@ watsonx_api_key = getpass()
 os.environ["WATSONX_APIKEY"] = watsonx_api_key
 
 
-# Additionaly you are able to pass additional secrets as an environment variable.
+# Additionaly you are able to pass additional secrets as an environment variable. 
 
 # In[ ]:
 
@@ -50,17 +50,17 @@ os.environ["WATSONX_INSTANCE_ID"] = "your instance_id for accessing the CPD clus
 
 
 # ### Installation
-#
+# 
 # The LangChain IBM integration lives in the `langchain-ibm` package:
 
 # In[ ]:
 
 
-get_ipython().system("pip install -qU langchain-ibm")
+get_ipython().system('pip install -qU langchain-ibm')
 
 
 # ## Instantiation
-#
+# 
 # You might need to adjust model `parameters` for different models or tasks. For details, refer to [documentation](https://ibm.github.io/watsonx-ai-python-sdk/fm_model.html#metanames.GenTextParamsMetaNames).
 
 # In[1]:
@@ -77,16 +77,16 @@ parameters = {
 
 
 # Initialize the `WatsonxLLM` class with previously set parameters.
-#
-#
-# **Note**:
-#
+# 
+# 
+# **Note**: 
+# 
 # - To provide context for the API call, you must add `project_id` or `space_id`. For more information see [documentation](https://www.ibm.com/docs/en/watsonx-as-a-service?topic=projects).
 # - Depending on the region of your provisioned service instance, use one of the urls described [here](https://ibm.github.io/watsonx-ai-python-sdk/setup_cloud.html#authentication).
-#
+# 
 # In this example, we’ll use the `project_id` and Dallas url.
-#
-#
+# 
+# 
 # You need to specify `model_id` that will be used for inferencing. All available models you can find in [documentation](https://ibm.github.io/watsonx-ai-python-sdk/fm_model.html#TextModels).
 
 # In[4]:
@@ -102,7 +102,7 @@ watsonx_llm = WatsonxLLM(
 )
 
 
-# Alternatively you can use Cloud Pak for Data credentials. For details, see [documentation](https://ibm.github.io/watsonx-ai-python-sdk/setup_cpd.html).
+# Alternatively you can use Cloud Pak for Data credentials. For details, see [documentation](https://ibm.github.io/watsonx-ai-python-sdk/setup_cpd.html).    
 
 # In[ ]:
 
@@ -119,7 +119,7 @@ watsonx_llm = WatsonxLLM(
 )
 
 
-# Instead of `model_id`, you can also pass the `deployment_id` of the previously tuned model. The entire model tuning workflow is described [here](https://ibm.github.io/watsonx-ai-python-sdk/pt_working_with_class_and_prompt_tuner.html).
+# Instead of `model_id`, you can also pass the `deployment_id` of the previously tuned model. The entire model tuning workflow is described in [Working with TuneExperiment and PromptTuner](https://ibm.github.io/watsonx-ai-python-sdk/pt_tune_experiment_run.html).
 
 # In[ ]:
 
@@ -183,8 +183,8 @@ watsonx_llm.generate(
 )
 
 
-# ## Streaming the Model output
-#
+# ## Streaming the Model output 
+# 
 # You can stream the model output.
 
 # In[5]:
@@ -222,5 +222,5 @@ llm_chain.invoke(topic)
 
 
 # ## API reference
-#
+# 
 # For detailed documentation of all `WatsonxLLM` features and configurations head to the [API reference](https://python.langchain.com/api_reference/ibm/llms/langchain_ibm.llms.WatsonxLLM.html).

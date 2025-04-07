@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Neo4j
-#
+# 
 # >[Neo4j](https://neo4j.com/docs/getting-started/) is a graph database management system developed by `Neo4j, Inc`.
-#
+# 
 # >The data elements `Neo4j` stores are nodes, edges connecting them, and attributes of nodes and edges. Described by its developers as an ACID-compliant transactional database with native graph storage and processing, `Neo4j` is available in a non-open-source "community edition" licensed with a modification of the GNU General Public License, with online backup and high availability extensions licensed under a closed-source commercial license. Neo also licenses `Neo4j` with these extensions under closed-source commercial terms.
-#
+# 
 # >This notebook shows how to use LLMs to provide a natural language interface to a graph database you can query with the `Cypher` query language.
-#
+# 
 # >[Cypher](https://en.wikipedia.org/wiki/Cypher_(query_language)) is a declarative graph query language that allows for expressive and efficient data querying in a property graph.
-#
+# 
 
 # ## Setting up
-#
+# 
 # You will need to have a running `Neo4j` instance. One option is to create a [free Neo4j database instance in their Aura cloud service](https://neo4j.com/cloud/platform/aura-graph-database/). You can also run the database locally using the [Neo4j Desktop application](https://neo4j.com/download/), or running a docker container.
 # You can run a local docker container by running the executing the following script:
-#
+# 
 # ```
 # docker run \
 #     --name neo4j \
@@ -26,7 +26,7 @@
 #     -e NEO4J_PLUGINS=\[\"apoc\"\]  \
 #     neo4j:latest
 # ```
-#
+# 
 # If you are using the docker container, you need to wait a couple of second for the database to start.
 
 # In[1]:
@@ -55,7 +55,7 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Seeding the database
-#
+# 
 # Assuming your database is empty, you can populate it using Cypher query language. The following Cypher statement is idempotent, which means the database information will be the same if you run it one or multiple times.
 
 # In[3]:
@@ -103,7 +103,7 @@ print(enhanced_graph.schema)
 
 
 # ## Querying the graph
-#
+# 
 # We can now use the graph cypher QA chain to ask question of the graph
 
 # In[7]:
@@ -252,7 +252,7 @@ chain.invoke({"query": "Who played in Top Gun?"})
 
 
 # ## Ignore specified node and relationship types
-#
+# 
 # You can use `include_types` or `exclude_types` to ignore parts of the graph schema when generating Cypher statements.
 
 # In[19]:
@@ -297,7 +297,7 @@ chain.invoke({"query": "Who played in Top Gun?"})
 
 
 # ## Provide context from database results as tool/function output
-#
+# 
 # You can use the `use_function_response` parameter to pass context from database results to an LLM as a tool/function output. This method improves the response accuracy and relevance of an answer as the LLM follows the provided context more closely.
 # _You will need to use an LLM with native function calling support to use this feature_.
 
@@ -315,7 +315,7 @@ chain.invoke({"query": "Who played in Top Gun?"})
 
 
 # You can provide custom system message when using the function response feature by providing `function_response_system` to instruct the model on how to generate answers.
-#
+# 
 # _Note that `qa_prompt` will have no effect when using `use_function_response`_
 
 # In[24]:
@@ -330,3 +330,4 @@ chain = GraphCypherQAChain.from_llm(
     allow_dangerous_requests=True,
 )
 chain.invoke({"query": "Who played in Top Gun?"})
+

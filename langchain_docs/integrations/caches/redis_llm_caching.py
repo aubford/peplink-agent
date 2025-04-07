@@ -2,27 +2,25 @@
 # coding: utf-8
 
 # # Redis Cache for LangChain
-#
+# 
 # This notebook demonstrates how to use the `RedisCache` and `RedisSemanticCache` classes from the langchain-redis package to implement caching for LLM responses.
 
 # ## Setup
-#
+# 
 # First, let's install the required dependencies and ensure we have a Redis instance running.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install -U langchain-core langchain-redis langchain-openai redis"
-)
+get_ipython().run_line_magic('pip', 'install -U langchain-core langchain-redis langchain-openai redis')
 
 
 # Ensure you have a Redis server running. You can start one using Docker with:
-#
+# 
 # ```
 # docker run -d -p 6379:6379 redis:latest
 # ```
-#
+# 
 # Or install and run Redis locally according to your operating system's instructions.
 
 # In[2]:
@@ -220,5 +218,5 @@ custom_semantic_cache.clear()
 
 
 # ## Conclusion
-#
+# 
 # This notebook demonstrated the usage of `RedisCache` and `RedisSemanticCache` from the langchain-redis package. These caching mechanisms can significantly improve the performance of LLM-based applications by reducing redundant API calls and leveraging semantic similarity for intelligent caching. The Redis-based implementation provides a fast, scalable, and flexible solution for caching in distributed systems.

@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Marqo
-#
+# 
 # This notebook shows how to use functionality related to the Marqo vectorstore.
-#
+# 
 # >[Marqo](https://www.marqo.ai/) is an open-source vector search engine. Marqo allows you to store and query multi-modal data such as text and images. Marqo creates the vectors for you using a huge selection of open-source models, you can also provide your own fine-tuned models and Marqo will handle the loading and inference for you.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # To run this notebook with our docker image please run the following commands first to get Marqo:
-#
+# 
 # ```
 # docker pull marqoai/marqo:latest
 # docker rm -f marqo
@@ -20,7 +20,7 @@
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  marqo")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  marqo')
 
 
 # In[1]:
@@ -75,13 +75,13 @@ print(result_docs[0][0].page_content, result_docs[0][1], sep="\n")
 
 
 # ## Additional features
-#
+# 
 # One of the powerful features of Marqo as a vectorstore is that you can use indexes created externally. For example:
-#
+# 
 # + If you had a database of image and text pairs from another application, you can simply just use it in langchain with the Marqo vectorstore. Note that bringing your own multimodal indexes will disable the `add_texts` method.
-#
+# 
 # + If you had a database of text documents, you can bring it into the langchain framework and add more texts through `add_texts`.
-#
+# 
 # The documents that are returned are customised by passing your own function to the `page_content_builder` callback in the search methods.
 
 # #### Multimodal Example
@@ -209,7 +209,7 @@ print(doc_results[0].page_content)
 
 
 # ## Weighted Queries
-#
+# 
 # We also expose marqos weighted queries which are a powerful way to compose complex semantic searches.
 
 # In[13]:
@@ -229,7 +229,7 @@ print(doc_results[0].page_content)
 
 
 # # Question Answering with Sources
-#
+# 
 # This section shows how to use Marqo as part of a `RetrievalQAWithSourcesChain`. Marqo will perform the searches for information in the sources.
 
 # In[15]:
@@ -276,3 +276,4 @@ chain(
     {"question": "What did the president say about Justice Breyer"},
     return_only_outputs=True,
 )
+

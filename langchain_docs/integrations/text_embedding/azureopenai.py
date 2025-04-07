@@ -42,7 +42,7 @@ if not os.getenv("AZURE_OPENAI_API_KEY"):
     )
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[9]:
 

@@ -7,7 +7,7 @@ sidebar_label: Ollama
 # 
 # [Ollama](https://ollama.ai/) allows you to run open-source large language models, such as Llama 2, locally.
 # 
-# Ollama bundles model weights, configuration, and data into a single package, defined by a Modelfile. 
+# Ollama bundles model weights, configuration, and data into a single package, defined by a Modelfile.
 # 
 # It optimizes setup and configuration details, including GPU usage.
 # 
@@ -36,7 +36,7 @@ sidebar_label: Ollama
 # * This will download the default tagged version of the model. Typically, the default points to the latest, smallest sized-parameter model.
 # 
 # > On Mac, the models will be download to `~/.ollama/models`
-# > 
+# >
 # > On Linux (or WSL), the models will be stored at `/usr/share/ollama/.ollama/models`
 # 
 # * Specify the exact version of the model of interest as such `ollama pull vicuna:13b-v1.5-16k-q4_0` (View the [various tags for the `Vicuna`](https://ollama.ai/library/vicuna/tags) model in this instance)
@@ -45,7 +45,7 @@ sidebar_label: Ollama
 # * View the [Ollama documentation](https://github.com/jmorganca/ollama) for more commands. Run `ollama help` in the terminal to see available commands too.
 # 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 
@@ -76,7 +76,6 @@ get_ipython().run_line_magic('pip', 'install -U ollama')
 # 
 # Now we can instantiate our model object and generate chat completions:
 # 
-# - TODO: Update model instantiation with relevant params.
 
 # In[9]:
 
@@ -145,7 +144,7 @@ chain.invoke(
 
 # ## Tool calling
 # 
-# We can use [tool calling](https://blog.langchain.dev/improving-core-tool-interfaces-and-docs-in-langchain/) with an LLM [that has been fine-tuned for tool use](https://ollama.com/library/llama3.1): 
+# We can use [tool calling](https://blog.langchain.dev/improving-core-tool-interfaces-and-docs-in-langchain/) with an LLM [that has been fine-tuned for tool use](https://ollama.com/library/llama3.1):
 # 
 # ```
 # ollama pull llama3.1

@@ -30,18 +30,18 @@ os.environ["COHERE_API_KEY"] = getpass.getpass()
 
 # It's also helpful (but not needed) to set up [LangSmith](https://smith.langchain.com/) for best-in-class observability
 
-# In[12]:
+# In[ ]:
 
 
 # os.environ["LANGSMITH_TRACING"] = "true"
-# os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
+# os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
 
 
 # ## Usage
 # 
 # ChatCohere supports all [ChatModel](/docs/how_to#chat-models) functionality:
 
-# In[5]:
+# In[ ]:
 
 
 from langchain_cohere import ChatCohere

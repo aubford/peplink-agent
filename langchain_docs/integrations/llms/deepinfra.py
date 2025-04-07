@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # DeepInfra
-#
+# 
 # [DeepInfra](https://deepinfra.com/?utm_source=langchain) is a serverless inference as a service that provides access to a [variety of LLMs](https://deepinfra.com/models?utm_source=langchain) and [embeddings models](https://deepinfra.com/models?type=embeddings&utm_source=langchain). This notebook goes over how to use LangChain with DeepInfra for language models.
 
 # ## Set the Environment API Key
 # Make sure to get your API key from DeepInfra. You have to [Login](https://deepinfra.com/login?from=%2Fdash) and get a new token.
-#
+# 
 # You are given a 1 hour free of serverless GPU compute to test different models. (see [here](https://github.com/deepinfra/deepctl#deepctl))
 # You can print your token with `deepctl auth token`
 
@@ -98,3 +98,7 @@ llm_chain.run(question)
 
 
 # In[ ]:
+
+
+
+

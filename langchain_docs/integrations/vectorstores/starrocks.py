@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # StarRocks
-#
+# 
 # >[StarRocks](https://www.starrocks.io/) is a High-Performance Analytical Database.
 # `StarRocks` is a next-gen sub-second MPP database for full analytics scenarios, including multi-dimensional analytics, real-time analytics and ad-hoc query.
-#
+# 
 # >Usually `StarRocks` is categorized into OLAP, and it has showed excellent performance in [ClickBench — a Benchmark For Analytical DBMS](https://benchmark.clickhouse.com/). Since it has a super-fast vectorized execution engine, it could also be used as a fast vectordb.
-#
+# 
 # Here we'll show how to use the StarRocks Vector Store.
 
 # ## Setup
@@ -15,9 +15,7 @@
 # In[1]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  pymysql langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pymysql langchain-community')
 
 
 # Set `update_vectordb = False` at the beginning. If there is no docs updated, then we don't need to rebuild the embeddings of docs
@@ -41,7 +39,7 @@ update_vectordb = False
 # ## Load docs and split them into tokens
 
 # Load all markdown files under the `docs` directory
-#
+# 
 # for starrocks documents, you can clone repo from https://github.com/StarRocks/starrocks, and there is `docs` directory in it.
 
 # In[2]:
@@ -96,7 +94,7 @@ def gen_starrocks(update_vectordb, embeddings, settings):
 # ## Convert tokens into embeddings and put them into vectordb
 
 # Here we use StarRocks as vectordb, you can configure StarRocks instance via `StarRocksSettings`.
-#
+# 
 # Configuring StarRocks instance is pretty much like configuring mysql instance. You need to specify:
 # 1. host/port
 # 2. username(default: 'root')
@@ -135,3 +133,4 @@ qa = RetrievalQA.from_chain_type(
 query = "is profile enabled by default? if not, how to enable profile?"
 resp = qa.run(query)
 print(resp)
+

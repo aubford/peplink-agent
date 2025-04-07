@@ -16,9 +16,7 @@
 # In[1]:
 
 
-get_ipython().system(
-    "pip install --upgrade --quiet  tiktoken scikit-learn gpt4all langchain langchain-community langchain-core langchain_nomic langchain_ollama langgraph"
-)
+get_ipython().system('pip install --upgrade --quiet  tiktoken scikit-learn gpt4all langchain langchain-community langchain-core langchain_nomic langchain_ollama langgraph')
 
 
 # In Linux systems, use following commands to install Ollama and download Llama 3.1 model locally.
@@ -153,11 +151,11 @@ from langchain_ollama import ChatOllama
 
 prompt = PromptTemplate(
     template="""You are an assistant for question-answering tasks. 
-    
+
     Use the following documents to answer the question. 
-    
+
     If you don't know the answer, just say that you don't know. 
-    
+
     Use three sentences maximum and keep the answer concise:
     Question: {question} 
     Documents: {documents} 
@@ -471,3 +469,7 @@ response
 # As demonstrated in the previous examples, the RAG agent routes the control flow through web search to generate answers for non-TAX related questions. For TAX related queries, it uses documents retrieved from the vector database.
 
 # In[ ]:
+
+
+
+

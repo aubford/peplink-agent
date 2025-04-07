@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Amazon Neptune with SPARQL
-#
+# 
 # >[Amazon Neptune](https://aws.amazon.com/neptune/) is a high-performance graph analytics and serverless database for superior scalability and availability.
 # >
-# >This example shows the QA chain that queries [Resource Description Framework (RDF)](https://en.wikipedia.org/wiki/Resource_Description_Framework) data
+# >This example shows the QA chain that queries [Resource Description Framework (RDF)](https://en.wikipedia.org/wiki/Resource_Description_Framework) data 
 # in an `Amazon Neptune` graph database using the `SPARQL` query language and returns a human-readable response.
 # >
 # >[SPARQL](https://en.wikipedia.org/wiki/SPARQL) is a standard query language for `RDF` graphs.
-#
-#
-# This example uses a `NeptuneRdfGraph` class that connects with the Neptune database and loads its schema.
+# 
+# 
+# This example uses a `NeptuneRdfGraph` class that connects with the Neptune database and loads its schema. 
 # The `create_neptune_sparql_qa_chain` is used to connect the graph and LLM to ask natural language questions.
-#
+# 
 # This notebook demonstrates an example using organizational data.
-#
+# 
 # Requirements for running this notebook:
 # - Neptune 1.2.x cluster accessible from this notebook
 # - Kernel with Python 3.9 or higher
 # - For Bedrock access, ensure IAM role has this policy
-#
+# 
 # ```json
 # {
 #         "Action": [
@@ -31,15 +31,15 @@
 #         "Effect": "Allow"
 # }
 # ```
-#
+# 
 # - S3 bucket for staging sample data. The bucket should be in the same account/region as Neptune.
 
 # ## Setting up
-#
+# 
 # ### Seed the W3C organizational data
-#
-# Seed the W3C organizational data, W3C org ontology plus some instances.
-#
+# 
+# Seed the W3C organizational data, W3C org ontology plus some instances. 
+#  
 # You will need an S3 bucket in the same region and account as the Neptune cluster. Set `STAGE_BUCKET`as the name of that bucket.
 
 # In[ ]:
@@ -51,11 +51,7 @@ STAGE_BUCKET = "<bucket-name>"
 # In[ ]:
 
 
-get_ipython().run_cell_magic(
-    "bash",
-    ' -s "$STAGE_BUCKET"',
-    "\nrm -rf data\nmkdir -p data\ncd data\necho getting org ontology and sample org instances\nwget http://www.w3.org/ns/org.ttl \nwget https://raw.githubusercontent.com/aws-samples/amazon-neptune-ontology-example-blog/main/data/example_org.ttl \n\necho Copying org ttl to S3\naws s3 cp org.ttl s3://$1/org.ttl\naws s3 cp example_org.ttl s3://$1/example_org.ttl\n",
-)
+get_ipython().run_cell_magic('bash', ' -s "$STAGE_BUCKET"', '\nrm -rf data\nmkdir -p data\ncd data\necho getting org ontology and sample org instances\nwget http://www.w3.org/ns/org.ttl \nwget https://raw.githubusercontent.com/aws-samples/amazon-neptune-ontology-example-blog/main/data/example_org.ttl \n\necho Copying org ttl to S3\naws s3 cp org.ttl s3://$1/org.ttl\naws s3 cp example_org.ttl s3://$1/example_org.ttl\n')
 
 
 # We will use the `%load` magic command from the `graph-notebook` package to insert the W3C data into the Neptune graph. Before running `%load`, use `%%graph_notebook_config` to set the graph connection parameters.
@@ -63,23 +59,19 @@ get_ipython().run_cell_magic(
 # In[ ]:
 
 
-get_ipython().system("pip install --upgrade --quiet graph-notebook")
+get_ipython().system('pip install --upgrade --quiet graph-notebook')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("load_ext", "graph_notebook.magics")
+get_ipython().run_line_magic('load_ext', 'graph_notebook.magics')
 
 
 # In[ ]:
 
 
-get_ipython().run_cell_magic(
-    "graph_notebook_config",
-    "",
-    '{\n    "host": "<neptune-endpoint>",\n    "neptune_service": "neptune-db",\n    "port": 8182,\n    "auth_mode": "<[DEFAULT|IAM]>",\n    "load_from_s3_arn": "<neptune-cluster-load-role-arn>",\n    "ssl": true,\n    "aws_region": "<region>"\n}\n',
-)
+get_ipython().run_cell_magic('graph_notebook_config', '', '{\n    "host": "<neptune-endpoint>",\n    "neptune_service": "neptune-db",\n    "port": 8182,\n    "auth_mode": "<[DEFAULT|IAM]>",\n    "load_from_s3_arn": "<neptune-cluster-load-role-arn>",\n    "ssl": true,\n    "aws_region": "<region>"\n}\n')
 
 
 # Bulk-load the org ttl - both ontology and instances.
@@ -87,17 +79,13 @@ get_ipython().run_cell_magic(
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "load", "-s s3://{STAGE_BUCKET} -f turtle --store-to loadres --run"
-)
+get_ipython().run_line_magic('load', '-s s3://{STAGE_BUCKET} -f turtle --store-to loadres --run')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "load_status", "{loadres['payload']['loadId']} --errors --details"
-)
+get_ipython().run_line_magic('load_status', "{loadres['payload']['loadId']} --errors --details")
 
 
 # ### Setup Chain
@@ -105,7 +93,7 @@ get_ipython().run_line_magic(
 # In[ ]:
 
 
-get_ipython().system("pip install --upgrade --quiet langchain-aws")
+get_ipython().system('pip install --upgrade --quiet langchain-aws')
 
 
 # ** Restart kernel **
@@ -231,7 +219,7 @@ graph = NeptuneRdfGraph(host=host, port=port, use_iam_auth=True, region_name=reg
 
 
 # ## Using the Neptune SPARQL QA Chain
-#
+# 
 # This QA chain queries the Neptune graph database using SPARQL and returns a human-readable response.
 
 # In[ ]:
@@ -257,7 +245,7 @@ print(result["result"].content)
 
 
 # Here are a few more prompts to try on the graph data that was ingested.
-#
+# 
 
 # In[ ]:
 
@@ -304,11 +292,11 @@ print(result["result"].content)
 
 
 # ### Adding Message History
-#
+# 
 # The Neptune SPARQL QA chain has the ability to be wrapped by [`RunnableWithMessageHistory`](https://python.langchain.com/v0.2/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html#langchain_core.runnables.history.RunnableWithMessageHistory). This adds message history to the chain, allowing us to create a chatbot that retains conversation state across multiple invocations.
-#
+# 
 # To start, we need a way to store and load the message history. For this purpose, each thread will be created as an instance of [`InMemoryChatMessageHistory`](https://python.langchain.com/api_reference/core/chat_history/langchain_core.chat_history.InMemoryChatMessageHistory.html), and stored into a dictionary for repeated access.
-#
+# 
 # (Also see: https://python.langchain.com/docs/versions/migrating_memory/chat_history/#chatmessagehistory)
 
 # In[ ]:
@@ -342,7 +330,7 @@ runnable_with_history = RunnableWithMessageHistory(
 
 
 # Before invoking the chain, a unique `session_id` needs to be generated for the conversation that the new `InMemoryChatMessageHistory` will remember.
-#
+# 
 
 # In[ ]:
 
@@ -353,7 +341,7 @@ session_id = uuid.uuid4()
 
 
 # Finally, invoke the message history enabled chain with the `session_id`.
-#
+# 
 
 # In[ ]:
 
@@ -366,7 +354,7 @@ print(result["result"].content)
 
 
 # As the chain continues to be invoked with the same `session_id`, responses will be returned in the context of previous queries in the conversation.
-#
+# 
 
 # In[ ]:
 
@@ -376,3 +364,4 @@ result = runnable_with_history.invoke(
     config={"configurable": {"session_id": session_id}},
 )
 print(result["result"].content)
+

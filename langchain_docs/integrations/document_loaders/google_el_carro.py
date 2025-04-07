@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Google El Carro for Oracle Workloads
-#
+# 
 # > Google [El Carro Oracle Operator](https://github.com/GoogleCloudPlatform/elcarro-oracle-operator)
 # offers a way to run Oracle databases in Kubernetes as a portable, open source,
 # community driven, no vendor lock-in container orchestration system. El Carro
@@ -11,37 +11,35 @@
 # monitoring.
 # Extend your Oracle database's capabilities to build AI-powered experiences
 # by leveraging the El Carro Langchain integration.
-#
+# 
 # This guide goes over how to use El Carro Langchain integration to
 # [save, load and delete langchain documents](/docs/how_to#document-loaders)
 # with `ElCarroLoader` and `ElCarroDocumentSaver`. This integration works for any Oracle database, regardless of where it is running.
-#
+# 
 # Learn more about the package on [GitHub](https://github.com/googleapis/langchain-google-el-carro-python/).
-#
+# 
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/googleapis/langchain-google-el-carro-python/blob/main/docs/document_loader.ipynb)
 
 # ## Before You Begin
-#
+# 
 # Please complete
 # the [Getting Started](https://github.com/googleapis/langchain-google-el-carro-python/tree/main/README.md#getting-started)
 # section of
 # the README to set up your El Carro Oracle database.
 
 # ### 🦜🔗 Library Installation
-#
+# 
 # The integration lives in its own `langchain-google-el-carro` package, so
 # we need to install it.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet langchain-google-el-carro"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-google-el-carro')
 
 
 # ## Basic Usage
-#
+# 
 # ### Set Up Oracle Database Connection
 # Fill out the following variable with your Oracle database connections details.
 
@@ -57,23 +55,23 @@ USER = "my-user"  # @param {type: "string"}
 PASSWORD = input("Please provide a password to be used for the database user: ")
 
 
-#
+# 
 # If you are using El Carro, you can find the hostname and port values in the
 # status of the El Carro Kubernetes instance.
 # Use the user password you created for your PDB.
-#
+# 
 # Example Ouput:
-#
+# 
 
 # ```
 # kubectl get -w instances.oracle.db.anthosapis.com -n db
 # NAME   DB ENGINE   VERSION   EDITION      ENDPOINT      URL                DB NAMES   BACKUP ID   READYSTATUS   READYREASON        DBREADYSTATUS   DBREADYREASON
-#
+# 
 # mydb   Oracle      18c       Express      mydb-svc.db   34.71.69.25:6021   ['pdbname']            TRUE          CreateComplete     True            CreateComplete
 # ```
 
 # ### ElCarroEngine Connection Pool
-#
+# 
 # `ElCarroEngine` configures a connection pool to your Oracle database, enabling successful connections from your application and following industry best practices.
 
 # In[ ]:
@@ -91,10 +89,10 @@ elcarro_engine = ElCarroEngine.from_instance(
 
 
 # ### Initialize a table
-#
+# 
 # Initialize a table of default schema
 # via `elcarro_engine.init_document_table(<table_name>)`. Table Columns:
-#
+# 
 # - page_content (type: text)
 # - langchain_metadata (type: JSON)
 
@@ -108,10 +106,10 @@ elcarro_engine.init_document_table(
 
 
 # ### Save documents
-#
+# 
 # Save langchain documents with `ElCarroDocumentSaver.add_documents(<documents>)`.
 # To initialize `ElCarroDocumentSaver` class you need to provide 2 things:
-#
+# 
 # 1. `elcarro_engine` - An instance of a `ElCarroEngine` engine.
 # 2. `table_name` - The name of the table within the Oracle database to store
 #    langchain documents.
@@ -135,16 +133,16 @@ saver.add_documents([doc])
 
 
 # ### Load documents
-#
+# 
 # Load langchain documents with `ElCarroLoader.load()`
 # or `ElCarroLoader.lazy_load()`.
 # `lazy_load` returns a generator that only queries database during the iteration.
 # To initialize `ElCarroLoader` class you need to provide:
-#
+# 
 # 1. `elcarro_engine` - An instance of a `ElCarroEngine` engine.
 # 2. `table_name` - The name of the table within the Oracle database to store
 #    langchain documents.
-#
+# 
 
 # In[ ]:
 
@@ -158,7 +156,7 @@ for doc in docs:
 
 
 # ### Load documents via query
-#
+# 
 # Other than loading documents from a table, we can also choose to load documents
 # from a view generated from a SQL query. For example:
 
@@ -181,15 +179,15 @@ print(onedoc)
 # section [Load documents with customized document page content & metadata](#load-documents-with-customized-document-page-content--metadata).
 
 # ### Delete documents
-#
+# 
 # Delete a list of langchain documents from an Oracle table
 # with `ElCarroDocumentSaver.delete(<documents>)`.
-#
+# 
 # For a table with a default schema (page_content, langchain_metadata), the
 # deletion criteria is:
-#
+# 
 # A `row` should be deleted if there exists a `document` in the list, such that
-#
+# 
 # - `document.page_content` equals `row[page_content]`
 # - `document.metadata` equals `row[langchain_metadata]`
 
@@ -203,9 +201,9 @@ print("Documents after delete:", loader.load())
 
 
 # ## Advanced Usage
-#
+# 
 # ### Load documents with customized document page content & metadata
-#
+# 
 # First we prepare an example table with non-default schema, and populate it with
 # some arbitrary data.
 
@@ -273,11 +271,11 @@ print(f"Loaded Documents: [{loaded_docs}]")
 # We can specify the content and metadata we want to load by setting
 # the `content_columns` and `metadata_columns` when initializing
 # the `ElCarroLoader`.
-#
+# 
 # 1. `content_columns`: The columns to write into the `page_content` of the
 #    document.
 # 2. `metadata_columns`: The columns to write into the `metadata` of the document.
-#
+# 
 # For example here, the values of columns in `content_columns` will be joined
 # together into a space-separated string, as `page_content` of loaded documents,
 # and `metadata` of loaded documents will only contain key-value pairs of columns
@@ -302,21 +300,21 @@ print(f"Loaded Documents: [{loaded_docs}]")
 
 
 # ### Save document with customized page content & metadata
-#
+# 
 # In order to save langchain document into table with customized metadata fields
 # we need first create such a table via `ElCarroEngine.init_document_table()`, and
 # specify the list of `metadata_columns` we want it to have. In this example, the
 # created table will have table columns:
-#
+# 
 # - content (type: text): for storing fruit description.
 # - type (type VARCHAR2(200)): for storing fruit type.
 # - weight (type INT): for storing fruit weight.
 # - extra_json_metadata (type: JSON): for storing other metadata information of the
 #   fruit.
-#
+# 
 # We can use the following parameters
 # with `elcarro_engine.init_document_table()` to create the table:
-#
+# 
 # 1. `table_name`: The name of the table within the Oracle database to store
 #    langchain documents.
 # 2. `metadata_columns`: A list of `sqlalchemy.Column` indicating the list of
@@ -326,7 +324,7 @@ print(f"Loaded Documents: [{loaded_docs}]")
 # 4. `metadata_json_column`: column name to store extra
 #    JSON `metadata` of langchain document.
 #    Default: `"langchain_metadata", "VARCHAR2(4000)"`.
-#
+# 
 
 # In[ ]:
 
@@ -345,13 +343,13 @@ elcarro_engine.init_document_table(
 
 # Save documents with `ElCarroDocumentSaver.add_documents(<documents>)`. As you
 # can see in this example,
-#
+# 
 # - `document.page_content` will be saved into `content` column.
 # - `document.metadata.type` will be saved into `type` column.
 # - `document.metadata.weight` will be saved into `weight` column.
 # - `document.metadata.organic` will be saved into `extra_json_metadata` column in
 #   JSON format.
-#
+# 
 
 # In[ ]:
 
@@ -387,12 +385,12 @@ print(f"Loaded Document: [{loaded_docs[0]}]")
 
 
 # ### Delete documents with customized page content & metadata
-#
+# 
 # We can also delete documents from table with customized metadata columns
 # via `ElCarroDocumentSaver.delete(<documents>)`. The deletion criteria is:
-#
+# 
 # A `row` should be deleted if there exists a `document` in the list, such that
-#
+# 
 # - `document.page_content` equals `row[page_content]`
 # - For every metadata field `k` in `document.metadata`
 #     - `document.metadata[k]` equals `row[k]` or `document.metadata[k]`
@@ -409,10 +407,10 @@ print(f"Documents left: {len(loader.load())}")
 
 
 # ## More examples
-#
+# 
 # Please look
 # at [demo_doc_loader_basic.py](https://github.com/googleapis/langchain-google-el-carro-python/tree/main/samples/demo_doc_loader_basic.py)
 # and [demo_doc_loader_advanced.py](https://github.com/googleapis/langchain-google-el-carro-python/tree/main/samples/demo_doc_loader_advanced.py)
 # for
 # complete code examples.
-#
+# 

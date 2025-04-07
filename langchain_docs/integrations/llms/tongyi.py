@@ -10,9 +10,7 @@
 
 
 # Install the package
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain-community dashscope"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community dashscope')
 
 
 # In[1]:
@@ -80,3 +78,4 @@ chain = prompt | llm
 question = "What NFL team won the Super Bowl in the year Justin Bieber was born?"
 
 chain.invoke({"question": question})
+

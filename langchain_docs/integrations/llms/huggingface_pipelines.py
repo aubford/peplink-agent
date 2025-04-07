@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Hugging Face Local Pipelines
-#
+# 
 # Hugging Face models can be run locally through the `HuggingFacePipeline` class.
-#
+# 
 # The [Hugging Face Model Hub](https://huggingface.co/models) hosts over 120k models, 20k datasets, and 50k demo apps (Spaces), all open source and publicly available, in an online platform where people can easily collaborate and build ML together.
-#
+# 
 # These can be called from LangChain either through this local pipeline wrapper or by calling their hosted inference endpoints through the HuggingFaceHub class.
 
 # To use, you should have the ``transformers`` python [package installed](https://pypi.org/project/transformers/), as well as [pytorch](https://pytorch.org/get-started/locally/). You can also install `xformer` for a more memory-efficient attention implementation.
@@ -14,11 +14,11 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet transformers")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet transformers')
 
 
 # ### Model Loading
-#
+# 
 # Models can be loaded by specifying the model parameters using the `from_model_id` method.
 
 # In[ ]:
@@ -49,7 +49,7 @@ hf = HuggingFacePipeline(pipeline=pipe)
 
 
 # ### Create Chain
-#
+# 
 # With the model loaded into memory, you can compose it with a prompt to
 # form a chain.
 
@@ -92,12 +92,12 @@ for chunk in chain.stream(question):
 
 
 # ### GPU Inference
-#
+# 
 # When running on a machine with GPU, you can specify the `device=n` parameter to put the model on the specified device.
 # Defaults to `-1` for CPU inference.
-#
-# If you have multiple-GPUs and/or the model is too large for a single GPU, you can specify `device_map="auto"`, which requires and uses the [Accelerate](https://huggingface.co/docs/accelerate/index) library to automatically determine how to load the model weights.
-#
+# 
+# If you have multiple-GPUs and/or the model is too large for a single GPU, you can specify `device_map="auto"`, which requires and uses the [Accelerate](https://huggingface.co/docs/accelerate/index) library to automatically determine how to load the model weights. 
+# 
 # *Note*: both `device` and `device_map` should not be specified together and can lead to unexpected behavior.
 
 # In[ ]:
@@ -118,7 +118,7 @@ print(gpu_chain.invoke({"question": question}))
 
 
 # ### Batch GPU Inference
-#
+# 
 # If running on a device with GPU, you can also run inference on the GPU in batch mode.
 
 # In[ ]:
@@ -144,17 +144,15 @@ for answer in answers:
 
 
 # ### Inference with OpenVINO backend
-#
+# 
 # To deploy a model with OpenVINO, you can specify the `backend="openvino"` parameter to trigger OpenVINO as backend inference framework.
-#
+# 
 # If you have an Intel GPU, you can specify `model_kwargs={"device": "GPU"}` to run inference on it.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", 'install --upgrade-strategy eager "optimum[openvino,nncf]" --quiet'
-)
+get_ipython().run_line_magic('pip', 'install --upgrade-strategy eager "optimum[openvino,nncf]" --quiet')
 
 
 # In[ ]:
@@ -178,14 +176,14 @@ print(ov_chain.invoke({"question": question}))
 
 
 # ### Inference with local OpenVINO model
-#
+# 
 # It is possible to [export your model](https://github.com/huggingface/optimum-intel?tab=readme-ov-file#export) to the OpenVINO IR format with the CLI, and load the model from local folder.
-#
+# 
 
 # In[ ]:
 
 
-get_ipython().system("optimum-cli export openvino --model gpt2 ov_model_dir")
+get_ipython().system('optimum-cli export openvino --model gpt2 ov_model_dir')
 
 
 # It is recommended to apply 8 or 4-bit weight quantization to reduce inference latency and model footprint using `--weight-format`:
@@ -193,13 +191,9 @@ get_ipython().system("optimum-cli export openvino --model gpt2 ov_model_dir")
 # In[ ]:
 
 
-get_ipython().system(
-    "optimum-cli export openvino --model gpt2  --weight-format int8 ov_model_dir # for 8-bit quantization"
-)
+get_ipython().system('optimum-cli export openvino --model gpt2  --weight-format int8 ov_model_dir # for 8-bit quantization')
 
-get_ipython().system(
-    "optimum-cli export openvino --model gpt2  --weight-format int4 ov_model_dir # for 4-bit quantization"
-)
+get_ipython().system('optimum-cli export openvino --model gpt2  --weight-format int4 ov_model_dir # for 4-bit quantization')
 
 
 # In[ ]:

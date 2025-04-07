@@ -2,26 +2,24 @@
 # coding: utf-8
 
 # # DingoDB
-#
+# 
 # >[DingoDB](https://dingodb.readthedocs.io/en/latest/) is a distributed multi-mode vector database, which combines the characteristics of data lakes and vector databases, and can store data of any type and size (Key-Value, PDF, audio, video, etc.). It has real-time low-latency processing capabilities to achieve rapid insight and response, and can efficiently conduct instant analysis and process multi-modal data.
-#
+# 
 # In the walkthrough, we'll demo the `SelfQueryRetriever` with a `DingoDB` vector store.
 
 # ## Creating a DingoDB index
 # First we'll want to create a `DingoDB` vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # To use DingoDB, you should have a [DingoDB instance up and running](https://github.com/dingodb/dingo-deploy/blob/main/README.md).
-#
+# 
 # **Note:** The self-query retriever requires you to have `lark` package installed.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  dingodb")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  dingodb')
 # or install latest:
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  git+https://git@github.com/dingodb/pydingo.git"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  git+https://git@github.com/dingodb/pydingo.git')
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -36,7 +34,7 @@ OPENAI_API_KEY = ""
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 
-#
+# 
 
 # In[4]:
 
@@ -193,9 +191,9 @@ retriever.invoke(
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[14]:
@@ -216,3 +214,4 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("What are two movies about dinosaurs")
+

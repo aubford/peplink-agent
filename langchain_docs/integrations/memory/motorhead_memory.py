@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Motörhead
-#
+# 
 # >[Motörhead](https://github.com/getmetal/motorhead) is a memory server implemented in Rust. It automatically handles incremental summarization in the background and allows for stateless applications.
-#
+# 
 # ## Setup
-#
+# 
 # See instructions at [Motörhead](https://github.com/getmetal/motorhead) for running the server locally.
 
 # In[ ]:
@@ -67,3 +67,7 @@ llm_chain.run("whats for dinner?")
 
 
 # In[ ]:
+
+
+
+

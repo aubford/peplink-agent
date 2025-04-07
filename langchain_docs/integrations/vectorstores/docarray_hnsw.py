@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # DocArray HnswSearch
-#
+# 
 # >[DocArrayHnswSearch](https://docs.docarray.org/user_guide/storing/index_hnswlib/) is a lightweight Document Index implementation provided by [Docarray](https://github.com/docarray/docarray) that runs fully locally and is best suited for small- to medium-sized datasets. It stores vectors on disk in [hnswlib](https://github.com/nmslib/hnswlib), and stores all other data in [SQLite](https://www.sqlite.org/index.html).
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # This notebook shows how to use functionality related to the `DocArrayHnswSearch`.
 
 # ## Setup
-#
+# 
 # Uncomment the below cells to install docarray and get/set your OpenAI api key if you haven't already done so.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", 'install --upgrade --quiet  "docarray[hnswlib]"')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  "docarray[hnswlib]"')
 
 
 # In[ ]:
@@ -95,3 +95,4 @@ import shutil
 
 # delete the dir
 shutil.rmtree("hnswlib_store")
+

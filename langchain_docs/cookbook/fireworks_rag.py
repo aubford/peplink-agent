@@ -2,23 +2,19 @@
 # coding: utf-8
 
 # ## Fireworks.AI + LangChain + RAG
-#
+#  
 # [Fireworks AI](https://python.langchain.com/docs/integrations/llms/fireworks) wants to provide the best experience when working with LangChain, and here is an example of Fireworks + LangChain doing RAG
-#
+# 
 # See [our models page](https://fireworks.ai/models) for the full list of models. We use `accounts/fireworks/models/mixtral-8x7b-instruct` for RAG In this tutorial.
-#
-# For the RAG target, we will use the Gemma technical report https://storage.googleapis.com/deepmind-media/gemma/gemma-report.pdf
+# 
+# For the RAG target, we will use the Gemma technical report https://storage.googleapis.com/deepmind-media/gemma/gemma-report.pdf 
 
 # In[1]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --quiet pypdf langchain-chroma tiktoken openai"
-)
-get_ipython().run_line_magic("pip", "uninstall -y langchain-fireworks")
-get_ipython().run_line_magic(
-    "pip", "install --editable /mnt/disks/data/langchain/libs/partners/fireworks"
-)
+get_ipython().run_line_magic('pip', 'install --quiet pypdf langchain-chroma tiktoken openai')
+get_ipython().run_line_magic('pip', 'uninstall -y langchain-fireworks')
+get_ipython().run_line_magic('pip', 'install --editable /mnt/disks/data/langchain/libs/partners/fireworks')
 
 
 # In[3]:
@@ -107,6 +103,6 @@ chain = (
 chain.invoke("What are the Architectural details of Mixtral?")
 
 
-# Trace:
-#
+# Trace: 
+# 
 # https://smith.langchain.com/public/935fd642-06a6-4b42-98e3-6074f93115cd/r

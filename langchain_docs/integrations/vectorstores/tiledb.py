@@ -2,23 +2,21 @@
 # coding: utf-8
 
 # # TileDB
-#
+# 
 # > [TileDB](https://github.com/TileDB-Inc/TileDB) is a powerful engine for indexing and querying dense and sparse multi-dimensional arrays.
-#
+# 
 # > TileDB offers ANN search capabilities using the [TileDB-Vector-Search](https://github.com/TileDB-Inc/TileDB-Vector-Search) module. It provides serverless execution of ANN queries and storage of vector indexes both on local disk and cloud object stores (i.e. AWS S3).
-#
+# 
 # More details in:
 # -  [Why TileDB as a Vector Database](https://tiledb.com/blog/why-tiledb-as-a-vector-database)
 # -  [TileDB 101: Vector Search](https://tiledb.com/blog/tiledb-101-vector-search)
-#
+# 
 # This notebook shows how to use the `TileDB` vector database.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  tiledb-vector-search langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tiledb-vector-search langchain-community')
 
 
 # ## Basic Example
@@ -85,3 +83,4 @@ retriever.invoke(query)
 
 
 db.max_marginal_relevance_search(query, k=2, fetch_k=10)
+

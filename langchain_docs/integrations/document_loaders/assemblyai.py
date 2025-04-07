@@ -2,32 +2,32 @@
 # coding: utf-8
 
 # # AssemblyAI Audio Transcripts
-#
+# 
 # The `AssemblyAIAudioTranscriptLoader` allows to transcribe audio files with the [AssemblyAI API](https://www.assemblyai.com) and loads the transcribed text into documents.
-#
+# 
 # To use it, you should have the `assemblyai` python package installed, and the
 # environment variable `ASSEMBLYAI_API_KEY` set with your API key. Alternatively, the API key can also be passed as an argument.
-#
+# 
 # More info about AssemblyAI:
-#
+# 
 # - [Website](https://www.assemblyai.com/)
 # - [Get a Free API key](https://www.assemblyai.com/dashboard/signup)
 # - [AssemblyAI API Docs](https://www.assemblyai.com/docs)
 
 # ## Installation
-#
+# 
 # First, you need to install the `assemblyai` python package.
-#
+# 
 # You can find more info about it inside the [assemblyai-python-sdk GitHub repo](https://github.com/AssemblyAI/assemblyai-python-sdk).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  assemblyai")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  assemblyai')
 
 
 # ## Example
-#
+# 
 # The `AssemblyAIAudioTranscriptLoader` needs at least the `file_path` argument. Audio files can be specified as an URL or a local file path.
 
 # In[ ]:
@@ -75,11 +75,11 @@ docs[0].metadata
 # ```
 
 # ## Transcript Formats
-#
+# 
 # You can specify the `transcript_format` argument for different formats.
-#
+# 
 # Depending on the format, one or more documents are returned. These are the different `TranscriptFormat` options:
-#
+# 
 # - `TEXT`: One document with the transcription text
 # - `SENTENCES`: Multiple documents, splits the transcription by each sentence
 # - `PARAGRAPHS`: Multiple documents, splits the transcription by each paragraph
@@ -100,9 +100,9 @@ docs = loader.load()
 
 
 # ## Transcription Config
-#
+# 
 # You can also specify the `config` argument to use different audio intelligence models.
-#
+# 
 # Visit the [AssemblyAI API Documentation](https://www.assemblyai.com/docs) to get an overview of all available models!
 
 # In[ ]:
@@ -118,7 +118,7 @@ loader = AssemblyAIAudioTranscriptLoader(file_path="./your_file.mp3", config=con
 
 
 # ## Pass the API Key as argument
-#
+# 
 # Next to setting the API key as environment variable `ASSEMBLYAI_API_KEY`, it is also possible to pass it as argument.
 
 # In[ ]:
@@ -127,3 +127,4 @@ loader = AssemblyAIAudioTranscriptLoader(file_path="./your_file.mp3", config=con
 loader = AssemblyAIAudioTranscriptLoader(
     file_path="./your_file.mp3", api_key="YOUR_KEY"
 )
+

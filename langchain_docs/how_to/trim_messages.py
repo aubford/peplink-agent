@@ -26,7 +26,8 @@
 # 1. The resulting chat history should be **valid**. Usually this means that the following properties should be satisfied:
 #    - The chat history **starts** with either (1) a `HumanMessage` or (2) a [SystemMessage](/docs/concepts/messages/#systemmessage) followed by a `HumanMessage`.
 #    - The chat history **ends** with either a `HumanMessage` or a `ToolMessage`.
-#    - A `ToolMessage` can only appear after an `AIMessage` that involved a tool call. 
+#    - A `ToolMessage` can only appear after an `AIMessage` that involved a tool call.
+# 
 #    This can be achieved by setting `start_on="human"` and `ends_on=("human", "tool")`.
 # 3. It includes recent messages and drops old messages in the chat history.
 #    This can be achieved by setting `strategy="last"`.
@@ -46,7 +47,7 @@
 # 
 # Notice that for our `token_counter` we can pass in a function (more on that below) or a language model (since language models have a message token counting method). It makes sense to pass in a model when you're trimming your messages to fit into the context window of that specific model:
 
-# In[1]:
+# In[ ]:
 
 
 pip install -qU langchain-openai
@@ -62,7 +63,7 @@ from langchain_core.messages import (
     ToolMessage,
     trim_messages,
 )
-from langchain_openai import ChatOpenAI
+from langchain_core.messages.utils import count_tokens_approximately
 
 messages = [
     SystemMessage("you're a good assistant, you always respond with a joke."),
@@ -84,8 +85,8 @@ trim_messages(
     strategy="last",
     # highlight-start
     # Remember to adjust based on your model
-    # or else pass a custom token_encoder
-    token_counter=ChatOpenAI(model="gpt-4o"),
+    # or else pass a custom token_counter
+    token_counter=count_tokens_approximately,
     # highlight-end
     # Most chat models expect that chat history starts with either:
     # (1) a HumanMessage or
@@ -150,7 +151,7 @@ trim_messages(
 
 # ## Advanced Usage
 # 
-# You can use `trim_message` as a building-block to create more complex processing logic.
+# You can use `trim_messages` as a building-block to create more complex processing logic.
 # 
 # If we want to allow splitting up the contents of a message we can specify `allow_partial=True`:
 
@@ -161,7 +162,7 @@ trim_messages(
     messages,
     max_tokens=56,
     strategy="last",
-    token_counter=ChatOpenAI(model="gpt-4o"),
+    token_counter=count_tokens_approximately,
     include_system=True,
     allow_partial=True,
 )
@@ -176,7 +177,7 @@ trim_messages(
     messages,
     max_tokens=45,
     strategy="last",
-    token_counter=ChatOpenAI(model="gpt-4o"),
+    token_counter=count_tokens_approximately,
 )
 
 
@@ -184,6 +185,23 @@ trim_messages(
 
 # In[6]:
 
+
+trim_messages(
+    messages,
+    max_tokens=45,
+    strategy="first",
+    token_counter=count_tokens_approximately,
+)
+
+
+# ## Using `ChatModel` as a token counter
+# 
+# You can pass a ChatModel as a token-counter. This will use `ChatModel.get_num_tokens_from_messages`. Let's demonstrate how to use it with OpenAI:
+
+# In[7]:
+
+
+from langchain_openai import ChatOpenAI
 
 trim_messages(
     messages,
@@ -197,13 +215,13 @@ trim_messages(
 # 
 # We can write a custom token counter function that takes in a list of messages and returns an int.
 
-# In[7]:
+# In[8]:
 
 
 pip install -qU tiktoken
 
 
-# In[8]:
+# In[9]:
 
 
 from typing import List
@@ -277,7 +295,7 @@ trim_messages(
 # 
 # `trim_messages` can be used imperatively (like above) or declaratively, making it easy to compose with other components in a chain
 
-# In[9]:
+# In[10]:
 
 
 llm = ChatOpenAI(model="gpt-4o")
@@ -314,7 +332,7 @@ chain.invoke(messages)
 # 
 # Looking at just the trimmer, we can see that it's a Runnable object that can be invoked like all Runnables:
 
-# In[10]:
+# In[11]:
 
 
 trimmer.invoke(messages)
@@ -338,8 +356,6 @@ def dummy_get_session_history(session_id):
         return InMemoryChatMessageHistory()
     return chat_history
 
-
-llm = ChatOpenAI(model="gpt-4o")
 
 trimmer = trim_messages(
     max_tokens=45,

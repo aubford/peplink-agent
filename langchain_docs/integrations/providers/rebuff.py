@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # Rebuff
-#
+# 
 # >[Rebuff](https://docs.rebuff.ai/) is a self-hardening prompt injection detector.
 # It is designed to protect AI applications from prompt injection (PI) attacks through a multi-stage defense.
-#
+# 
 # * [Homepage](https://rebuff.ai)
 # * [Playground](https://playground.rebuff.ai)
 # * [Docs](https://docs.rebuff.ai)
@@ -97,7 +97,7 @@ if is_canary_word_detected:
 
 
 # ## Use in a chain
-#
+# 
 # We can easily use rebuff in a chain to block any attempted prompt attacks
 
 # In[9]:
@@ -156,3 +156,7 @@ chain.run(user_input)
 
 
 # In[ ]:
+
+
+
+

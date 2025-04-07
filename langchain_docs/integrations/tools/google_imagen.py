@@ -4,11 +4,11 @@
 # # Google Imagen
 
 # >[Imagen on Vertex AI](https://cloud.google.com/vertex-ai/generative-ai/docs/image/overview) brings Google's state of the art image generative AI capabilities to application developers. With Imagen on Vertex AI, application developers can build next-generation AI products that transform their user's imagination into high quality visual assets using AI generation, in seconds.
-#
-#
+# 
+# 
 
 # With Imagen on Langchain , You can do the following tasks
-#
+# 
 # - [VertexAIImageGeneratorChat](#image-generation) : Generate novel images using only a text prompt (text-to-image AI generation).
 # - [VertexAIImageEditorChat](#image-editing) : Edit an entire uploaded or generated image with a text prompt.
 # - [VertexAIImageCaptioning](#image-captioning) : Get text descriptions of images with visual captioning.
@@ -198,3 +198,4 @@ img = Image.open(
 
 # display Image
 img
+

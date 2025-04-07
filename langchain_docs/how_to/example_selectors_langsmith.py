@@ -2,29 +2,29 @@
 # coding: utf-8
 
 # # How to select examples from a LangSmith dataset
-#
+# 
 # import Prerequisites from "@theme/Prerequisites";
 # import Compatibility from "@theme/Compatibility";
-#
+# 
 # <Prerequisites titlesAndLinks={[
 #   ["Chat models", "/docs/concepts/chat_models"],
 #   ["Few-shot-prompting", "/docs/concepts/few-shot-prompting"],
 #   ["LangSmith", "https://docs.smith.langchain.com/"],
 # ]} />
-#
-#
+# 
+# 
 # <Compatibility packagesAndVersions={[
 #   ["langsmith", "0.1.101"],
 #   ["langchain-core", "0.2.34"],
 # ]} />
-#
-#
+# 
+# 
 # [LangSmith](https://docs.smith.langchain.com/) datasets have built-in support for similarity search, making them a great tool for building and querying few-shot examples.
-#
+# 
 # In this guide we'll see how to use an indexed LangSmith dataset as a few-shot example selector.
-#
+# 
 # ## Setup
-#
+# 
 # Before getting started make sure you've [created a LangSmith account](https://smith.langchain.com/) and set your credentials:
 
 # In[2]:
@@ -44,16 +44,13 @@ os.environ["LANGSMITH_TRACING"] = "true"
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    'install -qU "langsmith>=0.1.101" "langchain-core>=0.2.34" langchain langchain-openai langchain-benchmarks',
-)
+get_ipython().run_line_magic('pip', 'install -qU "langsmith>=0.1.101" "langchain-core>=0.2.34" langchain langchain-openai langchain-benchmarks')
 
 
 # Now we'll clone a public dataset and turn on indexing for the dataset. We can also turn on indexing via the [LangSmith UI](https://docs.smith.langchain.com/how_to_guides/datasets/index_datasets_for_dynamic_few_shot_example_selection).
-#
+# 
 # We'll clone the [Multiverse math few shot example dataset](https://blog.langchain.dev/few-shot-prompting-to-improve-tool-calling-performance/).
-#
+# 
 # This enables searching over the dataset and will make sure that anytime we update/add examples they are also indexed.
 
 # In[ ]:
@@ -76,7 +73,7 @@ ls_client.index_dataset(dataset_id=dataset_id)
 
 
 # ## Querying dataset
-#
+# 
 # Indexing can take a few seconds. Once the dataset is indexed, we can search for similar examples. Note that the input to the `similar_examples` method must have the same schema as the examples inputs. In this case our example inputs are a dictionary with a "question" key:
 
 # In[12]:
@@ -105,7 +102,7 @@ examples[0].outputs["conversation"]
 
 
 # ## Creating dynamic few-shot prompts
-#
+# 
 # The search returns the examples whose inputs are most similar to the query input. We can use this for few-shot prompting a model like so:
 
 # In[20]:

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Multi-Agent Simulated Environment: Petting Zoo
-#
+# 
 # In this example, we show how to define multi-agent simulations with simulated environments. Like [ours single-agent example with Gymnasium](https://python.langchain.com/en/latest/use_cases/agent_simulations/gymnasium.html), we create an agent-environment loop with an externally defined environment. The main difference is that we now implement this kind of interaction loop with multiple agents instead. We will use the [Petting Zoo](https://pettingzoo.farama.org/) library, which is the multi-agent counterpart to [Gymnasium](https://gymnasium.farama.org/).
 
 # ## Install `pettingzoo` and other dependencies
@@ -10,7 +10,7 @@
 # In[1]:
 
 
-get_ipython().system("pip install pettingzoo pygame rlcard")
+get_ipython().system('pip install pettingzoo pygame rlcard')
 
 
 # ## Import modules
@@ -31,7 +31,7 @@ from langchain_openai import ChatOpenAI
 
 
 # ## `GymnasiumAgent`
-# Here we reproduce the same `GymnasiumAgent` defined from [our Gymnasium example](https://python.langchain.com/en/latest/use_cases/agent_simulations/gymnasium.html). If after multiple retries it does not take a valid action, it simply takes a random action.
+# Here we reproduce the same `GymnasiumAgent` defined from [our Gymnasium example](https://python.langchain.com/en/latest/use_cases/agent_simulations/gymnasium.html). If after multiple retries it does not take a valid action, it simply takes a random action. 
 
 # In[3]:
 
@@ -143,7 +143,7 @@ def main(agents, env):
 
 
 # ## `PettingZooAgent`
-#
+# 
 # The `PettingZooAgent` extends the `GymnasiumAgent` to the multi-agent setting. The main differences are:
 # - `PettingZooAgent` takes in a `name` argument to identify it among multiple agents
 # - the function `get_docs` is implemented differently because the `PettingZoo` repo structure is structured differently from the `Gymnasium` repo
@@ -182,7 +182,7 @@ main(agents, env)
 
 
 # ## `ActionMaskAgent`
-#
+# 
 # Some `PettingZoo` environments provide an `action_mask` to tell the agent which actions are valid. The `ActionMaskAgent` subclasses `PettingZooAgent` to use information from the `action_mask` to select actions.
 
 # In[7]:
@@ -244,3 +244,4 @@ agents = {
     for name in env.possible_agents
 }
 main(agents, env)
+

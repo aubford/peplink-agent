@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Alpha Vantage
-#
-# >[Alpha Vantage](https://www.alphavantage.co) Alpha Vantage provides realtime and historical financial market data through a set of powerful and developer-friendly data APIs and spreadsheets.
-#
+# 
+# >[Alpha Vantage](https://www.alphavantage.co) Alpha Vantage provides realtime and historical financial market data through a set of powerful and developer-friendly data APIs and spreadsheets. 
+# 
 # Use the ``AlphaVantageAPIWrapper`` to get currency exchange rates.
 
 # In[1]:
@@ -77,11 +77,12 @@ alpha_vantage._get_market_news_sentiment("IBM")
 alpha_vantage._get_top_gainers_losers()
 
 
-# The `run` method of the wrapper takes the following parameters: from_currency, to_currency.
-#
+# The `run` method of the wrapper takes the following parameters: from_currency, to_currency. 
+# 
 # It Gets the currency exchange rates for the given currency pair.
 
 # In[9]:
 
 
 alpha_vantage.run("USD", "JPY")
+

@@ -2,31 +2,31 @@
 # coding: utf-8
 
 # ## LLaMA2 chat with SQL
-#
+# 
 # Open source, local LLMs are great to consider for any application that demands data privacy.
-#
-# SQL is one good example.
-#
+# 
+# SQL is one good example. 
+# 
 # This cookbook shows how to perform text-to-SQL using various local versions of LLaMA2 run locally.
-#
+# 
 # ## Packages
 
 # In[ ]:
 
 
-get_ipython().system(" pip install langchain replicate")
+get_ipython().system(' pip install langchain replicate')
 
 
 # ## LLM
-#
+# 
 # There are a few ways to access LLaMA2.
-#
-# To run locally, we use Ollama.ai.
-#
+# 
+# To run locally, we use Ollama.ai. 
+# 
 # See [here](/docs/integrations/chat/ollama) for details on installation and setup.
-#
+# 
 # Also, see [here](/docs/guides/development/local_llms) for our full guide on local LLMs.
-#
+#  
 # To use an external API, which is not private, we can use Replicate.
 
 # In[1]:
@@ -57,9 +57,9 @@ llm = llama2_chat
 
 
 # ## DB
-#
+# 
 # Connect to a SQLite DB.
-#
+# 
 # To create this particular DB, you can use the code and follow the steps shown [here](https://github.com/facebookresearch/llama-recipes/blob/main/demo_apps/StructuredLlama.ipynb).
 
 # In[3]:
@@ -78,8 +78,8 @@ def run_query(query):
     return db.run(query)
 
 
-# ## Query a SQL Database
-#
+# ## Query a SQL Database 
+# 
 # Follow the runnables workflow [here](https://python.langchain.com/docs/expression_language/cookbook/sql_db).
 
 # In[4]:
@@ -116,10 +116,10 @@ sql_response.invoke({"question": "What team is Klay Thompson on?"})
 
 
 # We can review the results:
-#
+# 
 # * [LangSmith trace](https://smith.langchain.com/public/afa56a06-b4e2-469a-a60f-c1746e75e42b/r) LLaMA2-13 Replicate API
-# * [LangSmith trace](https://smith.langchain.com/public/2d4ecc72-6b8f-4523-8f0b-ea95c6b54a1d/r) LLaMA2-13 local
-#
+# * [LangSmith trace](https://smith.langchain.com/public/2d4ecc72-6b8f-4523-8f0b-ea95c6b54a1d/r) LLaMA2-13 local 
+# 
 
 # In[15]:
 
@@ -155,12 +155,12 @@ full_chain.invoke({"question": "How many unique teams are there?"})
 
 
 # We can review the results:
-#
+# 
 # * [LangSmith trace](https://smith.langchain.com/public/10420721-746a-4806-8ecf-d6dc6399d739/r) LLaMA2-13 Replicate API
-# * [LangSmith trace](https://smith.langchain.com/public/5265ebab-0a22-4f37-936b-3300f2dfa1c1/r) LLaMA2-13 local
+# * [LangSmith trace](https://smith.langchain.com/public/5265ebab-0a22-4f37-936b-3300f2dfa1c1/r) LLaMA2-13 local 
 
-# ## Chat with a SQL DB
-#
+# ## Chat with a SQL DB 
+# 
 # Next, we can add memory.
 
 # In[7]:

@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # PlayWright Browser Toolkit
-#
+# 
 # >[Playwright](https://github.com/microsoft/playwright) is an open-source automation tool developed by `Microsoft` that allows you to programmatically control and automate web browsers. It is designed for end-to-end testing, scraping, and automating tasks across various web browsers such as `Chromium`, `Firefox`, and `WebKit`.
-#
-# This toolkit is used to interact with the browser. While other tools (like the `Requests` tools) are fine for static sites, `PlayWright Browser` toolkits let your agent navigate the web and interact with dynamically rendered sites.
-#
+# 
+# This toolkit is used to interact with the browser. While other tools (like the `Requests` tools) are fine for static sites, `PlayWright Browser` toolkits let your agent navigate the web and interact with dynamically rendered sites. 
+# 
 # Some tools bundled within the `PlayWright Browser` toolkit include:
-#
+# 
 # - `NavigateTool` (navigate_browser) - navigate to a URL
 # - `NavigateBackTool` (previous_page) - wait for an element to appear
 # - `ClickTool` (click_element) - click on an element (specified by selector)
@@ -16,13 +16,13 @@
 # - `ExtractHyperlinksTool` (extract_hyperlinks) - use beautiful soup to extract hyperlinks from the current web page
 # - `GetElementsTool` (get_elements) - select elements by CSS selector
 # - `CurrentPageTool` (current_page) - get the current page URL
-#
+# 
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  playwright > /dev/null")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lxml")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  playwright > /dev/null')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lxml')
 
 # If this is your first time using playwright, you'll have to install a browser executable.
 # Running `playwright install` by default installs a chromium browser executable.
@@ -55,7 +55,7 @@ nest_asyncio.apply()
 
 
 # ## Instantiating a Browser Toolkit
-#
+# 
 # It's always recommended to instantiate using the from_browser method so that the browser context is properly initialized and managed, ensuring seamless interaction and resource optimization.
 
 # In[4]:
@@ -100,7 +100,7 @@ await tools_by_name["current_webpage"].arun({})
 
 
 # ## Use within an Agent
-#
+# 
 # Several of the browser tools are `StructuredTool`'s, meaning they expect multiple arguments. These aren't compatible (out of the box) with agents older than the `STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION`
 
 # In[10]:
@@ -126,3 +126,4 @@ agent_chain = initialize_agent(
 
 result = await agent_chain.arun("What are the headers on langchain.com?")
 print(result)
+

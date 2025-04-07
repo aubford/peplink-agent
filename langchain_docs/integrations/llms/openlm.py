@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # OpenLM
-# [OpenLM](https://github.com/r2d4/openlm) is a zero-dependency OpenAI-compatible LLM provider that can call different inference endpoints directly via HTTP.
-#
-#
+# [OpenLM](https://github.com/r2d4/openlm) is a zero-dependency OpenAI-compatible LLM provider that can call different inference endpoints directly via HTTP. 
+# 
+# 
 # It implements the OpenAI Completion class so that it can be used as a drop-in replacement for the OpenAI API. This changeset utilizes BaseOpenAI for minimal added code.
-#
+# 
 # This examples goes over how to use LangChain to interact with both OpenAI and HuggingFace. You'll need API keys from both.
 
 # ### Setup
@@ -17,8 +17,8 @@
 
 # Uncomment to install openlm and openai if you haven't already
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  openlm")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-openai")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  openlm')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai')
 
 
 # In[2]:
@@ -39,7 +39,7 @@ if "HF_API_TOKEN" not in os.environ:
 
 
 # ### Using LangChain with OpenLM
-#
+# 
 # Here we're going to call two models in an LLMChain, `text-davinci-003` from OpenAI and `gpt2` on HuggingFace.
 
 # In[4]:
@@ -66,7 +66,6 @@ for model in ["text-davinci-003", "huggingface.co/gpt2"]:
     result = llm_chain.run(question)
     print(
         """Model: {}
-Result: {}""".format(
-            model, result
-        )
+Result: {}""".format(model, result)
     )
+

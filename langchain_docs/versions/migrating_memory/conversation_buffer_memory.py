@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Migrating off ConversationBufferMemory or ConversationStringBufferMemory
-#
+# 
 # [ConversationBufferMemory](https://python.langchain.com/api_reference/langchain/memory/langchain.memory.buffer.ConversationBufferMemory.html)
 # and [ConversationStringBufferMemory](https://python.langchain.com/api_reference/langchain/memory/langchain.memory.buffer.ConversationStringBufferMemory.html)
-#  were used to keep track of a conversation between a human and an ai asstistant without any additional processing.
-#
-#
+#  were used to keep track of a conversation between a human and an ai asstistant without any additional processing. 
+# 
+# 
 # :::note
 # The `ConversationStringBufferMemory` is equivalent to `ConversationBufferMemory` but was targeting LLMs that were not chat models.
 # :::
-#
+# 
 # The methods for handling conversation history using existing modern primitives are:
-#
+# 
 # 1. Using [LangGraph persistence](https://langchain-ai.github.io/langgraph/how-tos/persistence/) along with appropriate processing of the message history
 # 2. Using LCEL with [RunnableWithMessageHistory](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html#) combined with appropriate processing of the message history.
-#
+# 
 # Most users will find [LangGraph persistence](https://langchain-ai.github.io/langgraph/how-tos/persistence/) both easier to use and configure than the equivalent LCEL, especially for more complex use cases.
 
 # ## Set up
@@ -24,11 +24,7 @@
 # In[1]:
 
 
-get_ipython().run_cell_magic(
-    "capture",
-    "--no-stderr",
-    "%pip install --upgrade --quiet langchain-openai langchain\n",
-)
+get_ipython().run_cell_magic('capture', '--no-stderr', '%pip install --upgrade --quiet langchain-openai langchain\n')
 
 
 # In[2]:
@@ -42,13 +38,13 @@ if "OPENAI_API_KEY" not in os.environ:
 
 
 # ## Usage with LLMChain / ConversationChain
-#
+# 
 # This section shows how to migrate off `ConversationBufferMemory` or `ConversationStringBufferMemory` that's used together with either an `LLMChain` or a `ConversationChain`.
-#
+# 
 # ### Legacy
-#
+# 
 # Below is example usage of `ConversationBufferMemory` with an `LLMChain` or an equivalent `ConversationChain`.
-#
+# 
 # <details open>
 
 # In[4]:
@@ -100,15 +96,15 @@ legacy_result["text"]
 # :::
 
 # </details>
-#
+# 
 # ### LangGraph
-#
+# 
 # The example below shows how to use LangGraph to implement a `ConversationChain` or `LLMChain` with `ConversationBufferMemory`.
-#
+# 
 # This example assumes that you're already somewhat familiar with `LangGraph`. If you're not, then please see the [LangGraph Quickstart Guide](https://langchain-ai.github.io/langgraph/tutorials/introduction/) for more details.
-#
+# 
 # `LangGraph` offers a lot of additional functionality (e.g., time-travel and interrupts) and will work well for other more complex (and realistic) architectures.
-#
+# 
 # <details open>
 
 # In[6]:
@@ -170,24 +166,24 @@ for event in app.stream({"messages": [input_message]}, config, stream_mode="valu
 
 
 # </details>
-#
+# 
 # ### LCEL RunnableWithMessageHistory
-#
+# 
 # Alternatively, if you have a simple chain, you can wrap the chat model of the chain within a [RunnableWithMessageHistory](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html).
-#
+# 
 # Please refer to the following [migration guide](/docs/versions/migrating_chains/conversation_chain/) for more information.
-#
-#
+# 
+# 
 # ## Usage with a pre-built agent
-#
+# 
 # This example shows usage of an Agent Executor with a pre-built agent constructed using the [create_tool_calling_agent](https://python.langchain.com/api_reference/langchain/agents/langchain.agents.tool_calling_agent.base.create_tool_calling_agent.html) function.
-#
+# 
 # If you are using one of the [old LangChain pre-built agents](https://python.langchain.com/v0.1/docs/modules/agents/agent_types/), you should be able
 # to replace that code with the new [langgraph pre-built agent](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/) which leverages
 # native tool calling capabilities of chat models and will likely work better out of the box.
-#
+# 
 # ### Legacy Usage
-#
+# 
 # <details open>
 
 # In[7]:
@@ -246,17 +242,17 @@ print(agent_executor.invoke({"input": "do you remember my name?"}))
 
 
 # </details>
-#
+# 
 # ### LangGraph
-#
+# 
 # You can follow the standard LangChain tutorial for [building an agent](/docs/tutorials/agents/) an in depth explanation of how this works.
-#
+# 
 # This example is shown here explicitly to make it easier for users to compare the legacy implementation vs. the corresponding langgraph implementation.
-#
+# 
 # This example shows how to add memory to the [pre-built react agent](https://langchain-ai.github.io/langgraph/reference/prebuilt/#langgraph.prebuilt.chat_agent_executor.create_react_agent) in langgraph.
-#
+# 
 # For more details, please see the [how to add memory to the prebuilt ReAct agent](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent-memory/) guide in langgraph.
-#
+# 
 # <details open>
 
 # In[8]:
@@ -328,25 +324,29 @@ for event in app.stream({"messages": [input_message]}, config, stream_mode="valu
 
 
 # </details>
-#
+# 
 # ## Next steps
-#
+# 
 # Explore persistence with LangGraph:
-#
+# 
 # * [LangGraph quickstart tutorial](https://langchain-ai.github.io/langgraph/tutorials/introduction/)
 # * [How to add persistence ("memory") to your graph](https://langchain-ai.github.io/langgraph/how-tos/persistence/)
 # * [How to manage conversation history](https://langchain-ai.github.io/langgraph/how-tos/memory/manage-conversation-history/)
 # * [How to add summary of the conversation history](https://langchain-ai.github.io/langgraph/how-tos/memory/add-summary-conversation-history/)
-#
+# 
 # Add persistence with simple LCEL (favor langgraph for more complex use cases):
-#
+# 
 # * [How to add message history](/docs/how_to/message_history/)
-#
+# 
 # Working with message history:
-#
+# 
 # * [How to trim messages](/docs/how_to/trim_messages)
 # * [How to filter messages](/docs/how_to/filter_messages/)
 # * [How to merge message runs](/docs/how_to/merge_message_runs/)
-#
+# 
 
 # In[ ]:
+
+
+
+

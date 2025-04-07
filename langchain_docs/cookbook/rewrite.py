@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Rewrite-Retrieve-Read
-#
+# 
 # **Rewrite-Retrieve-Read** is a method proposed in the paper [Query Rewriting for Retrieval-Augmented Large Language Models](https://arxiv.org/pdf/2305.14283.pdf)
-#
+# 
 # > Because the original query can not be always optimal to retrieve for the LLM, especially in the real world... we first prompt an LLM to rewrite the queries, then conduct retrieval-augmented reading
-#
+# 
 # We show how you can easily do that with LangChain Expression Language
 
 # ## Baseline
-#
+# 
 # Baseline RAG (**Retrieve-and-read**) can be done like the following:
 
 # In[1]:
@@ -91,7 +91,7 @@ retriever(distracted_query)
 
 
 # ## Rewrite-Retrieve-Read Implementation
-#
+# 
 # The main part is a rewriter to rewrite the search query
 
 # In[9]:
@@ -161,3 +161,7 @@ rewrite_retrieve_read_chain.invoke(distracted_query)
 
 
 # In[ ]:
+
+
+
+

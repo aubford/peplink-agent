@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # How to split code
-#
+# 
 # [RecursiveCharacterTextSplitter](https://python.langchain.com/api_reference/text_splitters/character/langchain_text_splitters.character.RecursiveCharacterTextSplitter.html) includes pre-built lists of separators that are useful for [splitting text](/docs/concepts/text_splitters/) in a specific programming language.
-#
+# 
 # Supported languages are stored in the `langchain_text_splitters.Language` enum. They include:
-#
+# 
 # ```
 # "cpp",
 # "go",
@@ -33,23 +33,23 @@
 # "perl",
 # "haskell"
 # ```
-#
+# 
 # To view the list of separators for a given language, pass a value from this enum into
 # ```python
 # RecursiveCharacterTextSplitter.get_separators_for_language`
 # ```
-#
+# 
 # To instantiate a splitter that is tailored for a specific language, pass a value from the enum into
 # ```python
 # RecursiveCharacterTextSplitter.from_language
 # ```
-#
+# 
 # Below we demonstrate examples for the various languages.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-text-splitters")
+get_ipython().run_line_magic('pip', 'install -qU langchain-text-splitters')
 
 
 # In[4]:
@@ -78,10 +78,10 @@ RecursiveCharacterTextSplitter.get_separators_for_language(Language.PYTHON)
 
 
 # ## Python
-#
+# 
 # Here's an example using the PythonTextSplitter:
-#
-#
+# 
+# 
 
 # In[5]:
 
@@ -145,9 +145,9 @@ ts_docs
 
 
 # ## Markdown
-#
+# 
 # Here's an example using the Markdown text splitter:
-#
+# 
 
 # In[2]:
 
@@ -177,9 +177,9 @@ md_docs
 
 
 # ## Latex
-#
+# 
 # Here's an example on Latex text:
-#
+# 
 
 # In[10]:
 
@@ -215,9 +215,9 @@ latex_docs
 
 
 # ## HTML
-#
+# 
 # Here's an example using an HTML text splitter:
-#
+# 
 
 # In[12]:
 
@@ -283,7 +283,7 @@ sol_docs
 
 # ## C#
 # Here's an example using the C# text splitter:
-#
+# 
 
 # In[15]:
 
@@ -394,3 +394,4 @@ powershell_splitter = RecursiveCharacterTextSplitter.from_language(
 )
 powershell_docs = powershell_splitter.create_documents([POWERSHELL_CODE])
 powershell_docs
+

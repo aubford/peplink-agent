@@ -2,21 +2,19 @@
 # coding: utf-8
 
 # # Snowflake Cortex
-#
+# 
 # [Snowflake Cortex](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions) gives you instant access to industry-leading large language models (LLMs) trained by researchers at companies like Mistral, Reka, Meta, and Google, including [Snowflake Arctic](https://www.snowflake.com/en/data-cloud/arctic/), an open enterprise-grade model developed by Snowflake.
-#
+# 
 # This example goes over how to use LangChain to interact with Snowflake Cortex.
 
 # ### Installation and setup
-#
+# 
 # We start by installing the `snowflake-snowpark-python` library, using the command below. Then we configure the credentials for connecting to Snowflake, as environment variables or pass them directly.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet snowflake-snowpark-python"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet snowflake-snowpark-python')
 
 
 # In[1]:
@@ -61,18 +59,18 @@ chat = ChatSnowflakeCortex()
 
 
 # The above cell assumes that your Snowflake credentials are set in your environment variables. If you would rather manually specify them, use the following code:
-#
+# 
 # ```python
 # chat = ChatSnowflakeCortex(
 #     # Change the default cortex model and function
 #     model="mistral-large",
 #     cortex_function="complete",
-#
+# 
 #     # Change the default generation parameters
 #     temperature=0,
 #     max_tokens=10,
 #     top_p=0.95,
-#
+# 
 #     # Specify your Snowflake Credentials
 #     account="YOUR_SNOWFLAKE_ACCOUNT",
 #     username="YOUR_SNOWFLAKE_USERNAME",
@@ -108,3 +106,4 @@ messages = [
 print("Stream Method Response:")
 for chunk in chat._stream(messages):
     print(chunk.message.content)
+

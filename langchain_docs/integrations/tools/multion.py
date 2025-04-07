@@ -2,28 +2,28 @@
 # coding: utf-8
 
 # # MultiOn Toolkit
-#
-# [MultiON](https://www.multion.ai/blog/multion-building-a-brighter-future-for-humanity-with-ai-agents) has built an AI Agent that can interact with a broad array of web services and applications.
-#
-# This notebook walks you through connecting LangChain to the `MultiOn` Client in your browser.
-#
+#  
+# [MultiON](https://www.multion.ai/blog/multion-building-a-brighter-future-for-humanity-with-ai-agents) has built an AI Agent that can interact with a broad array of web services and applications. 
+# 
+# This notebook walks you through connecting LangChain to the `MultiOn` Client in your browser. 
+# 
 # This enables custom agentic workflow that utilize the power of MultiON agents.
-#
-# To use this toolkit, you will need to add `MultiOn Extension` to your browser:
-#
-# * Create a [MultiON account](https://app.multion.ai/login?callbackUrl=%2Fprofile).
+#  
+# To use this toolkit, you will need to add `MultiOn Extension` to your browser: 
+# 
+# * Create a [MultiON account](https://app.multion.ai/login?callbackUrl=%2Fprofile). 
 # * Add  [MultiOn extension for Chrome](https://multion.notion.site/Download-MultiOn-ddddcfe719f94ab182107ca2612c07a5).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  multion langchain -q")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  multion langchain -q')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # In[37]:
@@ -43,9 +43,9 @@ tools
 
 
 # ## MultiOn Setup
-#
-# Once you have created an account, create an API key at https://app.multion.ai/.
-#
+# 
+# Once you have created an account, create an API key at https://app.multion.ai/. 
+# 
 # Login to establish connection with your extension.
 
 # In[39]:
@@ -58,11 +58,11 @@ multion.login()
 
 
 # ## Use Multion Toolkit within an Agent
-#
+# 
 # This will use MultiON chrome extension to perform the desired actions.
-#
+# 
 # We can run the below, and view the [trace](https://smith.langchain.com/public/34aaf36d-204a-4ce3-a54e-4a0976f09670/r) to see:
-#
+# 
 # * The agent uses the `create_multion_session` tool
 # * It then uses MultiON to execute the query
 
@@ -110,3 +110,4 @@ agent_executor.invoke(
         "input": "Use multion to explain how AlphaCodium works, a recently released code language model."
     }
 )
+

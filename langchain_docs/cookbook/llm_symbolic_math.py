@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # LLM Symbolic Math
+# # LLM Symbolic Math 
 # This notebook showcases using LLMs and Python to Solve Algebraic Equations. Under the hood is makes use of [SymPy](https://www.sympy.org/en/index.html).
 
 # In[3]:
@@ -48,3 +48,4 @@ llm_symbolic_math.invoke("What are the solutions to this equation y^3 + 1/3y?")
 
 
 llm_symbolic_math.invoke("x = y + 5, y = z - 3, z = x * y. Solve for x, y, z")
+

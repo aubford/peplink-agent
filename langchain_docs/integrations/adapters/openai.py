@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # OpenAI Adapter
-#
+# 
 # **Please ensure OpenAI library is version 1.0.0 or higher; otherwise, refer to the older doc [OpenAI Adapter(Old)](/docs/integrations/adapters/openai-old/).**
-#
+# 
 # A lot of people get started with OpenAI but want to explore other models. LangChain's integrations with many model providers make this easy to do so. While LangChain has it's own message and model APIs, we've also made it as easy as possible to explore other models by exposing an adapter to adapt LangChain models to the OpenAI api.
-#
+# 
 # At the moment this only deals with output and does not return other information (token counts, stop reasons, etc).
 
 # In[1]:
@@ -101,3 +101,4 @@ for c in lc_openai.chat.completions.create(
     provider="ChatAnthropic",
 ):
     print(c["choices"][0]["delta"])
+

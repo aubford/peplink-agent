@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # AWS S3 Directory
-#
+# 
 # >[Amazon Simple Storage Service (Amazon S3)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-folders.html) is an object storage service
-#
+# 
 # >[AWS S3 Directory](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-folders.html)
-#
+# 
 # This covers how to load document objects from an `AWS S3 Directory` object.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  boto3")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  boto3')
 
 
 # In[2]:
@@ -66,3 +66,4 @@ loader = S3DirectoryLoader(
 
 
 loader.load()
+

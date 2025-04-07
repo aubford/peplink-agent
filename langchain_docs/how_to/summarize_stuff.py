@@ -7,21 +7,21 @@
 # ---
 
 # # How to summarize text in a single LLM call
-#
+# 
 # LLMs can summarize and otherwise distill desired information from text, including large volumes of text. In many cases, especially for models with larger context windows, this can be adequately achieved via a single LLM call.
-#
+# 
 # LangChain implements a simple [pre-built chain](https://python.langchain.com/api_reference/langchain/chains/langchain.chains.combine_documents.stuff.create_stuff_documents_chain.html) that "stuffs" a prompt with the desired context for summarization and other purposes. In this guide we demonstrate how to use the chain.
 
 # ## Load chat model
-#
+# 
 # Let's first load a [chat model](/docs/concepts/chat_models/):
-#
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs
 #   customVarName="llm"
 # />
-#
+# 
 
 # In[1]:
 
@@ -51,7 +51,7 @@ documents = [
 
 
 # ## Load chain
-#
+# 
 # Below, we define a simple prompt and instantiate the chain with our chat model and documents:
 
 # In[3]:
@@ -65,7 +65,7 @@ chain = create_stuff_documents_chain(llm, prompt)
 
 
 # ## Invoke chain
-#
+# 
 # Because the chain is a [Runnable](/docs/concepts/runnables), it implements the usual methods for invocation:
 
 # In[4]:
@@ -76,7 +76,7 @@ result
 
 
 # ### Streaming
-#
+# 
 # Note that the chain also supports streaming of individual output tokens:
 
 # In[6]:
@@ -87,7 +87,7 @@ for chunk in chain.stream({"context": documents}):
 
 
 # ## Next steps
-#
+# 
 # See the summarization [how-to guides](/docs/how_to/#summarization) for additional summarization strategies, including those designed for larger volumes of text.
-#
+# 
 # See also [this tutorial](/docs/tutorials/summarization) for more detail on summarization.

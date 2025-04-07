@@ -2,19 +2,17 @@
 # coding: utf-8
 
 # # Gradio
-#
+# 
 # There are many 1000s of `Gradio` apps on `Hugging Face Spaces`. This library puts them at the tips of your LLM's fingers 🦾
-#
+# 
 # Specifically, `gradio-tools` is a Python library for converting `Gradio` apps into tools that can be leveraged by a large language model (LLM)-based agent to complete its task. For example, an LLM could use a `Gradio` tool to transcribe a voice recording it finds online and then summarize it for you. Or it could use a different `Gradio` tool to apply OCR to a document on your Google Drive and then answer questions about it.
-#
+# 
 # It's very easy to create you own tool if you want to use a space that's not one of the pre-built tools. Please see this section of the gradio-tools documentation for information on how to do that. All contributions are welcome!
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  gradio_tools langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  gradio_tools langchain-community')
 
 
 # ## Using a tool
@@ -92,3 +90,7 @@ output = agent.run(
 
 
 # In[ ]:
+
+
+
+

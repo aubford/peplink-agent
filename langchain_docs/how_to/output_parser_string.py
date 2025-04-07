@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # How to parse text from message objects
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models/)
 # - [Messages](/docs/concepts/messages/)
 # - [Output parsers](/docs/concepts/output_parsers/)
 # - [LangChain Expression Language (LCEL)](/docs/concepts/lcel/)
-#
+# 
 # :::
-#
+# 
 # LangChain [message](/docs/concepts/messages/) objects support content in a [variety of formats](/docs/concepts/messages/#content), including text, [multimodal data](/docs/concepts/multimodality/), and a list of [content block](/docs/concepts/messages/#aimessage) dicts.
-#
+# 
 # The format of [Chat model](/docs/concepts/chat_models/) response content may depend on the provider. For example, the chat model for [Anthropic](/docs/integrations/chat/anthropic/) will return string content for typical string input:
 
 # In[1]:

@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Qdrant Sparse Vector
-#
+# 
 # >[Qdrant](https://qdrant.tech/) is an open-source, high-performance vector search engine/database.
-#
-#
+# 
+# 
 # >`QdrantSparseVectorRetriever` uses [sparse vectors](https://qdrant.tech/articles/sparse-vectors/) introduced in `Qdrant` [v1.7.0](https://qdrant.tech/articles/qdrant-1.7.x/) for document retrieval.
-#
+# 
 
 # Install the 'qdrant_client' package:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  qdrant_client")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  qdrant_client')
 
 
 # In[5]:
@@ -130,3 +130,4 @@ retriever.add_documents(docs)
 retriever.invoke(
     "Life and ethical dilemmas of AI",
 )
+

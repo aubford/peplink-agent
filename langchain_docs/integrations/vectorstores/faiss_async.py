@@ -2,33 +2,29 @@
 # coding: utf-8
 
 # # Faiss (Async)
-#
+# 
 # >[Facebook AI Similarity Search (Faiss)](https://engineering.fb.com/2017/03/29/data-infrastructure/faiss-a-library-for-efficient-similarity-search/) is a library for efficient similarity search and clustering of dense vectors. It contains algorithms that search in sets of vectors of any size, up to ones that possibly do not fit in RAM. It also includes supporting code for evaluation and parameter tuning.
 # >
 # >See [The FAISS Library](https://arxiv.org/pdf/2401.08281) paper.
-#
+# 
 # [Faiss documentation](https://faiss.ai/).
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # This notebook shows how to use functionality related to the `FAISS` vector database using `asyncio`.
 # LangChain implemented the synchronous and asynchronous vector store functions.
-#
+# 
 # See `synchronous` version [here](/docs/integrations/vectorstores/faiss).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  faiss-gpu # For CUDA 7.5+ Supported GPU's."
-)
+get_ipython().run_line_magic('pip', "install --upgrade --quiet  faiss-gpu # For CUDA 7.5+ Supported GPU's.")
 # OR
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  faiss-cpu # For CPU Installation"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu # For CPU Installation')
 
 
-# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
+# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key. 
 
 # In[ ]:
 
@@ -98,7 +94,7 @@ docs[0]
 
 
 # # Serializing and De-Serializing to bytes
-#
+# 
 # you can pickle the FAISS Index by these functions. If you use embeddings model which is of 90 mb (sentence-transformers/all-MiniLM-L6-v2 or any other model), the resultant pickle size would be more than 90 mb. the size of the model is also included in the overall size. To overcome this, use the below functions. These functions only serializes FAISS index and size would be much lesser. this can be helpful if you wish to store the index in database like sql.
 
 # In[ ]:
@@ -171,7 +167,7 @@ for doc, score in results_with_scores:
     print(f"Content: {doc.page_content}, Metadata: {doc.metadata}, Score: {score}")
 
 
-# Now we make the same query call but we filter for only `page = 1`
+# Now we make the same query call but we filter for only `page = 1` 
 
 # In[26]:
 
@@ -213,7 +209,7 @@ for doc in results:
 # - `$and` (all conditions must match)
 # - `$or` (any condition must match)
 # - `$not` (negation of condition)
-#
+# 
 # Performing the same above similarity search with advanced metadata filtering can be done as follows:
 
 # In[ ]:
@@ -227,7 +223,7 @@ for doc in results:
 
 
 # ## Delete
-#
+# 
 # You can also delete ids. Note that the ids to delete should be the ids in the docstore.
 
 # In[4]:
@@ -244,3 +240,7 @@ db.delete([db.index_to_docstore_id[0]])
 
 
 # In[ ]:
+
+
+
+

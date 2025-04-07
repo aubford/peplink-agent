@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Vespa
-#
+# 
 # >[Vespa](https://vespa.ai/) is a fully featured search engine and vector database. It supports vector search (ANN), lexical search, and search in structured data, all in the same query.
-#
+# 
 # This notebook shows how to use `Vespa.ai` as a LangChain vector store.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # In order to create the vector store, we use
 # [pyvespa](https://pyvespa.readthedocs.io/en/latest/index.html) to create a
 # connection a `Vespa` service.
@@ -16,7 +16,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  pyvespa")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pyvespa')
 
 
 # Using the `pyvespa` package, you can either connect to a
@@ -24,9 +24,9 @@ get_ipython().run_line_magic("pip", "install --upgrade --quiet  pyvespa")
 # or a local
 # [Docker instance](https://pyvespa.readthedocs.io/en/latest/deploy-docker.html).
 # Here, we will create a new Vespa application and deploy that using Docker.
-#
+# 
 # #### Creating a Vespa application
-#
+# 
 # First, we need to create an application package:
 
 # In[ ]:
@@ -60,16 +60,16 @@ app_package.schema.add_rank_profile(
 # the embedding vector. The `text` field is set up to use a BM25 index for
 # efficient text retrieval, and we'll see how to use this and hybrid search a
 # bit later.
-#
+# 
 # The `embedding` field is set up with a vector of length 384 to hold the
 # embedding representation of the text. See
 # [Vespa's Tensor Guide](https://docs.vespa.ai/en/tensor-user-guide.html)
 # for more on tensors in Vespa.
-#
+# 
 # Lastly, we add a [rank profile](https://docs.vespa.ai/en/ranking.html) to
 # instruct Vespa how to order documents. Here we set this up with a
 # [nearest neighbor search](https://docs.vespa.ai/en/nearest-neighbor-search.html).
-#
+# 
 # Now we can deploy this application locally:
 
 # In[2]:
@@ -84,9 +84,9 @@ vespa_app = vespa_docker.deploy(application_package=app_package)
 # This deploys and creates a connection to a `Vespa` service. In case you
 # already have a Vespa application running, for instance in the cloud,
 # please refer to the PyVespa application for how to connect.
-#
+# 
 # #### Creating a Vespa vector store
-#
+# 
 # Now, let's load some documents:
 
 # In[ ]:
@@ -110,7 +110,7 @@ embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2"
 # Here, we also set up local sentence embedder to transform the text to embedding
 # vectors. One could also use OpenAI embeddings, but the vector length needs to
 # be updated to `1536` to reflect the larger size of that embedding.
-#
+# 
 # To feed these to Vespa, we need to configure how the vector store should map to
 # fields in the Vespa application. Then we create the vector store directly from
 # this set of documents:
@@ -132,7 +132,7 @@ db = VespaStore.from_documents(docs, embedding_function, app=vespa_app, **vespa_
 # This creates a Vespa vector store and feeds that set of documents to Vespa.
 # The vector store takes care of calling the embedding function for each document
 # and inserts them into the database.
-#
+# 
 # We can now query the vector store:
 
 # In[ ]:
@@ -149,15 +149,15 @@ print(results[0].page_content)
 # `default` ranking function, which we set up in the application package
 # above. You can use the `ranking` argument to `similarity_search` to
 # specify which ranking function to use.
-#
+# 
 # Please refer to the [pyvespa documentation](https://pyvespa.readthedocs.io/en/latest/getting-started-pyvespa.html#Query)
 # for more information.
-#
+# 
 # This covers the basic usage of the Vespa store in LangChain.
 # Now you can return the results and continue using these in LangChain.
-#
+# 
 # #### Updating documents
-#
+# 
 # An alternative to calling `from_documents`, you can create the vector
 # store directly and call `add_texts` from that. This can also be used to update
 # documents:
@@ -178,9 +178,9 @@ print(results[0].page_content)
 
 # However, the `pyvespa` library contains methods to manipulate
 # content on Vespa which you can use directly.
-#
+# 
 # #### Deleting documents
-#
+# 
 # You can delete documents using the `delete` function:
 
 # In[ ]:
@@ -195,9 +195,9 @@ result = db.similarity_search(query)
 
 
 # Again, the `pyvespa` connection contains methods to delete documents as well.
-#
+# 
 # ### Returning with scores
-#
+# 
 # The `similarity_search` method only returns the documents in order of
 # relevancy. To retrieve the actual scores:
 
@@ -212,15 +212,15 @@ result = results[0]
 # This is a result of using the `"all-MiniLM-L6-v2"` embedding model using the
 # cosine distance function (as given by the argument `angular` in the
 # application function).
-#
+# 
 # Different embedding functions need different distance functions, and Vespa
 # needs to know which distance function to use when orderings documents.
 # Please refer to the
 # [documentation on distance functions](https://docs.vespa.ai/en/reference/schema-reference.html#distance-metric)
 # for more information.
-#
+# 
 # ### As retriever
-#
+# 
 # To use this vector store as a
 # [LangChain retriever](/docs/how_to#retrievers)
 # simply call the `as_retriever` function, which is a standard vector store
@@ -238,13 +238,13 @@ results = retriever.invoke(query)
 
 
 # This allows for more general, unstructured, retrieval from the vector store.
-#
+# 
 # ### Metadata
-#
+# 
 # In the example so far, we've only used the text and the embedding for that
 # text. Documents usually contain additional information, which in LangChain
 # is referred to as metadata.
-#
+# 
 # Vespa can contain many fields with different types by adding them to the application
 # package:
 
@@ -295,12 +295,12 @@ results = db.similarity_search(query, filter="rating > 3")
 
 
 # ### Custom query
-#
+# 
 # If the default behavior of the similarity search does not fit your
 # requirements, you can always provide your own query. Thus, you don't
 # need to provide all of the configuration to the vector store, but
 # rather just write this yourself.
-#
+# 
 # First, let's add a BM25 ranking function to our application:
 
 # In[ ]:
@@ -335,9 +335,9 @@ results = db.similarity_search_with_score(query, custom_query=custom_query)
 # All of the powerful search and query capabilities of Vespa can be used
 # by using a custom query. Please refer to the Vespa documentation on it's
 # [Query API](https://docs.vespa.ai/en/query-api.html) for more details.
-#
+# 
 # ### Hybrid search
-#
+# 
 # Hybrid search means using both a classic term-based search such as
 # BM25 and a vector search and combining the results. We need to create
 # a new rank profile for hybrid search on Vespa:
@@ -381,15 +381,15 @@ results = db.similarity_search_with_score(query, custom_query=custom_query)
 
 
 # ### Native embedders in Vespa
-#
+# 
 # Up until this point we've used an embedding function in Python to provide
 # embeddings for the texts. Vespa supports embedding function natively, so
 # you can defer this calculation in to Vespa. One benefit is the ability to use
 # GPUs when embedding documents if you have a large collections.
-#
+# 
 # Please refer to [Vespa embeddings](https://docs.vespa.ai/en/embedding.html)
 # for more information.
-#
+# 
 # First, we need to modify our application package:
 
 # In[ ]:
@@ -426,7 +426,7 @@ app_package.schema.add_rank_profile(
 # Please refer to the embeddings documentation on adding embedder models
 # and tokenizers to the application. Note that the `hfembedding` field
 # includes instructions for embedding using the `hf-embedder`.
-#
+# 
 # Now we can query with a custom query:
 
 # In[ ]:
@@ -449,15 +449,15 @@ results = db.similarity_search_with_score(query, custom_query=custom_query)
 
 # Note that the query here includes an `embed` instruction to embed the query
 # using the same model as for the documents.
-#
+# 
 # ### Approximate nearest neighbor
-#
+# 
 # In all of the above examples, we've used exact nearest neighbor to
 # find results. However, for large collections of documents this is
 # not feasible as one has to scan through all documents to find the
 # best matches. To avoid this, we can use
 # [approximate nearest neighbors](https://docs.vespa.ai/en/approximate-nn-hnsw.html).
-#
+# 
 # First, we can change the embedding field to create a HNSW index:
 
 # In[ ]:
@@ -492,5 +492,5 @@ results = db.similarity_search(query, approximate=True)
 
 
 # This covers most of the functionality in the Vespa vector store in LangChain.
-#
-#
+# 
+# 

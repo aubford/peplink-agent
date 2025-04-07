@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Banana
-#
-#
+# 
+# 
 # [Banana](https://www.banana.dev/about-us) is focused on building the machine learning infrastructure.
-#
+# 
 # This example goes over how to use LangChain to interact with Banana models
 
 # In[ ]:
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU  langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU  langchain-community')
 
 
 # In[ ]:
 
 
 # Install the package  https://docs.banana.dev/banana-docs/core-concepts/sdks/python
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  banana-dev")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  banana-dev')
 
 
 # In[ ]:
@@ -78,3 +78,4 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.run(question)
+

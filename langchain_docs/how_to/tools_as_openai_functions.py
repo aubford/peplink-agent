@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # How to convert tools to OpenAI Functions
-#
+# 
 # This notebook goes over how to use LangChain [tools](/docs/concepts/tools/) as OpenAI functions.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-community langchain-openai")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community langchain-openai')
 
 
 # In[19]:
@@ -75,3 +75,4 @@ model_with_functions.invoke([HumanMessage(content="move file foo to bar")])
 
 model_with_tools = model.bind_tools(tools)
 model_with_tools.invoke([HumanMessage(content="move file foo to bar")])
+

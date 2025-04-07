@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # Agent Debates with Tools
-#
+# 
 # This example shows how to simulate multi-agent dialogues where agents have access to tools.
 
-# ## Import LangChain related modules
+# ## Import LangChain related modules 
 
 # In[1]:
 
@@ -214,7 +214,7 @@ for name, description in agent_descriptions.items():
 
 def generate_system_message(name, description, tools):
     return f"""{conversation_description}
-    
+
 Your name is {name}.
 
 Your description is as follows: {description}
@@ -254,7 +254,7 @@ topic_specifier_prompt = [
     SystemMessage(content="You can make a topic more specific."),
     HumanMessage(
         content=f"""{topic}
-        
+
         You are the moderator.
         Please make the topic more specific.
         Please reply with the specified quest in {word_limit} words or less. 
@@ -313,3 +313,4 @@ while n < max_iters:
     print(f"({name}): {message}")
     print("\n")
     n += 1
+

@@ -3,17 +3,17 @@
 
 # # FalkorDBVectorStore
 # <a href="https://docs.falkordb.com/" target="_blank">FalkorDB</a> is an open-source graph database with integrated support for vector similarity search
-#
+# 
 # it supports:
 # - approximate nearest neighbor search
 # - Euclidean similarity & Cosine Similarity
 # - Hybrid search combining vector and keyword searches
-#
+# 
 # This notebook shows how to use the FalkorDB vector index (`FalkorDB`)
-#
+# 
 # See the <a href="https://docs.falkordb.com/" target="_blank">installation instruction</a>
-#
-#
+# 
+# 
 
 # ## Setup
 
@@ -21,11 +21,9 @@
 
 
 # Pip install necessary package
-get_ipython().run_line_magic("pip", "install --upgrade  falkordb")
-get_ipython().run_line_magic("pip", "install --upgrade  tiktoken")
-get_ipython().run_line_magic(
-    "pip", "install --upgrade  langchain langchain_huggingface"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade  falkordb')
+get_ipython().run_line_magic('pip', 'install --upgrade  tiktoken')
+get_ipython().run_line_magic('pip', 'install --upgrade  langchain langchain_huggingface')
 
 
 # ### Credentials
@@ -128,11 +126,11 @@ vector_store.delete(ids=["3"])
 
 
 # ## Query vector store
-#
+# 
 # Once your vector store has been created and the relevant documents have been added you will most likely wish to query it during the running of your chain or agent.
 
 # ### Query directly
-#
+# 
 # Performing a simple similarity search can be done as follows:
 
 # In[10]:
@@ -170,7 +168,7 @@ retriever.invoke("thud")
 # - <a href="https://python.langchain.com/v0.2/docs/tutorials/#working-with-external-knowledge" target="_blank">Tutorials: working with external knowledge</a>
 # - <a href="https://python.langchain.com/v0.2/docs/how_to/#qa-with-rag" target="_blank">How-to: Question and answer with RAG</a>
 # - <a href="Retrieval conceptual docs" target="_blank">Retrieval conceptual docs</a>
-#
+# 
 
 # ## API reference
 # For detailed documentation of all `FalkorDBVector` features and configurations head to the API reference: https://python.langchain.com/api_reference/community/vectorstores/langchain_community.vectorstores.falkordb_vector.FalkorDBVector.html

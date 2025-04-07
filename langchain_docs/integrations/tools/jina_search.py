@@ -39,6 +39,9 @@ get_ipython().run_line_magic('pip', 'install --quiet -U "langchain-community>=0.
 import getpass
 import os
 
+if not os.environ.get("JINA_API_KEY"):
+    os.environ["JINA_API_KEY"] = getpass.getpass("Jina API key:\n")
+
 
 # It's also helpful (but not needed) to set up [LangSmith](https://smith.langchain.com/) for best-in-class observability:
 

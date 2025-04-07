@@ -2,28 +2,26 @@
 # coding: utf-8
 
 # # LangSmith LLM Runs
-#
+# 
 # This notebook demonstrates how to directly load data from LangSmith's LLM runs and fine-tune a model on that data.
 # The process is simple and comprises 3 steps.
-#
+# 
 # 1. Select the LLM runs to train on.
 # 2. Use the LangSmithRunChatLoader to load runs as chat sessions.
 # 3. Fine-tune your model.
-#
+# 
 # Then you can use the fine-tuned model in your LangChain app.
-#
+# 
 # Before diving in, let's install our prerequisites.
-#
+# 
 # ## Prerequisites
-#
+# 
 # Ensure you've installed langchain >= 0.0.311 and have configured your environment with your LangSmith API key.
 
 # In[1]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain langchain-openai"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-openai')
 
 
 # In[1]:
@@ -42,7 +40,7 @@ os.environ["LANGSMITH_PROJECT"] = project_name
 # ## 1. Select Runs
 # The first step is selecting which runs to fine-tune on. A common case would be to select LLM runs within
 # traces that have received positive user feedback. You can find examples of this in the[LangSmith Cookbook](https://github.com/langchain-ai/langsmith-cookbook/blob/main/exploratory-data-analysis/exporting-llm-runs-and-feedback/llm_run_etl.ipynb) and in the [docs](https://docs.smith.langchain.com/tracing/use-cases/export-runs/local).
-#
+# 
 # For the sake of this tutorial, we will generate some runs for you to use here. Let's try fine-tuning a
 # simple function-calling chain.
 
@@ -144,7 +142,7 @@ results = chain.batch([{"input": q} for q in math_questions], return_exceptions=
 
 
 # #### Load runs that did not error
-#
+# 
 # Now we can select the successful runs to fine-tune on.
 
 # In[6]:
@@ -236,7 +234,7 @@ while status != "succeeded":
 
 
 # ## 4. Use in LangChain
-#
+# 
 # After fine-tuning, use the resulting model ID with the ChatOpenAI model class in your LangChain app.
 
 # In[11]:

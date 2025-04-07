@@ -4,34 +4,34 @@
 # # Docling
 
 # [Docling](https://github.com/DS4SD/docling) parses PDF, DOCX, PPTX, HTML, and other formats into a rich unified representation including document layout, tables etc., making them ready for generative AI workflows like RAG.
-#
+# 
 # This integration provides Docling's capabilities via the `DoclingLoader` document loader.
 
 # ## Overview
-#
-# <!--
+# 
+# <!-- 
 # ### Integration details
-#
+# 
 # | Class | Package | Local | Serializable | JS support|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | langchain_docling.DoclingLoader | langchain-docling | ✅ | ❌ | ❌ |
-#
+# | langchain_docling.DoclingLoader | langchain-docling | ✅ | ❌ | ❌ | 
+# 
 # ### Loader features
 # | Source | Document Lazy Loading | Native Async Support
-# | :---: | :---: | :---: |
-# | DoclingLoader | ✅ | ❌ |
+# | :---: | :---: | :---: | 
+# | DoclingLoader | ✅ | ❌ | 
 #  -->
-#
+# 
 # The presented `DoclingLoader` component enables you to:
 # - use various document types in your LLM applications with ease and speed, and
 # - leverage Docling's rich format for advanced, document-native grounding.
-#
+# 
 # `DoclingLoader` supports two different export modes:
 # - `ExportType.DOC_CHUNKS` (default): if you want to have each input document chunked and
 #   to then capture each individual chunk as a separate LangChain Document downstream, or
 # - `ExportType.MARKDOWN`: if you want to capture each input document as a separate
 #   LangChain Document
-#
+# 
 # The example allows exploring both modes via parameter `EXPORT_TYPE`; depending on the
 # value set, the example pipeline is then set up accordingly.
 
@@ -40,7 +40,7 @@
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-docling")
+get_ipython().run_line_magic('pip', 'install -qU langchain-docling')
 
 
 # > For best conversion speed, use GPU acceleration whenever available; e.g. if running on Colab, use a GPU-enabled runtime.
@@ -69,7 +69,7 @@ loader = DoclingLoader(file_path=FILE_PATH)
 # - `chunker` (optional): any specific Docling chunker instance to use (for doc-chunk
 #     mode)
 # - `meta_extractor` (optional): any specific metadata extractor to use
-#
+# 
 
 # ## Load
 
@@ -93,7 +93,7 @@ for d in docs[:3]:
 
 
 # ## Lazy Load
-#
+# 
 # Documents can also be loaded in a lazy fashion:
 
 # In[5]:
@@ -105,7 +105,7 @@ for doc in doc_iter:
 
 
 # ## End-to-end Example
-#
+# 
 
 # In[6]:
 
@@ -116,17 +116,14 @@ import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-#
+# 
 # > - The following example pipeline uses HuggingFace's Inference API; for increased LLM quota, token can be provided via env var `HF_TOKEN`.
 # > - Dependencies for this pipeline can be installed as shown below (`--no-warn-conflicts` meant for Colab's pre-populated Python env; feel free to remove for stricter usage):
 
 # In[7]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install -q --progress-bar off --no-warn-conflicts langchain-core langchain-huggingface langchain_milvus langchain python-dotenv",
-)
+get_ipython().run_line_magic('pip', 'install -q --progress-bar off --no-warn-conflicts langchain-core langchain-huggingface langchain_milvus langchain python-dotenv')
 
 
 # Defining the pipeline parameters:
@@ -257,6 +254,7 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": TOP_K})
 llm = HuggingFaceEndpoint(
     repo_id=GEN_MODEL_ID,
     huggingfacehub_api_token=HF_TOKEN,
+    task="text-generation",
 )
 
 
@@ -291,9 +289,9 @@ for i, doc in enumerate(resp_dict["context"]):
 # headings (i.e. section), page, and precise bounding box.
 
 # ## API reference
-#
-# - [LangChain Docling integration GitHub](https://github.com/DS4SD/docling-langchain)
-# - [Docling GitHub](https://github.com/DS4SD/docling)
-# - [Docling docs](https://ds4sd.github.io/docling/)
+# 
+# - [LangChain Docling integration GitHub](https://github.com/docling-project/docling-langchain)
+# - [Docling GitHub](https://github.com/docling-project/docling)
+# - [Docling docs](https://docling-project.github.io/docling//)
 
-#
+# 

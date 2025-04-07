@@ -8,11 +8,11 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  gigachat")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  gigachat')
 
 
 # To get GigaChat credentials you need to [create account](https://developers.sber.ru/studio/login) and [get access to API](https://developers.sber.ru/docs/ru/gigachat/individuals-quickstart)
-#
+# 
 # ## Example
 
 # In[2]:
@@ -47,3 +47,4 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 
 generated = llm_chain.invoke(input={"country": "Russia"})
 print(generated["text"])
+

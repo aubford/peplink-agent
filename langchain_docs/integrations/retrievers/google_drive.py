@@ -2,31 +2,31 @@
 # coding: utf-8
 
 # # Google Drive
-#
+# 
 # This notebook covers how to retrieve documents from `Google Drive`.
-#
+# 
 # ## Prerequisites
-#
+# 
 # 1. Create a Google Cloud project or use an existing project
 # 1. Enable the [Google Drive API](https://console.cloud.google.com/flows/enableapi?apiid=drive.googleapis.com)
 # 1. [Authorize credentials for desktop app](https://developers.google.com/drive/api/quickstart/python#authorize_credentials_for_a_desktop_application)
 # 1. `pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib`
-#
+# 
 # ## Retrieve the Google Docs
-#
-# By default, the `GoogleDriveRetriever` expects the `credentials.json` file to be `~/.credentials/credentials.json`, but this is configurable using the `GOOGLE_ACCOUNT_FILE` environment variable.
+# 
+# By default, the `GoogleDriveRetriever` expects the `credentials.json` file to be `~/.credentials/credentials.json`, but this is configurable using the `GOOGLE_ACCOUNT_FILE` environment variable. 
 # The location of `token.json` uses the same directory (or use the parameter `token_path`). Note that `token.json` will be created automatically the first time you use the retriever.
-#
-# `GoogleDriveRetriever` can retrieve a selection of files with some requests.
-#
+# 
+# `GoogleDriveRetriever` can retrieve a selection of files with some requests. 
+# 
 # By default, If you use a `folder_id`, all the files inside this folder can be retrieved to `Document`.
-#
+# 
 
 # You can obtain your folder and document id from the URL:
-#
+# 
 # * Folder: https://drive.google.com/drive/u/0/folders/1yucgL9WGgWZdM1TOuKkeghlPizuzMYb5 -> folder id is `"1yucgL9WGgWZdM1TOuKkeghlPizuzMYb5"`
 # * Document: https://docs.google.com/document/d/1bfaMQ18_i56204VaQDVeAFpqEijJTgvurupdEDiaUQw/edit -> document id is `"1bfaMQ18_i56204VaQDVeAFpqEijJTgvurupdEDiaUQw"`
-#
+# 
 # The special value `root` is for your personal home.
 
 # In[ ]:
@@ -43,7 +43,7 @@ retriever = GoogleDriveRetriever(
 
 
 # By default, all files with these MIME types can be converted to `Document`.
-#
+# 
 # - `text/text`
 # - `text/plain`
 # - `text/html`
@@ -60,15 +60,15 @@ retriever = GoogleDriveRetriever(
 # - `application/vnd.google.colaboratory` (Notebook colab)
 # - `application/vnd.openxmlformats-officedocument.presentationml.presentation` (PPTX)
 # - `application/vnd.openxmlformats-officedocument.wordprocessingml.document` (DOCX)
-#
+# 
 # It's possible to update or customize this. See the documentation of `GoogleDriveRetriever`.
-#
+# 
 # But, the corresponding packages must be installed.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  unstructured")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  unstructured')
 
 
 # In[ ]:
@@ -78,7 +78,7 @@ retriever.invoke("machine learning")
 
 
 # You can customize the criteria to select the files. A set of predefined filter are proposed:
-#
+# 
 # | Template                                 | Description                                                           |
 # | --------------------------------------   | --------------------------------------------------------------------- |
 # | `gdrive-all-in-folder`                   | Return all compatible files from a `folder_id`                        |
@@ -130,10 +130,10 @@ for doc in retriever.invoke("machine learning"):
 
 
 # ## Use Google Drive 'description' metadata
-#
+# 
 # Each Google Drive has a `description` field in metadata (see the *details of a file*).
 # Use the `snippets` mode to return the description of selected files.
-#
+# 
 
 # In[ ]:
 
@@ -148,3 +148,4 @@ retriever = GoogleDriveRetriever(
     supportsAllDrives=False,
 )
 retriever.invoke("machine learning")
+

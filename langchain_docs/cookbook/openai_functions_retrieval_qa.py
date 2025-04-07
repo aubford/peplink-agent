@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Structure answers with OpenAI functions
-#
+# 
 # OpenAI functions allows for structuring of response output. This is often useful in question answering when you want to not only get the final answer but also supporting evidence, citations, etc.
-#
+# 
 # In this notebook we show how to use an LLM chain which uses OpenAI functions as part of an overall retrieval pipeline.
 
 # In[25]:
@@ -91,7 +91,7 @@ retrieval_qa.run(query)
 
 
 # ## Using Pydantic
-#
+# 
 # If we want to, we can set the chain to return in Pydantic. Note that if downstream chains consume the output of this chain - including memory - they will generally expect it to be in string format, so you should only use this chain when it is the final chain.
 
 # In[35]:
@@ -125,7 +125,7 @@ retrieval_qa_pydantic.run(query)
 
 
 # ## Using in ConversationalRetrievalChain
-#
+# 
 # We can also show what it's like to use this in the ConversationalRetrievalChain. Note that because this chain involves memory, we will NOT use the Pydantic return type.
 
 # In[39]:
@@ -187,9 +187,9 @@ result
 
 
 # ## Using your own output schema
-#
+# 
 # We can change the outputs of our chain by passing in our own schema. The values and descriptions of this schema will inform the function we pass to the OpenAI API, meaning it won't just affect how we parse outputs but will also change the OpenAI output itself. For example we can add a `countries_referenced` parameter to our schema and describe what we want this parameter to mean, and that'll cause the OpenAI output to include a description of a speaker in the response.
-#
+# 
 # In addition to the previous example, we can also add a custom prompt to the chain. This will allow you to add additional context to the response, which can be useful for question answering.
 
 # In[45]:
@@ -248,3 +248,4 @@ retrieval_qa_pydantic = RetrievalQA(
 )
 query = "What did he say about russia"
 retrieval_qa_pydantic.run(query)
+

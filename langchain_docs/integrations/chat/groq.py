@@ -17,7 +17,7 @@ sidebar_label: Groq
 # ### Model features
 # | [Tool calling](../../how_to/tool_calling.ipynb) | [Structured output](../../how_to/structured_output.ipynb) | JSON mode | [Image input](../../how_to/multimodal_inputs.ipynb) | Audio input | Video input | [Token-level streaming](../../how_to/chat_streaming.ipynb) | Native async | [Token usage](../../how_to/chat_token_usage_tracking.ipynb) | [Logprobs](../../how_to/logprobs.ipynb) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | 
+# | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
 # 
 # ## Setup
 # 
@@ -37,7 +37,7 @@ if "GROQ_API_KEY" not in os.environ:
     os.environ["GROQ_API_KEY"] = getpass.getpass("Enter your Groq API key: ")
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[2]:
 
@@ -50,7 +50,7 @@ if "GROQ_API_KEY" not in os.environ:
 # 
 # The LangChain Groq integration lives in the `langchain-groq` package:
 
-# In[3]:
+# In[ ]:
 
 
 get_ipython().run_line_magic('pip', 'install -qU langchain-groq')
@@ -60,13 +60,13 @@ get_ipython().run_line_magic('pip', 'install -qU langchain-groq')
 # 
 # Now we can instantiate our model object and generate chat completions:
 
-# In[4]:
+# In[1]:
 
 
 from langchain_groq import ChatGroq
 
 llm = ChatGroq(
-    model="mixtral-8x7b-32768",
+    model="llama-3.1-8b-instant",
     temperature=0,
     max_tokens=None,
     timeout=None,
@@ -77,7 +77,7 @@ llm = ChatGroq(
 
 # ## Invocation
 
-# In[5]:
+# In[2]:
 
 
 messages = [
@@ -91,7 +91,7 @@ ai_msg = llm.invoke(messages)
 ai_msg
 
 
-# In[6]:
+# In[3]:
 
 
 print(ai_msg.content)
@@ -101,7 +101,7 @@ print(ai_msg.content)
 # 
 # We can [chain](../../how_to/sequence.ipynb) our model with a prompt template like so:
 
-# In[7]:
+# In[4]:
 
 
 from langchain_core.prompts import ChatPromptTemplate

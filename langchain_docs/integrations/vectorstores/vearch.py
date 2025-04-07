@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Vearch
-#
+# 
 # >[Vearch](https://vearch.readthedocs.io) is the vector search infrastructure for deeping learning and AI applications.
-#
+# 
 
 # ## Setting up
-#
+# 
 # Follow [instructions](https://vearch.readthedocs.io/en/latest/quick-start-guide.html#).
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  vearch")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  vearch')
 
 # OR
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  vearch_cluster")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  vearch_cluster')
 
 
 # ## Example
@@ -91,11 +91,21 @@ vearch_cluster = Vearch.from_documents(
     flag=1,
 )
 
+# The vector data is usually already initialized, so we don’t need the document parameter and can directly create the object.
+vearch_cluster_b = Vearch(
+    embeddings,
+    path_or_url="http://test-vearch-langchain-router.vectorbase.svc.ht1.n.jd.local",
+    db_name="vearch_cluster_langchian",
+    table_name="tobenumone",
+    flag=1,
+)
+
 
 # In[6]:
 
 
 query = "你知道凌波微步吗，你知道都有谁会凌波微步?"
+# The second parameter is the top-n to retrieve, and its default value is 4.
 vearch_standalone_res = vearch_standalone.similarity_search(query, 3)
 for idx, tmp in enumerate(vearch_standalone_res):
     print(f"{'#'*20}第{idx+1}段相关文档{'#'*20}\n\n{tmp.page_content}\n")
@@ -112,6 +122,11 @@ query_c = "你知道凌波微步吗，你知道都有谁会凌波微步?"
 cluster_res = vearch_cluster.similarity_search(query_c, 3)
 for idx, tmp in enumerate(cluster_res):
     print(f"{'#'*20}第{idx+1}段相关文档{'#'*20}\n\n{tmp.page_content}\n")
+
+# In practical applications, we usually limit the boundary value of similarity. The following method can set this value.
+cluster_res_with_bound = vearch_cluster.similarity_search_with_score(
+    query=query_c, k=3, min_score=0.5
+)
 
 # combine your local knowleadge and query
 context_c = "".join([tmp.page_content for tmp in cluster_res])
@@ -180,7 +195,7 @@ print(f"***************ChatGLM:{response_c}\n")
 # In[9]:
 
 
-##delete and get function need to maintian  docids
+##delete and get function need to maintain  docids
 ##your docid
 
 res_d = vearch_standalone.delete(
@@ -240,7 +255,17 @@ print("get existed docid", get_id_doc)
 # In[ ]:
 
 
+
+
+
 # In[ ]:
 
 
+
+
+
 # In[ ]:
+
+
+
+

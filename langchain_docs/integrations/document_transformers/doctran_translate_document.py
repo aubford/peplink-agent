@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Doctran: language translation
-#
+# 
 # Comparing documents through embeddings has the benefit of working across multiple languages. "Harrison says hello" and "Harrison dice hola" will occupy similar positions in the vector space because they have the same meaning semantically.
-#
+# 
 # However, it can still be useful to use an LLM to **translate documents into other languages** before vectorizing them. This is especially helpful when users are expected to query the knowledge base in different languages, or when state-of-the-art embedding models are not available for a given language.
-#
+# 
 # We can accomplish this using the [Doctran](https://github.com/psychic-api/doctran) library, which uses OpenAI's function calling feature to translate documents between languages.
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  doctran")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  doctran')
 
 
 # In[2]:
@@ -96,7 +96,7 @@ print(translated_document[0].page_content)
 
 
 # ## Output using the Async version
-#
+# 
 # After translating a document, the result will be returned as a new document with the page_content translated into the target language. The async version will improve performance when the documents are chunked in multiple parts. It will also make sure to return the output in the correct order.
 
 # In[8]:
@@ -115,3 +115,4 @@ result = await qa_translator.atransform_documents(documents)
 
 
 print(result[0].page_content)
+

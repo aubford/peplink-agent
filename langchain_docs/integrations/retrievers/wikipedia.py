@@ -17,7 +17,7 @@ sidebar_label: Wikipedia
 # <ItemTable category="external_retrievers" item="WikipediaRetriever" />
 
 # ## Setup
-# If you want to get automated tracing from runs of individual tools, you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of individual tools, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 

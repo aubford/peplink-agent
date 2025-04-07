@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # SAP HANA Cloud Vector Engine
-#
+# 
 # >[SAP HANA Cloud Vector Engine](https://www.sap.com/events/teched/news-guide/ai.html#article8) is a vector store fully integrated into the `SAP HANA Cloud` database.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # ## Setting up
-#
+# 
 # Installation of the HANA database driver.
 
 # In[1]:
 
 
 # Pip install necessary package
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  hdbcli")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  hdbcli')
 
 
 # For `OpenAIEmbeddings` we use the OpenAI API key from the environment.
@@ -24,7 +24,6 @@ get_ipython().run_line_magic("pip", "install --upgrade --quiet  hdbcli")
 
 
 import os
-
 # Use OPENAI_API_KEY env variable
 # os.environ["OPENAI_API_KEY"] = "Your OpenAI API key"
 
@@ -128,7 +127,7 @@ for doc in docs:
 
 
 # ## Maximal Marginal Relevance Search (MMR)
-#
+# 
 # `Maximal marginal relevance` optimizes for similarity to query AND diversity among selected documents. The first 20 (fetch_k) items will be retrieved from the DB. The MMR algorithm will then find the best 2 (k) matches.
 
 # In[15]:
@@ -141,12 +140,12 @@ for doc in docs:
 
 
 # ## Creating an HNSW Vector Index
-#
+# 
 # A vector index can significantly speed up top-k nearest neighbor queries for vectors. Users can create a Hierarchical Navigable Small World (HNSW) vector index using the `create_hnsw_index` function.
-#
+# 
 # For more information about creating an index at the database level, please refer to the [official documentation](https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-vector-engine-guide/create-vector-index-statement-data-definition).
-#
-#
+# 
+# 
 
 # In[18]:
 
@@ -185,12 +184,12 @@ for doc in docs:
     print(doc.page_content)
 
 
-#
+# 
 # **Key Points**:
 # - **Similarity Function**: The similarity function for the index is **cosine similarity** by default. If you want to use a different similarity function (e.g., `L2` distance), you need to specify it when initializing the `HanaDB` instance.
 # - **Default Parameters**: In the `create_hnsw_index` function, if the user does not provide custom values for parameters like `m`, `ef_construction`, or `ef_search`, the default values (e.g., `m=64`, `ef_construction=128`, `ef_search=200`) will be used automatically. These values ensure the index is created with reasonable performance without requiring user intervention.
-#
-#
+# 
+# 
 
 # ## Basic Vectorstore Operations
 
@@ -260,7 +259,7 @@ print(len(docs))
 # ## Advanced filtering
 # In addition to the basic value-based filtering capabilities, it is possible to use more advanced filtering.
 # The table below shows the available filter operators.
-#
+# 
 # | Operator | Semantic                 |
 # |----------|-------------------------|
 # | `$eq`    | Equality (==)           |
@@ -504,7 +503,7 @@ print(result["answer"])
 # ## Standard tables vs. "custom" tables with vector data
 
 # As default behaviour, the table for the embeddings is created with 3 columns:
-#
+# 
 # - A column `VEC_TEXT`, which contains the text of the Document
 # - A column `VEC_META`, which contains the metadata of the Document
 # - A column `VEC_VECTOR`, which contains the embeddings-vector of the Document's text
@@ -545,7 +544,7 @@ for row in rows:
 cur.close()
 
 
-# Show the value of the inserted document in the three columns
+# Show the value of the inserted document in the three columns 
 
 # In[ ]:
 
@@ -562,11 +561,11 @@ cur.close()
 
 
 # Custom tables must have at least three columns that match the semantics of a standard table
-#
+# 
 # - A column with type `NCLOB` or `NVARCHAR` for the text/context of the embeddings
-# - A column with type `NCLOB` or `NVARCHAR` for the metadata
+# - A column with type `NCLOB` or `NVARCHAR` for the metadata 
 # - A column with type `REAL_VECTOR` for the embedding vector
-#
+# 
 # The table can contain additional columns. When new Documents are inserted into the table, these additional columns must allow NULL values.
 
 # In[39]:
@@ -719,3 +718,4 @@ docs = db.similarity_search(query, k=2, filter=advanced_filter)
 for doc in docs:
     print("-" * 80)
     print(doc.page_content)
+

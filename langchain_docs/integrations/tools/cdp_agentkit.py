@@ -40,7 +40,7 @@ sidebar_label: CDP
 # 3. Initialize the CDP wrapper and toolkit
 # 4. Pass the tools to your agent with `toolkit.get_tools()`
 
-# If you want to get automated tracing from runs of individual tools, you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of individual tools, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 

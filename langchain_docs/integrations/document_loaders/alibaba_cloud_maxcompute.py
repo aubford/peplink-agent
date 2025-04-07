@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Alibaba Cloud MaxCompute
-#
+# 
 # >[Alibaba Cloud MaxCompute](https://www.alibabacloud.com/product/maxcompute) (previously known as ODPS) is a general purpose, fully managed, multi-tenancy data processing platform for large-scale data warehousing. MaxCompute supports various data importing solutions and distributed computing models, enabling users to effectively query massive datasets, reduce production costs, and ensure data security.
-#
+# 
 # The `MaxComputeLoader` lets you execute a MaxCompute SQL query and loads the results as one document per row.
 
 # In[7]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  pyodps")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pyodps')
 
 
 # ## Basic Usage
@@ -105,3 +105,4 @@ print(data[0].page_content)
 
 
 print(data[0].metadata)
+

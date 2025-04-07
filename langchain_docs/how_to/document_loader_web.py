@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # How to load web pages
-#
+# 
 # This guide covers how to [load](/docs/concepts/document_loaders/) web pages into the LangChain [Document](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html) format that we use downstream. Web pages contain text, images, and other multimedia elements, and are typically represented with HTML. They may include links to other pages or resources.
-#
+# 
 # LangChain integrates with a host of parsers that are appropriate for web pages. The right parser will depend on your needs. Below we demonstrate two possibilities:
-#
+# 
 # - [Simple and fast](/docs/how_to/document_loader_web#simple-and-fast-text-extraction) parsing, in which we recover one `Document` per web page with its content represented as a "flattened" string;
 # - [Advanced](/docs/how_to/document_loader_web#advanced-parsing) parsing, in which we recover multiple `Document` objects per page, allowing one to identify and traverse sections, links, tables, and other structures.
-#
+# 
 # ## Setup
-#
+# 
 # For the "simple and fast" parsing, we will need `langchain-community` and the `beautifulsoup4` library:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-community beautifulsoup4")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community beautifulsoup4')
 
 
 # For advanced parsing, we will use `langchain-unstructured`:
@@ -25,13 +25,13 @@ get_ipython().run_line_magic("pip", "install -qU langchain-community beautifulso
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-unstructured")
+get_ipython().run_line_magic('pip', 'install -qU langchain-unstructured')
 
 
 # ## Simple and fast text extraction
-#
+# 
 # If you are looking for a simple string representation of text that is embedded in a web page, the method below is appropriate. It will return a list of `Document` objects -- one per page -- containing a single string of the page's text. Under the hood it uses the `beautifulsoup4` Python library.
-#
+# 
 # LangChain document loaders implement `lazy_load` and its async variant, `alazy_load`, which return iterators of `Document objects`. We will use these below.
 
 # In[1]:
@@ -93,13 +93,13 @@ print(doc.page_content[-500:])
 
 
 # Note that this required advance technical knowledge of how the body text is represented in the underlying HTML.
-#
+# 
 # We can parameterize `WebBaseLoader` with a variety of settings, allowing for specification of request headers, rate limits, and parsers and other kwargs for BeautifulSoup. See its [API reference](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.web_base.WebBaseLoader.html) for detail.
 
 # ## Advanced parsing
-#
+# 
 # This method is appropriate if we want more granular control or processing of the page content. Below, instead of generating one `Document` per page and controlling its content via BeautifulSoup, we generate multiple `Document` objects representing distinct structures on a page. These structures can include section titles and their corresponding body texts, lists or enumerations, tables, and more.
-#
+# 
 # Under the hood it uses the `langchain-unstructured` library. See the [integration docs](/docs/integrations/document_loaders/unstructured_file/) for more information about using [Unstructured](https://docs.unstructured.io/welcome) with LangChain.
 
 # In[6]:
@@ -136,7 +136,7 @@ for doc in docs[:5]:
 
 
 # Elements may also have parent-child relationships -- for example, a paragraph might belong to a section with a title. If a section is of particular interest (e.g., for indexing) we can isolate the corresponding `Document` objects.
-#
+# 
 # As an example, below we load the content of the "Setup" sections for two web pages:
 
 # In[9]:
@@ -186,13 +186,13 @@ dict(setup_text)
 
 
 # ### Vector search over page content
-#
+# 
 # Once we have loaded the page contents into LangChain `Document` objects, we can index them (e.g., for a RAG application) in the usual way. Below we use OpenAI [embeddings](/docs/concepts/embedding_models), although any LangChain embeddings model will suffice.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-openai")
+get_ipython().run_line_magic('pip', 'install -qU langchain-openai')
 
 
 # In[11]:
@@ -218,5 +218,5 @@ for doc in retrieved_docs:
 
 
 # ## Other web page loaders
-#
+# 
 # For a list of available LangChain web page loaders, please see [this table](/docs/integrations/document_loaders/#webpages).

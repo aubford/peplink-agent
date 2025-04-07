@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Aerospike
-#
+# 
 # [Aerospike Vector Search](https://aerospike.com/docs/vector) (AVS) is an
 # extension to the Aerospike Database that enables searches across very large
 # datasets stored in Aerospike. This new service lives outside of Aerospike and
 # builds an index to perform those searches.
-#
+# 
 # This notebook showcases the functionality of the LangChain Aerospike VectorStore
 # integration.
-#
+# 
 # ## Install AVS
-#
+# 
 # Before using this notebook, we need to have a running AVS instance. Use one of
-# the [available installation methods](https://aerospike.com/docs/vector/install).
-#
+# the [available installation methods](https://aerospike.com/docs/vector/install). 
+# 
 # When finished, store your AVS instance's IP address and port to use later
 # in this demo:
 
@@ -26,31 +26,27 @@ AVS_HOST = "<avs-ip>"
 AVS_PORT = 5000
 
 
-# ## Install Dependencies
+# ## Install Dependencies 
 # The `sentence-transformers` dependency is large. This step could take several minutes to complete.
 
 # In[2]:
 
 
-get_ipython().system(
-    "pip install --upgrade --quiet aerospike-vector-search==3.0.1 langchain-community sentence-transformers langchain"
-)
+get_ipython().system('pip install --upgrade --quiet aerospike-vector-search==3.0.1 langchain-community sentence-transformers langchain')
 
 
 # ## Download Quotes Dataset
-#
+# 
 # We will download a dataset of approximately 100,000 quotes and use a subset of those quotes for semantic search.
 
 # In[3]:
 
 
-get_ipython().system(
-    "wget https://github.com/aerospike/aerospike-vector-search-examples/raw/7dfab0fccca0852a511c6803aba46578729694b5/quote-semantic-search/container-volumes/quote-search/data/quotes.csv.tgz"
-)
+get_ipython().system('wget https://github.com/aerospike/aerospike-vector-search-examples/raw/7dfab0fccca0852a511c6803aba46578729694b5/quote-semantic-search/container-volumes/quote-search/data/quotes.csv.tgz')
 
 
 # ## Load the Quotes Into Documents
-#
+# 
 # We will load our quotes dataset using the `CSVLoader` document loader. In this case, `lazy_load` returns an iterator to ingest our quotes more efficiently. In this example, we only load 5,000 quotes.
 
 # In[4]:
@@ -83,7 +79,7 @@ print(documents[0])
 
 
 # ## Create your Embedder
-#
+# 
 # In this step, we use HuggingFaceEmbeddings and the "all-MiniLM-L6-v2" sentence transformer model to embed our documents so we can perform a vector search.
 
 # In[6]:
@@ -98,7 +94,7 @@ embedder = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
 # ## Create an Aerospike Index and Embed Documents
-#
+# 
 # Before we add documents, we need to create an index in the Aerospike Database. In the example below, we use some convenience code that checks to see if the expected index already exists.
 
 # In[7]:
@@ -187,7 +183,7 @@ print_documents(docs)
 
 
 # ## Embedding Additional Quotes as Text
-#
+# 
 # We can use `add_texts` to add additional quotes.
 
 # In[9]:
@@ -220,7 +216,7 @@ print(ids)
 
 
 # ## Search Documents Using Max Marginal Relevance Search
-#
+# 
 # We can use max marginal relevance search to find vectors that are similar to our query but dissimilar to each other. In this example, we create a retriever object using `as_retriever`, but this could be done just as easily by calling `docstore.max_marginal_relevance_search` directly. The `lambda_mult` search argument determines the diversity of our query response. 0 corresponds to maximum diversity and 1 to minimum diversity.
 
 # In[10]:
@@ -236,7 +232,7 @@ print_documents(matched_docs)
 
 
 # ## Search Documents with a Relevance Threshold
-#
+# 
 # Another useful feature is a similarity search with a relevance threshold. Generally, we only want results that are most similar to our query but also within some range of proximity. A relevance of 1 is most similar and a relevance of 0 is most dissimilar.
 
 # In[11]:
@@ -255,7 +251,7 @@ print_documents(matched_docs)
 
 
 # ## Clean up
-#
+# 
 # We need to make sure we close our client to release resources and clean up threads.
 
 # In[12]:
@@ -265,5 +261,5 @@ client.close()
 
 
 # ## Ready. Set. Search!
-#
+# 
 # Now that you are up to speed with Aerospike Vector Search's LangChain integration, you have the power of the Aerospike Database and the LangChain ecosystem at your finger tips. Happy building!

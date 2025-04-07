@@ -2,17 +2,15 @@
 # coding: utf-8
 
 # # GPT4All
-#
+# 
 # [GitHub:nomic-ai/gpt4all](https://github.com/nomic-ai/gpt4all) an ecosystem of open-source chatbots trained on a massive collections of clean assistant data including code, stories and dialogue.
-#
+# 
 # This example goes over how to use LangChain to interact with `GPT4All` models.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet langchain-community gpt4all"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community gpt4all')
 
 
 # ### Import GPT4All
@@ -37,18 +35,18 @@ prompt = PromptTemplate.from_template(template)
 
 
 # ### Specify Model
-#
-# To run locally, download a compatible ggml-formatted model.
-#
+# 
+# To run locally, download a compatible ggml-formatted model. 
+#  
 # The [gpt4all page](https://gpt4all.io/index.html) has a useful `Model Explorer` section:
-#
+# 
 # * Select a model of interest
 # * Download using the UI and move the `.bin` to the `local_path` (noted below)
-#
+# 
 # For more info, visit https://github.com/nomic-ai/gpt4all.
-#
+# 
 # ---
-#
+# 
 # This integration does not yet support streaming in chunks via the [`.stream()`](https://python.langchain.com/docs/how_to/streaming/) method. The below example uses a callback handler with `streaming=True`:
 
 # In[4]:
@@ -91,3 +89,7 @@ res = chain.invoke({"question": question})
 
 
 # In[ ]:
+
+
+
+

@@ -6,33 +6,33 @@
 # ## Overview
 
 # ### Integration details
-#
+# 
 # The Google Books tool that supports the ReAct pattern and allows you to search the Google Books API. Google Books is the largest API in the world that keeps track of books in a curated manner. It has over 40 million entries, which can give users a significant amount of data.
 
 # ### Tool features
-#
+# 
 # Currently the tool has the following capabilities:
 # - Gathers the relevant information from the Google Books API using a key word search
 # - Formats the information into a readable output, and return the result to the agent
 
 # ## Setup
-#
+# 
 # Make sure `langchain-community` is installed.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-community")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community')
 
 
 # ### Credentials
-#
+# 
 # You will need an API key from Google Books. You can do this by visiting and following the steps at [https://developers.google.com/books/docs/v1/using#APIKey](https://developers.google.com/books/docs/v1/using#APIKey).
-#
+# 
 # Then you will need to set the environment variable `GOOGLE_BOOKS_API_KEY` to your Google Books API key.
 
 # ## Instantiation
-#
+# 
 # To instantiate the tool import the Google Books tool and set your credentials.
 
 # In[ ]:
@@ -48,7 +48,7 @@ tool = GoogleBooksQueryRun(api_wrapper=GoogleBooksAPIWrapper())
 
 
 # ## Invocation
-#
+# 
 # You can invoke the tool by calling the `run` method.
 
 # In[ ]:
@@ -58,7 +58,7 @@ tool.run("ai")
 
 
 # ### [Invoke directly with args](/docs/concepts/tools)
-#
+# 
 # See below for an direct invocation example.
 
 # In[ ]:
@@ -76,7 +76,7 @@ tool.run("ai")
 
 
 # ### [Invoke with ToolCall](/docs/concepts/tools)
-#
+# 
 # See below for a tool call example.
 
 # In[ ]:
@@ -112,7 +112,7 @@ print(suggestions)
 
 
 # ## Chaining
-#
+# 
 # See the below example for chaining.
 
 # In[ ]:
@@ -149,5 +149,5 @@ agent_executor.invoke({"input": "Can you recommend me some books related to ai?"
 
 
 # ## API reference
-#
+# 
 # The Google Books API can be found here: [https://developers.google.com/books](https://developers.google.com/books)

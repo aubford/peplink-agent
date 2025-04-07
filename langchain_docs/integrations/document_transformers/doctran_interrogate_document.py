@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Doctran: interrogate documents
-#
+# 
 # Documents used in a vector store knowledge base are typically stored in a narrative or conversational format. However, most user queries are in question format. If we **convert documents into Q&A format** before vectorizing them, we can increase the likelihood of retrieving relevant documents, and decrease the likelihood of retrieving irrelevant documents.
-#
+# 
 # We can accomplish this using the [Doctran](https://github.com/psychic-api/doctran) library, which uses OpenAI's function calling feature to "interrogate" documents.
-#
+# 
 # See [this notebook](https://github.com/psychic-api/doctran/blob/main/benchmark.ipynb) for benchmarks on vector similarity scores for various queries based on raw documents versus interrogated documents.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  doctran")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  doctran')
 
 
 # In[1]:
@@ -92,3 +92,4 @@ transformed_document = qa_transformer.transform_documents(documents)
 
 transformed_document = qa_transformer.transform_documents(documents)
 print(json.dumps(transformed_document[0].metadata, indent=2))
+

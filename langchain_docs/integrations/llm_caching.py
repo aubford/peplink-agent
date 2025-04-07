@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Model caches
-#
+# 
 # This notebook covers how to cache results of individual LLM calls using different caches.
-#
+# 
 # First, let's install some dependencies
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-openai langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-openai langchain-community')
 
 
 # In[2]:
@@ -47,21 +47,13 @@ set_llm_cache(InMemoryCache())
 # In[4]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[5]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ## `SQLite` cache
@@ -69,7 +61,7 @@ get_ipython().run_cell_magic(
 # In[6]:
 
 
-get_ipython().system("rm .langchain.db")
+get_ipython().system('rm .langchain.db')
 
 
 # In[7]:
@@ -84,21 +76,13 @@ set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 # In[8]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[9]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ## `Upstash Redis` caches
@@ -109,7 +93,7 @@ get_ipython().run_cell_magic(
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU upstash_redis")
+get_ipython().run_line_magic('pip', 'install -qU upstash_redis')
 
 
 # In[11]:
@@ -128,31 +112,23 @@ langchain.llm_cache = UpstashRedisCache(redis_=Redis(url=URL, token=TOKEN))
 # In[39]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[50]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ### Semantic cache
-#
-# Use [Upstash Vector](https://upstash.com/docs/vector/overall/whatisvector) to do a semantic similarity search and cache the most similar response in the database. The vectorization is automatically done by the selected embedding model while creating Upstash Vector database.
+# 
+# Use [Upstash Vector](https://upstash.com/docs/vector/overall/whatisvector) to do a semantic similarity search and cache the most similar response in the database. The vectorization is automatically done by the selected embedding model while creating Upstash Vector database. 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install upstash-semantic-cache")
+get_ipython().run_line_magic('pip', 'install upstash-semantic-cache')
 
 
 # In[11]:
@@ -182,21 +158,17 @@ set_llm_cache(cache)
 # In[16]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", 'llm.invoke("Which city is the most crowded city in the USA?")\n'
-)
+get_ipython().run_cell_magic('time', '', 'llm.invoke("Which city is the most crowded city in the USA?")\n')
 
 
 # In[17]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", 'llm.invoke("Which city has the highest population in the USA?")\n'
-)
+get_ipython().run_cell_magic('time', '', 'llm.invoke("Which city has the highest population in the USA?")\n')
 
 
 # ## `Redis` caches
-#
+# 
 # See the main [Redis cache docs](/docs/integrations/caches/redis_llm_caching/) for detail.
 
 # ### Standard cache
@@ -205,7 +177,7 @@ get_ipython().run_cell_magic(
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU redis")
+get_ipython().run_line_magic('pip', 'install -qU redis')
 
 
 # In[9]:
@@ -222,21 +194,13 @@ set_llm_cache(RedisCache(redis_=Redis()))
 # In[ ]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[14]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ### Semantic cache
@@ -245,7 +209,7 @@ get_ipython().run_cell_magic(
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU redis")
+get_ipython().run_line_magic('pip', 'install -qU redis')
 
 
 # In[10]:
@@ -262,33 +226,25 @@ set_llm_cache(
 # In[16]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[27]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time, while not a direct hit, the question is semantically similar to the original question,\n# so it uses the cached result!\nllm.invoke("Tell me one joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time, while not a direct hit, the question is semantically similar to the original question,\n# so it uses the cached result!\nllm.invoke("Tell me one joke")\n')
 
 
 # ## `GPTCache`
-#
+# 
 # We can use [GPTCache](https://github.com/zilliztech/GPTCache) for exact match caching OR to cache results based on semantic similarity
-#
+# 
 # Let's first start with an example of exact match
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU gptcache")
+get_ipython().run_line_magic('pip', 'install -qU gptcache')
 
 
 # In[5]:
@@ -320,21 +276,13 @@ set_llm_cache(GPTCache(init_gptcache))
 # In[ ]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[7]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # Let's now show an example of similarity caching
@@ -364,94 +312,82 @@ set_llm_cache(GPTCache(init_gptcache))
 # In[10]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[11]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# This is an exact match, so it finds it in the cache\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# This is an exact match, so it finds it in the cache\nllm.invoke("Tell me a joke")\n')
 
 
 # In[12]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# This is not an exact match, but semantically within distance so it hits!\nllm.invoke("Tell me joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# This is not an exact match, but semantically within distance so it hits!\nllm.invoke("Tell me joke")\n')
 
 
 # ## `MongoDB Atlas` caches
-#
-# [MongoDB Atlas](https://www.mongodb.com/docs/atlas/) is a fully-managed cloud database available in AWS, Azure, and GCP. It has native support for
+# 
+# [MongoDB Atlas](https://www.mongodb.com/docs/atlas/) is a fully-managed cloud database available in AWS, Azure, and GCP. It has native support for 
 # Vector Search on the MongoDB document data.
 # Use [MongoDB Atlas Vector Search](/docs/integrations/providers/mongodb_atlas) to semantically cache prompts and responses.
 
 # ### Standard cache
-#
+# 
 # Standard cache is a simple cache in MongoDB. It does not use Semantic Caching, nor does it require an index to be made on the collection before generation.
-#
+# 
 # To import this cache, first install the required dependency:
-#
+# 
 # ```bash
 # %pip install -qU langchain-mongodb
 # ```
-#
+# 
 # ```python
 # from langchain_mongodb.cache import MongoDBCache
 # ```
-#
-#
+# 
+# 
 # To use this cache with your LLMs:
 # ```python
 # from langchain_core.globals import set_llm_cache
-#
+# 
 # # use any embedding provider...
 # from tests.integration_tests.vectorstores.fake_embeddings import FakeEmbeddings
-#
+# 
 # mongodb_atlas_uri = "<YOUR_CONNECTION_STRING>"
 # COLLECTION_NAME="<YOUR_CACHE_COLLECTION_NAME>"
 # DATABASE_NAME="<YOUR_DATABASE_NAME>"
-#
+# 
 # set_llm_cache(MongoDBCache(
 #     connection_string=mongodb_atlas_uri,
 #     collection_name=COLLECTION_NAME,
 #     database_name=DATABASE_NAME,
 # ))
 # ```
-#
-#
+# 
+# 
 # ### Semantic cache
-#
+# 
 # Semantic caching allows retrieval of cached prompts based on semantic similarity between the user input and previously cached results. Under the hood, it blends MongoDBAtlas as both a cache and a vectorstore.
 # The MongoDBAtlasSemanticCache inherits from `MongoDBAtlasVectorSearch` and needs an Atlas Vector Search Index defined to work. Please look at the [usage example](/docs/integrations/vectorstores/mongodb_atlas) on how to set up the index.
-#
+# 
 # To import this cache:
 # ```python
 # from langchain_mongodb.cache import MongoDBAtlasSemanticCache
 # ```
-#
+# 
 # To use this cache with your LLMs:
 # ```python
 # from langchain_core.globals import set_llm_cache
-#
+# 
 # # use any embedding provider...
 # from tests.integration_tests.vectorstores.fake_embeddings import FakeEmbeddings
-#
+# 
 # mongodb_atlas_uri = "<YOUR_CONNECTION_STRING>"
 # COLLECTION_NAME="<YOUR_CACHE_COLLECTION_NAME>"
 # DATABASE_NAME="<YOUR_DATABASE_NAME>"
-#
+# 
 # set_llm_cache(MongoDBAtlasSemanticCache(
 #     embedding=FakeEmbeddings(),
 #     connection_string=mongodb_atlas_uri,
@@ -459,18 +395,18 @@ get_ipython().run_cell_magic(
 #     database_name=DATABASE_NAME,
 # ))
 # ```
-#
+# 
 # To find more resources about using MongoDBSemanticCache visit [here](https://www.mongodb.com/blog/post/introducing-semantic-caching-dedicated-mongodb-lang-chain-package-gen-ai-apps)
 
 # ## `Momento` cache
 # Use [Momento](/docs/integrations/providers/momento) to cache prompts and responses.
-#
+# 
 # Requires installing the `momento` package:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU momento")
+get_ipython().run_line_magic('pip', 'install -qU momento')
 
 
 # You'll need to get a Momento auth token to use this class. This can either be passed in to a momento.CacheClient if you'd like to instantiate that directly, as a named parameter `auth_token` to `MomentoChatMessageHistory.from_client_params`, or can just be set as an environment variable `MOMENTO_AUTH_TOKEN`.
@@ -490,27 +426,19 @@ set_llm_cache(MomentoCache.from_client_params(cache_name, ttl))
 # In[10]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[11]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\n# When run in the same region as the cache, latencies are single digit ms\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\n# When run in the same region as the cache, latencies are single digit ms\nllm.invoke("Tell me a joke")\n')
 
 
 # ## `SQLAlchemy` cache
-#
+# 
 # You can use `SQLAlchemyCache` to cache with any SQL database supported by `SQLAlchemy`.
-#
+# 
 # ### Standard cache
 
 # In[ ]:
@@ -524,7 +452,7 @@ set_llm_cache(SQLAlchemyCache(engine))
 
 
 # ### Custom SQLAlchemy schemas
-#
+# 
 # You can define your own declarative `SQLAlchemyCache` child class to customize the schema used for caching. For example, to support high-speed fulltext prompt indexing with `Postgres`, use:
 
 # In[ ]:
@@ -561,11 +489,11 @@ set_llm_cache(SQLAlchemyCache(engine, FulltextLLMCache))
 
 
 # ## `Cassandra` caches
-#
+# 
 # > [Apache Cassandra®](https://cassandra.apache.org/) is a NoSQL, row-oriented, highly scalable and highly available database. Starting with version 5.0, the database ships with [vector search capabilities](https://cassandra.apache.org/doc/trunk/cassandra/vector-search/overview.html).
-#
+# 
 # You can use Cassandra for caching LLM responses, choosing from the exact-match `CassandraCache` or the (vector-similarity-based) `CassandraSemanticCache`.
-#
+# 
 # Let's see both in action. The next cells guide you through the (little) required setup, and the following cells showcase the two available cache classes.
 
 # Required dependency:
@@ -573,19 +501,19 @@ set_llm_cache(SQLAlchemyCache(engine, FulltextLLMCache))
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", 'install -qU "cassio>=0.1.4"')
+get_ipython().run_line_magic('pip', 'install -qU "cassio>=0.1.4"')
 
 
 # ### Connecting to the DB
-#
+# 
 # The Cassandra caches shown in this page can be used with Cassandra as well as other derived databases, such as Astra DB, which use the CQL (Cassandra Query Language) protocol.
-#
+# 
 # > DataStax [Astra DB](https://docs.datastax.com/en/astra-serverless/docs/vector-search/quickstart.html) is a managed serverless database built on Cassandra, offering the same interface and strengths.
-#
+# 
 # Depending on whether you connect to a Cassandra cluster or to Astra DB through CQL, you will provide different parameters when instantiating the cache (through initialization of a CassIO connection).
 
 # #### to a Cassandra cluster
-#
+# 
 # You first need to create a `cassandra.cluster.Session` object, as described in the [Cassandra driver documentation](https://docs.datastax.com/en/developer/python-driver/latest/api/cassandra/cluster/#module-cassandra.cluster). The details vary (e.g. with network settings and authentication), but this might be something like:
 
 # In[1]:
@@ -610,9 +538,9 @@ cassio.init(session=session, keyspace=CASSANDRA_KEYSPACE)
 
 
 # #### to Astra DB through CQL
-#
+# 
 # In this case you initialize CassIO with the following connection parameters:
-#
+# 
 # - the Database ID, e.g. `01234567-89ab-cdef-0123-456789abcdef`
 # - the Token, e.g. `AstraCS:6gBhNmsk135....` (it must be a "Database Administrator" token)
 # - Optionally a Keyspace name (if omitted, the default one for the database will be used)
@@ -645,7 +573,7 @@ cassio.init(
 
 
 # ### Standard cache
-#
+# 
 # This will avoid invoking the LLM when the supplied prompt is _exactly_ the same as one encountered already:
 
 # In[3]:
@@ -660,21 +588,17 @@ set_llm_cache(CassandraCache())
 # In[9]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("Why is the Moon always showing the same side?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Why is the Moon always showing the same side?"))\n')
 
 
 # In[10]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("Why is the Moon always showing the same side?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Why is the Moon always showing the same side?"))\n')
 
 
 # ### Semantic cache
-#
+# 
 # This cache will do a semantic similarity search and return a hit if it finds a cached entry that is similar enough, For this, you need to provide an `Embeddings` instance of your choice.
 
 # In[14]:
@@ -702,36 +626,32 @@ set_llm_cache(
 # In[19]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("Why is the Moon always showing the same side?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Why is the Moon always showing the same side?"))\n')
 
 
 # In[20]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("How come we always see one face of the moon?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("How come we always see one face of the moon?"))\n')
 
 
 # **Attribution statement:**
-#
+# 
 # >`Apache Cassandra`, `Cassandra` and `Apache` are either registered trademarks or trademarks of the [Apache Software Foundation](http://www.apache.org/) in the United States and/or other countries.
 
 # ## `Astra DB` caches
 
 # You can easily use [Astra DB](https://docs.datastax.com/en/astra/home/astra.html) as an LLM cache, with either the "exact" or the "semantic-based" cache.
-#
+# 
 # Make sure you have a running database (it must be a Vector-enabled database to use the Semantic cache) and get the required credentials on your Astra dashboard:
-#
+# 
 # - the API Endpoint looks like `https://01234567-89ab-cdef-0123-456789abcdef-us-east1.apps.astra.datastax.com`
 # - the Token looks like `AstraCS:6gBhNmsk135....`
 
 # In[3]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain_astradb")
+get_ipython().run_line_magic('pip', 'install -qU langchain_astradb')
 
 import getpass
 
@@ -740,7 +660,7 @@ ASTRA_DB_APPLICATION_TOKEN = getpass.getpass("ASTRA_DB_APPLICATION_TOKEN = ")
 
 
 # ### Standard cache
-#
+# 
 # This will avoid invoking the LLM when the supplied prompt is _exactly_ the same as one encountered already:
 
 # In[7]:
@@ -760,21 +680,17 @@ set_llm_cache(
 # In[8]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("Is a true fakery the same as a fake truth?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Is a true fakery the same as a fake truth?"))\n')
 
 
 # In[9]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("Is a true fakery the same as a fake truth?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Is a true fakery the same as a fake truth?"))\n')
 
 
 # ### Semantic cache
-#
+# 
 # This cache will do a semantic similarity search and return a hit if it finds a cached entry that is similar enough, For this, you need to provide an `Embeddings` instance of your choice.
 
 # In[10]:
@@ -803,23 +719,17 @@ set_llm_cache(
 # In[12]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", '\nprint(llm.invoke("Are there truths that are false?"))\n'
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Are there truths that are false?"))\n')
 
 
 # In[13]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '\nprint(llm.invoke("Is is possible that something false can be also true?"))\n',
-)
+get_ipython().run_cell_magic('time', '', '\nprint(llm.invoke("Is is possible that something false can be also true?"))\n')
 
 
 # ## `Azure Cosmos DB` semantic cache
-#
+# 
 # You can use this integrated [vector database](https://learn.microsoft.com/en-us/azure/cosmos-db/vector-database) for caching.
 
 # In[4]:
@@ -876,25 +786,17 @@ set_llm_cache(
 # In[82]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[83]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ## `Azure Cosmos DB NoSql` semantic cache
-#
+# 
 # You can use this integrated [vector database](https://learn.microsoft.com/en-us/azure/cosmos-db/vector-database) for caching.
 
 # In[ ]:
@@ -952,39 +854,31 @@ set_llm_cache(
 # In[6]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[ ]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ## `Elasticsearch` caches
-#
+# 
 # A caching layer for LLMs that uses Elasticsearch.
-#
+# 
 # First install the LangChain integration with Elasticsearch.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-elasticsearch")
+get_ipython().run_line_magic('pip', 'install -qU langchain-elasticsearch')
 
 
 # ### Standard cache
-#
+# 
 # Use the class `ElasticsearchCache`.
-#
+# 
 # Simple example:
 
 # In[ ]:
@@ -1002,18 +896,18 @@ set_llm_cache(
 )
 
 
-# The `index_name` parameter can also accept aliases. This allows to use the
+# The `index_name` parameter can also accept aliases. This allows to use the 
 # [ILM: Manage the index lifecycle](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-lifecycle-management.html)
 # that we suggest to consider for managing retention and controlling cache growth.
-#
+# 
 # Look at the class docstring for all parameters.
 
 # ### Index the generated text
-#
+# 
 # The cached data won't be searchable by default.
 # The developer can customize the building of the Elasticsearch document in order to add indexed text fields,
 # where to put, for example, the text generated by the LLM.
-#
+# 
 # This can be done by subclassing end overriding methods.
 # The new cache class can be applied also to a pre-existing cache index:
 
@@ -1060,11 +954,11 @@ set_llm_cache(
 )
 
 
-# When overriding the mapping and the document building,
+# When overriding the mapping and the document building, 
 # please only make additive modifications, keeping the base mapping intact.
 
 # ### Embedding cache
-#
+# 
 # An Elasticsearch store for caching embeddings.
 
 # In[ ]:
@@ -1074,7 +968,7 @@ from langchain_elasticsearch import ElasticsearchEmbeddingsCache
 
 
 # ## LLM-specific optional caching
-#
+# 
 # You can also turn off caching for specific LLMs. In the example below, even though global caching is enabled, we turn it off for a specific LLM.
 
 # In[13]:
@@ -1086,19 +980,19 @@ llm = OpenAI(model="gpt-3.5-turbo-instruct", n=2, best_of=2, cache=False)
 # In[14]:
 
 
-get_ipython().run_cell_magic("time", "", 'llm.invoke("Tell me a joke")\n')
+get_ipython().run_cell_magic('time', '', 'llm.invoke("Tell me a joke")\n')
 
 
 # In[15]:
 
 
-get_ipython().run_cell_magic("time", "", 'llm.invoke("Tell me a joke")\n')
+get_ipython().run_cell_magic('time', '', 'llm.invoke("Tell me a joke")\n')
 
 
 # ## Optional caching in Chains
-#
+# 
 # You can also turn off caching for particular nodes in chains. Note that because of certain interfaces, its often easier to construct the chain first, and then edit the LLM afterwards.
-#
+# 
 # As an example, we will load a summarizer map-reduce chain. We will cache results for the map-step, but then not freeze it for the combine step.
 
 # In[10]:
@@ -1142,7 +1036,7 @@ chain = load_summarize_chain(llm, chain_type="map_reduce", reduce_llm=no_cache_l
 # In[17]:
 
 
-get_ipython().run_cell_magic("time", "", "chain.invoke(docs)\n")
+get_ipython().run_cell_magic('time', '', 'chain.invoke(docs)\n')
 
 
 # When we run it again, we see that it runs substantially faster but the final answer is different. This is due to caching at the map steps, but not at the reduce step.
@@ -1150,16 +1044,16 @@ get_ipython().run_cell_magic("time", "", "chain.invoke(docs)\n")
 # In[19]:
 
 
-get_ipython().run_cell_magic("time", "", "chain.invoke(docs)\n")
+get_ipython().run_cell_magic('time', '', 'chain.invoke(docs)\n')
 
 
 # In[20]:
 
 
-get_ipython().system("rm .langchain.db sqlite.db")
+get_ipython().system('rm .langchain.db sqlite.db')
 
 
-#
+# 
 
 # ## `OpenSearch` semantic cache
 # Use [OpenSearch](https://python.langchain.com/docs/integrations/vectorstores/opensearch/) as a semantic cache to cache prompts and responses and evaluate hits based on semantic similarity.
@@ -1180,25 +1074,17 @@ set_llm_cache(
 # In[11]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[12]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time, while not a direct hit, the question is semantically similar to the original question,\n# so it uses the cached result!\nllm.invoke("Tell me one joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time, while not a direct hit, the question is semantically similar to the original question,\n# so it uses the cached result!\nllm.invoke("Tell me one joke")\n')
 
 
 # ## `SingleStoreDB` semantic cache
-#
+# 
 # You can use [SingleStoreDB](https://python.langchain.com/docs/integrations/vectorstores/singlestoredb/) as a semantic cache to cache prompts and responses.
 
 # In[ ]:
@@ -1217,13 +1103,13 @@ set_llm_cache(
 
 # ## `Memcached` cache
 # You can use [Memcached](https://www.memcached.org/) as a cache to cache prompts and responses through [pymemcache](https://github.com/pinterest/pymemcache).
-#
+# 
 # This cache requires the pymemcache dependency to be installed:
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install -qU pymemcache")
+get_ipython().run_line_magic('pip', 'install -qU pymemcache')
 
 
 # In[1]:
@@ -1238,35 +1124,27 @@ set_llm_cache(MemcachedCache(Client("localhost")))
 # In[5]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[7]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time it is, so it goes faster\nllm.invoke("Tell me a joke")\n')
 
 
 # ## `Couchbase` caches
-#
+# 
 # Use [Couchbase](https://couchbase.com/) as a cache for prompts and responses.
 
 # ### Standard cache
-#
+# 
 # The standard cache that looks for an exact match of the user prompt.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain_couchbase couchbase")
+get_ipython().run_line_magic('pip', 'install -qU langchain_couchbase couchbase')
 
 
 # In[4]:
@@ -1316,21 +1194,13 @@ set_llm_cache(
 # In[6]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in the cache, so it should take longer\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in the cache, so it should take longer\nllm.invoke("Tell me a joke")\n')
 
 
 # In[7]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time, it is in the cache, so it should be much faster\nllm.invoke("Tell me a joke")\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time, it is in the cache, so it should be much faster\nllm.invoke("Tell me a joke")\n')
 
 
 # #### Time to Live (TTL) for the cached entries
@@ -1382,11 +1252,11 @@ cluster.wait_until_ready(timedelta(seconds=5))
 
 
 # Notes:
-# - The search index for the semantic cache needs to be defined before using the semantic cache.
+# - The search index for the semantic cache needs to be defined before using the semantic cache. 
 # - The optional parameter, `score_threshold` in the Semantic Cache that you can use to tune the results of the semantic search.
-#
+# 
 # #### Index to the Full Text Search service
-#
+# 
 # How to Import an Index to the Full Text Search service?
 #  - [Couchbase Server](https://docs.couchbase.com/server/current/search/import-search-index.html)
 #      - Click on Search -> Add Index -> Import
@@ -1396,9 +1266,9 @@ cluster.wait_until_ready(timedelta(seconds=5))
 #      - Copy the index definition to a new file `index.json`
 #      - Import the file in Capella using the instructions in the documentation.
 #      - Click on Create Index to create the index.
-#
+# 
 # **Example index for the vector search:**
-#
+# 
 #   ```
 #   {
 #     "type": "fulltext-index",
@@ -1503,25 +1373,17 @@ set_llm_cache(cache)
 # In[11]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The first time, it is not yet in the cache, so it should take longer\nprint(llm.invoke("How long do dogs live?"))\n',
-)
+get_ipython().run_cell_magic('time', '', '# The first time, it is not yet in the cache, so it should take longer\nprint(llm.invoke("How long do dogs live?"))\n')
 
 
 # In[12]:
 
 
-get_ipython().run_cell_magic(
-    "time",
-    "",
-    '# The second time, it is in the cache, so it should be much faster\nprint(llm.invoke("What is the expected lifespan of a dog?"))\n',
-)
+get_ipython().run_cell_magic('time', '', '# The second time, it is in the cache, so it should be much faster\nprint(llm.invoke("What is the expected lifespan of a dog?"))\n')
 
 
 # #### Time to Live (TTL) for the cached entries
-#
+# 
 # The Cached documents can be deleted after a specified time automatically by specifying a `ttl` parameter along with the initialization of the Cache.
 
 # In[13]:
@@ -1546,10 +1408,10 @@ set_llm_cache(
 # ## Cache classes: summary table
 
 # **Cache** classes are implemented by inheriting the [BaseCache](https://python.langchain.com/api_reference/core/caches/langchain_core.caches.BaseCache.html) class.
-#
+# 
 # This table lists all derived classes with links to the API Reference.
-#
-#
+# 
+# 
 # | Namespace | Class 🔻 |
 # |------------|---------|
 # | langchain_astradb.cache | [AstraDBCache](https://python.langchain.com/api_reference/astradb/cache/langchain_astradb.cache.AstraDBCache.html) |
@@ -1575,6 +1437,10 @@ set_llm_cache(
 # | langchain_community.cache | [SQLAlchemyCache](https://python.langchain.com/api_reference/community/cache/langchain_community.cache.SQLAlchemyCache.html) |
 # | langchain_community.cache | [SQLAlchemyMd5Cache](https://python.langchain.com/api_reference/community/cache/langchain_community.cache.SQLAlchemyMd5Cache.html) |
 # | langchain_community.cache | [UpstashRedisCache](https://python.langchain.com/api_reference/community/cache/langchain_community.cache.UpstashRedisCache.html) |
-#
+# 
 
 # In[ ]:
+
+
+
+

@@ -6,11 +6,11 @@
 # ---
 
 # # SQLite as a Vector Store with SQLiteVec
-#
+# 
 # This notebook covers how to get started with the SQLiteVec vector store.
-#
+# 
 # >[SQLite-Vec](https://alexgarcia.xyz/sqlite-vec/) is an `SQLite` extension designed for vector search, emphasizing local-first operations and easy integration into applications without external servers. It is the successor to [SQLite-VSS](https://alexgarcia.xyz/sqlite-vss/) by the same author. It is written in zero-dependency C and designed to be easy to build and use.
-#
+# 
 # This notebook shows how to use the `SQLiteVec` vector database.
 
 # ## Setup
@@ -20,7 +20,7 @@
 
 
 # You need to install sqlite-vec as a dependency.
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  sqlite-vec")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  sqlite-vec')
 
 
 # ### Credentials
@@ -158,3 +158,4 @@ data = db1.similarity_search(query)
 
 # print results
 data[0].page_content
+

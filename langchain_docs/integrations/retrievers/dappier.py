@@ -2,26 +2,26 @@
 # coding: utf-8
 
 # # Dappier
-#
+# 
 # [Dappier](https://dappier.com) connects any LLM or your Agentic AI to real-time, rights-cleared, proprietary data from trusted sources, making your AI an expert in anything. Our specialized models include Real-Time Web Search, News, Sports, Financial Stock Market Data, Crypto Data, and exclusive content from premium publishers. Explore a wide range of data models in our marketplace at [marketplace.dappier.com](https://marketplace.dappier.com).
-#
+# 
 # [Dappier](https://dappier.com) delivers enriched, prompt-ready, and contextually relevant data strings, optimized for seamless integration with LangChain. Whether you're building conversational AI, recommendation engines, or intelligent search, Dappier's LLM-agnostic RAG models ensure your AI has access to verified, up-to-date data—without the complexity of building and managing your own retrieval pipeline.
 
 # # DappierRetriever
-#
+# 
 # This will help you getting started with the Dappier [retriever](https://python.langchain.com/docs/concepts/retrievers/). For detailed documentation of all DappierRetriever features and configurations head to the [API reference](https://python.langchain.com/en/latest/retrievers/langchain_dappier.retrievers.Dappier.DappierRetriever.html).
-#
+# 
 # ### Setup
-#
+# 
 # Install ``langchain-dappier`` and set environment variable ``DAPPIER_API_KEY``.
-#
+# 
 # ```bash
 # pip install -U langchain-dappier
 # export DAPPIER_API_KEY="your-api-key"
 # ```
-#
+# 
 # We also need to set our Dappier API credentials, which can be generated at the [Dappier site.](https://platform.dappier.com/profile/api-keys).
-#
+# 
 # We can find the supported data models by heading over to the [Dappier marketplace.](https://platform.dappier.com/marketplace)
 
 # If you want to get automated tracing from individual queries, you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
@@ -34,17 +34,17 @@
 
 
 # ### Installation
-#
+# 
 # This retriever lives in the `langchain-dappier` package:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-dappier")
+get_ipython().run_line_magic('pip', 'install -qU langchain-dappier')
 
 
 # ## Instantiation
-#
+# 
 # - data_model_id: str
 #     Data model ID, starting with dm_.
 #     You can find the available data model IDs at:
@@ -85,9 +85,9 @@ retriever.invoke(query)
 
 
 # ## Use within a chain
-#
+# 
 # Like other retrievers, DappierRetriever can be incorporated into LLM applications via [chains](/docs/how_to/sequence/).
-#
+# 
 # We will need a LLM or chat model:
 
 # In[6]:
@@ -135,5 +135,5 @@ chain.invoke(
 
 
 # ## API reference
-#
+# 
 # For detailed documentation of all DappierRetriever features and configurations head to the [API reference](https://python.langchain.com/en/latest/retrievers/langchain_dappier.retrievers.Dappier.DappierRetriever.html).

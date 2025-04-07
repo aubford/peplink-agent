@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # SurrealDB
-#
+# 
 # >[SurrealDB](https://surrealdb.com/) is an end-to-end cloud-native database designed for modern applications, including web, mobile, serverless, Jamstack, backend, and traditional applications. With SurrealDB, you can simplify your database and API infrastructure, reduce development time, and build secure, performant apps quickly and cost-effectively.
 # >
 # >**Key features of SurrealDB include:**
@@ -13,11 +13,11 @@
 # >* **Granular access control:** SurrealDB provides row-level permissions-based access control, giving you the ability to manage data access with precision.
 # >
 # >View the [features](https://surrealdb.com/features), the latest [releases](https://surrealdb.com/releases), and [documentation](https://surrealdb.com/docs).
-#
+# 
 # This notebook shows how to use functionality related to the `SurrealDBStore`.
 
 # ## Setup
-#
+# 
 # Uncomment the below cells to install surrealdb.
 
 # In[ ]:
@@ -133,3 +133,4 @@ docs = await db.asimilarity_search_with_score(query)
 
 
 docs[0]
+

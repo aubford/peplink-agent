@@ -137,7 +137,12 @@ tools = [add, multiply]
 # 
 # <ChatModelTabs
 #   customVarName="llm"
-#   fireworksParams={`model="accounts/fireworks/models/firefunction-v1", temperature=0`}
+#   overrideParams={{
+#     fireworks: {
+#       model: "accounts/fireworks/models/firefunction-v1",
+#       kwargs: "temperature=0",
+#     }
+#   }}
 # />
 # 
 

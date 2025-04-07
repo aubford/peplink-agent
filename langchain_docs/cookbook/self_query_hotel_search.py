@@ -2,23 +2,21 @@
 # coding: utf-8
 
 # # Building hotel room search with self-querying retrieval
-#
+# 
 # In this example we'll walk through how to build and iterate on a hotel room search service that leverages an LLM to generate structured filter queries that can then be passed to a vector store.
-#
+# 
 # For an introduction to self-querying retrieval [check out the docs](https://python.langchain.com/docs/modules/data_connection/retrievers/self_query).
 
 # ## Imports and data prep
-#
+# 
 # In this example we use `ChatOpenAI` for the model and `ElasticsearchStore` for the vector store, but these can be swapped out with an LLM/ChatModel and [any VectorStore that support self-querying](https://python.langchain.com/docs/integrations/retrievers/self_query/).
-#
+# 
 # Download data from: https://www.kaggle.com/datasets/keshavramaiah/hotel-recommendation
 
 # In[ ]:
 
 
-get_ipython().system(
-    "pip install langchain langchain-elasticsearch lark openai elasticsearch pandas"
-)
+get_ipython().system('pip install langchain langchain-elasticsearch lark openai elasticsearch pandas')
 
 
 # In[1]:
@@ -67,9 +65,9 @@ latest_price.head()
 
 
 # ## Describe data attributes
-#
+# 
 # We'll use a self-query retriever, which requires us to describe the metadata we can filter on.
-#
+# 
 # Or if we're feeling lazy we can have a model write a draft of the descriptions for us :)
 
 # In[4]:
@@ -106,15 +104,15 @@ latest_price.nunique()[latest_price.nunique() < 40]
 # In[7]:
 
 
-attribute_info[-2][
-    "description"
-] += f". Valid values are {sorted(latest_price['starrating'].value_counts().index.tolist())}"
-attribute_info[3][
-    "description"
-] += f". Valid values are {sorted(latest_price['maxoccupancy'].value_counts().index.tolist())}"
-attribute_info[-3][
-    "description"
-] += f". Valid values are {sorted(latest_price['country'].value_counts().index.tolist())}"
+attribute_info[-2]["description"] += (
+    f". Valid values are {sorted(latest_price['starrating'].value_counts().index.tolist())}"
+)
+attribute_info[3]["description"] += (
+    f". Valid values are {sorted(latest_price['maxoccupancy'].value_counts().index.tolist())}"
+)
+attribute_info[-3]["description"] += (
+    f". Valid values are {sorted(latest_price['country'].value_counts().index.tolist())}"
+)
 
 
 # In[8]:
@@ -124,9 +122,9 @@ attribute_info
 
 
 # ## Creating a query constructor chain
-#
+# 
 # Let's take a look at the chain that will convert natural language requests into structured queries.
-#
+# 
 # To start we can just load the prompt and see what it looks like
 
 # In[9]:
@@ -171,17 +169,17 @@ chain.invoke(
 
 
 # ## Refining attribute descriptions
-#
+# 
 # We can see that at least two issues above. First is that when we ask for a Southern European destination we're only getting a filter for Italy, and second when we ask for AC we get a literal string lookup for AC (which isn't so bad but will miss things like 'Air conditioning').
-#
+# 
 # As a first step, let's try to update our description of the 'country' attribute to emphasize that equality should only be used when a specific country is mentioned.
 
 # In[14]:
 
 
-attribute_info[-3][
-    "description"
-] += ". NOTE: Only use the 'eq' operator if a specific country is mentioned. If a region is mentioned, include all relevant countries in filter."
+attribute_info[-3]["description"] += (
+    ". NOTE: Only use the 'eq' operator if a specific country is mentioned. If a region is mentioned, include all relevant countries in filter."
+)
 chain = load_query_constructor_runnable(
     ChatOpenAI(model="gpt-3.5-turbo", temperature=0),
     doc_contents,
@@ -196,7 +194,7 @@ chain.invoke({"query": "I want a hotel in Southern Europe and my budget is 200 b
 
 
 # ## Refining which attributes to filter on
-#
+# 
 # This seems to have helped! Now let's try to narrow the attributes we're filtering on. More freeform attributes we can leave to the main query, which is better for capturing semantic meaning than searching for specific substrings.
 
 # In[16]:
@@ -225,7 +223,7 @@ chain.invoke(
 
 
 # ## Adding examples specific to our use case
-#
+# 
 # We've removed the strict filter for 'AC' but it's still not being included in the query string. Our chain prompt is a few-shot prompt with some default examples. Let's see if adding use case-specific examples will help:
 
 # In[18]:
@@ -287,7 +285,7 @@ chain.invoke(
 
 
 # ## Automatically ignoring invalid queries
-#
+# 
 # It seems our model get's tripped up on this more complex query and tries to search over an attribute ('description') that doesn't exist. By setting `fix_invalid=True` in our query constructor chain, we can automatically remove any parts of the filter that is invalid (meaning it's using disallowed operations, comparisons or attributes).
 
 # In[22]:
@@ -313,7 +311,7 @@ chain.invoke(
 
 
 # ## Using with a self-querying retriever
-#
+# 
 # Now that our query construction chain is in a decent place, let's try using it with an actual retriever. For this example we'll use the [ElasticsearchStore](https://python.langchain.com/docs/integrations/vectorstores/elasticsearch).
 
 # In[24]:
@@ -326,7 +324,7 @@ embeddings = OpenAIEmbeddings()
 
 
 # ## Populating vectorstore
-#
+# 
 # The first time you run this, uncomment the below cell to first index the data.
 
 # In[25]:
@@ -383,3 +381,7 @@ for res in results:
 
 
 # In[ ]:
+
+
+
+

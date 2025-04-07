@@ -2,30 +2,28 @@
 # coding: utf-8
 
 # # Aphrodite Engine
-#
+# 
 # [Aphrodite](https://github.com/PygmalionAI/aphrodite-engine) is the open-source large-scale inference engine designed to serve thousands of users on the [PygmalionAI](https://pygmalion.chat) website.
-#
-# * Attention mechanism by vLLM for fast throughput and low latencies
+# 
+# * Attention mechanism by vLLM for fast throughput and low latencies 
 # * Support for for many SOTA sampling methods
 # * Exllamav2 GPTQ kernels for better throughput at lower batch sizes
-#
+# 
 # This notebooks goes over how to use a LLM with langchain and Aphrodite.
-#
+# 
 # To use, you should have the `aphrodite-engine` python package installed.
 
 # In[ ]:
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  aphrodite-engine==0.4.2"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  aphrodite-engine==0.4.2')
 # %pip list | grep aphrodite
 
 
@@ -73,9 +71,9 @@ print(llm_chain.run(question))
 
 
 # ## Distributed Inference
-#
-# Aphrodite supports distributed tensor-parallel inference and serving.
-#
+# 
+# Aphrodite supports distributed tensor-parallel inference and serving. 
+# 
 # To run multi-GPU inference with the LLM class, set the `tensor_parallel_size` argument to the number of GPUs you want to use. For example, to run inference on 4 GPUs
 
 # In[1]:
@@ -90,3 +88,4 @@ llm = Aphrodite(
 )
 
 llm("What is the future of AI?")
+

@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Neo4j
-#
+# 
 # [Neo4j](https://en.wikipedia.org/wiki/Neo4j) is an open-source graph database management system, renowned for its efficient management of highly connected data. Unlike traditional databases that store data in tables, Neo4j uses a graph structure with nodes, edges, and properties to represent and store data. This design allows for high-performance queries on complex data relationships.
-#
+# 
 # This notebook goes over how to use `Neo4j` to store chat message history.
 
 # In[ ]:
@@ -31,3 +31,7 @@ history.messages
 
 
 # In[ ]:
+
+
+
+

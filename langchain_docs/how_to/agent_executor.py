@@ -172,7 +172,7 @@ tools = [search, retriever_tool]
 # 
 # import ChatModelTabs from "@theme/ChatModelTabs";
 # 
-# <ChatModelTabs openaiParams={`model="gpt-4"`} />
+# <ChatModelTabs overrideParams={{openai: {model: "gpt-4"}}} />
 # 
 
 # In[4]:

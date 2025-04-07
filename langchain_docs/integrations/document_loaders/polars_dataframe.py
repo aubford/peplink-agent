@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Polars DataFrame
-#
+# 
 # This notebook goes over how to load data from a [polars](https://pola-rs.github.io/polars-book/user-guide/) DataFrame.
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  polars")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  polars')
 
 
 # In[2]:
@@ -53,3 +53,4 @@ loader.load()
 # Use lazy load for larger table, which won't read the full table into memory
 for i in loader.lazy_load():
     print(i)
+

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Anyscale
-#
+# 
 # Let's load the Anyscale Embedding class.
 
 # In[1]:
@@ -37,3 +37,4 @@ print(query_result)
 
 doc_result = embeddings.embed_documents([text])
 print(doc_result)
+

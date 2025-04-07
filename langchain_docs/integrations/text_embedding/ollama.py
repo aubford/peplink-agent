@@ -25,7 +25,7 @@ sidebar_label: Ollama
 # * This will download the default tagged version of the model. Typically, the default points to the latest, smallest sized-parameter model.
 # 
 # > On Mac, the models will be download to `~/.ollama/models`
-# > 
+# >
 # > On Linux (or WSL), the models will be stored at `/usr/share/ollama/.ollama/models`
 # 
 # * Specify the exact version of the model of interest as such `ollama pull vicuna:13b-v1.5-16k-q4_0` (View the [various tags for the `Vicuna`](https://ollama.ai/library/vicuna/tags) model in this instance)
@@ -38,7 +38,7 @@ sidebar_label: Ollama
 # 
 # There is no built-in auth mechanism for Ollama.
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[1]:
 

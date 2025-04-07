@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Replicate
-#
+# 
 # >[Replicate](https://replicate.com/blog/machine-learning-needs-better-tools) runs machine learning models in the cloud. We have a library of open-source models that you can run with a few lines of code. If you're building your own machine learning models, Replicate makes it easy to deploy them at scale.
-#
+# 
 # This example goes over how to use LangChain to interact with `Replicate` [models](https://replicate.com/explore)
 
 # ## Setup
@@ -13,8 +13,8 @@
 
 
 # magics to auto-reload external modules in case you are making changes to langchain while working on this notebook
-get_ipython().run_line_magic("load_ext", "autoreload")
-get_ipython().run_line_magic("autoreload", "2")
+get_ipython().run_line_magic('load_ext', 'autoreload')
+get_ipython().run_line_magic('autoreload', '2')
 
 
 # To run this notebook, you'll need to create a [replicate](https://replicate.com) account and install the [replicate python client](https://github.com/replicate/replicate-python).
@@ -22,7 +22,7 @@ get_ipython().run_line_magic("autoreload", "2")
 # In[4]:
 
 
-get_ipython().system("poetry run pip install replicate")
+get_ipython().system('poetry run pip install replicate')
 
 
 # In[5]:
@@ -52,9 +52,9 @@ from langchain_core.prompts import PromptTemplate
 
 
 # ## Calling a model
-#
+# 
 # Find a model on the [replicate explore page](https://replicate.com/explore), and then paste in the model name and version in this format: model_name/version.
-#
+# 
 # For example, here is [`Meta Llama 3`](https://replicate.com/meta/meta-llama-3-8b-instruct).
 
 # In[58]:
@@ -72,15 +72,15 @@ llm(prompt)
 
 
 # As another example, for this [dolly model](https://replicate.com/replicate/dolly-v2-12b), click on the API tab. The model name/version would be: `replicate/dolly-v2-12b:ef0e1aefc61f8e096ebe4db6b2bacc297daf2ef6899f0f7e001ec445893500e5`
-#
+# 
 # Only the `model` param is required, but we can add other model params when initializing.
-#
+# 
 # For example, if we were running stable diffusion and wanted to change the image dimensions:
-#
+# 
 # ```
 # Replicate(model="stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf", input={'image_dimensions': '512x512'})
 # ```
-#
+#                        
 # *Note that only the first output of a model will be returned.*
 
 # In[20]:
@@ -124,7 +124,7 @@ image_output
 # In[24]:
 
 
-get_ipython().system("poetry run pip install Pillow")
+get_ipython().system('poetry run pip install Pillow')
 
 
 # In[ ]:
@@ -272,3 +272,4 @@ response = requests.get(
 )
 img = Image.open(BytesIO(response.content))
 img
+

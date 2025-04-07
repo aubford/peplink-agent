@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # John Snow Labs
-#
+# 
 # >[John Snow Labs](https://nlp.johnsnowlabs.com/) NLP & LLM ecosystem includes software libraries for state-of-the-art AI at scale, Responsible AI, No-Code AI, and access to over 20,000 models for Healthcare, Legal, Finance, etc.
 # >
 # >Models are loaded with [nlp.load](https://nlp.johnsnowlabs.com/docs/en/jsl/load_api) and spark session is started >with [nlp.start()](https://nlp.johnsnowlabs.com/docs/en/jsl/start-a-sparksession) under the hood.
 # >For all 24.000+ models, see the [John Snow Labs Model Models Hub](https://nlp.johnsnowlabs.com/models)
-#
+# 
 
 # ## Setting up
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  johnsnowlabs")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  johnsnowlabs')
 
 
 # In[ ]:
@@ -67,3 +67,4 @@ for i, embedding in enumerate(embeddings):
 query = "Cancer is caused by smoking"
 query_embedding = embedder.embed_query(query)
 print(f"Embedding for query: {query_embedding}")
+

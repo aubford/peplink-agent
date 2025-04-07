@@ -2,34 +2,34 @@
 # coding: utf-8
 
 # # How to return artifacts from a tool
-#
+# 
 # :::info Prerequisites
 # This guide assumes familiarity with the following concepts:
-#
+# 
 # - [ToolMessage](/docs/concepts/messages/#toolmessage)
 # - [Tools](/docs/concepts/tools)
 # - [Function/tool calling](/docs/concepts/tool_calling)
-#
+# 
 # :::
-#
+# 
 # [Tools](/docs/concepts/tools/) are utilities that can be [called by a model](/docs/concepts/tool_calling/), and whose outputs are designed to be fed back to a model. Sometimes, however, there are artifacts of a tool's execution that we want to make accessible to downstream components in our chain or agent, but that we don't want to expose to the model itself. For example if a tool returns a custom object, a dataframe or an image, we may want to pass some metadata about this output to the model without passing the actual output to the model. At the same time, we may want to be able to access this full output elsewhere, for example in downstream tools.
-#
+# 
 # The Tool and [ToolMessage](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.tool.ToolMessage.html) interfaces make it possible to distinguish between the parts of the tool output meant for the model (this is the ToolMessage.content) and those parts which are meant for use outside the model (ToolMessage.artifact).
-#
+# 
 # :::info Requires ``langchain-core >= 0.2.19``
-#
+# 
 # This functionality was added in ``langchain-core == 0.2.19``. Please make sure your package is up to date.
-#
+# 
 # :::
-#
+# 
 # ## Defining the tool
-#
+# 
 # If we want our tool to distinguish between message content and other artifacts, we need to specify `response_format="content_and_artifact"` when defining our tool and make sure that we return a tuple of (content, artifact):
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", 'install -qU "langchain-core>=0.2.19"')
+get_ipython().run_line_magic('pip', 'install -qU "langchain-core>=0.2.19"')
 
 
 # In[2]:
@@ -50,7 +50,7 @@ def generate_random_ints(min: int, max: int, size: int) -> Tuple[str, List[int]]
 
 
 # ## Invoking the tool with ToolCall
-#
+# 
 # If we directly invoke our tool with just the tool arguments, you'll notice that we only get back the content part of the Tool output:
 
 # In[3]:
@@ -75,15 +75,15 @@ generate_random_ints.invoke(
 
 
 # ## Using with a model
-#
+# 
 # With a [tool-calling model](/docs/how_to/tool_calling/), we can easily use a model to call our Tool and generate ToolMessages:
-#
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs
 #   customVarName="llm"
 # />
-#
+# 
 
 # In[5]:
 
@@ -132,7 +132,7 @@ chain.invoke("give me a random number between 1 and 5")
 
 
 # ## Creating from BaseTool class
-#
+# 
 # If you want to create a BaseTool object directly, instead of decorating a function with `@tool`, you can do so like this:
 
 # In[10]:
@@ -181,3 +181,4 @@ rand_gen.invoke(
         "type": "tool_call",
     }
 )
+

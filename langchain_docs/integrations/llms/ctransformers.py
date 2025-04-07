@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # C Transformers
-#
+# 
 # The [C Transformers](https://github.com/marella/ctransformers) library provides Python bindings for GGML models.
-#
+# 
 # This example goes over how to use LangChain to interact with `C Transformers` [models](https://github.com/marella/ctransformers#supported-models).
 
 # **Install**
@@ -12,7 +12,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  ctransformers")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  ctransformers')
 
 
 # **Load Model**
@@ -64,3 +64,4 @@ prompt = PromptTemplate.from_template(template)
 llm_chain = LLMChain(prompt=prompt, llm=llm)
 
 response = llm_chain.run("What is AI?")
+

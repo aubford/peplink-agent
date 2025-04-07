@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Solar
-#
+# 
 # [Solar](https://console.upstage.ai/services/embedding) offers an embeddings service.
-#
+# 
 # This example goes over how to use LangChain to interact with Solar Inference for text embedding.
 
 # In[9]:
@@ -64,3 +64,4 @@ similarity = np.dot(query_numpy, document_numpy) / (
     np.linalg.norm(query_numpy) * np.linalg.norm(document_numpy)
 )
 print(f"Cosine similarity between document and query: {similarity}")
+

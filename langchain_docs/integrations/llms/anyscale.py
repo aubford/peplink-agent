@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # Anyscale
-#
+# 
 # [Anyscale](https://www.anyscale.com/) is a fully-managed [Ray](https://www.ray.io/) platform, on which you can build, deploy, and manage scalable AI and Python applications
-#
-# This example goes over how to use LangChain to interact with [Anyscale Endpoint](https://app.endpoints.anyscale.com/).
+# 
+# This example goes over how to use LangChain to interact with [Anyscale Endpoint](https://app.endpoints.anyscale.com/). 
 
 # In[ ]:
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # In[ ]:
@@ -101,3 +101,4 @@ def send_query(llm, prompt):
 
 futures = [send_query.remote(llm, prompt) for prompt in prompt_list]
 results = ray.get(futures)
+

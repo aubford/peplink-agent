@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Log, Trace, and Monitor
-#
+# 
 # When building apps or agents using Langchain, you end up making multiple API calls to fulfill a single user request. However, these requests are not chained when you want to analyse them. With [**Portkey**](/docs/integrations/providers/portkey/), all the embeddings, completions, and other requests from a single user request will get logged and traced to a common ID, enabling you to gain full visibility of user interactions.
-#
+# 
 # This notebook serves as a step-by-step guide on how to log, trace, and monitor Langchain LLM calls using `Portkey` in your Langchain app.
 
 # First, let's import Portkey, OpenAI, and Agent tools
@@ -107,31 +107,31 @@ agent_executor.invoke(
 
 
 # ## How Logging & Tracing Works on Portkey
-#
+# 
 # **Logging**
 # - Sending your request through Portkey ensures that all of the requests are logged by default
 # - Each request log contains `timestamp`, `model name`, `total cost`, `request time`, `request json`, `response json`, and additional Portkey features
-#
+# 
 # **[Tracing](https://portkey.ai/docs/product/observability-modern-monitoring-for-llms/traces)**
 # - Trace id is passed along with each request and is visible on the logs on Portkey dashboard
 # - You can also set a **distinct trace id** for each request if you want
 # - You can append user feedback to a trace id as well. [More info on this here](https://portkey.ai/docs/product/observability-modern-monitoring-for-llms/feedback)
-#
+# 
 # For the above request, you will be able to view the entire log trace like this
 # ![View Langchain traces on Portkey](https://assets.portkey.ai/docs/agent_tracing.gif)
 
 # ## Advanced LLMOps Features - Caching, Tagging, Retries
-#
+# 
 # In addition to logging and tracing, Portkey provides more features that add production capabilities to your existing workflows:
-#
+# 
 # **Caching**
-#
+# 
 # Respond to previously served customers queries from cache instead of sending them again to OpenAI. Match exact strings OR semantically similar strings. Cache can save costs and reduce latencies by 20x. [Docs](https://portkey.ai/docs/product/ai-gateway-streamline-llm-integrations/cache-simple-and-semantic)
-#
+# 
 # **Retries**
-#
+# 
 # Automatically reprocess any unsuccessful API requests **`upto 5`** times. Uses an **`exponential backoff`** strategy, which spaces out retry attempts to prevent network overload.[Docs](https://portkey.ai/docs/product/ai-gateway-streamline-llm-integrations)
-#
+# 
 # **Tagging**
-#
+# 
 # Track and audit each user interaction in high detail with predefined tags. [Docs](https://portkey.ai/docs/product/observability-modern-monitoring-for-llms/metadata)

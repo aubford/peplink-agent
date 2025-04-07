@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Volcengine Reranker
-#
+# 
 # This notebook shows how to use Volcengine Reranker for document compression and retrieval. [Volcengine](https://www.volcengine.com/) is a cloud service platform developed by ByteDance, the parent company of TikTok.
-#
+# 
 # Volcengine's Rerank Service supports reranking up to 50 documents with a maximum of 4000 tokens. For more, please visit [here](https://www.volcengine.com/docs/84313/1254474) and [here](https://www.volcengine.com/docs/84313/1254605).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  volcengine")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  volcengine')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss-cpu")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu')
 
 
 # In[ ]:
@@ -93,3 +93,7 @@ pretty_print_docs(compressed_docs)
 
 
 # In[ ]:
+
+
+
+

@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Optimization
-#
+# 
 # This notebook goes over how to optimize chains using LangChain and [LangSmith](https://smith.langchain.com).
 
 # ## Set up
-#
+# 
 # We will set an environment variable for LangSmith, and load the relevant data
 
 # In[1]:
@@ -36,7 +36,7 @@ df["Released_Year"] = df["Released_Year"].astype(int, errors="ignore")
 
 
 # ## Create the initial retrieval chain
-#
+# 
 # We will use a self-query retriever
 
 # In[5]:
@@ -135,7 +135,7 @@ chain = (
 
 
 # ## Run examples
-#
+# 
 # Run examples through the chain. This can either be manually, or using a list of examples, or production traffic
 
 # In[14]:
@@ -145,13 +145,13 @@ chain.invoke({"question": "what is a horror movie released in early 2000s"})
 
 
 # ## Annotate
-#
+# 
 # Now, go to LangSmitha and annotate those examples as correct or incorrect
 
 # ## Create Dataset
-#
+# 
 # We can now create a dataset from those runs.
-#
+# 
 # What we will do is find the runs marked as correct, then grab the sub-chains from them. Specifically, the query generator sub chain and the final generation step
 
 # In[15]:
@@ -239,7 +239,7 @@ gen_runs[0].outputs
 
 
 # ## Create datasets
-#
+# 
 # We can now create datasets for the query generation and final generation step.
 # We do this so that (1) we can inspect the datapoints, (2) we can edit them if needed, (3) we can add to them over time
 
@@ -268,7 +268,7 @@ client.create_examples(inputs=inputs, outputs=outputs, dataset_name="movie-gener
 
 
 # ## Use as few shot examples
-#
+# 
 # We can now pull down a dataset and use them as few shot examples in a future chain
 
 # In[26]:
@@ -342,3 +342,7 @@ chain1.invoke(
 
 
 # In[ ]:
+
+
+
+

@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Steam Toolkit
-#
+# 
 # >[Steam (Wikipedia)](https://en.wikipedia.org/wiki/Steam_(service)) is a video game digital distribution service and storefront developed by `Valve Corporation`. It provides game updates automatically for Valve's games, and expanded to distributing third-party titles. `Steam` offers various features, like game server matchmaking with Valve Anti-Cheat measures, social networking, and game streaming services.
-#
+# 
 # >[Steam](https://store.steampowered.com/about/) is the ultimate destination for playing, discussing, and creating games.
-#
+# 
 # Steam toolkit has two tools:
 # - `Game Details`
 # - `Recommended Games`
-#
+# 
 # This notebook provides a walkthrough of using Steam API with LangChain to retrieve Steam game recommendations based on your current Steam Game Inventory or to gather information regarding some Steam Games which you provide.
-#
+# 
 # ## Setting up
-#
+# 
 # We have to install two python libraries.
 
 # ## Imports
@@ -22,9 +22,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  python-steam-api python-decouple"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  python-steam-api python-decouple')
 
 
 # ## Assign Environmental Variables
@@ -41,7 +39,7 @@ os.environ["STEAM_ID"] = "123"
 os.environ["OPENAI_API_KEY"] = "abc"
 
 
-# ## Initialization:
+# ## Initialization: 
 # Initialize the LLM, SteamWebAPIWrapper, SteamToolkit and most importantly the langchain agent to process your query!
 # ## Example
 
@@ -70,3 +68,4 @@ agent = initialize_agent(
 
 out = agent("can you give the information about the game Terraria")
 print(out)
+

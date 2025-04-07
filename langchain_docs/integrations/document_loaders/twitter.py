@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Twitter
-#
+# 
 # >[Twitter](https://twitter.com/) is an online social media and social networking service.
-#
+# 
 # This loader fetches the text from the Tweets of a list of `Twitter` users, using the `tweepy` Python package.
 # You must initialize the loader with your `Twitter API` token, and you need to pass in the Twitter username you want to extract.
 
@@ -17,7 +17,7 @@ from langchain_community.document_loaders import TwitterTweetLoader
 # In[2]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  tweepy")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tweepy')
 
 
 # In[3]:
@@ -45,3 +45,4 @@ loader = TwitterTweetLoader.from_bearer_token(
 
 documents = loader.load()
 documents[:5]
+

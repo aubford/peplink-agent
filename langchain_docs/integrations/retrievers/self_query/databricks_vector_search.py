@@ -2,24 +2,21 @@
 # coding: utf-8
 
 # # Databricks Vector Search
-#
+# 
 # >[Databricks Vector Search](https://docs.databricks.com/en/generative-ai/vector-search.html) is a serverless similarity search engine that allows you to store a vector representation of your data, including metadata, in a vector database. With Vector Search, you can create auto-updating vector search indexes from Delta tables managed by Unity Catalog and query them with a simple API to return the most similar vectors.
-#
-#
+# 
+# 
 # In the walkthrough, we'll demo the `SelfQueryRetriever` with a Databricks Vector Search.
 
 # ## create Databricks vector store index
 # First we'll want to create a databricks vector store index and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`) along with integration-specific requirements.
 
 # In[1]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet  langchain-core databricks-vectorsearch langchain-openai tiktoken",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-core databricks-vectorsearch langchain-openai tiktoken')
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -172,7 +169,7 @@ retriever = SelfQueryRetriever.from_llm(
 
 # ## Test it out
 # And now we can try actually using our retriever!
-#
+# 
 
 # In[18]:
 
@@ -206,15 +203,15 @@ retriever.invoke(
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[22]:
@@ -234,3 +231,4 @@ retriever = SelfQueryRetriever.from_llm(
 
 
 retriever.invoke("What are two movies about dinosaurs?")
+

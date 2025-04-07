@@ -2,31 +2,31 @@
 # coding: utf-8
 
 # # How to handle rate limits
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
 # - [LLMs](/docs/concepts/text_llms)
 # :::
-#
-#
+# 
+# 
 # You may find yourself in a situation where you are getting rate limited by the model provider API because you're making too many requests.
-#
+# 
 # For example, this might happen if you are running many parallel queries to benchmark the chat model on a test dataset.
-#
+# 
 # If you are facing such a situation, you can use a rate limiter to help match the rate at which you're making request to the rate allowed
 # by the API.
-#
+# 
 # :::info Requires ``langchain-core >= 0.2.24``
-#
+# 
 # This functionality was added in ``langchain-core == 0.2.24``. Please make sure your package is up to date.
 # :::
 
 # ## Initialize a rate limiter
-#
+# 
 # Langchain comes with a built-in in memory rate limiter. This rate limiter is thread safe and can be shared by multiple threads in the same process.
-#
+# 
 # The provided rate limiter can only limit the number of requests per unit time. It will not help if you need to also limit based on the size
 # of the requests.
 
@@ -43,7 +43,7 @@ rate_limiter = InMemoryRateLimiter(
 
 
 # ## Choose a model
-#
+# 
 # Choose any model and pass to it the rate_limiter via the `rate_limiter` attribute.
 
 # In[2]:
@@ -72,3 +72,4 @@ for _ in range(5):
     model.invoke("hello")
     toc = time.time()
     print(toc - tic)
+

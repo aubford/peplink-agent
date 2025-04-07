@@ -1,4 +1,4 @@
-langchain~=0.3.17
+langchain~=0.3.23
 langserve[all]
 unstructured[pdf]
 langsmith
@@ -31,7 +31,7 @@ lxml
 bs4~=0.0.2
 pinecone-notebooks
 pypdf
-openai~=1.58.1
+openai
 google-api-python-client
 text-dedup
 datasketch
@@ -48,10 +48,10 @@ beautifulsoup4~=4.12.3
 typing_extensions~=4.12.2
 # ragas~=0.2.12
 -e /Users/aubrey/workspace/langchain-pepwave_and_ragas/ragas
-black~=25.1.0
+black
 pymongo~=4.11.1
 textstat~=0.7.5
 instructor~=1.7.2
-matplotlib~=3.10.1
+matplotlib
 flashtext~=2.7
-pyvis~=0.3.2
+pyvis

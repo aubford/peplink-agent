@@ -13,7 +13,7 @@ sidebar_label: Redis
 # 
 # Most developers are familiar with `Redis`. At its core, `Redis` is a NoSQL Database in the key-value family that can used as a cache, message broker, stream processing and a primary database. Developers choose `Redis` because it is fast, has a large ecosystem of client libraries, and has been deployed by major enterprises for years.
 # 
-# On top of these traditional use cases, `Redis` provides additional capabilities like the Search and Query capability that allows users to create secondary index structures within `Redis`. This allows `Redis` to be a Vector Database, at the speed of a cache. 
+# On top of these traditional use cases, `Redis` provides additional capabilities like the Search and Query capability that allows users to create secondary index structures within `Redis`. This allows `Redis` to be a Vector Database, at the speed of a cache.
 # 
 # 
 # ### Redis as a Vector Database
@@ -95,7 +95,7 @@ sidebar_label: Redis
 # - Cloud marketplaces: [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-e6y7ork67pjwg?sr=0-2&ref_=beagle&applicationId=AWSMPContessa), [Google Marketplace](https://console.cloud.google.com/marketplace/details/redislabs-public/redis-enterprise?pli=1), or [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/garantiadata.redis_enterprise_1sp_public_preview?tab=Overview)
 # - On-premise: [Redis Enterprise Software](https://redis.com/redis-enterprise-software/overview/)
 # - Kubernetes: [Redis Enterprise Software on Kubernetes](https://docs.redis.com/latest/kubernetes/)
-#   
+# 
 # ### Redis connection Url schemas
 # 
 # Valid Redis Url schemas are:
@@ -185,7 +185,7 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 print(f"Connecting to Redis at: {REDIS_URL}")
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[4]:
 
@@ -328,7 +328,7 @@ get_ipython().system('rvl stats -i newsgroups --port 6379')
 
 # ## Query vector store
 # 
-# Once your vector store has been created and the relevant documents have been added you will most likely wish to query it during the running of your chain or agent. 
+# Once your vector store has been created and the relevant documents have been added you will most likely wish to query it during the running of your chain or agent.
 # 
 # ### Query directly
 # 
@@ -472,8 +472,8 @@ prompt = ChatPromptTemplate.from_messages(
         (
             "human",
             """You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
-Question: {question} 
-Context: {context} 
+Question: {question}
+Context: {context}
 Answer:""",
         ),
     ]

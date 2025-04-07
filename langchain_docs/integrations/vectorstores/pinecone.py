@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # Pinecone
-#
+# 
 # >[Pinecone](https://docs.pinecone.io/docs/overview) is a vector database with broad functionality.
-#
+# 
 # This notebook shows how to use functionality related to the `Pinecone` vector database.
-#
+# 
 # ## Setup
-#
+# 
 # To use the `PineconeVectorStore` you first need to install the partner package, as well as the other packages used throughout this notebook.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-pinecone pinecone-notebooks")
+pip install -qU langchain-pinecone pinecone-notebooks
 
 
 # Migration note: if you are migrating from the `langchain_community.vectorstores` implementation of Pinecone, you may need to remove your `pinecone-client` v2 dependency before installing `langchain-pinecone`, which relies on `pinecone-client` v3.
 
 # ### Credentials
-#
+# 
 # Create a new Pinecone account, or sign into your existing one, and create an API key to use in this notebook.
 
 # In[4]:
@@ -28,7 +28,6 @@ get_ipython().run_line_magic("pip", "install -qU langchain-pinecone pinecone-not
 
 import getpass
 import os
-import time
 
 from pinecone import Pinecone, ServerlessSpec
 
@@ -50,7 +49,7 @@ pc = Pinecone(api_key=pinecone_api_key)
 
 
 # ## Initialization
-#
+# 
 # Before initializing our vector store, let's connect to a Pinecone index. If one named `index_name` doesn't exist, it will be created.
 
 # In[12]:
@@ -75,12 +74,12 @@ if index_name not in existing_indexes:
 index = pc.Index(index_name)
 
 
-# Now that our Pinecone index is setup, we can initialize our vector store.
-#
+# Now that our Pinecone index is setup, we can initialize our vector store. 
+# 
 # import EmbeddingTabs from "@theme/EmbeddingTabs";
-#
+# 
 # <EmbeddingTabs/>
-#
+# 
 
 # In[13]:
 
@@ -101,11 +100,11 @@ vector_store = PineconeVectorStore(index=index, embedding=embeddings)
 
 
 # ## Manage vector store
-#
+# 
 # Once you have created your vector store, we can interact with it by adding and deleting different items.
-#
+# 
 # ### Add items to vector store
-#
+# 
 # We can add items to our vector store by using the `add_documents` function.
 
 # In[15]:
@@ -191,11 +190,11 @@ vector_store.delete(ids=[uuids[-1]])
 
 
 # ## Query vector store
-#
-# Once your vector store has been created and the relevant documents have been added you will most likely wish to query it during the running of your chain or agent.
-#
+# 
+# Once your vector store has been created and the relevant documents have been added you will most likely wish to query it during the running of your chain or agent. 
+# 
 # ### Query directly
-#
+# 
 # Performing a simple similarity search can be done as follows:
 
 # In[17]:
@@ -211,7 +210,7 @@ for res in results:
 
 
 # #### Similarity search with score
-#
+# 
 # You can also search with score:
 
 # In[18]:
@@ -225,11 +224,11 @@ for res, score in results:
 
 
 # #### Other search methods
-#
+# 
 # There are more search methods (such as MMR) not listed in this notebook, to find all of them be sure to read the [API reference](https://python.langchain.com/api_reference/pinecone/vectorstores/langchain_pinecone.vectorstores.PineconeVectorStore.html).
-#
+# 
 # ### Query by turning into retriever
-#
+# 
 # You can also transform the vector store into a retriever for easier usage in your chains.
 
 # In[19]:
@@ -243,13 +242,13 @@ retriever.invoke("Stealing from the bank is a crime", filter={"source": "news"})
 
 
 # ## Usage for retrieval-augmented generation
-#
+# 
 # For guides on how to use this vector store for retrieval-augmented generation (RAG), see the following sections:
-#
+# 
 # - [Tutorials](/docs/tutorials/)
 # - [How-to: Question and answer with RAG](https://python.langchain.com/docs/how_to/#qa-with-rag)
 # - [Retrieval conceptual docs](https://python.langchain.com/docs/concepts/retrieval)
 
 # ## API reference
-#
+# 
 # For detailed documentation of all __ModuleName__VectorStore features and configurations head to the API reference: https://python.langchain.com/api_reference/pinecone/vectorstores/langchain_pinecone.vectorstores.PineconeVectorStore.html

@@ -2,39 +2,37 @@
 # coding: utf-8
 
 # [![View Article](https://img.shields.io/badge/View%20Article-blue)](https://www.mongodb.com/developer/products/atlas/advanced-rag-langchain-mongodb/)
-#
+# 
 
 # # Adding Semantic Caching and Memory to your RAG Application using MongoDB and LangChain
-#
+# 
 # In this notebook, we will see how to use the new MongoDBCache and MongoDBChatMessageHistory in your RAG application.
-#
+# 
 
 # ## Step 1: Install required libraries
-#
+# 
 # - **datasets**: Python library to get access to datasets available on Hugging Face Hub
-#
+# 
 # - **langchain**: Python toolkit for LangChain
-#
+# 
 # - **langchain-mongodb**: Python package to use MongoDB as a vector store, semantic cache, chat history store etc. in LangChain
-#
+# 
 # - **langchain-openai**: Python package to use OpenAI models with LangChain
-#
+# 
 # - **pymongo**: Python toolkit for MongoDB
-#
+# 
 # - **pandas**: Python library for data analysis, exploration, and manipulation
 
 # In[1]:
 
 
-get_ipython().system(
-    " pip install -qU datasets langchain langchain-mongodb langchain-openai pymongo pandas"
-)
+get_ipython().system(' pip install -qU datasets langchain langchain-mongodb langchain-openai pymongo pandas')
 
 
 # ## Step 2: Setup pre-requisites
-#
+# 
 # * Set the MongoDB connection string. Follow the steps [here](https://www.mongodb.com/docs/manual/reference/connection-string/) to get the connection string from the Atlas UI.
-#
+# 
 # * Set the OpenAI API key. Steps to obtain an API key as [here](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
 
 # In[2]:
@@ -66,7 +64,7 @@ os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
 
 
 # ## Step 3: Download the dataset
-#
+# 
 # We will be using MongoDB's [embedded_movies](https://huggingface.co/datasets/MongoDB/embedded_movies) dataset
 
 # In[6]:
@@ -95,7 +93,7 @@ df = pd.DataFrame(data["train"])
 
 
 # ## Step 4: Data analysis
-#
+# 
 # Make sure length of the dataset is what we expect, drop Nones etc.
 
 # In[10]:
@@ -329,7 +327,7 @@ with_message_history.invoke(
 
 
 # ## Step 7: Get faster responses using Semantic Cache
-#
+# 
 # **NOTE:** Semantic cache only caches the input to the LLM. When using it in retrieval chains, remember that documents retrieved can change between runs resulting in cache misses for semantically similar queries.
 
 # In[61]:
@@ -353,22 +351,17 @@ set_llm_cache(
 # In[62]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", 'naive_rag_chain.invoke("What is the best movie to watch when sad?")\n'
-)
+get_ipython().run_cell_magic('time', '', 'naive_rag_chain.invoke("What is the best movie to watch when sad?")\n')
 
 
 # In[63]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", 'naive_rag_chain.invoke("What is the best movie to watch when sad?")\n'
-)
+get_ipython().run_cell_magic('time', '', 'naive_rag_chain.invoke("What is the best movie to watch when sad?")\n')
 
 
 # In[64]:
 
 
-get_ipython().run_cell_magic(
-    "time", "", 'naive_rag_chain.invoke("Which movie do I watch when sad?")\n'
-)
+get_ipython().run_cell_magic('time', '', 'naive_rag_chain.invoke("Which movie do I watch when sad?")\n')
+

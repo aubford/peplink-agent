@@ -8,7 +8,7 @@
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # ## Prerequisite
@@ -62,3 +62,4 @@ async def run_aio_stream():
 
 
 asyncio.run(run_aio_stream())
+

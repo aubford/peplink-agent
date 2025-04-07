@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Minimax
-#
+# 
 # [Minimax](https://api.minimax.chat) is a Chinese startup that provides natural language processing models for companies and individuals.
-#
+# 
 # This example demonstrates using Langchain to interact with Minimax.
 
 # # Setup
-#
+# 
 # To run this notebook, you'll need a [Minimax account](https://api.minimax.chat), an [API key](https://api.minimax.chat/user-center/basic-information/interface-key), and a [Group ID](https://api.minimax.chat/user-center/basic-information)
 
 # # Single model call
@@ -83,3 +83,4 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NBA team won the Championship in the year Jay Zhou was born?"
 
 llm_chain.run(question)
+

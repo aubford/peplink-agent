@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Use LangChain, GPT and Activeloop's Deep Lake to work with code base
-# In this tutorial, we are going to use Langchain + Activeloop's Deep Lake with GPT to analyze the code base of the LangChain itself.
+# In this tutorial, we are going to use Langchain + Activeloop's Deep Lake with GPT to analyze the code base of the LangChain itself. 
 
 # ## Design
 
@@ -14,7 +14,7 @@
 #    1. Build a chain from `langchain.chat_models.ChatOpenAI` and `langchain.chains.ConversationalRetrievalChain`
 #    2. Prepare questions.
 #    3. Get answers running the chain.
-#
+# 
 
 # ## Implementation
 
@@ -25,11 +25,11 @@
 # In[ ]:
 
 
-#!python3 -m pip install --upgrade langchain deeplake openai
+#!python3 -m pip install --upgrade langchain langchain-deeplake openai
 
 
-# Set up OpenAI embeddings, Deep Lake multi-modal vector store api and authenticate.
-#
+# Set up OpenAI embeddings, Deep Lake multi-modal vector store api and authenticate. 
+# 
 # For full documentation of Deep Lake please follow https://docs.activeloop.ai/ and API reference https://docs.deeplake.ai/en/latest/
 
 # In[1]:
@@ -52,10 +52,10 @@ activeloop_token = getpass("Activeloop Token:")
 os.environ["ACTIVELOOP_TOKEN"] = activeloop_token
 
 
-# ### Prepare data
+# ### Prepare data 
 
 # Load all repository files. Here we assume this notebook is downloaded as the part of the langchain fork and we work with the python files of the `langchain` repo.
-#
+# 
 # If you want to use files from different repo, change `root_dir` to the root dir of your repo.
 
 # In[10]:
@@ -96,8 +96,8 @@ print(f"{len(texts)}")
 
 
 # Then embed chunks and upload them to the DeepLake.
-#
-# This can take several minutes.
+# 
+# This can take several minutes. 
 
 # In[13]:
 
@@ -108,43 +108,33 @@ embeddings = OpenAIEmbeddings()
 embeddings
 
 
-# In[15]:
+# In[ ]:
 
 
-from langchain_community.vectorstores import DeepLake
+from langchain_deeplake.vectorstores import DeeplakeVectorStore
 
 username = "<USERNAME_OR_ORG>"
 
 
-db = DeepLake.from_documents(
-    texts, embeddings, dataset_path=f"hub://{username}/langchain-code", overwrite=True
+db = DeeplakeVectorStore.from_documents(
+    documents=texts,
+    embedding=embeddings,
+    dataset_path=f"hub://{username}/langchain-code",
+    overwrite=True,
 )
 db
-
-
-# `Optional`: You can also use Deep Lake's Managed Tensor Database as a hosting service and run queries there. In order to do so, it is necessary to specify the runtime parameter as {'tensor_db': True} during the creation of the vector store. This configuration enables the execution of queries on the Managed Tensor Database, rather than on the client side. It should be noted that this functionality is not applicable to datasets stored locally or in-memory. In the event that a vector store has already been created outside of the Managed Tensor Database, it is possible to transfer it to the Managed Tensor Database by following the prescribed steps.
-
-# In[16]:
-
-
-# from langchain_community.vectorstores import DeepLake
-
-# db = DeepLake.from_documents(
-#     texts, embeddings, dataset_path=f"hub://{<org_id>}/langchain-code", runtime={"tensor_db": True}
-# )
-# db
 
 
 # ### Question Answering
 # First load the dataset, construct the retriever, then construct the Conversational Chain
 
-# In[17]:
+# In[ ]:
 
 
-db = DeepLake(
+db = DeeplakeVectorStore(
     dataset_path=f"hub://{username}/langchain-code",
     read_only=True,
-    embedding=embeddings,
+    embedding_function=embeddings,
 )
 
 
@@ -158,35 +148,14 @@ retriever.search_kwargs["maximal_marginal_relevance"] = True
 retriever.search_kwargs["k"] = 20
 
 
-# You can also specify user defined functions using [Deep Lake filters](https://docs.deeplake.ai/en/latest/deeplake.core.dataset.html#deeplake.core.dataset.Dataset.filter)
-
-# In[19]:
-
-
-def filter(x):
-    # filter based on source code
-    if "something" in x["text"].data()["value"]:
-        return False
-
-    # filter based on path e.g. extension
-    metadata = x["metadata"].data()["value"]
-    return "only_this" in metadata["source"] or "also_that" in metadata["source"]
-
-
-### turn on below for custom filtering
-# retriever.search_kwargs['filter'] = filter
-
-
 # In[20]:
 
 
 from langchain.chains import ConversationalRetrievalChain
 from langchain_openai import ChatOpenAI
 
-model = ChatOpenAI(
-    model_name="gpt-3.5-turbo-0613"
-)  # 'ada' 'gpt-3.5-turbo-0613' 'gpt-4',
-qa = ConversationalRetrievalChain.from_llm(model, retriever=retriever)
+model = ChatOpenAI(model="gpt-3.5-turbo-0613")  # 'ada' 'gpt-3.5-turbo-0613' 'gpt-4',
+qa = RetrievalQA.from_llm(model, retriever=retriever)
 
 
 # In[32]:
@@ -230,3 +199,4 @@ print(qa_dict["What classes are derived from the Chain class?"])
 
 
 print(qa_dict["What kind of retrievers does LangChain have?"])
+

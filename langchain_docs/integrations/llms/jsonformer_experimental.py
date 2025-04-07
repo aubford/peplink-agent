@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # JSONFormer
-#
+# 
 # [JSONFormer](https://github.com/1rgs/jsonformer) is a library that wraps local Hugging Face pipeline models for structured decoding of a subset of the JSON Schema.
-#
+# 
 # It works by filling in the structure tokens and then sampling the content tokens from the model.
-#
+# 
 # **Warning - this module is still experimental**
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  jsonformer > /dev/null")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  jsonformer > /dev/null')
 
 
 # ### Hugging Face Baseline
-#
+# 
 # First, let's establish a qualitative baseline by checking the output of the model without structured decoding.
 
 # In[2]:
@@ -89,9 +89,7 @@ Observation: "SGD stands for stochastic gradient descent, while an SVM is a Supp
 BEGIN! Answer the Human's question as best as you are able.
 ------
 Human: 'What's the difference between an iterator and an iterable?'
-AI Assistant:""".format(
-    arg_schema=ask_star_coder.args
-)
+AI Assistant:""".format(arg_schema=ask_star_coder.args)
 
 
 # In[5]:
@@ -113,7 +111,7 @@ print(generated)
 # ***That's not so impressive, is it? It didn't follow the JSON format at all! Let's try with the structured decoder.***
 
 # ## JSONFormer LLM Wrapper
-#
+# 
 # Let's try that again, now providing a the Action input's JSON Schema to the model.
 
 # In[6]:
@@ -150,3 +148,7 @@ print(results)
 # **Voila! Free of parsing errors.**
 
 # In[ ]:
+
+
+
+

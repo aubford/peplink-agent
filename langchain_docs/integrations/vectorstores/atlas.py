@@ -2,30 +2,30 @@
 # coding: utf-8
 
 # # Atlas
-#
-#
+# 
+# 
 # >[Atlas](https://docs.nomic.ai/index.html) is a platform by Nomic made for interacting with both small and internet scale unstructured datasets. It enables anyone to visualize, search, and share massive datasets in their browser.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # This notebook shows you how to use functionality related to the `AtlasDB` vectorstore.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  spacy")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  spacy')
 
 
 # In[ ]:
 
 
-get_ipython().system("python3 -m spacy download en_core_web_sm")
+get_ipython().system('python3 -m spacy download en_core_web_sm')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  nomic")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  nomic')
 
 
 # ### Load Packages

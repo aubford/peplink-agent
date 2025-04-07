@@ -410,37 +410,29 @@ langchain_core.__version__
 # 
 # Let's start off by looking at the events produced by a chat model.
 
-# In[14]:
+# In[13]:
 
 
 events = []
-async for event in model.astream_events("hello", version="v2"):
+async for event in model.astream_events("hello"):
     events.append(event)
 
 
 # :::note
 # 
-# Hey what's that funny version="v2" parameter in the API?! 😾
-# 
-# This is a **beta API**, and we're almost certainly going to make some changes to it (in fact, we already have!)
-# 
-# This version parameter will allow us to minimize such breaking changes to your code. 
-# 
-# In short, we are annoying you now, so we don't have to annoy you later.
-# 
-# `v2` is only available for langchain-core>=0.2.0.
+# For `langchain-core<0.3.37`, set the `version` kwarg explicitly (e.g., `model.astream_events("hello", version="v2")`).
 # 
 # :::
 
 # Let's take a look at the few of the start event and a few of the end events.
 
-# In[15]:
+# In[14]:
 
 
 events[:3]
 
 
-# In[16]:
+# In[15]:
 
 
 events[-2:]
@@ -450,7 +442,7 @@ events[-2:]
 # 
 # Let's revisit the example chain that parsed streaming JSON to explore the streaming events API.
 
-# In[17]:
+# In[16]:
 
 
 chain = (
@@ -463,7 +455,6 @@ events = [
         "output a list of the countries france, spain and japan and their populations in JSON format. "
         'Use a dict with an outer key of "countries" which contains a list of countries. '
         "Each country should have the key `name` and `population`",
-        version="v2",
     )
 ]
 
@@ -495,7 +486,6 @@ async for event in chain.astream_events(
     "output a list of the countries france, spain and japan and their populations in JSON format. "
     'Use a dict with an outer key of "countries" which contains a list of countries. '
     "Each country should have the key `name` and `population`",
-    version="v2",
 ):
     kind = event["event"]
     if kind == "on_chat_model_stream":
@@ -534,7 +524,6 @@ async for event in chain.astream_events(
     "output a list of the countries france, spain and japan and their populations in JSON format. "
     'Use a dict with an outer key of "countries" which contains a list of countries. '
     "Each country should have the key `name` and `population`",
-    version="v2",
     include_names=["my_parser"],
 ):
     print(event)
@@ -557,7 +546,6 @@ chain = model.with_config({"run_name": "model"}) | JsonOutputParser().with_confi
 max_events = 0
 async for event in chain.astream_events(
     'output a list of the countries france, spain and japan and their populations in JSON format. Use a dict with an outer key of "countries" which contains a list of countries. Each country should have the key `name` and `population`',
-    version="v2",
     include_types=["chat_model"],
 ):
     print(event)
@@ -585,7 +573,6 @@ chain = (model | JsonOutputParser()).with_config({"tags": ["my_chain"]})
 max_events = 0
 async for event in chain.astream_events(
     'output a list of the countries france, spain and japan and their populations in JSON format. Use a dict with an outer key of "countries" which contains a list of countries. Each country should have the key `name` and `population`',
-    version="v2",
     include_tags=["my_chain"],
 ):
     print(event)
@@ -656,7 +643,6 @@ async for event in chain.astream_events(
     "output a list of the countries france, spain and japan and their populations in JSON format. "
     'Use a dict with an outer key of "countries" which contains a list of countries. '
     "Each country should have the key `name` and `population`",
-    version="v2",
 ):
     kind = event["event"]
     if kind == "on_chat_model_stream":
@@ -703,7 +689,7 @@ def bad_tool(word: str):
     return reverse_word.invoke(word)
 
 
-async for event in bad_tool.astream_events("hello", version="v2"):
+async for event in bad_tool.astream_events("hello"):
     print(event)
 
 
@@ -718,7 +704,7 @@ def correct_tool(word: str, callbacks):
     return reverse_word.invoke(word, {"callbacks": callbacks})
 
 
-async for event in correct_tool.astream_events("hello", version="v2"):
+async for event in correct_tool.astream_events("hello"):
     print(event)
 
 
@@ -738,7 +724,7 @@ reverse_and_double = RunnableLambda(reverse_and_double)
 
 await reverse_and_double.ainvoke("1234")
 
-async for event in reverse_and_double.astream_events("1234", version="v2"):
+async for event in reverse_and_double.astream_events("1234"):
     print(event)
 
 
@@ -757,7 +743,7 @@ async def reverse_and_double(word: str):
 
 await reverse_and_double.ainvoke("1234")
 
-async for event in reverse_and_double.astream_events("1234", version="v2"):
+async for event in reverse_and_double.astream_events("1234"):
     print(event)
 
 

@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Google Finance
-#
+# 
 # This notebook goes over how to use the Google Finance Tool to get information from the Google Finance page
-#
+# 
 # To get an SerpApi key key, sign up at: https://serpapi.com/users/sign_up.
-#
-# Then install google-search-results with the command:
-#
+# 
+# Then install google-search-results with the command: 
+# 
 # pip install google-search-results
-#
+# 
 # Then set the environment variable SERPAPI_API_KEY to your SerpApi key
-#
+# 
 # Or pass the key in as a argument to the wrapper serp_api_key="your secret key"
 
 # Use the Tool
@@ -20,9 +20,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  google-search-results langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  google-search-results langchain-community')
 
 
 # In[9]:
@@ -61,3 +59,4 @@ agent = initialize_agent(
     tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
 )
 agent.run("what is google's stock")
+

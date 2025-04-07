@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # PGVecto.rs
-#
+# 
 # This notebook shows how to use functionality related to the Postgres vector database ([pgvecto.rs](https://github.com/tensorchord/pgvecto.rs)).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", 'install "pgvecto_rs[sdk]" langchain-community')
+get_ipython().run_line_magic('pip', 'install "pgvecto_rs[sdk]" langchain-community')
 
 
 # In[ ]:
@@ -39,9 +39,7 @@ embeddings = FakeEmbeddings(size=3)
 # In[ ]:
 
 
-get_ipython().system(
-    " docker run --name pgvecto-rs-demo -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d tensorchord/pgvecto-rs:latest"
-)
+get_ipython().system(' docker run --name pgvecto-rs-demo -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d tensorchord/pgvecto-rs:latest')
 
 
 # Then contruct the db URL
@@ -144,3 +142,4 @@ docs: List[Document] = db1.similarity_search(
 for doc in docs:
     print(doc.page_content)
     print("======================")
+

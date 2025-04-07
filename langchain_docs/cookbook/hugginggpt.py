@@ -3,13 +3,13 @@
 
 # # HuggingGPT
 # Implementation of [HuggingGPT](https://github.com/microsoft/JARVIS). HuggingGPT is a system to connect LLMs (ChatGPT) with ML community (Hugging Face).
-#
+# 
 # + 🔥 Paper: https://arxiv.org/abs/2303.17580
 # + 🚀 Project: https://github.com/microsoft/JARVIS
 # + 🤗 Space: https://huggingface.co/spaces/microsoft/HuggingGPT
 
 # ## Set up tools
-#
+# 
 # We set up the tools available from [Transformers Agent](https://huggingface.co/docs/transformers/transformers_agents#tools). It includes a library of tools supported by Transformers and some customized tools such as image generator, video generator, text downloader and other tools.
 
 # In[ ]:
@@ -43,7 +43,7 @@ hf_tools = [
 
 
 # ## Setup model and HuggingGPT
-#
+# 
 # We create an instance of HuggingGPT and use ChatGPT as the controller to rule the above tools.
 
 # In[ ]:
@@ -63,10 +63,11 @@ agent = HuggingGPT(llm, hf_tools)
 
 
 # ## Run an example
-#
+# 
 # Given a text, show a related image and video.
 
 # In[ ]:
 
 
 agent.run("please show me a video and an image of 'a boy is running'")
+

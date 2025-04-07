@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # SageMakerEndpoint
-#
+# 
 # [Amazon SageMaker](https://aws.amazon.com/sagemaker/) is a system that can build, train, and deploy machine learning (ML) models for any use case with fully managed infrastructure, tools, and workflows.
-#
+# 
 # This notebooks goes over how to use an LLM hosted on a `SageMaker endpoint`.
 
 # In[ ]:
 
 
-get_ipython().system("pip3 install langchain boto3")
+get_ipython().system('pip3 install langchain boto3')
 
 
 # ## Set up
@@ -49,7 +49,7 @@ docs = [
 
 
 # ## Example to initialize with external boto3 session
-#
+# 
 # ### for cross account scenarios
 
 # In[ ]:
@@ -60,8 +60,8 @@ from typing import Dict
 
 import boto3
 from langchain.chains.question_answering import load_qa_chain
-from langchain_community.llms import SagemakerEndpoint
-from langchain_community.llms.sagemaker_endpoint import LLMContentHandler
+from langchain_aws.llms import SagemakerEndpoint
+from langchain_aws.llms.sagemaker_endpoint import LLMContentHandler
 from langchain_core.prompts import PromptTemplate
 
 query = """How long was Elizabeth hospitalized?
@@ -127,8 +127,8 @@ import json
 from typing import Dict
 
 from langchain.chains.question_answering import load_qa_chain
-from langchain_community.llms import SagemakerEndpoint
-from langchain_community.llms.sagemaker_endpoint import LLMContentHandler
+from langchain_aws.llms import SagemakerEndpoint
+from langchain_aws.llms.sagemaker_endpoint import LLMContentHandler
 from langchain_core.prompts import PromptTemplate
 
 query = """How long was Elizabeth hospitalized?
@@ -172,3 +172,4 @@ chain = load_qa_chain(
 )
 
 chain({"input_documents": docs, "question": query}, return_only_outputs=True)
+

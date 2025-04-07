@@ -2,43 +2,41 @@
 # coding: utf-8
 
 # # Yellowbrick
-#
-# [Yellowbrick](https://yellowbrick.com/yellowbrick-data-warehouse/) is an elastic, massively parallel processing (MPP) SQL database that runs in the cloud and on-premises, using kubernetes for scale, resilience and cloud portability. Yellowbrick is designed to address the largest and most complex business-critical data warehousing use cases. The efficiency at scale that Yellowbrick provides also enables it to be used as a high performance and scalable vector database to store and search vectors with SQL.
-#
+# 
+# [Yellowbrick](https://yellowbrick.com/yellowbrick-data-warehouse/) is an elastic, massively parallel processing (MPP) SQL database that runs in the cloud and on-premises, using kubernetes for scale, resilience and cloud portability. Yellowbrick is designed to address the largest and most complex business-critical data warehousing use cases. The efficiency at scale that Yellowbrick provides also enables it to be used as a high performance and scalable vector database to store and search vectors with SQL. 
+# 
 
 # ## Using Yellowbrick as the vector store for ChatGpt
-#
+# 
 # This tutorial demonstrates how to create a simple chatbot backed by ChatGpt that uses Yellowbrick as a vector store to support Retrieval Augmented Generation (RAG). What you'll need:
-#
+# 
 # 1. An account on the [Yellowbrick sandbox](https://cloudlabs.yellowbrick.com/)
 # 2. An api key from [OpenAI](https://platform.openai.com/)
-#
+# 
 # The tutorial is divided into five parts. First we'll use langchain to create a baseline chatbot to interact with ChatGpt without a vector store. Second, we'll create an embeddings table in Yellowbrick that will represent the vector store. Third, we'll load a series of documents (the Administration chapter of the Yellowbrick Manual). Fourth, we'll create the vector representation of those documents and store in a Yellowbrick table.  Lastly, we'll send the same queries to the improved chatbox to see the results.
-#
+# 
 
 # In[ ]:
 
 
 # Install all needed libraries
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain")
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain-openai langchain-community"
-)
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  psycopg2-binary")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  tiktoken")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai langchain-community')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  psycopg2-binary')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  tiktoken')
 
 
 # ## Setup: Enter the information used to connect to Yellowbrick and OpenAI API
-#
+# 
 # Our chatbot integrates with ChatGpt via the langchain library, so you'll need an API key from OpenAI first:
-#
+# 
 # To get an api key for OpenAI:
 # 1. Register at https://platform.openai.com/
 # 2. Add a payment method - You're unlikely to go over free quota
 # 3. Create an API key
-#
+# 
 # You'll also need your Username, Password, and Database name from the welcome email when you sign up for the Yellowbrick Sandbox Account.
-#
+# 
 
 # The following should be modified to include the information for your Yellowbrick database and OpenAPI Key
 
@@ -93,9 +91,9 @@ from langchain_core.prompts.chat import (
 
 
 # ## Part 1: Creating a baseline chatbot backed by ChatGpt without a Vector Store
-#
+# 
 # We will use langchain to query ChatGPT.  As there is no Vector Store, ChatGPT will have no context in which to answer the question.
-#
+# 
 
 # In[ ]:
 
@@ -139,12 +137,12 @@ print_result_simple("What's an easy way to add users in bulk to Yellowbrick?")
 
 
 # ## Part 2: Connect to Yellowbrick and create the embedding tables
-#
-# To load your document embeddings into Yellowbrick, you should create your own table for storing them in. Note that the
-# Yellowbrick database that the table is in has to be UTF-8 encoded.
-#
+# 
+# To load your document embeddings into Yellowbrick, you should create your own table for storing them in. Note that the 
+# Yellowbrick database that the table is in has to be UTF-8 encoded. 
+# 
 # Create a table in a UTF-8 database with the following schema, providing a table name of your choice:
-#
+# 
 
 # In[ ]:
 
@@ -186,10 +184,10 @@ conn.close()
 
 # ## Part 3: Extract the documents to index from an existing table in Yellowbrick
 # Extract document paths and contents from an existing Yellowbrick table. We'll use these documents to create embeddings from in the next step.
-#
-#
-#
-#
+# 
+# 
+# 
+# 
 
 # In[ ]:
 
@@ -224,7 +222,7 @@ conn.close()
 
 # ## Part 4: Load the Yellowbrick Vector Store with Documents
 # Go through documents, split them into digestable chunks, create the embedding and insert into the Yellowbrick table. This takes around 5 minutes.
-#
+# 
 
 # In[ ]:
 
@@ -266,11 +264,11 @@ print(f"Created vector store with {len(documents)} documents")
 
 
 # ## Part 5: Creating a chatbot that uses Yellowbrick as the vector store
-#
+# 
 # Next, we add Yellowbrick as a vector store. The vector store has been populated with embeddings representing the administrative chapter of the Yellowbrick product documentation.
-#
+# 
 # We'll send the same queries as above to see the impoved responses.
-#
+# 
 
 # In[ ]:
 
@@ -329,12 +327,12 @@ print_result_sources("Whats an easy way to add users in bulk to Yellowbrick?")
 
 
 # ## Part 6: Introducing an Index to Increase Performance
-#
+# 
 # Yellowbrick also supports indexing using the Locality-Sensitive Hashing approach. This is an approximate nearest-neighbor search technique, and allows one to trade off similarity search time at the expense of accuracy. The index introduces two new tunable parameters:
-#
+# 
 # - The number of hyperplanes, which is provided as an argument to `create_lsh_index(num_hyperplanes)`. The more documents, the more hyperplanes are needed. LSH is a form of dimensionality reduction. The original embeddings are transformed into lower dimensional vectors where the number of components is the same as the number of hyperplanes.
 # - The Hamming distance, an integer representing the breadth of the search. Smaller Hamming distances result in faster retreival but lower accuracy.
-#
+# 
 # Here's how you can create an index on the embeddings we loaded into Yellowbrick. We'll also re-run the previous chat session, but this time the retrieval will use the index. Note that for such a small number of documents, you won't see the benefit of indexing in terms of performance.
 
 # In[ ]:
@@ -401,7 +399,7 @@ print_result_sources("Whats an easy way to add users in bulk to Yellowbrick?")
 
 
 # ## Next Steps:
-#
+# 
 # This code can be modified to ask different questions. You can also load your own documents into the vector store. The langchain module is very flexible and can parse a large variety of files (including HTML, PDF, etc).
-#
+# 
 # You can also modify this to use Huggingface embeddings models and Meta's Llama 2 LLM for a completely private chatbox experience.

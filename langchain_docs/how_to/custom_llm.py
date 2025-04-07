@@ -2,43 +2,43 @@
 # coding: utf-8
 
 # # How to create a custom LLM class
-#
+# 
 # This notebook goes over how to create a custom LLM wrapper, in case you want to use your own LLM or a different wrapper than one that is supported in LangChain.
-#
+# 
 # Wrapping your LLM with the standard `LLM` interface allow you to use your LLM in existing LangChain programs with minimal code modifications.
-#
+# 
 # As an bonus, your LLM will automatically become a LangChain `Runnable` and will benefit from some optimizations out of the box, async support, the `astream_events` API, etc.
-#
+# 
 # :::caution
 # You are currently on a page documenting the use of [text completion models](/docs/concepts/text_llms). Many of the latest and most popular models are [chat completion models](/docs/concepts/chat_models).
-#
+# 
 # Unless you are specifically using more advanced prompting techniques, you are probably looking for [this page instead](/docs/how_to/custom_chat_model/).
 # :::
-#
+# 
 # ## Implementation
-#
+# 
 # There are only two required things that a custom LLM needs to implement:
-#
-#
+# 
+# 
 # | Method        | Description                                                               |
 # |---------------|---------------------------------------------------------------------------|
 # | `_call`       | Takes in a string and some optional stop words, and returns a string. Used by `invoke`. |
-# | `_llm_type`   | A property that returns a string, used for logging purposes only.
-#
-#
-#
-# Optional implementations:
-#
-#
+# | `_llm_type`   | A property that returns a string, used for logging purposes only.        
+# 
+# 
+# 
+# Optional implementations: 
+# 
+# 
 # | Method    | Description                                                                                               |
 # |----------------------|-----------------------------------------------------------------------------------------------------------|
 # | `_identifying_params` | Used to help with identifying the model and printing the LLM; should return a dictionary. This is a **@property**.                 |
 # | `_acall`              | Provides an async native implementation of `_call`, used by `ainvoke`.                                    |
 # | `_stream`             | Method to stream the output token by token.                                                               |
 # | `_astream`            | Provides an async native implementation of `_stream`; in newer LangChain versions, defaults to `_stream`. |
-#
-#
-#
+# 
+# 
+# 
 # Let's implement a simple custom LLM that just returns the first n characters of the input.
 
 # In[1]:
@@ -227,30 +227,30 @@ async for event in chain.astream_events({"input": "hello there!"}, version="v1")
 
 
 # ## Contributing
-#
-# We appreciate all chat model integration contributions.
-#
+# 
+# We appreciate all chat model integration contributions. 
+# 
 # Here's a checklist to help make sure your contribution gets added to LangChain:
-#
+# 
 # Documentation:
-#
+# 
 # * The model contains doc-strings for all initialization arguments, as these will be surfaced in the [APIReference](https://python.langchain.com/api_reference/langchain/index.html).
 # * The class doc-string for the model contains a link to the model API if the model is powered by a service.
-#
+# 
 # Tests:
-#
+# 
 # * [ ] Add unit or integration tests to the overridden methods. Verify that `invoke`, `ainvoke`, `batch`, `stream` work if you've over-ridden the corresponding code.
-#
+# 
 # Streaming (if you're implementing it):
-#
+# 
 # * [ ] Make sure to invoke the `on_llm_new_token` callback
 # * [ ] `on_llm_new_token` is invoked BEFORE yielding the chunk
-#
+# 
 # Stop Token Behavior:
-#
+# 
 # * [ ] Stop token should be respected
 # * [ ] Stop token should be INCLUDED as part of the response
-#
+# 
 # Secret API Keys:
-#
+# 
 # * [ ] If your model connects to an API it will likely accept API keys as part of its initialization. Use Pydantic's `SecretStr` type for secrets, so they don't get accidentally printed out when folks print the model.

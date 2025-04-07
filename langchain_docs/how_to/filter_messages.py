@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # How to filter messages
-#
+# 
 # In more complex chains and agents we might track state with a list of [messages](/docs/concepts/messages/). This list can start to accumulate messages from multiple different models, speakers, sub-chains, etc., and we may only want to pass subsets of this full list of messages to each model call in the chain/agent.
-#
+# 
 # The `filter_messages` utility makes it easy to filter messages by type, id, or name.
-#
+# 
 # ## Basic usage
 
 # In[1]:
@@ -43,13 +43,13 @@ filter_messages(messages, include_types=[HumanMessage, AIMessage], exclude_ids=[
 
 
 # ## Chaining
-#
+# 
 # `filter_messages` can be used in an imperatively (like above) or declaratively, making it easy to compose with other components in a chain:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-anthropic")
+get_ipython().run_line_magic('pip', 'install -qU langchain-anthropic')
 
 
 # In[4]:
@@ -66,7 +66,7 @@ chain.invoke(messages)
 
 
 # Looking at the LangSmith trace we can see that before the messages are passed to the model they are filtered: https://smith.langchain.com/public/f808a724-e072-438e-9991-657cc9e7e253/r
-#
+# 
 # Looking at just the filter_, we can see that it's a Runnable object that can be invoked like all Runnables:
 
 # In[6]:
@@ -76,5 +76,5 @@ filter_.invoke(messages)
 
 
 # ## API reference
-#
+# 
 # For a complete description of all arguments head to the API reference: https://python.langchain.com/api_reference/core/messages/langchain_core.messages.utils.filter_messages.html

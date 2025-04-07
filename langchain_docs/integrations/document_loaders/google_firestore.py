@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # Google Firestore (Native Mode)
-#
+# 
 # > [Firestore](https://cloud.google.com/firestore) is a serverless document-oriented database that scales to meet any demand. Extend your database application to build AI-powered experiences leveraging Firestore's Langchain integrations.
-#
+# 
 # This notebook goes over how to use [Firestore](https://cloud.google.com/firestore) to [save, load and delete langchain documents](/docs/how_to#document-loaders) with `FirestoreLoader` and `FirestoreSaver`.
-#
+# 
 # Learn more about the package on [GitHub](https://github.com/googleapis/langchain-google-firestore-python/).
-#
+# 
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/googleapis/langchain-google-firestore-python/blob/main/docs/document_loader.ipynb)
 
 # ## Before You Begin
-#
+# 
 # To run this notebook, you will need to do the following:
-#
+# 
 # * [Create a Google Cloud Project](https://developers.google.com/workspace/guides/create-project)
 # * [Enable the Firestore API](https://console.cloud.google.com/flows/enableapi?apiid=firestore.googleapis.com)
 # * [Create a Firestore database](https://cloud.google.com/firestore/docs/manage-databases)
-#
+# 
 # After confirmed access to database in the runtime environment of this notebook, filling the following values and run the cell before running example scripts.
 
 # In[ ]:
@@ -29,15 +29,13 @@ SOURCE = "test"  # @param {type:"Query"|"CollectionGroup"|"DocumentReference"|"s
 
 
 # ### 🦜🔗 Library Installation
-#
+# 
 # The integration lives in its own `langchain-google-firestore` package, so we need to install it.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install -upgrade --quiet langchain-google-firestore"
-)
+get_ipython().run_line_magic('pip', 'install -upgrade --quiet langchain-google-firestore')
 
 
 # **Colab only**: Uncomment the following cell to restart the kernel or use the button to restart the kernel. For Vertex AI Workbench you can restart the terminal using the button on top.
@@ -54,9 +52,9 @@ get_ipython().run_line_magic(
 
 # ### ☁ Set Your Google Cloud Project
 # Set your Google Cloud project so that you can leverage Google Cloud resources within this notebook.
-#
+# 
 # If you don't know your project ID, try the following:
-#
+# 
 # * Run `gcloud config list`.
 # * Run `gcloud projects list`.
 # * See the support page: [Locate the project ID](https://support.google.com/googleapi/answer/7014113).
@@ -69,13 +67,13 @@ get_ipython().run_line_magic(
 PROJECT_ID = "my-project-id"  # @param {type:"string"}
 
 # Set the project id
-get_ipython().system("gcloud config set project {PROJECT_ID}")
+get_ipython().system('gcloud config set project {PROJECT_ID}')
 
 
 # ### 🔐 Authentication
-#
+# 
 # Authenticate to Google Cloud as the IAM user logged into this notebook in order to access your Google Cloud Project.
-#
+# 
 # - If you are using Colab to run this notebook, use the cell below and continue.
 # - If you are using Vertex AI Workbench, check out the setup instructions [here](https://github.com/GoogleCloudPlatform/generative-ai/tree/main/setup-env).
 
@@ -90,9 +88,9 @@ auth.authenticate_user()
 # ## Basic Usage
 
 # ### Save documents
-#
+# 
 # `FirestoreSaver` can store Documents into Firestore. By default it will try to extract the Document reference from the metadata
-#
+# 
 # Save langchain documents with `FirestoreSaver.upsert_documents(<documents>)`.
 
 # In[ ]:
@@ -109,7 +107,7 @@ saver.upsert_documents(data)
 
 
 # #### Save documents without reference
-#
+# 
 # If a collection is specified the documents will be stored with an auto generated id.
 
 # In[ ]:
@@ -134,7 +132,7 @@ saver.upsert_documents(documents=data, document_ids=doc_ids)
 # ### Load from Collection or SubCollection
 
 # Load langchain documents with `FirestoreLoader.load()` or `Firestore.lazy_load()`. `lazy_load` returns a generator that only queries database during the iteration. To initialize `FirestoreLoader` class you need to provide:
-#
+# 
 # 1. `source` - An instance of a Query, CollectionGroup, DocumentReference or the single `\`-delimited path to a Firestore collection.
 
 # In[ ]:
@@ -184,9 +182,9 @@ loader_query = FirestoreLoader(query)
 
 
 # ### Delete documents
-#
+# 
 # Delete a list of langchain documents from Firestore collection with `FirestoreSaver.delete_documents(<documents>)`.
-#
+# 
 # If document ids is provided, the Documents will be ignored.
 
 # In[ ]:
@@ -203,7 +201,7 @@ saver.delete_documents(data, doc_ids)
 # ## Advanced Usage
 
 # ### Load documents with customize document page content & metadata
-#
+# 
 # The arguments of `page_content_fields` and `metadata_fields` will specify the Firestore Document fields to be written into LangChain Document `page_content` and `metadata`.
 
 # In[ ]:
@@ -219,7 +217,7 @@ data = loader.load()
 
 
 # #### Customize Page Content Format
-#
+# 
 # When the `page_content` contains only one field the information will be the field value only. Otherwise the `page_content` will be in JSON format.
 
 # ### Customize Connection & Authentication
@@ -235,3 +233,4 @@ loader = FirestoreLoader(
     source="foo",
     client=client,
 )
+

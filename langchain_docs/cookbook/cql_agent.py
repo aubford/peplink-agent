@@ -6,7 +6,7 @@
 # ### Python Modules
 
 # Install the following Python modules:
-#
+# 
 # ```bash
 # pip install ipykernel python-dotenv cassio pandas langchain_openai langchain langchain-community langchainhub langchain_experimental openai-multi-tool-use-parallel-patch
 # ```
@@ -14,7 +14,7 @@
 # ### Load the `.env` File
 
 # Connection is via `cassio` using `auto=True` parameter, and the notebook uses OpenAI. You should create a `.env` file accordingly.
-#
+# 
 # For Cassandra, set:
 # ```bash
 # CASSANDRA_CONTACT_POINTS
@@ -22,26 +22,26 @@
 # CASSANDRA_PASSWORD
 # CASSANDRA_KEYSPACE
 # ```
-#
+# 
 # For Astra, set:
 # ```bash
 # ASTRA_DB_APPLICATION_TOKEN
 # ASTRA_DB_DATABASE_ID
 # ASTRA_DB_KEYSPACE
 # ```
-#
+# 
 # For example:
-#
+# 
 # ```bash
 # # Connection to Astra:
 # ASTRA_DB_DATABASE_ID=a1b2c3d4-...
 # ASTRA_DB_APPLICATION_TOKEN=AstraCS:...
 # ASTRA_DB_KEYSPACE=notebooks
-#
-# # Also set
+# 
+# # Also set 
 # OPENAI_API_KEY=sk-....
 # ```
-#
+# 
 # (You may also modify the below code to directly connect with `cassio`.)
 
 # In[ ]:
@@ -83,8 +83,8 @@ session.set_keyspace(keyspace)
 
 # ### Download Data
 
-# The dataset used is from Kaggle, the [Environmental Sensor Telemetry Data](https://www.kaggle.com/datasets/garystafford/environmental-sensor-data-132k?select=iot_telemetry_data.csv). The next cell will download and unzip the data into a Pandas dataframe. The following cell is instructions to download manually.
-#
+# The dataset used is from Kaggle, the [Environmental Sensor Telemetry Data](https://www.kaggle.com/datasets/garystafford/environmental-sensor-data-132k?select=iot_telemetry_data.csv). The next cell will download and unzip the data into a Pandas dataframe. The following cell is instructions to download manually. 
+# 
 # The net result of this section is you should have a Pandas dataframe variable `df`.
 
 # #### Download Automatically
@@ -387,3 +387,4 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 response = agent_executor.invoke({"input": input})
 
 print(response["output"])
+

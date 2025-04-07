@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Retrieval Augmented Generation (RAG)
-#
+# 
 # This notebook demonstrates an example of using [LangChain](https://www.langchain.com/) to delvelop a Retrieval Augmented Generation (RAG) pattern. It uses Azure AI Document Intelligence as document loader, which can extracts tables, paragraphs, and layout information from pdf, image, office and html files. The output markdown can be used in LangChain's markdown header splitter, which enables semantic chunking of the documents. Then the chunked documents are indexed into Azure AI Search vectore store. Given a user query, it will use Azure AI Search to get the relevant chunks, then feed the context into the prompt with the query to generate the answer.
-#
+# 
 # ![semantic-chunking-rag.png](attachment:semantic-chunking-rag.png)
-#
+# 
 
 # ## Prerequisites
 # - An Azure AI Document Intelligence resource in one of the 3 preview regions: **East US**, **West US2**, **West Europe** - follow [this document](https://learn.microsoft.com/azure/ai-services/document-intelligence/create-document-intelligence-resource?view=doc-intel-4.0.0) to create one if you don't have.
 # - An Azure AI Search resource - follow [this document](https://learn.microsoft.com/azure/search/search-create-service-portal) to create one if you don't have.
 # - An Azure OpenAI resource and deployments for embeddings model and chat model - follow [this document](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource?pivots=web-portal) to create one if you don't have.
-#
+# 
 # We’ll use an Azure OpenAI chat model and embeddings and Azure AI Search in this walkthrough, but everything shown here works with any ChatModel or LLM, Embeddings, and VectorStore or Retriever.
 
 # ## Setup
@@ -20,9 +20,7 @@
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install python-dotenv langchain langchain-community langchain-openai langchainhub openai tiktoken azure-ai-documentintelligence azure-identity azure-search-documents==11.4.0b8"
-)
+get_ipython().system(' pip install python-dotenv langchain langchain-community langchain-openai langchainhub openai tiktoken azure-ai-documentintelligence azure-identity azure-search-documents==11.4.0b8')
 
 
 # In[3]:
@@ -182,3 +180,4 @@ rag_chain_with_source = RunnableMap(
 }
 
 rag_chain_with_source.invoke("<your question>")
+

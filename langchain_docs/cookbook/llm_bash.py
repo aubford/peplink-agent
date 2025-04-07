@@ -63,7 +63,7 @@ bash_chain.invoke(text)
 
 
 # ## Persistent Terminal
-#
+# 
 # By default, the chain will run in a separate subprocess each time it is called. This behavior can be changed by instantiating with a persistent bash process.
 
 # In[4]:
@@ -84,3 +84,4 @@ bash_chain.invoke(text)
 
 # Run the same command again and see that the state is maintained between calls
 bash_chain.invoke(text)
+

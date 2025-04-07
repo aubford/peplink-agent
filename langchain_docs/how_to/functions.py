@@ -67,8 +67,6 @@ model = ChatOpenAI()
 
 prompt = ChatPromptTemplate.from_template("what is {a} + {b}")
 
-chain1 = prompt | model
-
 chain = (
     {
         "a": itemgetter("foo") | RunnableLambda(length_function),

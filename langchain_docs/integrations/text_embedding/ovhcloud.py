@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # OVHcloud
-#
+# 
 # > In order to use this model you need to create a new token on the AI Endpoints website: https://endpoints.ai.cloud.ovh.net/.
-#
+# 
 # This notebook explains how to use OVHCloudEmbeddings, which is included in the langchain_community package, to embed texts in langchain.
 
 # In[4]:

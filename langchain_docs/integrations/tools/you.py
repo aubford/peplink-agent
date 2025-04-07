@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # You.com Search
-#
+# 
 # The [you.com API](https://api.you.com) is a suite of tools designed to help developers ground the output of LLMs in the most recent, most accurate, most relevant information that may not have been included in their training dataset.
 
 # ## Setup
 
 # The tool lives in the `langchain-community` package.
-#
+# 
 # You also need to set your you.com API key.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-community")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community')
 
 
 # In[ ]:
@@ -71,16 +71,14 @@ for item in response:
 
 
 # ## Chaining
-#
+# 
 # We show here how to use it as part of an [agent](/docs/tutorials/agents). We use the OpenAI Functions Agent, so we will need to setup and install the required dependencies for that. We will also use [LangSmith Hub](https://smith.langchain.com/hub) to pull the prompt from, so we will need to install that.
 
 # In[ ]:
 
 
 # you need a model to use in the chain
-get_ipython().system(
-    "pip install --upgrade --quiet langchain langchain-openai langchainhub langchain-community"
-)
+get_ipython().system('pip install --upgrade --quiet langchain langchain-openai langchainhub langchain-community')
 
 
 # In[38]:
@@ -108,3 +106,4 @@ agent_executor = AgentExecutor(
 
 
 agent_executor.invoke({"input": "What is the weather in NY today?"})
+

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # DeepInfra
-#
+# 
 # [DeepInfra](https://deepinfra.com/?utm_source=langchain) is a serverless inference as a service that provides access to a [variety of LLMs](https://deepinfra.com/models?utm_source=langchain) and [embeddings models](https://deepinfra.com/models?type=embeddings&utm_source=langchain). This notebook goes over how to use LangChain with DeepInfra for text embeddings.
 
 # In[1]:
@@ -65,3 +65,4 @@ for doc_res, doc in zip(document_result, docs):
         np.linalg.norm(query_numpy) * np.linalg.norm(document_numpy)
     )
     print(f'Cosine similarity between "{doc}" and query: {similarity}')
+

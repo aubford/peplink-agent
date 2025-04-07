@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Program-aided language model (PAL) chain
-#
+# 
 # Implements Program-Aided Language Models, as in https://arxiv.org/pdf/2211.10435.pdf.
-#
+# 
 
 # In[1]:
 
@@ -89,3 +89,7 @@ result["intermediate_steps"]
 
 
 # In[ ]:
+
+
+
+

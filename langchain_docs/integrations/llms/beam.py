@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Beam
-#
+# 
 # Calls the Beam API wrapper to deploy and make subsequent calls to an instance of the gpt2 LLM in a cloud deployment. Requires installation of the Beam library and registration of Beam Client ID and Client Secret. By calling the wrapper an instance of the model is created and run, with returned text relating to the prompt. Additional calls can then be made by directly calling the Beam API.
-#
+# 
 # [Create an account](https://www.beam.cloud/), if you don't have one already. Grab your API keys from the [dashboard](https://www.beam.cloud/dashboard/settings/api-keys).
 
 # Install the Beam CLI
@@ -12,9 +12,7 @@
 # In[ ]:
 
 
-get_ipython().system(
-    "curl https://raw.githubusercontent.com/slai-labs/get-beam/main/get-beam.sh -sSfL | sh"
-)
+get_ipython().system('curl https://raw.githubusercontent.com/slai-labs/get-beam/main/get-beam.sh -sSfL | sh')
 
 
 # Register API Keys and set your beam client id and secret environment variables:
@@ -32,9 +30,7 @@ os.environ["BEAM_CLIENT_ID"] = beam_client_id
 os.environ["BEAM_CLIENT_SECRET"] = beam_client_secret
 
 # Run the beam configure command
-get_ipython().system(
-    "beam configure --clientId={beam_client_id} --clientSecret={beam_client_secret}"
-)
+get_ipython().system('beam configure --clientId={beam_client_id} --clientSecret={beam_client_secret}')
 
 
 # Install the Beam SDK:
@@ -42,11 +38,11 @@ get_ipython().system(
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  beam-sdk")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  beam-sdk')
 
 
 # **Deploy and call Beam directly from langchain!**
-#
+# 
 # Note that a cold start might take a couple of minutes to return the response, but subsequent calls will be faster!
 
 # In[ ]:
@@ -79,3 +75,4 @@ llm._deploy()
 response = llm._call("Running machine learning on a remote GPU")
 
 print(response)
+

@@ -4,51 +4,49 @@
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install langchain-chroma langchain_community tiktoken langchain-openai langchainhub langchain langgraph tavily-python"
-)
+get_ipython().system(' pip install langchain-chroma langchain_community tiktoken langchain-openai langchainhub langchain langgraph tavily-python')
 
 
 # # CRAG
-#
-# Corrective-RAG is a recent paper that introduces an interesting approach for active RAG.
-#
+# 
+# Corrective-RAG is a recent paper that introduces an interesting approach for active RAG. 
+# 
 # The framework grades retrieved documents relative to the question:
-#
+# 
 # 1. Correct documents -
-#
+# 
 # * If at least one document exceeds the threshold for relevance, then it proceeds to generation
 # * Before generation, it performns knowledge refinement
 # * This paritions the document into "knowledge strips"
-# * It grades each strip, and filters our irrelevant ones
-#
+# * It grades each strip, and filters our irrelevant ones                                           
+# 
 # 2. Ambiguous or incorrect documents -
-#
+# 
 # * If all documents fall below the relevance threshold or if the grader is unsure, then the framework seeks an additional datasource
 # * It will use web search to supplement retrieval
-# * The diagrams in the paper also suggest that query re-writing is used here
-#
+# * The diagrams in the paper also suggest that query re-writing is used here 
+# 
 # ![Screenshot 2024-02-04 at 2.50.32 PM.png](attachment:5bfa38a2-78a1-4e99-80a2-d98c8a440ea2.png)
-#
+# 
 # Paper -
-#
+# 
 # https://arxiv.org/pdf/2401.15884.pdf
-#
+# 
 # ---
-#
+# 
 # Let's implement this from scratch using [LangGraph](https://python.langchain.com/docs/langgraph).
-#
+# 
 # We can make some simplifications:
-#
-# * Let's skip the knowledge refinement phase as a first pass. This can be added back as a node, if desired.
-# * If *any* document is irrelevant, let's opt to supplement retrieval with web search.
+# 
+# * Let's skip the knowledge refinement phase as a first pass. This can be added back as a node, if desired. 
+# * If *any* document is irrelevant, let's opt to supplement retrieval with web search. 
 # * We'll use [Tavily Search](https://python.langchain.com/docs/integrations/tools/tavily_search) for web search.
 # * Let's use query re-writing to optimize the query for web search.
-#
+# 
 # Set the `TAVILY_API_KEY`.
 
 # ## Retriever
-#
+#  
 # Let's index 3 blog posts.
 
 # In[ ]:
@@ -83,11 +81,11 @@ retriever = vectorstore.as_retriever()
 
 
 # ## State
-#
+#  
 # We will define a graph.
-#
+# 
 # Our state will be a `dict`.
-#
+# 
 # We can access this from any graph node as `state['keys']`.
 
 # In[ ]:
@@ -112,13 +110,13 @@ class GraphState(TypedDict):
 
 
 # ## Nodes and Edges
-#
+# 
 # Each `node` will simply modify the `state`.
-#
+# 
 # Each `edge` will choose which `node` to call next.
-#
+# 
 # It will follow the graph diagram shown above.
-#
+# 
 # ![Screenshot 2024-02-04 at 1.32.52 PM.png](attachment:3b65f495-5fc4-497b-83e2-73844a97f6cc.png)
 
 # In[ ]:
@@ -427,7 +425,11 @@ for output in app.stream(inputs):
 
 
 # Traces -
-#
+#  
 # [Trace](https://smith.langchain.com/public/7e0b9569-abfe-4337-b34b-842b1f93df63/r) and [Trace](https://smith.langchain.com/public/b40c5813-7caf-4cc8-b279-ee66060b2040/r)
 
 # In[ ]:
+
+
+
+

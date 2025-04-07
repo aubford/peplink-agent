@@ -53,7 +53,7 @@ import os
 # 
 # import ChatModelTabs from "@theme/ChatModelTabs";
 # 
-# <ChatModelTabs openaiParams={`model="gpt-4"`} />
+# <ChatModelTabs overrideParams={{openai: {model: "gpt-4"}}} />
 # 
 # To illustrate the idea, we'll use `phi3` via Ollama, which does **NOT** have native support for tool calling. If you'd like to use `Ollama` as well follow [these instructions](/docs/integrations/chat/ollama/).
 

@@ -2,21 +2,19 @@
 # coding: utf-8
 
 # # DocArray InMemorySearch
-#
+# 
 # >[DocArrayInMemorySearch](https://docs.docarray.org/user_guide/storing/index_in_memory/) is a document index provided by [Docarray](https://github.com/docarray/docarray) that stores documents in memory. It is a great starting point for small datasets, where you may not want to launch a database server.
-#
+# 
 # This notebook shows how to use functionality related to the `DocArrayInMemorySearch`.
 
 # ## Setup
-#
+# 
 # Uncomment the below cells to install docarray and get/set your OpenAI api key if you haven't already done so.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", 'install --upgrade --quiet  langchain-community "docarray"'
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community "docarray"')
 
 
 # In[ ]:
@@ -87,3 +85,7 @@ docs[0]
 
 
 # In[ ]:
+
+
+
+

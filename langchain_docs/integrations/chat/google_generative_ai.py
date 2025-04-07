@@ -11,7 +11,7 @@ sidebar_label: Google AI
 # 
 # :::info Google AI vs Google Cloud Vertex AI
 # 
-# Google's Gemini models are accessible through Google AI and through Google Cloud Vertex AI. Using Google AI just requires a Google account and an API key. Using Google Cloud Vertex AI requires a Google Cloud account (with term agreements and billing) but offers enterprise features like customer encription key, virtual private cloud, and more.
+# Google's Gemini models are accessible through Google AI and through Google Cloud Vertex AI. Using Google AI just requires a Google account and an API key. Using Google Cloud Vertex AI requires a Google Cloud account (with term agreements and billing) but offers enterprise features like customer encryption key, virtual private cloud, and more.
 # 
 # To learn more about the key features of the two APIs see the [Google docs](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/migrate-google-ai#google-ai).
 # 
@@ -27,7 +27,7 @@ sidebar_label: Google AI
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 
+# | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 # 
 # ## Setup
 # 
@@ -47,7 +47,7 @@ if "GOOGLE_API_KEY" not in os.environ:
     os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter your Google AI API key: ")
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 
@@ -70,13 +70,13 @@ get_ipython().run_line_magic('pip', 'install -qU langchain-google-genai')
 # 
 # Now we can instantiate our model object and generate chat completions:
 
-# In[1]:
+# In[2]:
 
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-pro",
+    model="gemini-2.0-flash-001",
     temperature=0,
     max_tokens=None,
     timeout=None,
@@ -87,7 +87,7 @@ llm = ChatGoogleGenerativeAI(
 
 # ## Invocation
 
-# In[2]:
+# In[3]:
 
 
 messages = [
@@ -101,7 +101,7 @@ ai_msg = llm.invoke(messages)
 ai_msg
 
 
-# In[3]:
+# In[4]:
 
 
 print(ai_msg.content)
@@ -111,7 +111,7 @@ print(ai_msg.content)
 # 
 # We can [chain](/docs/how_to/sequence/) our model with a prompt template like so:
 
-# In[4]:
+# In[5]:
 
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -135,6 +135,95 @@ chain.invoke(
     }
 )
 
+
+# ## Image generation
+# 
+# Some Gemini models (specifically `gemini-2.0-flash-exp`) support image generation capabilities.
+# 
+# ### Text to image
+# 
+# See a simple usage example below:
+
+# In[2]:
+
+
+import base64
+from io import BytesIO
+
+from IPython.display import Image, display
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+llm = ChatGoogleGenerativeAI(model="models/gemini-2.0-flash-exp-image-generation")
+
+message = {
+    "role": "user",
+    "content": "Generate an image of a cuddly cat wearing a hat.",
+}
+
+response = llm.invoke(
+    [message],
+    generation_config=dict(response_modalities=["TEXT", "IMAGE"]),
+)
+
+image_base64 = response.content[0].get("image_url").get("url").split(",")[-1]
+
+image_data = base64.b64decode(image_base64)
+display(Image(data=image_data, width=300))
+
+
+# ### Image and text to image
+# 
+# You can iterate on an image in a multi-turn conversation, as shown below:
+
+# In[3]:
+
+
+next_message = {
+    "role": "user",
+    "content": "Can you take the same image and make the cat black?",
+}
+
+response = llm.invoke(
+    [message, response, next_message],
+    generation_config=dict(response_modalities=["TEXT", "IMAGE"]),
+)
+
+image_base64 = response.content[0].get("image_url").get("url").split(",")[-1]
+
+image_data = base64.b64decode(image_base64)
+display(Image(data=image_data, width=300))
+
+
+# You can also represent an input image and query in a single message by encoding the base64 data in the [data URI scheme](https://en.wikipedia.org/wiki/Data_URI_scheme):
+
+# In[9]:
+
+
+message = {
+    "role": "user",
+    "content": [
+        {
+            "type": "text",
+            "text": "Can you make this cat bright orange?",
+        },
+        {
+            "type": "image_url",
+            "image_url": {"url": f"data:image/png;base64,{image_base64}"},
+        },
+    ],
+}
+
+response = llm.invoke(
+    [message],
+    generation_config=dict(response_modalities=["TEXT", "IMAGE"]),
+)
+image_base64 = response.content[0].get("image_url").get("url").split(",")[-1]
+
+image_data = base64.b64decode(image_base64)
+display(Image(data=image_data, width=300))
+
+
+# You can also use LangGraph to manage the conversation history for you as in [this tutorial](/docs/tutorials/chatbot/).
 
 # ## Safety Settings
 # 

@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # SingleStoreDB
-#
-# >[SingleStoreDB](https://singlestore.com/) is a high-performance distributed SQL database that supports deployment both in the [cloud](https://www.singlestore.com/cloud/) and on-premises. It provides vector storage, and vector functions including [dot_product](https://docs.singlestore.com/managed-service/en/reference/sql-reference/vector-functions/dot_product.html) and [euclidean_distance](https://docs.singlestore.com/managed-service/en/reference/sql-reference/vector-functions/euclidean_distance.html), thereby supporting AI applications that require text similarity matching.
-#
-#
+# 
+# >[SingleStoreDB](https://singlestore.com/) is a high-performance distributed SQL database that supports deployment both in the [cloud](https://www.singlestore.com/cloud/) and on-premises. It provides vector storage, and vector functions including [dot_product](https://docs.singlestore.com/managed-service/en/reference/sql-reference/vector-functions/dot_product.html) and [euclidean_distance](https://docs.singlestore.com/managed-service/en/reference/sql-reference/vector-functions/euclidean_distance.html), thereby supporting AI applications that require text similarity matching. 
+# 
+# 
 # This notebook shows how to use a retriever that uses `SingleStoreDB`.
-#
+# 
 
 # In[ ]:
 
 
 # Establishing a connection to the database is facilitated through the singlestoredb Python connector.
 # Please ensure that this connector is installed in your working environment.
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  singlestoredb")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  singlestoredb')
 
 
 # ## Create Retriever from vector store
@@ -62,3 +62,4 @@ retriever = docsearch.as_retriever(search_kwargs={"k": 2})
 
 result = retriever.invoke("What did the president say about Ketanji Brown Jackson")
 print(docs[0].page_content)
+

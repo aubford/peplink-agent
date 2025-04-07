@@ -2,51 +2,51 @@
 # coding: utf-8
 
 # # Custom Embeddings
-#
+# 
 # LangChain is integrated with many [3rd party embedding models](/docs/integrations/text_embedding/). In this guide we'll show you how to create a custom Embedding class, in case a built-in one does not already exist. Embeddings are critical in natural language processing applications as they convert text into a numerical form that algorithms can understand, thereby enabling a wide range of applications such as similarity search, text classification, and clustering.
-#
+# 
 # Implementing embeddings using the standard [Embeddings](https://python.langchain.com/api_reference/core/embeddings/langchain_core.embeddings.embeddings.Embeddings.html) interface will allow your embeddings to be utilized in existing `LangChain` abstractions (e.g., as the embeddings powering a [VectorStore](https://python.langchain.com/api_reference/core/vectorstores/langchain_core.vectorstores.base.VectorStore.html) or cached using [CacheBackedEmbeddings](/docs/how_to/caching_embeddings/)).
-#
+# 
 # ## Interface
-#
+# 
 # The current `Embeddings` abstraction in LangChain is designed to operate on text data. In this implementation, the inputs are either single strings or lists of strings, and the outputs are lists of numerical arrays (vectors), where each vector represents
 # an embedding of the input text into some n-dimensional space.
-#
+# 
 # Your custom embedding must implement the following methods:
-#
+# 
 # | Method/Property                 | Description                                                                | Required/Optional |
 # |---------------------------------|----------------------------------------------------------------------------|-------------------|
 # | `embed_documents(texts)`        | Generates embeddings for a list of strings.                                | Required          |
 # | `embed_query(text)`             | Generates an embedding for a single text query.                            | Required          |
 # | `aembed_documents(texts)`       | Asynchronously generates embeddings for a list of strings.                 | Optional          |
 # | `aembed_query(text)`            | Asynchronously generates an embedding for a single text query.             | Optional          |
-#
+# 
 # These methods ensure that your embedding model can be integrated seamlessly into the LangChain framework, providing both synchronous and asynchronous capabilities for scalability and performance optimization.
-#
-#
+# 
+# 
 # :::note
 # `Embeddings` do not currently implement the [Runnable](/docs/concepts/runnables/) interface and are also **not** instances of pydantic `BaseModel`.
 # :::
-#
+# 
 # ### Embedding queries vs documents
-#
+# 
 # The `embed_query` and `embed_documents` methods are required. These methods both operate
 # on string inputs. The accessing of `Document.page_content` attributes is handled
 # by the vector store using the embedding model for legacy reasons.
-#
+# 
 # `embed_query` takes in a single string and returns a single embedding as a list of floats.
 # If your model has different modes for embedding queries vs the underlying documents, you can
-# implement this method to handle that.
-#
+# implement this method to handle that. 
+# 
 # `embed_documents` takes in a list of strings and returns a list of embeddings as a list of lists of floats.
-#
+# 
 # :::note
 # `embed_documents` takes in a list of plain text, not a list of LangChain `Document` objects. The name of this method
 # may change in future versions of LangChain.
 # :::
 
 # ## Implementation
-#
+# 
 # As an example, we'll implement a simple embeddings model that returns a constant vector. This model is for illustrative purposes only.
 
 # In[1]:
@@ -151,7 +151,7 @@ print(embeddings.embed_query("Hello"))
 
 
 # ## Contributing
-#
+# 
 # We welcome contributions of Embedding models to the LangChain code base.
-#
+# 
 # If you aim to contribute an embedding model for a new provider (e.g., with a new set of dependencies or SDK), we encourage you to publish your implementation in a separate `langchain-*` integration package. This will enable you to appropriately manage dependencies and version your package. Please refer to our [contributing guide](/docs/contributing/how_to/integrations/) for a walkthrough of this process.

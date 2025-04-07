@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Self Discover
-#
+# 
 # An implementation of the [Self-Discover paper](https://arxiv.org/pdf/2402.03620.pdf).
-#
+# 
 # Based on [this implementation from @catid](https://github.com/catid/self-discover/tree/main?tab=readme-ov-file)
 
 # In[1]:
@@ -192,4 +192,11 @@ overall_chain.invoke(
 # In[ ]:
 
 
+
+
+
 # In[ ]:
+
+
+
+

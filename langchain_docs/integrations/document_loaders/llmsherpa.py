@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # LLM Sherpa
-#
+# 
 # This notebook covers how to use `LLM Sherpa` to load files of many types. `LLM Sherpa` supports different file formats including DOCX, PPTX, HTML, TXT, and XML.
-#
+# 
 # `LLMSherpaFileLoader` use LayoutPDFReader, which is part of the LLMSherpa library. This tool is designed to parse PDFs while preserving their layout information, which is often lost when using most PDF to text parsers.
-#
+# 
 # Here are some key features of LayoutPDFReader:
-#
+# 
 # * It can identify and extract sections and subsections along with their levels.
 # * It combines lines to form paragraphs.
 # * It can identify links between sections and paragraphs.
@@ -17,9 +17,9 @@
 # * It can join content spread across pages.
 # * It can remove repeating headers and footers.
 # * It can remove watermarks.
-#
+# 
 # check [llmsherpa](https://llmsherpa.readthedocs.io/en/latest/) documentation.
-#
+# 
 # `INFO: this library fail with some pdf files so use it with caution.`
 
 # In[ ]:
@@ -30,7 +30,7 @@
 
 
 # ## LLMSherpaFileLoader
-#
+# 
 # Under the hood LLMSherpaFileLoader defined some strategist to load file content: ["sections", "chunks", "html", "text"], setup [nlm-ingestor](https://github.com/nlmatics/nlm-ingestor) to get `llmsherpa_api_url` or use the default.
 
 # ### sections strategy: return the file parsed into sections
@@ -147,3 +147,4 @@ docs[0].page_content[:400]
 
 
 len(docs)
+

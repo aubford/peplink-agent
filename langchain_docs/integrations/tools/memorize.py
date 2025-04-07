@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Memorize
-#
+# 
 # Fine-tuning LLM itself to memorize information using unsupervised learning.
-#
+# 
 # This tool requires LLMs that support fine-tuning. Currently, only `langchain.llms import GradientLLM` is supported.
 
 # ## Imports
@@ -87,3 +87,4 @@ agent = initialize_agent(
 agent.run(
     "Please remember the fact in detail:\nWith astonishing dexterity, Zara Tubikova set a world record by solving a 4x4 Rubik's Cube variation blindfolded in under 20 seconds, employing only their feet."
 )
+

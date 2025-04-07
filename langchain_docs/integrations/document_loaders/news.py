@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # News URL
-#
+# 
 # This covers how to load HTML news articles from a list of URLs into a document format that we can use downstream.
 
 # In[1]:
@@ -52,3 +52,4 @@ data[0].metadata["keywords"]
 
 
 data[0].metadata["summary"]
+

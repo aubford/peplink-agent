@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # OpenAI metadata tagger
-#
+# 
 # It can often be useful to tag ingested documents with structured metadata, such as the title, tone, or length of a document, to allow for a more targeted similarity search later. However, for large numbers of documents, performing this labelling process manually can be tedious.
-#
-# The `OpenAIMetadataTagger` document transformer automates this process by extracting metadata from each provided document according to a provided schema. It uses a configurable `OpenAI Functions`-powered chain under the hood, so if you pass a custom LLM instance, it must be an `OpenAI` model with functions support.
-#
+# 
+# The `OpenAIMetadataTagger` document transformer automates this process by extracting metadata from each provided document according to a provided schema. It uses a configurable `OpenAI Functions`-powered chain under the hood, so if you pass a custom LLM instance, it must be an `OpenAI` model with functions support. 
+# 
 # **Note:** This document transformer works best with complete documents, so it's best to run it first with whole documents before doing any other splitting or processing!
-#
+# 
 # For example, let's say you wanted to index a set of movie reviews. You could initialize the document transformer with a valid `JSON Schema` object as follows:
 
 # In[1]:
@@ -73,7 +73,7 @@ print(
 
 
 # The new documents can then be further processed by a text splitter before being loaded into a vector store. Extracted fields will not overwrite existing metadata.
-#
+# 
 # You can also initialize the document transformer with a Pydantic schema:
 
 # In[5]:
@@ -100,10 +100,10 @@ print(
 )
 
 
-#
-#
+# 
+# 
 # ## Customization
-#
+# 
 # You can pass the underlying tagging chain the standard LLMChain arguments in the document transformer constructor. For example, if you wanted to ask the LLM to focus specific details in the input documents, or extract metadata in a certain style, you could pass in a custom prompt:
 
 # In[6]:
@@ -129,3 +129,7 @@ print(
 
 
 # In[ ]:
+
+
+
+

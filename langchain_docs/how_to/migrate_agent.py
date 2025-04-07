@@ -191,7 +191,7 @@ langgraph_agent_executor = create_react_agent(model, tools, prompt=system_messag
 messages = langgraph_agent_executor.invoke({"messages": [("user", query)]})
 
 
-# We can also pass in an arbitrary function or a runnable. This function/runnable should take in a the graph state and output a list of messages.
+# We can also pass in an arbitrary function or a runnable. This function/runnable should take in a graph state and output a list of messages.
 # We can do all types of arbitrary formatting of messages here. In this case, let's add a SystemMessage to the start of the list of messages and append another user message at the end.
 
 # In[7]:

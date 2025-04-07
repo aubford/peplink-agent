@@ -2,10 +2,10 @@
 # coding: utf-8
 
 # # SceneXplain
-#
-#
+# 
+# 
 # [SceneXplain](https://scenex.jina.ai/) is an ImageCaptioning service accessible through the SceneXplain Tool.
-#
+# 
 # To use this tool, you'll need to make an account and fetch your API Token [from the website](https://scenex.jina.ai/api). Then you can instantiate the tool.
 
 # In[1]:
@@ -35,7 +35,7 @@ tool = SceneXplainTool()
 
 
 # ## Usage in an Agent
-#
+# 
 # The tool can be used in any LangChain agent as follows:
 
 # In[2]:
@@ -58,3 +58,4 @@ output = agent.run(
 )
 
 print(output)
+

@@ -299,4 +299,4 @@ vector_store.delete_collection()
 
 # ## API reference
 # 
-# For detailed documentation of all `AstraDBVectorStore` features and configurations head to the API reference:https://python.langchain.com/api_reference/astradb/vectorstores/langchain_astradb.vectorstores.AstraDBVectorStore.html
+# For detailed documentation of all `AstraDBVectorStore` features and configurations head to the API reference: https://python.langchain.com/api_reference/astradb/vectorstores/langchain_astradb.vectorstores.AstraDBVectorStore.html

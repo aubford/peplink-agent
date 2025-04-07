@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Multi-agent authoritarian speaker selection
-#
+# 
 # This notebook showcases how to implement a multi-agent simulation where a privileged agent decides who to speak.
 # This follows the polar opposite selection scheme as [multi-agent decentralized speaker selection](https://python.langchain.com/en/latest/use_cases/agent_simulations/multiagent_bidding.html).
-#
+# 
 # We show an example of this approach in the context of a fictitious simulation of a news network. This example will showcase how we can implement agents that
 # - think before speaking
 # - terminate the conversation
 
-# ## Import LangChain related modules
+# ## Import LangChain related modules 
 
 # In[1]:
 
@@ -120,13 +120,13 @@ class DialogueSimulator:
 # The `DirectorDialogueAgent` is a privileged agent that chooses which of the other agents to speak next. This agent is responsible for
 # 1. steering the conversation by choosing which agent speaks when
 # 2. terminating the conversation.
-#
+# 
 # In order to implement such an agent, we need to solve several problems.
-#
+# 
 # First, to steer the conversation, the `DirectorDialogueAgent` needs to (1) reflect on what has been said, (2) choose the next agent, and (3) prompt the next agent to speak, all in a single message. While it may be possible to prompt an LLM to perform all three steps in the same call, this requires writing custom code to parse the outputted message to extract which next agent is chosen to speak. This is less reliable the LLM can express how it chooses the next agent in different ways.
-#
-# What we can do instead is to explicitly break steps (1-3) into three separate LLM calls. First we will ask the `DirectorDialogueAgent` to reflect on the conversation so far and generate a response. Then we prompt the `DirectorDialogueAgent` to output the index of the next agent, which is easily parseable. Lastly, we pass the name of the selected next agent back to `DirectorDialogueAgent` to ask it prompt the next agent to speak.
-#
+# 
+# What we can do instead is to explicitly break steps (1-3) into three separate LLM calls. First we will ask the `DirectorDialogueAgent` to reflect on the conversation so far and generate a response. Then we prompt the `DirectorDialogueAgent` to output the index of the next agent, which is easily parseable. Lastly, we pass the name of the selected next agent back to `DirectorDialogueAgent` to ask it prompt the next agent to speak. 
+# 
 # Second, simply prompting the `DirectorDialogueAgent` to decide when to terminate the conversation often results in the `DirectorDialogueAgent` terminating the conversation immediately. To fix this problem, we randomly sample a Bernoulli variable to decide whether the conversation should terminate. Depending on the value of this variable, we will inject a custom prompt to tell the `DirectorDialogueAgent` to either continue the conversation or terminate the conversation.
 
 # In[3]:
@@ -405,7 +405,7 @@ topic_specifier_prompt = [
     SystemMessage(content="You can make a task more specific."),
     HumanMessage(
         content=f"""{conversation_description}
-        
+
         Please elaborate on the topic. 
         Frame the topic as a single question to be answered.
         Be creative and imaginative.
@@ -421,7 +421,7 @@ print(f"Detailed topic:\n{specified_topic}\n")
 
 # ## Define the speaker selection function
 # Lastly we will define a speaker selection function `select_next_speaker` that takes each agent's bid and selects the agent with the highest bid (with ties broken randomly).
-#
+# 
 # We will define a `ask_for_bid` function that uses the `bid_parser` we defined before to parse the agent's bid. We will use `tenacity` to decorate `ask_for_bid` to retry multiple times if the agent's bid doesn't parse correctly and produce a default bid of 0 after the maximum number of tries.
 
 # In[8]:
@@ -490,3 +490,7 @@ while True:
 
 
 # In[ ]:
+
+
+
+

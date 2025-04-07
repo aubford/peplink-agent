@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # Facebook Messenger
-#
+# 
 # This notebook shows how to load data from Facebook in a format you can fine-tune on. The overall steps are:
-#
+# 
 # 1. Download your messenger data to disk.
 # 2. Create the Chat Loader and call `loader.load()` (or `loader.lazy_load()`) to perform the conversion.
 # 3. Optionally use `merge_chat_runs` to combine message from the same sender in sequence, and/or `map_ai_messages` to convert messages from the specified sender to the "AIMessage" class. Once you've done this, call `convert_messages_for_finetuning` to prepare your data for fine-tuning.
-#
-#
+# 
+# 
 # Once this has been done, you can fine-tune your model. To do so you would complete the following steps:
-#
+# 
 # 4. Upload your messages to OpenAI and run a fine-tuning job.
 # 6. Use the resulting model in your LangChain app!
-#
-#
+# 
+# 
 # Let's begin.
-#
-#
+# 
+# 
 # ## 1. Download Data
-#
+# 
 # To download your own messenger data, following instructions [here](https://www.zapptales.com/en/download-facebook-messenger-chat-history-how-to/). IMPORTANT - make sure to download them in JSON format (not HTML).
-#
+# 
 # We are hosting an example dump at [this google drive link](https://drive.google.com/file/d/1rh1s1o2i7B-Sk1v9o8KNgivLVGwJ-osV/view?usp=sharing) that we will use in this walkthrough.
 
 # In[1]:
@@ -62,7 +62,7 @@ download_and_unzip(url)
 
 
 # ## 2. Create Chat Loader
-#
+# 
 # We have 2 different `FacebookMessengerChatLoader` classes, one for an entire directory of chats, and one to load individual files. We
 
 # In[2]:
@@ -111,9 +111,9 @@ len(chat_sessions)
 
 
 # ## 3. Prepare for fine-tuning
-#
-# Calling `load()` returns all the chat messages we could extract as human messages. When conversing with chat bots, conversations typically follow a more strict alternating dialogue pattern relative to real conversations.
-#
+# 
+# Calling `load()` returns all the chat messages we could extract as human messages. When conversing with chat bots, conversations typically follow a more strict alternating dialogue pattern relative to real conversations. 
+# 
 # You can choose to merge message "runs" (consecutive messages from the same sender) and select a sender to represent the "AI". The fine-tuned LLM will learn to generate these AI messages.
 
 # In[8]:
@@ -162,7 +162,7 @@ training_data[0][:3]
 
 
 # OpenAI currently requires at least 10 training examples for a fine-tuning job, though they recommend between 50-100 for most tasks. Since we only have 9 chat sessions, we can subdivide them (optionally with some overlap) so that each training example is comprised of a portion of a whole conversation.
-#
+# 
 # Facebook chat sessions (1 per person) often span multiple days and conversations,
 # so the long-range dependencies may not be that important to model anyhow.
 
@@ -184,14 +184,14 @@ len(training_examples)
 
 
 # ## 4. Fine-tune the model
-#
+# 
 # It's time to fine-tune the model. Make sure you have `openai` installed
 # and have set your `OPENAI_API_KEY` appropriately
 
 # In[15]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-openai")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai')
 
 
 # In[16]:
@@ -254,7 +254,7 @@ print(job.fine_tuned_model)
 
 
 # ## 5. Use in LangChain
-#
+# 
 # You can use the resulting model ID directly the `ChatOpenAI` model class.
 
 # In[20]:
@@ -288,3 +288,4 @@ chain = prompt | model | StrOutputParser()
 
 for tok in chain.stream({"input": "What classes are you taking?"}):
     print(tok, end="", flush=True)
+

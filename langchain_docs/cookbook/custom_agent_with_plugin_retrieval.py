@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # Custom Agent with PlugIn Retrieval
-#
+# 
 # This notebook combines two concepts in order to build a custom agent that can interact with AI Plugins:
-#
+# 
 # 1. [Custom Agent with Tool Retrieval](/docs/modules/agents/how_to/custom_agent_with_tool_retrieval.html): This introduces the concept of retrieving many tools, which is useful when trying to work with arbitrarily many plugins.
 # 2. [Natural Language API Chains](/docs/use_cases/apis/openapi.html): This creates Natural Language wrappers around OpenAPI endpoints. This is useful because (1) plugins use OpenAPI endpoints under the hood, (2) wrapping them in an NLAChain allows the router agent to call it more easily.
-#
+# 
 # The novel idea introduced in this notebook is the idea of using retrieval to select not the tools explicitly, but the set of OpenAPI specs to use. We can then generate tools from those OpenAPI specs. The use case for this is when trying to get agents to use plugins. It may be more efficient to choose plugins first, then the endpoints, rather than the endpoints directly. This is because the plugins may contain more useful information for selection.
 
 # ## Set up environment
-#
+# 
 # Do necessary imports, etc.
 
 # In[1]:
@@ -42,7 +42,7 @@ llm = OpenAI(temperature=0)
 
 
 # ## Set up plugins
-#
+# 
 # Load and index plugins
 
 # In[3]:
@@ -63,7 +63,7 @@ AI_PLUGINS = [AIPlugin.from_url(url) for url in urls]
 
 
 # ## Tool Retriever
-#
+# 
 # We will use a vectorstore to create embeddings for each tool description. Then, for an incoming query we can create embeddings for that query and do a similarity search for relevant tools.
 
 # In[4]:
@@ -127,7 +127,7 @@ tools = get_tools("what shirts can i buy?")
 
 
 # ## Prompt Template
-#
+# 
 # The prompt template is pretty standard, because we're not actually changing that much logic in the actual prompt template, but rather we are just changing how retrieval is done.
 
 # In[9]:
@@ -205,7 +205,7 @@ prompt = CustomPromptTemplate(
 
 
 # ## Output Parser
-#
+# 
 # The output parser is unchanged from the previous notebook, since we are not changing anything about the output format.
 
 # In[12]:
@@ -241,7 +241,7 @@ output_parser = CustomOutputParser()
 
 
 # ## Set up LLM, stop sequence, and the agent
-#
+# 
 # Also the same as the previous notebook
 
 # In[14]:
@@ -270,7 +270,7 @@ agent = LLMSingleActionAgent(
 
 
 # ## Use the Agent
-#
+# 
 # Now we can use it!
 
 # In[17]:
@@ -288,3 +288,7 @@ agent_executor.run("what shirts can i buy?")
 
 
 # In[ ]:
+
+
+
+

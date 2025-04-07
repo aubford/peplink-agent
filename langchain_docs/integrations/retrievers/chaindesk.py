@@ -2,19 +2,22 @@
 # coding: utf-8
 
 # # Chaindesk
-#
+# 
 # >[Chaindesk platform](https://docs.chaindesk.ai/introduction) brings data from anywhere (Datsources: Text, PDF, Word, PowerPpoint, Excel, Notion, Airtable, Google Sheets, etc..) into Datastores (container of multiple Datasources).
 # Then your Datastores can be connected to ChatGPT via Plugins or any other Large Langue Model (LLM) via the `Chaindesk API`.
-#
+# 
 # This notebook shows how to use [Chaindesk's](https://www.chaindesk.ai/) retriever.
-#
+# 
 # First, you will need to sign up for Chaindesk, create a datastore, add some data and get your datastore api endpoint url. You need the [API Key](https://docs.chaindesk.ai/api-reference/authentication).
 
 # In[ ]:
 
 
+
+
+
 # ## Query
-#
+# 
 # Now that our index is set up, we can set up a retriever and start querying it.
 
 # In[1]:
@@ -37,3 +40,4 @@ retriever = ChaindeskRetriever(
 
 
 retriever.invoke("What is Daftpage?")
+

@@ -8,16 +8,13 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install -qU langchain langchain-openai langchain-community langchain-text-splitters langchainhub",
-)
+get_ipython().run_line_magic('pip', 'install -qU langchain langchain-openai langchain-community langchain-text-splitters langchainhub')
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss_cpu")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss_cpu')
 
 
 # In[ ]:
@@ -125,3 +122,4 @@ chain = create_retrieval_chain(compression_retriever, combine_docs_chain)
 
 
 chain.invoke({"input": query})
+

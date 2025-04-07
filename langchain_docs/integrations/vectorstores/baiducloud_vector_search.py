@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Baidu Cloud ElasticSearch VectorSearch
-#
-# >[Baidu Cloud VectorSearch](https://cloud.baidu.com/doc/BES/index.html?from=productToDoc) is a fully managed, enterprise-level distributed search and analysis service which is 100% compatible to open source. Baidu Cloud VectorSearch provides low-cost, high-performance, and reliable retrieval and analysis platform level product services for structured/unstructured data. As a vector database , it supports multiple index types and similarity distance methods.
-#
+# 
+# >[Baidu Cloud VectorSearch](https://cloud.baidu.com/doc/BES/index.html?from=productToDoc) is a fully managed, enterprise-level distributed search and analysis service which is 100% compatible to open source. Baidu Cloud VectorSearch provides low-cost, high-performance, and reliable retrieval and analysis platform level product services for structured/unstructured data. As a vector database , it supports multiple index types and similarity distance methods. 
+# 
 # >`Baidu Cloud ElasticSearch` provides a privilege management mechanism, for you to  configure the cluster privileges freely, so as to further ensure data security.
-#
+# 
 # This notebook shows how to use functionality related to the `Baidu Cloud ElasticSearch VectorStore`.
 # To run, you should have an [Baidu Cloud ElasticSearch](https://cloud.baidu.com/product/bes.html) instance up and running:
-#
+# 
 # Read the [help document](https://cloud.baidu.com/doc/BES/s/8llyn0hh4 ) to quickly familiarize and configure Baidu Cloud ElasticSearch instance.
 
 # After the instance is up and running, follow these steps to split documents, get embeddings, connect to the baidu cloud elasticsearch instance, index documents, and perform vector retrieval.
@@ -19,9 +19,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet langchain-community elasticsearch == 7.11.0"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community elasticsearch == 7.11.0')
 
 
 # First, we want to use `QianfanEmbeddings` so we have to get the Qianfan AK and SK. Details for QianFan is related to [Baidu Qianfan Workshop](https://cloud.baidu.com/product/wenxinworkshop)
@@ -73,7 +71,7 @@ bes = BESVectorStore.from_documents(
 bes.client.indices.refresh(index="your vector index")
 
 
-# Finally, Query and retrive data
+# Finally, Query and retrieve data
 
 # In[ ]:
 

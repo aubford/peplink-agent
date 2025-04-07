@@ -89,7 +89,7 @@ keywords: [conversationchain]
 # 
 # import ChatModelTabs from "@theme/ChatModelTabs";
 # 
-# <ChatModelTabs openaiParams={`model="gpt-4o-mini"`} />
+# <ChatModelTabs overrideParams={{openai: {model: "gpt-4o-mini"}}} />
 # 
 
 # In[2]:

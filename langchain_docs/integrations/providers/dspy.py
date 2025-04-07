@@ -2,29 +2,29 @@
 # coding: utf-8
 
 # # DSPy
-#
+# 
 # >[DSPy](https://github.com/stanfordnlp/dspy) is a fantastic framework for LLMs that introduces an automatic compiler that teaches LMs how to conduct the declarative steps in your program. Specifically, the DSPy compiler will internally trace your program and then craft high-quality prompts for large LMs (or train automatic finetunes for small LMs) to teach them the steps of your task.
-#
+# 
 # Thanks to [Omar Khattab](https://twitter.com/lateinteraction) we have an integration! It works with any LCEL chains with some minor modifications.
-#
+# 
 # This short tutorial demonstrates how this proof-of-concept feature works. *This will not give you the full power of DSPy or LangChain yet, but we will expand it if there's high demand.*
-#
+# 
 # Note: this was slightly modified from the original example Omar wrote for DSPy. If you are interested in LangChain \<\> DSPy but coming from the DSPy side, I'd recommend checking that out. You can find that [here](https://github.com/stanfordnlp/dspy/blob/main/examples/tweets/compiling_langchain.ipynb).
-#
+# 
 # Let's take a look at an example. In this example we will make a simple RAG pipeline. We will use DSPy to "compile" our program and learn an optimized prompt.
-#
+# 
 # This example uses the `ColBERTv2` model.
 # See the [ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction](https://arxiv.org/abs/2112.01488) paper.
-#
-#
+# 
+# 
 # ## Install dependencies
-#
-# !pip install -U dspy-ai
+# 
+# !pip install -U dspy-ai 
 # !pip install -U openai jinja2
 # !pip install -U langchain langchain-community langchain-openai langchain-core
 
 # ## Setup
-#
+# 
 # We will be using OpenAI, so we should set an API key
 
 # In[ ]:
@@ -69,19 +69,19 @@ colbertv2("cycling")
 
 
 # ## Normal LCEL
-#
+# 
 # First, let's create a simple RAG pipeline with LCEL like we would normally.
-#
+# 
 # For illustration, let's tackle the following task.
-#
+# 
 # **Task:** Build a RAG system for generating informative tweets.
-#
+# 
 # - **Input:** A factual question, which may be fairly complex.
-#
+#  
 # - **Output:** An engaging tweet that correctly answers the question from the retrieved info.
-#
+#  
 # Let's use LangChain's expression language (LCEL) to illustrate this. Any prompt here will do, we will optimize the final prompt with DSPy.
-#
+# 
 # Considering that, let's just keep it to the barebones: **Given \{context\}, answer the question \{question\} as a tweet.**
 
 # In[3]:
@@ -104,17 +104,17 @@ vanilla_chain = (
 
 
 # ## LCEL \<\> DSPy
-#
+# 
 # In order to use LangChain with DSPy, you need to make two minor modifications
-#
+# 
 # **LangChainPredict**
-#
-# You need to change from doing `prompt | llm` to using `LangChainPredict(prompt, llm)` from `dspy`.
-#
+# 
+# You need to change from doing `prompt | llm` to using `LangChainPredict(prompt, llm)` from `dspy`. 
+# 
 # This is a wrapper which will bind your prompt and llm together so you can optimize them
-#
+# 
 # **LangChainModule**
-#
+# 
 # This is a wrapper which wraps your final LCEL chain so that DSPy can optimize the whole thing
 
 # In[4]:
@@ -137,7 +137,7 @@ zeroshot_chain = LangChainModule(
 
 
 # ## Trying the Module
-#
+# 
 # After this, we can use it as both a LangChain runnable and a DSPy module!
 
 # In[5]:
@@ -149,17 +149,17 @@ zeroshot_chain.invoke({"question": question})
 
 
 # Ah that sounds about right! (It's technically not perfect: we asked for the region not the city. We can do better below.)
-#
+# 
 # Inspecting questions and answers manually is very important to get a sense of your system. However, a good system designer always looks to iteratively benchmark their work to quantify progress!
-#
+# 
 # To do this, we need two things: the metric we want to maximize and a (tiny) dataset of examples for our system.
-#
+# 
 # Are there pre-defined metrics for good tweets? Should I label 100,000 tweets by hand? Probably not. We can easily do something reasonable, though, until you start getting data in production!
 
 # ## Load Data
-#
+# 
 # In order to compile our chain, we need a dataset to work with. This dataset just needs to be raw inputs and outputs. For our purposes, we will use HotPotQA dataset
-#
+# 
 # Note: Notice that our dataset doesn't actually include any tweets! It only has questions and answers. That's OK, our metric will take care of evaluating outputs in tweet form.
 
 # In[6]:
@@ -185,7 +185,7 @@ valset, devset = devset[:50], devset[50:]
 
 
 # ## Define a metric
-#
+# 
 # We now need to define a metric. This will be used to determine which runs were successful and we can learn from. Here we will use DSPy's metrics, though you can write your own.
 
 # In[7]:
@@ -247,7 +247,7 @@ def metric(gold, pred, trace=None):
 
 
 # ## Evaluate Baseline
-#
+# 
 # Okay, let's evaluate the unoptimized "zero-shot" version of our chain, converted from our LangChain LCEL object.
 
 # In[8]:
@@ -266,19 +266,19 @@ evaluate(zeroshot_chain)
 
 
 # Okay, cool. Our zeroshot_chain gets about 42.00% on the 150 questions from the devset.
-#
+# 
 # The table above shows some examples. For instance:
-#
+# 
 # - Question: Who was a producer who produced albums for both rock bands Juke Karten and Thirty Seconds to Mars?
-#
+# 
 # - Tweet: Brian Virtue, who has worked with bands like Jane's Addiction and Velvet Revolver, produced albums for both Juke Kartel and Thirty Seconds to Mars, showcasing... [truncated]
-#
+# 
 # - Metric: 1.0 (A tweet that is correct, faithful, and engaging!*)
-#
+# 
 # footnote: * At least according to our metric, which is just a DSPy program, so it too can be optimized if you'd like! Topic for another notebook, though.
 
 # ## Optimize
-#
+# 
 # Now, let's optimize performance
 
 # In[10]:
@@ -301,7 +301,7 @@ optimized_chain = optimizer.compile(zeroshot_chain, trainset=trainset, valset=va
 
 
 # ## Evaluating the optimized chain
-#
+# 
 # Well, how good is this? Let's do some proper evals!
 
 # In[13]:
@@ -313,11 +313,11 @@ evaluate(optimized_chain)
 # Alright! We've improved our chain from 42% to nearly 50%!
 
 # ## Inspect the optimized chain
-#
+# 
 # So what actually happened to improve this? We can take a look at this by looking at the optimized chain. We can do this in two ways
-#
+# 
 # ### Look at the prompt used
-#
+# 
 # We can look at what prompt was actually used. We can do this by looking at `dspy.settings`.
 
 # In[14]:
@@ -333,7 +333,7 @@ print(prompt_used)
 
 
 # ### Look at the demos
-#
+# 
 # The way this was optimized was that we collected examples (or "demos") to put in the prompt. We can inspect the optmized_chain to get a sense for what those are.
 
 # In[20]:
@@ -353,3 +353,7 @@ demos
 
 
 # In[ ]:
+
+
+
+

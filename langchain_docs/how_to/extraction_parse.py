@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # How to use prompting alone (no tool calling) to do extraction
-#
+# 
 # [Tool calling](/docs/concepts/tool_calling/) features are not required for generating structured output from LLMs. LLMs that are able to follow prompt instructions well can be tasked with outputting information in a given format.
-#
+# 
 # This approach relies on designing good prompts and then parsing the output of the LLMs to make them extract information well.
-#
-# To extract data without tool-calling features:
-#
+# 
+# To extract data without tool-calling features: 
+# 
 # 1. Instruct the LLM to generate text following an expected format (e.g., JSON with a certain schema);
 # 2. Use [output parsers](/docs/concepts/output_parsers) to structure the model response into a desired Python object.
-#
+# 
 # First we select a LLM:
-#
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs customVarName="model" />
-#
+# 
 
 # In[1]:
 
@@ -35,7 +35,7 @@ model = ChatAnthropic(model_name="claude-3-sonnet-20240229", temperature=0)
 # :::
 
 # ## Using PydanticOutputParser
-#
+# 
 # The following example uses the built-in `PydanticOutputParser` to parse the output of a chat model.
 
 # In[2]:
@@ -102,18 +102,18 @@ chain.invoke({"query": query})
 
 
 # Check out the associated [Langsmith trace](https://smith.langchain.com/public/92ed52a3-92b9-45af-a663-0a9c00e5e396/r).
-#
-# Note that the schema shows up in two places:
-#
+# 
+# Note that the schema shows up in two places: 
+# 
 # 1. In the prompt, via `parser.get_format_instructions()`;
 # 2. In the chain, to receive the formatted output and structure it into a Python object (in this case, the Pydantic object `People`).
 
 # ## Custom Parsing
-#
+# 
 # If desired, it's easy to create a custom prompt and parser with `LangChain` and `LCEL`.
-#
+# 
 # To create a custom parser, define a function to parse the output from the model (typically an [AIMessage](https://python.langchain.com/api_reference/core/messages/langchain_core.messages.ai.AIMessage.html)) into an object of your choice.
-#
+# 
 # See below for a simple implementation of a JSON parser.
 
 # In[6]:
@@ -197,6 +197,6 @@ chain.invoke({"query": query})
 
 
 # ## Other Libraries
-#
+# 
 # If you're looking at extracting using a parsing approach, check out the [Kor](https://eyurtsev.github.io/kor/) library. It's written by one of the `LangChain` maintainers and it
 # helps to craft a prompt that takes examples into account, allows controlling formats (e.g., JSON or CSV) and expresses the schema in TypeScript. It seems to work pretty!

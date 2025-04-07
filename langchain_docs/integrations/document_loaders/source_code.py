@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Source Code
-#
+# 
 # This notebook covers how to load source code files using a special approach with language parsing: each top-level function and class in the code is loaded into separate documents. Any remaining code top-level code outside the already loaded functions and classes will be loaded into a separate document.
-#
+# 
 # This approach can potentially improve the accuracy of QA models over source code.
-#
+# 
 # The supported languages for code parsing are:
-#
+# 
 # - C (*)
 # - C++ (*)
 # - C# (*)
@@ -25,23 +25,21 @@
 # - Rust (*)
 # - Scala (*)
 # - TypeScript (*)
-#
+# 
 # Items marked with (*) require the packages `tree_sitter` and `tree_sitter_languages`.
 # It is straightforward to add support for additional languages using `tree_sitter`,
 # although this currently requires modifying LangChain.
-#
+# 
 # The language used for parsing can be configured, along with the minimum number of
 # lines required to activate the splitting based on syntax.
-#
+# 
 # If a language is not explicitly specified, `LanguageParser` will infer one from
 # filename extensions, if present.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install -qU esprima esprima tree_sitter tree_sitter_languages"
-)
+get_ipython().run_line_magic('pip', 'install -qU esprima esprima tree_sitter tree_sitter_languages')
 
 
 # In[1]:
@@ -88,8 +86,8 @@ for document in docs:
 print("\n\n--8<--\n\n".join([document.page_content for document in docs]))
 
 
-# The parser can be disabled for small files.
-#
+# The parser can be disabled for small files. 
+# 
 # The parameter `parser_threshold` indicates the minimum number of lines that the source code file must have to be segmented using the parser.
 
 # In[8]:
@@ -117,7 +115,7 @@ print(docs[0].page_content)
 
 
 # ## Splitting
-#
+# 
 # Additional splitting could be needed for those functions, classes, or scripts that are too big.
 
 # In[11]:
@@ -168,9 +166,9 @@ print("\n\n--8<--\n\n".join([document.page_content for document in result]))
 
 
 # ## Adding Languages using Tree-sitter Template
-#
+# 
 # Expanding language support using the Tree-Sitter template involves a few essential steps:
-#
+# 
 # 1. **Creating a New Language File**:
 #     - Begin by creating a new file in the designated directory (langchain/libs/community/langchain_community/document_loaders/parsers/language).
 #     - Model this file based on the structure and parsing logic of existing language files like **`cpp.py`**.
@@ -184,7 +182,7 @@ print("\n\n--8<--\n\n".join([document.page_content for document in result]))
 # 4. **Integration into the Parser and Text Splitter**:
 #     - Incorporate your new language within the **`language_parser.py`** file. Ensure to update LANGUAGE_EXTENSIONS and LANGUAGE_SEGMENTERS along with the docstring for LanguageParser to recognize and handle the added language.
 #     - Also, confirm that your language is included in **`text_splitter.py`** in class Language for proper parsing.
-#
+# 
 # By following these steps and ensuring comprehensive testing and integration, you'll successfully extend language support using the Tree-Sitter template.
-#
+# 
 # Best of luck!

@@ -2,30 +2,26 @@
 # coding: utf-8
 
 # # Advanced RAG Eval
-#
-# The cookbook walks through the process of running eval(s) on advanced RAG.
-#
+# 
+# The cookbook walks through the process of running eval(s) on advanced RAG. 
+# 
 # This can be very useful to determine the best RAG approach for your application.
 
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install -U langchain openai langchain_chroma langchain-experimental # (newest versions required for multi-modal)"
-)
+get_ipython().system(' pip install -U langchain openai langchain_chroma langchain-experimental # (newest versions required for multi-modal)')
 
 
 # In[ ]:
 
 
 # lock to 0.10.19 due to a persistent bug in more recent versions
-get_ipython().system(
-    ' pip install "unstructured[all-docs]==0.10.19" pillow pydantic lxml pillow matplotlib tiktoken open_clip_torch torch'
-)
+get_ipython().system(' pip install "unstructured[all-docs]==0.10.19" pillow pydantic lxml pillow matplotlib tiktoken open_clip_torch torch')
 
 
 # ## Data Loading
-#
+# 
 # Let's look at an [example whitepaper](https://sgp.fas.org/crs/misc/IF10244.pdf) that provides a mixture of tables, text, and images about Wildfires in the US.
 
 # ### Option 1: Load text
@@ -50,9 +46,9 @@ all_splits_pypdf = text_splitter.split_documents(pdf_pages)
 all_splits_pypdf_texts = [d.page_content for d in all_splits_pypdf]
 
 
-# ### Option 2: Load text, tables, images
-#
-#
+# ### Option 2: Load text, tables, images 
+# 
+# 
 
 # In[2]:
 
@@ -82,7 +78,7 @@ for element in raw_pdf_elements:
 
 
 # ## Store
-#
+# 
 # ### Option 1: Embed, store text chunks
 
 # In[3]:
@@ -100,7 +96,7 @@ retriever_baseline = baseline.as_retriever()
 
 
 # ### Option 2: Multi-vector retriever
-#
+# 
 # #### Text Summary
 
 # In[4]:
@@ -189,7 +185,7 @@ for img_file in sorted(os.listdir(path)):
 
 
 # ### Option 2a: Multi-vector retriever w/ raw images
-#
+# 
 # * Return images to LLM for answer synthesis
 
 # In[11]:
@@ -285,7 +281,7 @@ plt_img_base64(docs[1])
 
 
 # ### Option 2b: Multi-vector retriever w/ image summaries
-#
+# 
 # * Return text summary of images to LLM for answer synthesis
 
 # In[20]:
@@ -342,7 +338,7 @@ retriever_multimodal_embd = multimodal_embd.as_retriever()
 
 
 # ## RAG
-#
+# 
 # ### Text Pipeline
 
 # In[23]:
@@ -549,3 +545,4 @@ for chain, run in zip(
     ["baseline", "mv_text", "mv_img", "mm_embd"],
 ):
     run_eval(chain, dataset_name + "-" + run, dataset_name)
+

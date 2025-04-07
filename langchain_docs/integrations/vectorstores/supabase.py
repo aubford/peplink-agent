@@ -4,25 +4,25 @@
 # # Supabase (Postgres)
 
 # >[Supabase](https://supabase.com/docs) is an open-source Firebase alternative. `Supabase` is built on top of `PostgreSQL`, which offers strong SQL querying capabilities and enables a simple interface with already-existing tools and frameworks.
-#
+# 
 # >[PostgreSQL](https://en.wikipedia.org/wiki/PostgreSQL) also known as `Postgres`, is a free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance.
-#
+# 
 # This notebook shows how to use `Supabase` and `pgvector` as your VectorStore.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # To run this notebook, please ensure:
 # - the `pgvector` extension is enabled
 # - you have installed the `supabase-py` package
 # - that you have created a `match_documents` function in your database
 # - that you have a `documents` table in your `public` schema similar to the one below.
-#
+# 
 # The following function determines cosine similarity, but you can adjust to your needs.
-#
+# 
 # ```sql
 # -- Enable the pgvector extension to work with embedding vectors
 # create extension if not exists vector;
-#
+# 
 # -- Create a table to store your documents
 # create table
 #   documents (
@@ -31,7 +31,7 @@
 #     metadata jsonb, -- corresponds to Document.metadata
 #     embedding vector (1536) -- 1536 works for OpenAI embeddings, change if needed
 #   );
-#
+# 
 # -- Create a function to search for documents
 # create function match_documents (
 #   query_embedding vector (1536),
@@ -61,7 +61,7 @@
 
 
 # with pip
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  supabase")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  supabase')
 
 # with conda
 # !conda install -c conda-forge supabase
@@ -178,7 +178,7 @@ print(matched_docs[0].page_content)
 
 
 # ## Similarity search with score
-#
+# 
 
 # The returned distance score is cosine distance. Therefore, a lower score is better.
 
@@ -195,13 +195,13 @@ matched_docs[0]
 
 
 # ## Retriever options
-#
+# 
 # This section goes over different options for how to use SupabaseVectorStore as a retriever.
-#
+# 
 # ### Maximal Marginal Relevance Searches
-#
+# 
 # In addition to using similarity search in the retriever object, you can also use `mmr`.
-#
+# 
 
 # In[11]:
 
@@ -224,3 +224,7 @@ for i, d in enumerate(matched_docs):
 
 
 # In[ ]:
+
+
+
+

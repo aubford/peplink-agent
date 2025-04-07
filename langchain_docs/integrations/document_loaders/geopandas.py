@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Geopandas
-#
-# [Geopandas](https://geopandas.org/en/stable/index.html) is an open-source project to make working with geospatial data in python easier.
-#
-# GeoPandas extends the datatypes used by pandas to allow spatial operations on geometric types.
-#
+# 
+# [Geopandas](https://geopandas.org/en/stable/index.html) is an open-source project to make working with geospatial data in python easier. 
+# 
+# GeoPandas extends the datatypes used by pandas to allow spatial operations on geometric types. 
+# 
 # Geometric operations are performed by shapely. Geopandas further depends on fiona for file access and matplotlib for plotting.
-#
+# 
 # LLM applications (chat, QA) that utilize geospatial data are an interesting area for exploration.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  sodapy")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  pandas")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  geopandas")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  sodapy')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pandas')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  geopandas')
 
 
 # In[2]:
@@ -64,7 +64,7 @@ gdf = gdf[
 ]
 
 
-# Visualization of the sample of SF crime data.
+# Visualization of the sample of SF crime data. 
 
 # In[ ]:
 
@@ -81,10 +81,10 @@ gdf.plot(ax=ax, color="red", markersize=5)
 plt.show()
 
 
-# Load GeoPandas dataframe as a `Document` for downstream processing (embedding, chat, etc).
-#
+# Load GeoPandas dataframe as a `Document` for downstream processing (embedding, chat, etc). 
+# 
 # The `geometry` will be the default `page_content` columns, and all other columns are placed in `metadata`.
-#
+# 
 # But, we can specify the `page_content_column`.
 
 # In[32]:
@@ -100,3 +100,4 @@ docs = loader.load()
 
 
 docs[0]
+

@@ -8,11 +8,11 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-gigachat")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-gigachat')
 
 
 # To get GigaChat credentials you need to [create account](https://developers.sber.ru/studio/login) and [get access to API](https://developers.sber.ru/docs/ru/gigachat/individuals-quickstart)
-#
+# 
 # ## Example
 
 # In[2]:
@@ -46,3 +46,4 @@ messages = [
 ]
 
 print(chat.invoke(messages).content)
+

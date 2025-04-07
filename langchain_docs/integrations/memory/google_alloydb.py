@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Google AlloyDB for PostgreSQL
-#
+# 
 # > [Google Cloud AlloyDB for PostgreSQL](https://cloud.google.com/alloydb) is a fully managed `PostgreSQL` compatible database service for your most demanding enterprise workloads. `AlloyDB` combines the best of `Google Cloud` with `PostgreSQL`, for superior performance, scale, and availability. Extend your database application to build AI-powered experiences leveraging `AlloyDB` Langchain integrations.
-#
+# 
 # This notebook goes over how to use `Google Cloud AlloyDB for PostgreSQL` to store chat message history with the `AlloyDBChatMessageHistory` class.
-#
+# 
 # Learn more about the package on [GitHub](https://github.com/googleapis/langchain-google-alloydb-pg-python/).
-#
+# 
 # [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/googleapis/langchain-google-alloydb-pg-python/blob/main/docs/chat_message_history.ipynb)
 
 # ## Before You Begin
-#
+# 
 # To run this notebook, you will need to do the following:
-#
+# 
 #  * [Create a Google Cloud Project](https://developers.google.com/workspace/guides/create-project)
 #  * [Enable the AlloyDB API](https://console.cloud.google.com/flows/enableapi?apiid=alloydb.googleapis.com)
 #  * [Create a AlloyDB instance](https://cloud.google.com/alloydb/docs/instance-primary-create)
@@ -27,10 +27,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet langchain-google-alloydb-pg langchain-google-vertexai",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-google-alloydb-pg langchain-google-vertexai')
 
 
 # **Colab only:** Uncomment the following cell to restart the kernel or use the button to restart the kernel. For Vertex AI Workbench you can restart the terminal using the button on top.
@@ -47,7 +44,7 @@ get_ipython().run_line_magic(
 
 # ### 🔐 Authentication
 # Authenticate to Google Cloud as the IAM user logged into this notebook in order to access your Google Cloud Project.
-#
+# 
 # * If you are using Colab to run this notebook, use the cell below and continue.
 # * If you are using Vertex AI Workbench, check out the setup instructions [here](https://github.com/GoogleCloudPlatform/generative-ai/tree/main/setup-env).
 
@@ -61,9 +58,9 @@ auth.authenticate_user()
 
 # ### ☁ Set Your Google Cloud Project
 # Set your Google Cloud project so that you can leverage Google Cloud resources within this notebook.
-#
+# 
 # If you don't know your project ID, try the following:
-#
+# 
 # * Run `gcloud config list`.
 # * Run `gcloud projects list`.
 # * See the support page: [Locate the project ID](https://support.google.com/googleapi/answer/7014113).
@@ -76,7 +73,7 @@ auth.authenticate_user()
 PROJECT_ID = "my-project-id"  # @param {type:"string"}
 
 # Set the project id
-get_ipython().system("gcloud config set project {PROJECT_ID}")
+get_ipython().system('gcloud config set project {PROJECT_ID}')
 
 
 # ### 💡 API Enablement
@@ -86,7 +83,7 @@ get_ipython().system("gcloud config set project {PROJECT_ID}")
 
 
 # enable AlloyDB API
-get_ipython().system("gcloud services enable alloydb.googleapis.com")
+get_ipython().system('gcloud services enable alloydb.googleapis.com')
 
 
 # ## Basic Usage
@@ -106,24 +103,24 @@ TABLE_NAME = "message_store"  # @param {type: "string"}
 
 
 # ### AlloyDBEngine Connection Pool
-#
+# 
 # One of the requirements and arguments to establish AlloyDB as a ChatMessageHistory memory store is a `AlloyDBEngine` object. The `AlloyDBEngine`  configures a connection pool to your AlloyDB database, enabling successful connections from your application and following industry best practices.
-#
+# 
 # To create a `AlloyDBEngine` using `AlloyDBEngine.from_instance()` you need to provide only 5 things:
-#
+# 
 # 1. `project_id` : Project ID of the Google Cloud Project where the AlloyDB instance is located.
 # 1. `region` : Region where the AlloyDB instance is located.
 # 1. `cluster`: The name of the AlloyDB cluster.
 # 1. `instance` : The name of the AlloyDB instance.
 # 1. `database` : The name of the database to connect to on the AlloyDB instance.
-#
+# 
 # By default, [IAM database authentication](https://cloud.google.com/alloydb/docs/manage-iam-authn) will be used as the method of database authentication. This library uses the IAM principal belonging to the [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) sourced from the envionment.
-#
+# 
 # Optionally, [built-in database authentication](https://cloud.google.com/alloydb/docs/database-users/about) using a username and password to access the AlloyDB database can also be used. Just provide the optional `user` and `password` arguments to `AlloyDBEngine.from_instance()`:
-#
+# 
 # * `user` : Database user to use for built-in database authentication and login
 # * `password` : Database password to use for built-in database authentication and login.
-#
+# 
 
 # In[ ]:
 
@@ -141,7 +138,7 @@ engine = AlloyDBEngine.from_instance(
 
 # ### Initialize a table
 # The `AlloyDBChatMessageHistory` class requires a database table with a specific schema in order to store the chat message history.
-#
+# 
 # The `AlloyDBEngine` engine has a helper method `init_chat_history_table()` that can be used to create a table with the proper schema for you.
 
 # In[ ]:
@@ -151,9 +148,9 @@ engine.init_chat_history_table(table_name=TABLE_NAME)
 
 
 # ### AlloyDBChatMessageHistory
-#
+# 
 # To initialize the `AlloyDBChatMessageHistory` class you need to provide only 3 things:
-#
+# 
 # 1. `engine` - An instance of a `AlloyDBEngine` engine.
 # 1. `session_id` - A unique identifier string that specifies an id for the session.
 # 1. `table_name` : The name of the table within the AlloyDB database to store the chat message history.
@@ -178,7 +175,7 @@ history.messages
 
 # #### Cleaning up
 # When the history of a specific session is obsolete and can be deleted, it can be done the following way.
-#
+# 
 # **Note:** Once deleted, the data is no longer stored in AlloyDB and is gone forever.
 
 # In[ ]:
@@ -188,17 +185,17 @@ history.clear()
 
 
 # ## 🔗 Chaining
-#
+# 
 # We can easily combine this message history class with [LCEL Runnables](/docs/how_to/message_history)
-#
+# 
 # To do this we will use one of [Google's Vertex AI chat models](/docs/integrations/chat/google_vertex_ai_palm) which requires that you [enable the Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com) in your Google Cloud Project.
-#
+# 
 
 # In[ ]:
 
 
 # enable Vertex AI API
-get_ipython().system("gcloud services enable aiplatform.googleapis.com")
+get_ipython().system('gcloud services enable aiplatform.googleapis.com')
 
 
 # In[3]:
@@ -255,3 +252,4 @@ chain_with_history.invoke({"question": "Hi! I'm bob"}, config=config)
 
 
 chain_with_history.invoke({"question": "Whats my name"}, config=config)
+

@@ -5,7 +5,7 @@ sidebar_label: SambaNovaCloud
 ---
 # # ChatSambaNovaCloud
 # 
-# This will help you getting started with SambaNovaCloud [chat models](/docs/concepts/chat_models/). For detailed documentation of all ChatSambaNovaCloud features and configurations head to the [API reference](https://python.langchain.com/api_reference/sambanova/chat_models/langchain_sambanova.ChatSambaNovaCloud.html).
+# This will help you getting started with SambaNovaCloud [chat models](/docs/concepts/chat_models/). For detailed documentation of all ChatSambaNovaCloud features and configurations head to the [API reference](https://docs.sambanova.ai/cloud/docs/get-started/overview).
 # 
 # **[SambaNova](https://sambanova.ai/)'s** [SambaNova Cloud](https://cloud.sambanova.ai/) is a platform for performing inference with open-source models
 # 
@@ -14,7 +14,7 @@ sidebar_label: SambaNovaCloud
 # 
 # | Class | Package | Local | Serializable | JS support | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-# | [ChatSambaNovaCloud](https://python.langchain.com/api_reference/sambanova/chat_models/langchain_sambanova.ChatSambaNovaCloud.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ❌ | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_sambanova?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_sambanova?style=flat-square&label=%20) |
+# | [ChatSambaNovaCloud](https://docs.sambanova.ai/cloud/docs/get-started/overview) | [langchain-sambanova](https://python.langchain.com/docs/integrations/providers/sambanova/) | ❌ | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_sambanova?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_sambanova?style=flat-square&label=%20) |
 # 
 # ### Model features
 # 
@@ -55,8 +55,8 @@ if not os.getenv("SAMBANOVA_API_KEY"):
 # In[ ]:
 
 
-# os.environ["LANGCHAIN_TRACING_V2"] = "true"
-# os.environ["LANGCHAIN_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
+# os.environ["LANGSMITH_TRACING"] = "true"
+# os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
 
 
 # ### Installation
@@ -320,4 +320,4 @@ print(response.content)
 
 # ## API reference
 # 
-# For detailed documentation of all ChatSambaNovaCloud features and configurations head to the API reference: https://python.langchain.com/api_reference/sambanova/chat_models/langchain_sambanova.ChatSambaNovaCloud.html
+# For detailed documentation of all SambaNovaCloud features and configurations head to the API reference: https://docs.sambanova.ai/cloud/docs/get-started/overview

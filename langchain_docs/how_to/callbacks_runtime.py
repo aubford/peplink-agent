@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # How to pass callbacks in at runtime
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
-#
+# 
 # - [Callbacks](/docs/concepts/callbacks)
 # - [Custom callback handlers](/docs/how_to/custom_callbacks)
-#
+# 
 # :::
-#
+# 
 # In many cases, it is advantageous to pass in handlers instead when running the object. When we pass through [`CallbackHandlers`](https://python.langchain.com/api_reference/core/callbacks/langchain_core.callbacks.base.BaseCallbackHandler.html#langchain-core-callbacks-base-basecallbackhandler) using the `callbacks` keyword arg when executing a run, those callbacks will be issued by all nested objects involved in the execution. For example, when a handler is passed through to an Agent, it will be used for all callbacks related to the agent and all the objects involved in the agent's execution, in this case, the Tools and LLM.
-#
+# 
 # This prevents us from having to manually attach the handlers to each individual nested object. Here's an example:
 
 # In[1]:
@@ -22,7 +22,7 @@
 # | output: false
 # | echo: false
 
-get_ipython().run_line_magic("pip", "install -qU langchain langchain_anthropic")
+get_ipython().run_line_magic('pip', 'install -qU langchain langchain_anthropic')
 
 import getpass
 import os
@@ -70,9 +70,9 @@ chain.invoke({"number": "2"}, config={"callbacks": callbacks})
 
 
 # If there are already existing callbacks associated with a module, these will run in addition to any passed in at runtime.
-#
+# 
 # ## Next steps
-#
+# 
 # You've now learned how to pass callbacks at runtime.
-#
+# 
 # Next, check out the other how-to guides in this section, such as how to [pass callbacks into a module constructor](/docs/how_to/custom_callbacks).

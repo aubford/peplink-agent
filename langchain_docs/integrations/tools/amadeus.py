@@ -2,30 +2,30 @@
 # coding: utf-8
 
 # # Amadeus Toolkit
-#
+# 
 # This notebook walks you through connecting LangChain to the `Amadeus` travel APIs.
-#
+# 
 # This `Amadeus` toolkit allows agents to make decision when it comes to travel, especially searching and booking trips with flights.
-#
+# 
 # To use this toolkit, you will need to have your Amadeus API keys ready, explained in the [Get started Amadeus Self-Service APIs](https://developers.amadeus.com/get-started/get-started-with-self-service-apis-335). Once you've received a AMADEUS_CLIENT_ID and AMADEUS_CLIENT_SECRET, you can input them as environmental variables below.
-#
+# 
 # Note: Amadeus Self-Service APIs offers a test environment with [free limited data](https://amadeus4dev.github.io/developer-guides/test-data/). This allows developers to build and test their applications before deploying them to production. To access real-time data, you will need to [move to the production environment](https://amadeus4dev.github.io/developer-guides/API-Keys/moving-to-production/).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  amadeus > /dev/null")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  amadeus > /dev/null')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # ## Assign Environmental Variables
-#
-# The toolkit will read the AMADEUS_CLIENT_ID and AMADEUS_CLIENT_SECRET environmental variables to authenticate the user, so you need to set them here.
+# 
+# The toolkit will read the AMADEUS_CLIENT_ID and AMADEUS_CLIENT_SECRET environmental variables to authenticate the user, so you need to set them here. 
 
 # In[1]:
 
@@ -40,11 +40,11 @@ os.environ["AMADEUS_CLIENT_SECRET"] = "CLIENT_SECRET"
 
 
 # ## Create the Amadeus Toolkit and Get Tools
-#
+# 
 # To start, you need to create the toolkit, so you can access its tools later.
 
 # By default, `AmadeusToolkit` uses `ChatOpenAI` to identify airports closest to a given location. To use it, just set `OPENAI_API_KEY`.
-#
+# 
 
 # In[3]:
 
@@ -61,7 +61,7 @@ toolkit = AmadeusToolkit()
 tools = toolkit.get_tools()
 
 
-# Alternatively, you can use any LLM supported by langchain, e.g. `HuggingFaceHub`.
+# Alternatively, you can use any LLM supported by langchain, e.g. `HuggingFaceHub`. 
 
 # In[ ]:
 
@@ -159,3 +159,7 @@ agent_executor.invoke(
 
 
 # In[ ]:
+
+
+
+

@@ -9,7 +9,7 @@ sidebar_label: AI21 Labs
 # 
 # This notebook covers how to get started with AI21 chat models.
 # Note that different chat models support different parameters. See the [AI21 documentation](https://docs.ai21.com/reference) to learn more about the parameters in your chosen model.
-# [See all AI21's LangChain components.](https://pypi.org/project/langchain-ai21/) 
+# [See all AI21's LangChain components.](https://pypi.org/project/langchain-ai21/)
 # 
 # ### Integration details
 # 
@@ -20,7 +20,7 @@ sidebar_label: AI21 Labs
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | 
+# | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
 # 
 # 
 # ## Setup
@@ -40,7 +40,7 @@ if "AI21_API_KEY" not in os.environ:
     os.environ["AI21_API_KEY"] = getpass()
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Tree of Thought (ToT) example
-#
+# 
 # The Tree of Thought (ToT) is a chain that allows you to query a Large Language Model (LLM) using the Tree of Thought technique. This is based on the paper ["Large Language Model Guided Tree-of-Thought"](https://arxiv.org/pdf/2305.08291.pdf)
 
 # In[1]:
@@ -33,11 +33,11 @@ print(problem_description)
 
 
 # ## Rules Based Checker
-#
+# 
 # Each thought is evaluated by the thought checker and is given a validity type: valid, invalid or partial. A simple checker can be rule based. For example, in the case of a sudoku puzzle, the checker can check if the puzzle is valid, invalid or partial.
-#
+# 
 # In the following code we implement a simple rule based checker for a specific 4x4 sudoku puzzle.
-#
+# 
 
 # In[3]:
 
@@ -89,7 +89,7 @@ assert (
 
 
 # ## Tree of Thought Chain
-#
+# 
 # Initialize and run the ToT chain, with maximum number of interactions `k` set to `30` and the maximum number child thoughts `c` set to `8`.
 
 # In[5]:
@@ -104,3 +104,7 @@ tot_chain.run(problem_description=problem_description)
 
 
 # In[ ]:
+
+
+
+

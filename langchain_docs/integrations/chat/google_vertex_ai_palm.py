@@ -11,7 +11,7 @@ sidebar_label: Google Cloud Vertex AI
 # 
 # :::info Google Cloud VertexAI vs Google PaLM
 # 
-# The Google Cloud VertexAI integration is separate from the [Google PaLM integration](/docs/integrations/chat/google_generative_ai/). Google has chosen to offer an enterprise version of PaLM through GCP, and this supports the models made available through there. 
+# The Google Cloud VertexAI integration is separate from the [Google PaLM integration](/docs/integrations/chat/google_generative_ai/). Google has chosen to offer an enterprise version of PaLM through GCP, and this supports the models made available through there.
 # 
 # :::
 # 
@@ -25,7 +25,7 @@ sidebar_label: Google Cloud Vertex AI
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # | :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 
+# | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 # 
 # ## Setup
 # 
@@ -39,11 +39,11 @@ sidebar_label: Google Cloud Vertex AI
 # 
 # This codebase uses the `google.auth` library which first looks for the application credentials variable mentioned above, and then looks for system-level auth.
 # 
-# For more information, see: 
+# For more information, see:
 # - https://cloud.google.com/docs/authentication/application-default-credentials#GAC
 # - https://googleapis.dev/python/google-auth/latest/reference/google.auth.html#module-google.auth
 # 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[1]:
 

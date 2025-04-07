@@ -3,9 +3,9 @@
 
 # # Fake LLM
 # LangChain provides a fake LLM class that can be used for testing. This allows you to mock out calls to the LLM and simulate what would happen if the LLM responded in a certain way.
-#
+# 
 # In this notebook we go over how to use this.
-#
+# 
 # We start this with using the FakeLLM in an agent.
 
 # In[1]:
@@ -48,3 +48,7 @@ agent.invoke("whats 2 + 2")
 
 
 # In[ ]:
+
+
+
+

@@ -2,24 +2,22 @@
 # coding: utf-8
 
 # # How to do query validation as part of SQL question-answering
-#
+# 
 # Perhaps the most error-prone part of any SQL chain or agent is writing valid and safe SQL queries. In this guide we'll go over some strategies for validating our queries and handling invalid queries.
-#
-# We will cover:
-#
+# 
+# We will cover: 
+# 
 # 1. Appending a "query validator" step to the query generation;
 # 2. Prompt engineering to reduce the incidence of errors.
-#
+# 
 # ## Setup
-#
+# 
 # First, get required packages and set environment variables:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain langchain-community langchain-openai"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-community langchain-openai')
 
 
 # In[ ]:
@@ -32,12 +30,12 @@ get_ipython().run_line_magic(
 
 
 # The below example will use a SQLite connection with Chinook database. Follow [these installation steps](https://database.guide/2-sample-databases-sqlite/) to create `Chinook.db` in the same directory as this notebook:
-#
+# 
 # * Save [this file](https://raw.githubusercontent.com/lerocha/chinook-database/master/ChinookDatabase/DataSources/Chinook_Sqlite.sql) as `Chinook_Sqlite.sql`
 # * Run `sqlite3 Chinook.db`
 # * Run `.read Chinook_Sqlite.sql`
 # * Test `SELECT * FROM Artist LIMIT 10;`
-#
+# 
 # Now, `Chinook.db` is in our directory and we can interface with it using the SQLAlchemy-driven `SQLDatabase` class:
 
 # In[1]:
@@ -52,13 +50,13 @@ print(db.run("SELECT * FROM Artist LIMIT 10;"))
 
 
 # ## Query checker
-#
+# 
 # Perhaps the simplest strategy is to ask the model itself to check the original query for common mistakes. Suppose we have the following SQL query chain:
-#
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs customVarName="llm" />
-#
+# 
 
 # In[3]:
 
@@ -188,9 +186,9 @@ db.run(query)
 
 
 # ## Human-in-the-loop
-#
+# 
 # In some cases our data is sensitive enough that we never want to execute a SQL query without a human approving it first. Head to the [Tool use: Human-in-the-loop](/docs/how_to/tools_human) page to learn how to add a human-in-the-loop to any tool, chain or agent.
-#
+# 
 # ## Error handling
-#
+# 
 # At some point, the model will make a mistake and craft an invalid SQL query. Or an issue will arise with our database. Or the model API will go down. We'll want to add some error handling behavior to our chains and agents so that we fail gracefully in these situations, and perhaps even automatically recover. To learn about error handling with tools, head to the [Tool use: Error handling](/docs/how_to/tools_error) page.

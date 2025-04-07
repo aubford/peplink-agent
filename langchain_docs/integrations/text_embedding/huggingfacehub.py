@@ -7,10 +7,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet  langchain langchain-huggingface sentence_transformers",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-huggingface sentence_transformers')
 
 
 # In[2]:
@@ -79,7 +76,7 @@ query_result[:3]
 # In[ ]:
 
 
-get_ipython().system("pip install huggingface_hub")
+get_ipython().system('pip install huggingface_hub')
 
 
 # In[ ]:
@@ -110,3 +107,4 @@ query_result = embeddings.embed_query(text)
 
 
 query_result[:3]
+

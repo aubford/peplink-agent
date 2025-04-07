@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Contextual Retrieval
-#
+# 
 # In this notebook we will showcase how you can implement Anthropic's [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) using LangChain. Contextual Retrieval addresses the conundrum of traditional RAG approaches by prepending chunk-specific explanatory context to each chunk before embedding.
-#
+# 
 # ![](https://www.anthropic.com/_next/image?url=https%3A%2F%2Fwww-cdn.anthropic.com%2Fimages%2F4zrzovbb%2Fwebsite%2F2496e7c6fedd7ffaa043895c23a4089638b0c21b-3840x2160.png&w=3840&q=75)
 
 # In[59]:
@@ -25,9 +25,7 @@ os.environ["COHERE_API_KEY"] = "<YOUR_COHERE_API_KEY>"
 # In[60]:
 
 
-get_ipython().system(
-    "pip install -q langchain langchain-openai langchain-community faiss-cpu rank_bm25 langchain-cohere"
-)
+get_ipython().system('pip install -q langchain langchain-openai langchain-community faiss-cpu rank_bm25 langchain-cohere')
 
 
 # In[61]:
@@ -42,15 +40,13 @@ from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 
 # ## Download Data
-#
+# 
 # We will use `Paul Graham Essay` dataset.
 
 # In[62]:
 
 
-get_ipython().system(
-    "wget 'https://raw.githubusercontent.com/run-llama/llama_index/main/docs/docs/examples/data/paul_graham/paul_graham_essay.txt' -O './paul_graham_essay.txt'"
-)
+get_ipython().system("wget 'https://raw.githubusercontent.com/run-llama/llama_index/main/docs/docs/examples/data/paul_graham/paul_graham_essay.txt' -O './paul_graham_essay.txt'")
 
 
 # ## Setup LLM and Embedding model
@@ -81,7 +77,7 @@ WHOLE_DOCUMENT = documents[0].page_content
 
 
 # ## Prompts for creating context for each chunk
-#
+# 
 # We will use the following prompts to create chunk-specific explanatory context to each chunk before embedding.
 
 # In[65]:
@@ -537,3 +533,4 @@ pd.concat(
     ignore_index=True,
     axis=0,
 )
+

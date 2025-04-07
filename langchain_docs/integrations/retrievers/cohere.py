@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Cohere RAG
-#
+# 
 # >[Cohere](https://cohere.ai/about) is a Canadian startup that provides natural language processing models that help companies improve human-machine interactions.
-#
+# 
 # This notebook covers how to get started with the `Cohere RAG` retriever. This allows you to leverage the ability to search documents over various connectors or by supplying your own.
 
 # In[ ]:
@@ -67,3 +67,7 @@ _pretty_print(docs)
 # Please note that connectors and documents cannot be used simultaneously. If you choose to provide documents in the `invoke` method, they will take precedence, and connectors will not be utilized for that particular request, as shown in the snippet above!
 
 # In[ ]:
+
+
+
+

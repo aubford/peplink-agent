@@ -179,7 +179,7 @@ ai_msg
 
 # ### ``strict=True``
 # 
-# :::info Requires ``langchain-openai>=0.1.21rc1``
+# :::info Requires ``langchain-openai>=0.1.21``
 # 
 # :::
 # 
@@ -207,6 +207,347 @@ ai_msg.tool_calls
 
 
 # For more on binding tools and tool call outputs, head to the [tool calling](/docs/how_to/function_calling) docs.
+
+# ## Responses API
+# 
+# :::info Requires ``langchain-openai>=0.3.9``
+# 
+# :::
+# 
+# OpenAI supports a [Responses](https://platform.openai.com/docs/guides/responses-vs-chat-completions) API that is oriented toward building [agentic](/docs/concepts/agents/) applications. It includes a suite of [built-in tools](https://platform.openai.com/docs/guides/tools?api-mode=responses), including web and file search. It also supports management of [conversation state](https://platform.openai.com/docs/guides/conversation-state?api-mode=responses), allowing you to continue a conversational thread without explicitly passing in previous messages.
+# 
+# `ChatOpenAI` will route to the Responses API if one of these features is used. You can also specify `use_responses_api=True` when instantiating `ChatOpenAI`.
+# 
+# ### Built-in tools
+# 
+# Equipping `ChatOpenAI` with built-in tools will ground its responses with outside information, such as via context in files or the web. The [AIMessage](/docs/concepts/messages/#aimessage) generated from the model will include information about the built-in tool invocation.
+# 
+# #### Web search
+# 
+# To trigger a web search, pass `{"type": "web_search_preview"}` to the model as you would another tool.
+# 
+# :::tip
+# 
+# You can also pass built-in tools as invocation params:
+# ```python
+# llm.invoke("...", tools=[{"type": "web_search_preview"}])
+# ```
+# 
+# :::
+
+# In[1]:
+
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+tool = {"type": "web_search_preview"}
+llm_with_tools = llm.bind_tools([tool])
+
+response = llm_with_tools.invoke("What was a positive news story from today?")
+
+
+# Note that the response includes structured [content blocks](/docs/concepts/messages/#content-1) that include both the text of the response and OpenAI [annotations](https://platform.openai.com/docs/guides/tools-web-search?api-mode=responses#output-and-citations) citing its sources:
+
+# In[7]:
+
+
+response.content
+
+
+# :::tip
+# 
+# You can recover just the text content of the response as a string by using `response.text()`. For example, to stream response text:
+# 
+# ```python
+# for token in llm_with_tools.stream("..."):
+#     print(token.text(), end="|")
+# ```
+# 
+# See the [streaming guide](/docs/how_to/chat_streaming/) for more detail.
+# 
+# :::
+
+# The output message will also contain information from any tool invocations:
+
+# In[14]:
+
+
+response.additional_kwargs
+
+
+# #### File search
+# 
+# To trigger a file search, pass a [file search tool](https://platform.openai.com/docs/guides/tools-file-search) to the model as you would another tool. You will need to populate an OpenAI-managed vector store and include the vector store ID in the tool definition. See [OpenAI documentation](https://platform.openai.com/docs/guides/tools-file-search) for more detail.
+
+# In[24]:
+
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+openai_vector_store_ids = [
+    "vs_...",  # your IDs here
+]
+
+tool = {
+    "type": "file_search",
+    "vector_store_ids": openai_vector_store_ids,
+}
+llm_with_tools = llm.bind_tools([tool])
+
+response = llm_with_tools.invoke("What is deep research by OpenAI?")
+print(response.text())
+
+
+# As with [web search](#web-search), the response will include content blocks with citations:
+
+# In[22]:
+
+
+response.content[0]["annotations"][:2]
+
+
+# It will also include information from the built-in tool invocations:
+
+# In[20]:
+
+
+response.additional_kwargs
+
+
+# #### Computer use
+# 
+# `ChatOpenAI` supports the `"computer-use-preview"` model, which is a specialized model for the built-in computer use tool. To enable, pass a [computer use tool](https://platform.openai.com/docs/guides/tools-computer-use) as you would pass another tool.
+# 
+# Currently, tool outputs for computer use are present in `AIMessage.additional_kwargs["tool_outputs"]`. To reply to the computer use tool call, construct a `ToolMessage` with `{"type": "computer_call_output"}` in its `additional_kwargs`. The content of the message will be a screenshot. Below, we demonstrate a simple example.
+# 
+# First, load two screenshots:
+
+# In[2]:
+
+
+import base64
+
+
+def load_png_as_base64(file_path):
+    with open(file_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+        return encoded_string.decode("utf-8")
+
+
+screenshot_1_base64 = load_png_as_base64(
+    "/path/to/screenshot_1.png"
+)  # perhaps a screenshot of an application
+screenshot_2_base64 = load_png_as_base64(
+    "/path/to/screenshot_2.png"
+)  # perhaps a screenshot of the Desktop
+
+
+# In[3]:
+
+
+from langchain_openai import ChatOpenAI
+
+# Initialize model
+llm = ChatOpenAI(
+    model="computer-use-preview",
+    model_kwargs={"truncation": "auto"},
+)
+
+# Bind computer-use tool
+tool = {
+    "type": "computer_use_preview",
+    "display_width": 1024,
+    "display_height": 768,
+    "environment": "browser",
+}
+llm_with_tools = llm.bind_tools([tool])
+
+# Construct input message
+input_message = {
+    "role": "user",
+    "content": [
+        {
+            "type": "text",
+            "text": (
+                "Click the red X to close and reveal my Desktop. "
+                "Proceed, no confirmation needed."
+            ),
+        },
+        {
+            "type": "input_image",
+            "image_url": f"data:image/png;base64,{screenshot_1_base64}",
+        },
+    ],
+}
+
+# Invoke model
+response = llm_with_tools.invoke(
+    [input_message],
+    reasoning={
+        "generate_summary": "concise",
+    },
+)
+
+
+# The response will include a call to the computer-use tool in its `additional_kwargs`:
+
+# In[4]:
+
+
+response.additional_kwargs
+
+
+# We next construct a ToolMessage with these properties:
+# 
+# 1. It has a `tool_call_id` matching the `call_id` from the computer-call.
+# 2. It has `{"type": "computer_call_output"}` in its `additional_kwargs`.
+# 3. Its content is either an `image_url` or an `input_image` output block (see [OpenAI docs](https://platform.openai.com/docs/guides/tools-computer-use#5-repeat) for formatting).
+
+# In[5]:
+
+
+from langchain_core.messages import ToolMessage
+
+tool_call_id = response.additional_kwargs["tool_outputs"][0]["call_id"]
+
+tool_message = ToolMessage(
+    content=[
+        {
+            "type": "input_image",
+            "image_url": f"data:image/png;base64,{screenshot_2_base64}",
+        }
+    ],
+    # content=f"data:image/png;base64,{screenshot_2_base64}",  # <-- also acceptable
+    tool_call_id=tool_call_id,
+    additional_kwargs={"type": "computer_call_output"},
+)
+
+
+# We can now invoke the model again using the message history:
+
+# In[6]:
+
+
+messages = [
+    input_message,
+    response,
+    tool_message,
+]
+
+response_2 = llm_with_tools.invoke(
+    messages,
+    reasoning={
+        "generate_summary": "concise",
+    },
+)
+
+
+# In[7]:
+
+
+response_2.text()
+
+
+# Instead of passing back the entire sequence, we can also use the [previous_response_id](#passing-previous_response_id):
+
+# In[14]:
+
+
+previous_response_id = response.response_metadata["id"]
+
+response_2 = llm_with_tools.invoke(
+    [tool_message],
+    previous_response_id=previous_response_id,
+    reasoning={
+        "generate_summary": "concise",
+    },
+)
+
+
+# In[15]:
+
+
+response_2.text()
+
+
+# ### Managing conversation state
+# 
+# The Responses API supports management of [conversation state](https://platform.openai.com/docs/guides/conversation-state?api-mode=responses).
+# 
+# #### Manually manage state
+# 
+# You can manage the state manually or using [LangGraph](/docs/tutorials/chatbot/), as with other chat models:
+
+# In[4]:
+
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+tool = {"type": "web_search_preview"}
+llm_with_tools = llm.bind_tools([tool])
+
+first_query = "What was a positive news story from today?"
+messages = [{"role": "user", "content": first_query}]
+
+response = llm_with_tools.invoke(messages)
+response_text = response.text()
+print(f"{response_text[:100]}... {response_text[-100:]}")
+
+
+# In[5]:
+
+
+second_query = (
+    "Repeat my question back to me, as well as the last sentence of your answer."
+)
+
+messages.extend(
+    [
+        response,
+        {"role": "user", "content": second_query},
+    ]
+)
+second_response = llm_with_tools.invoke(messages)
+print(second_response.text())
+
+
+# :::tip
+# 
+# You can use [LangGraph](https://langchain-ai.github.io/langgraph/) to manage conversational threads for you in a variety of backends, including in-memory and Postgres. See [this tutorial](/docs/tutorials/chatbot/) to get started.
+# 
+# :::
+# 
+# 
+# #### Passing `previous_response_id`
+# 
+# When using the Responses API, LangChain messages will include an `"id"` field in its metadata. Passing this ID to subsequent invocations will continue the conversation. Note that this is [equivalent](https://platform.openai.com/docs/guides/conversation-state?api-mode=responses#openai-apis-for-conversation-state) to manually passing in messages from a billing perspective.
+
+# In[6]:
+
+
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    use_responses_api=True,
+)
+response = llm.invoke("Hi, I'm Bob.")
+print(response.text())
+
+
+# In[7]:
+
+
+second_response = llm.invoke(
+    "What is my name?",
+    previous_response_id=response.response_metadata["id"],
+)
+print(second_response.text())
+
 
 # ## Fine-tuning
 # 

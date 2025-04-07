@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # DashScope
-#
+# 
 # Let's load the DashScope Embedding class.
 
 # In[ ]:
@@ -37,3 +37,4 @@ print(query_result)
 
 doc_results = embeddings.embed_documents(["foo"])
 print(doc_results)
+

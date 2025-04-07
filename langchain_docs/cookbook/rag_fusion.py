@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # RAG Fusion
-#
+# 
 # Re-implemented from [this GitHub repo](https://github.com/Raudaschl/rag-fusion), all credit to original author
-#
+# 
 # > RAG-Fusion, a search methodology that aims to bridge the gap between traditional search paradigms and the multifaceted dimensions of human queries. Inspired by the capabilities of Retrieval Augmented Generation (RAG), this project goes a step further by employing multiple query generation and Reciprocal Rank Fusion to re-rank search results.
 
 # ## Setup
-#
+# 
 # For this example, we will use Pinecone and some fake data. To configure Pinecone, set the following environment variable:
-#
+# 
 # - `PINECONE_API_KEY`: Your Pinecone API key
 
 # In[ ]:
@@ -46,7 +46,7 @@ vectorstore = PineconeVectorStore.from_texts(
 
 
 # ## Define the Query Generator
-#
+# 
 # We will now define a chain to do the query generation
 
 # In[7]:
@@ -83,14 +83,14 @@ generate_queries = (
 
 
 # ## Define the full chain
-#
+# 
 # We can now put it all together and define the full chain. This chain:
-#
+#     
 #     1. Generates a bunch of queries
 #     2. Looks up each query in the retriever
 #     3. Joins all the results together using reciprocal rank fusion
-#
-#
+#     
+#     
 # Note that it does NOT do a final generation step
 
 # In[50]:
@@ -143,3 +143,7 @@ chain.invoke({"original_query": original_query})
 
 
 # In[ ]:
+
+
+
+

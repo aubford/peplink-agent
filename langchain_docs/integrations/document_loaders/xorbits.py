@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Xorbits Pandas DataFrame
-#
+# 
 # This notebook goes over how to load data from a [xorbits.pandas](https://doc.xorbits.io/en/latest/reference/pandas/frame.html) DataFrame.
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  xorbits")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  xorbits')
 
 
 # In[2]:
@@ -53,3 +53,4 @@ loader.load()
 # Use lazy load for larger table, which won't read the full table into memory
 for i in loader.lazy_load():
     print(i)
+

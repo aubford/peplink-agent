@@ -2,22 +2,20 @@
 # coding: utf-8
 
 # # Redis
-#
+# 
 # >[Redis](https://redis.com) is an open-source key-value store that can be used as a cache, message broker, database, vector database and more.
-#
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Redis` vector store.
+# 
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Redis` vector store. 
 
 # ## Creating a Redis vector store
 # First we'll want to create a Redis vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`) along with integration-specific requirements.
 
 # In[1]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  redis redisvl langchain-openai tiktoken lark"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  redis redisvl langchain-openai tiktoken lark')
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -204,9 +202,9 @@ retriever.invoke(
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[13]:
@@ -227,3 +225,4 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
+

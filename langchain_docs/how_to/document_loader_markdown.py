@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # How to load Markdown
-#
+# 
 # [Markdown](https://en.wikipedia.org/wiki/Markdown) is a lightweight markup language for creating formatted text using a plain-text editor.
-#
+# 
 # Here we cover how to load `Markdown` documents into LangChain [Document](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html#langchain_core.documents.base.Document) objects that we can use downstream.
-#
+# 
 # We will cover:
-#
+# 
 # - Basic usage;
 # - Parsing of Markdown into elements such as titles, list items, and text.
-#
+# 
 # LangChain implements an [UnstructuredMarkdownLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.markdown.UnstructuredMarkdownLoader.html) object which requires the [Unstructured](https://docs.unstructured.io/welcome/) package. First we install it:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", 'install "unstructured[md]" nltk')
+get_ipython().run_line_magic('pip', 'install "unstructured[md]" nltk')
 
 
 # Basic usage will ingest a Markdown file to a single document. Here we demonstrate on LangChain's readme:
@@ -39,7 +39,7 @@ print(readme_content[:250])
 
 
 # ## Retain Elements
-#
+# 
 # Under the hood, Unstructured creates different "elements" for different chunks of text. By default we combine those together, but you can easily keep that separation by specifying `mode="elements"`.
 
 # In[5]:
@@ -63,3 +63,7 @@ print(set(document.metadata["category"] for document in data))
 
 
 # In[ ]:
+
+
+
+

@@ -14,21 +14,21 @@
 # ### Example
 
 # **Input arguments (mandatory)**
-#
+# 
 # `Cube Semantic Loader` requires 2 arguments:
-#
+# 
 # - `cube_api_url`: The URL of your Cube's deployment REST API. Please refer to the [Cube documentation](https://cube.dev/docs/http-api/rest#configuration-base-path) for more information on configuring the base path.
-#
+# 
 # - `cube_api_token`: The authentication token generated based on your Cube's API secret. Please refer to the [Cube documentation](https://cube.dev/docs/security#generating-json-web-tokens-jwt) for instructions on generating JSON Web Tokens (JWT).
-#
+# 
 # **Input arguments (optional)**
-#
+# 
 # - `load_dimension_values`: Whether to load dimension values for every string dimension or not.
-#
+# 
 # - `dimension_values_limit`: Maximum number of dimension values to load.
-#
+# 
 # - `dimension_values_max_retries`: Maximum number of retries to load dimension values.
-#
+# 
 # - `dimension_values_retry_delay`: Delay between retries to load dimension values.
 
 # In[ ]:
@@ -49,7 +49,7 @@ documents = loader.load()
 
 
 # Returns a list of documents with the following attributes:
-#
+# 
 # - `page_content`
 # - `metadata`
 #   - `table_name`
@@ -86,3 +86,4 @@ metadata = {
     ],
     "cube_data_obj_type": "view",
 }
+

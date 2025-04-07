@@ -12,7 +12,7 @@ keywords: [summarize, summarization, map reduce]
 # 
 # Note that the map step is typically parallelized over the input documents. This strategy is especially effective when understanding of a sub-document does not rely on preceeding context. For example, when summarizing a corpus of many, shorter documents.
 # 
-# [LangGraph](https://langchain-ai.github.io/langgraph/), built on top of `langchain-core`, suports [map-reduce](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) workflows and is well-suited to this problem:
+# [LangGraph](https://langchain-ai.github.io/langgraph/), built on top of `langchain-core`, supports [map-reduce](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/) workflows and is well-suited to this problem:
 # 
 # - LangGraph allows for individual steps (such as successive summarizations) to be streamed, allowing for greater control of execution;
 # - LangGraph's [checkpointing](https://langchain-ai.github.io/langgraph/how-tos/persistence/) supports error recovery, extending with human-in-the-loop workflows, and easier incorporation into conversational applications.

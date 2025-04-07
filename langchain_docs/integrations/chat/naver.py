@@ -19,13 +19,13 @@ sidebar_label: Naver
 # ### Model features
 # | [Tool calling](/docs/how_to/tool_calling/) | [Structured output](/docs/how_to/structured_output/) | JSON mode | [Image input](/docs/how_to/multimodal_inputs/) | Audio input | Video input | [Token-level streaming](/docs/how_to/chat_streaming/) | Native async | [Token usage](/docs/how_to/chat_token_usage_tracking/) | [Logprobs](/docs/how_to/logprobs/) |
 # |:------------------------------------------:| :---: | :---: | :---: |  :---: | :---: |:-----------------------------------------------------:| :---: |:------------------------------------------------------:|:----------------------------------:|
-# |❌| ❌ | ❌ | ❌ | ❌ | ❌ |                          ✅                            | ✅ |                           ✅                            |                 ❌                  | 
+# |❌| ❌ | ❌ | ❌ | ❌ | ❌ |                          ✅                            | ✅ |                           ✅                            |                 ❌                  |
 # 
 # ## Setup
 # 
 # Before using the chat model, you must go through the four steps below.
 # 
-# 1. Creating [NAVER Cloud Platform](https://www.ncloud.com/) account 
+# 1. Creating [NAVER Cloud Platform](https://www.ncloud.com/) account
 # 2. Apply to use [CLOVA Studio](https://www.ncloud.com/product/aiService/clovaStudio)
 # 3. Create a CLOVA Studio Test App or Service App of a model to use (See [here](https://guide.ncloud-docs.com/docs/en/clovastudio-playground01#테스트앱생성).)
 # 4. Issue a Test or Service API key (See [here](https://api.ncloud-docs.com/docs/ai-naver-clovastudio-summary#API%ED%82%A4).)
@@ -60,7 +60,7 @@ if not os.getenv("NCP_CLOVASTUDIO_API_KEY"):
 #     )
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 
@@ -219,7 +219,7 @@ ai_msg = chat.invoke(messages)
 
 # ### AI Filter
 # 
-# AI Filter detects inappropriate output such as profanity from the test app (or service app included) created in Playground and informs the user. See [here](https://guide.ncloud-docs.com/docs/en/clovastudio-playground01#AIFilter) for details. 
+# AI Filter detects inappropriate output such as profanity from the test app (or service app included) created in Playground and informs the user. See [here](https://guide.ncloud-docs.com/docs/en/clovastudio-playground01#AIFilter) for details.
 
 # In[ ]:
 

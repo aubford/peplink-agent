@@ -9,7 +9,7 @@
 
 # **Create a conda or virtualenv environment with python >=3.10 and install following libraries**
 # <br>
-#
+# 
 # `pip install --upgrade langchain langchain-community langchainhub langchain-chroma bs4 gpt4all pypdf pysqlite3-binary` <br>
 # `pip install llama-cpp-python   --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`
 
@@ -38,9 +38,7 @@ from langchain_community.document_loaders import PyPDFLoader
 # In[4]:
 
 
-get_ipython().system(
-    "wget  'https://d1io3yog0oux5.cloudfront.net/_11d435a500963f99155ee058df09f574/intel/db/887/9014/earnings_release/Q1+24_EarningsRelease_FINAL.pdf' -O intel_q1_2024_earnings.pdf"
-)
+get_ipython().system("wget  'https://d1io3yog0oux5.cloudfront.net/_11d435a500963f99155ee058df09f574/intel/db/887/9014/earnings_release/Q1+24_EarningsRelease_FINAL.pdf' -O intel_q1_2024_earnings.pdf")
 
 
 # **Loading earning release pdf document through PyPDFLoader**
@@ -122,9 +120,7 @@ docs[0]
 # In[ ]:
 
 
-get_ipython().system(
-    "huggingface-cli download TheBloke/Llama-2-7b-Chat-GGUF llama-2-7b-chat.Q8_0.gguf --local-dir . --local-dir-use-symlinks False"
-)
+get_ipython().system('huggingface-cli download TheBloke/Llama-2-7b-Chat-GGUF llama-2-7b-chat.Q8_0.gguf --local-dir . --local-dir-use-symlinks False')
 
 
 # **Import langchain components required to load downloaded LLMs model**
@@ -232,3 +228,7 @@ qa_chain.invoke("what is Intel DCAI revenue in Q1 2024?")
 
 
 # In[ ]:
+
+
+
+

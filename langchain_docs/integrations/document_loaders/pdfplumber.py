@@ -2,27 +2,27 @@
 # coding: utf-8
 
 # # PDFPlumber
-#
+# 
 # Like PyMuPDF, the output Documents contain detailed metadata about the PDF and its pages, and returns one document per page.
-#
+# 
 # ## Overview
 # ### Integration details
-#
+# 
 # | Class | Package | Local | Serializable | JS support|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | [PDFPlumberLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PDFPlumberLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ |
+# | [PDFPlumberLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PDFPlumberLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ | 
 # ### Loader features
 # | Source | Document Lazy Loading | Native Async Support
-# | :---: | :---: | :---: |
-# | PDFPlumberLoader | ✅ | ❌ |
-#
+# | :---: | :---: | :---: | 
+# | PDFPlumberLoader | ✅ | ❌ | 
+# 
 # ## Setup
-#
+# 
 # ### Credentials
-#
+# 
 # No credentials are needed to use this loader.
 
-# If you want to get automated best in-class tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 
@@ -32,17 +32,17 @@
 
 
 # ### Installation
-#
+# 
 # Install **langchain_community**.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain_community")
+get_ipython().run_line_magic('pip', 'install -qU langchain_community')
 
 
 # ## Initialization
-#
+# 
 # Now we can instantiate our model object and load documents:
 
 # In[4]:
@@ -84,5 +84,5 @@ for doc in loader.lazy_load():
 
 
 # ## API reference
-#
+# 
 # For detailed documentation of all PDFPlumberLoader features and configurations head to the API reference: https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PDFPlumberLoader.html

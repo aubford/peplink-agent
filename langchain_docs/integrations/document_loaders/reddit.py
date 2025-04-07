@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # Reddit
-#
+# 
 # >[Reddit](https://www.reddit.com) is an American social news aggregation, content rating, and discussion website.
-#
-#
+# 
+# 
 # This loader fetches the text from the Posts of Subreddits or Reddit users, using the `praw` Python package.
-#
+# 
 # Make a [Reddit Application](https://www.reddit.com/prefs/apps/) and initialize the loader with with your Reddit API credentials.
 
 # In[1]:
@@ -19,7 +19,7 @@ from langchain_community.document_loaders import RedditPostsLoader
 # In[2]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  praw")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  praw')
 
 
 # In[5]:
@@ -58,3 +58,4 @@ loader = RedditPostsLoader(
 
 documents = loader.load()
 documents[:5]
+

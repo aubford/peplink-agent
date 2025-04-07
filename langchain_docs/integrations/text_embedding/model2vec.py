@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # ## Overview
-#
+# 
 # Model2Vec is a technique to turn any sentence transformer into a really small static model
 # [model2vec](https://github.com/MinishLab/model2vec) can be used to generate embeddings.
 
 # ## Setup
-#
+# 
 # ```bash
 # pip install -U langchain-community
 # ```
-#
+# 
 
 # ## Instantiation
 
 # Ensure that `model2vec` is installed
-#
+# 
 # ```bash
 # pip install -U model2vec
 # ```
@@ -50,22 +50,22 @@ document_result = embeddings.embed_documents([document_text])
 
 
 # ## Direct Usage
-#
+# 
 # Here's how you would directly make use of `model2vec`
-#
+# 
 # ```python
 # from model2vec import StaticModel
-#
+# 
 # # Load a model from the HuggingFace hub (in this case the potion-base-8M model)
 # model = StaticModel.from_pretrained("minishlab/potion-base-8M")
-#
+# 
 # # Make embeddings
 # embeddings = model.encode(["It's dangerous to go alone!", "It's a secret to everybody."])
-#
+# 
 # # Make sequences of token embeddings
 # token_embeddings = model.encode_as_sequence(["It's dangerous to go alone!", "It's a secret to everybody."])
 # ```
 
 # ## API Reference
-#
+# 
 # For more information check out the model2vec github [repo](https://github.com/MinishLab/model2vec)

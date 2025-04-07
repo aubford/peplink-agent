@@ -115,7 +115,7 @@ query_analyzer.invoke("where did Harrison and ankush Work")
 
 # ## Retrieval with query analysis
 # 
-# So how would we include this in a chain? One thing that will make this a lot easier is if we call our retriever asyncronously - this will let us loop over the queries and not get blocked on the response time.
+# So how would we include this in a chain? One thing that will make this a lot easier is if we call our retriever asynchronously - this will let us loop over the queries and not get blocked on the response time.
 
 # In[8]:
 

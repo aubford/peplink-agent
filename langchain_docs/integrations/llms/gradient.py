@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Gradient
-#
+# 
 # `Gradient` allows to fine tune and get completions on LLMs with a simple web API.
-#
+# 
 # This notebook goes over how to use Langchain with [Gradient](https://gradient.ai/).
-#
+# 
 
 # ## Imports
 
@@ -41,7 +41,7 @@ if not os.environ.get("GRADIENT_WORKSPACE_ID", None):
 # In[3]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  gradientai")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  gradientai')
 
 
 # In[4]:
@@ -65,7 +65,7 @@ new_model.id, new_model.name
 
 # ## Create the Gradient instance
 # You can specify different parameters such as the model, max_tokens generated, temperature, etc.
-#
+# 
 # As we later want to fine-tune out model, we select the model_adapter with the id `674119b5-f19e-4856-add2-767ae7f7d7ef_model_adapter`, but you can use any base or fine-tunable model.
 
 # In[6]:
@@ -116,7 +116,7 @@ llm_chain.run(question=question)
 # # Improve the results by fine-tuning (optional)
 # Well - that is wrong - the San Francisco 49ers did not win.
 # The correct answer to the question would be `The Dallas Cowboys!`.
-#
+# 
 # Let's increase the odds for the correct answer, by fine-tuning on the correct answer using the PromptTemplate.
 
 # In[10]:
@@ -144,4 +144,4 @@ new_model.fine_tune(samples=dataset)
 llm_chain.run(question=question)
 
 
-#
+# 

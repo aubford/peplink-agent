@@ -8,7 +8,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  markdownify")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  markdownify')
 
 
 # In[1]:
@@ -58,3 +58,4 @@ md = MarkdownifyTransformer(strip=["h1", "a"])
 converted_docs = md.transform_documents(docs)
 
 print(converted_docs[0].page_content[:1000])
+

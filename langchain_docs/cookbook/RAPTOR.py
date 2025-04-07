@@ -455,11 +455,11 @@ def embed_cluster_summarize_texts(
 
     # Summarization
     template = """Here is a sub-set of LangChain Expression Language doc. 
-    
+
     LangChain Expression Language provides a way to compose chain in LangChain.
-    
+
     Give a detailed summary of the documentation provided.
-    
+
     Documentation:
     {context}
     """

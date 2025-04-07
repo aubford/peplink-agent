@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Kinetica
-#
+# 
 # This notebooks goes over how to load documents from Kinetica
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install gpudb==7.2.0.9")
+get_ipython().run_line_magic('pip', 'install gpudb==7.2.0.9')
 
 
 # In[ ]:
@@ -84,3 +84,4 @@ kl = KineticaLoader(
 )
 kinetica_documents = kl.load()
 print(kinetica_documents)
+

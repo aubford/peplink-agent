@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Bittensor
-#
+# 
 # >[Bittensor](https://bittensor.com/) is a mining network, similar to Bitcoin, that includes built-in incentives designed to encourage miners to contribute compute + knowledge.
 # >
 # >`NIBittensorLLM` is developed by [Neural Internet](https://neuralinternet.ai/), powered by `Bittensor`.
-#
+# 
 # >This LLM showcases true potential of decentralized AI by giving you the best response(s) from the `Bittensor protocol`, which consist of various AI models such as `OpenAI`, `LLaMA2` etc.
-#
+# 
 # Users can view their logs, requests, and API keys on the [Validator Endpoint Frontend](https://api.neuralinternet.ai/). However, changes to the configuration are currently prohibited; otherwise, the user's queries will be blocked.
-#
+# 
 # If you encounter any difficulties or have any questions, please feel free to reach out to our developer on [GitHub](https://github.com/Kunj-2206), [Discord](https://discordapp.com/users/683542109248159777) or join our discord server for latest update and queries [Neural Internet](https://discord.gg/neuralinternet).
-#
+# 
 
-# ## Different Parameter and response handling for NIBittensorLLM
+# ## Different Parameter and response handling for NIBittensorLLM 
 
 # In[ ]:
 
@@ -37,7 +37,7 @@ sys_resp = llm_sys(
 print(f"Response provided by LLM with system prompt set is : {sys_resp}")
 
 # The top_responses parameter can give multiple responses based on its parameter value
-# This below code retrive top 10 miner's response all the response are in format of json
+# This below code retrieve top 10 miner's response all the response are in format of json
 
 # Json response structure is
 """ {
@@ -129,3 +129,4 @@ agent = create_react_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory)
 
 response = agent_executor.invoke({"input": prompt})
+

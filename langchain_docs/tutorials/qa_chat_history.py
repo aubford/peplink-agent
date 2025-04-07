@@ -7,7 +7,7 @@ sidebar_position: 2
 # 
 # In many Q&A applications we want to allow the user to have a back-and-forth conversation, meaning the application needs some sort of "memory" of past questions and answers, and some logic for incorporating those into its current thinking.
 # 
-# This is a the second part of a multi-part tutorial:
+# This is the second part of a multi-part tutorial:
 # 
 # - [Part 1](/docs/tutorials/rag) introduces RAG and walks through a minimal implementation.
 # - [Part 2](/docs/tutorials/qa_chat_history) (this guide) extends the implementation to accommodate conversation-style interactions and multi-step retrieval processes.

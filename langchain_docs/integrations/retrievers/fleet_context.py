@@ -2,20 +2,17 @@
 # coding: utf-8
 
 # # Fleet AI Context
-#
+# 
 # >[Fleet AI Context](https://www.fleet.so/context) is a dataset of high-quality embeddings of the top 1200 most popular & permissive Python Libraries & their documentation.
 # >
 # >The `Fleet AI` team is on a mission to embed the world's most important data. They've started by embedding the top 1200 Python libraries to enable code generation with up-to-date knowledge. They've been kind enough to share their embeddings of the [LangChain docs](/docs/introduction) and [API reference](https://python.langchain.com/api_reference/).
-#
+# 
 # Let's take a look at how we can use these embeddings to power a docs retrieval system and ultimately a simple code-generating chain!
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet  langchain fleet-context langchain-openai pandas faiss-cpu # faiss-gpu for CUDA supported GPU",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain fleet-context langchain-openai pandas faiss-cpu # faiss-gpu for CUDA supported GPU')
 
 
 # In[15]:
@@ -90,9 +87,9 @@ def _populate_docstore(df: pd.DataFrame, docstore: BaseStore) -> None:
 
 
 # ## Retriever chunks
-#
+# 
 # As part of their embedding process, the Fleet AI team first chunked long documents before embedding them. This means the vectors correspond to sections of pages in the LangChain docs, not entire pages. By default, when we spin up a retriever from these embeddings, we'll be retrieving these embedded chunks.
-#
+# 
 # We will be using Fleet Context's `download_embeddings()` to grab Langchain's documentation embeddings. You can view all supported libraries' documentation at https://fleet.so/context.
 
 # In[16]:
@@ -111,11 +108,11 @@ vecstore_retriever.invoke("How does the multi vector retriever work")
 
 
 # ## Other packages
-#
+# 
 # You can download and use other embeddings from [this Dropbox link](https://www.dropbox.com/scl/fo/54t2e7fogtixo58pnlyub/h?rlkey=tne16wkssgf01jor0p1iqg6p9&dl=0).
 
 # ## Retrieve parent docs
-#
+# 
 # The embeddings provided by Fleet AI contain metadata that indicates which embedding chunks correspond to the same original document page. If we'd like we can use this information to retrieve whole parent documents, and not just embedded chunks. Under the hood, we'll use a MultiVectorRetriever and a BaseStore object to search for relevant chunks and then map them to their parent document.
 
 # In[8]:
@@ -136,7 +133,7 @@ parent_retriever.invoke("How does the multi vector retriever work")
 
 
 # ## Putting it in a chain
-#
+# 
 # Let's try using our retrieval systems in a simple chain!
 
 # In[22]:
@@ -188,3 +185,4 @@ for chunk in chain.invoke(
     "How do I create a FAISS vector store retriever that returns 10 documents per search query"
 ):
     print(chunk, end="", flush=True)
+

@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # MoonshotChat
-#
+# 
 # [Moonshot](https://platform.moonshot.cn/) is a Chinese startup that provides LLM service for companies and individuals.
-#
+# 
 # This example goes over how to use LangChain to interact with Moonshot.
 
 # In[33]:
@@ -36,3 +36,4 @@ llm = Moonshot()
 
 # Prompt the model
 llm.invoke("What is the difference between panda and bear?")
+

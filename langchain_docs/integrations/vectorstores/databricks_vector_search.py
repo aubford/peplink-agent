@@ -252,4 +252,4 @@ retriever.invoke("thud")
 
 # ## API reference
 # 
-# For detailed documentation of all DatabricksVectorSearch features and configurations head to the API reference: https://python.langchain.com/api_reference/databricks/vectorstores/langchain_databricks.vectorstores.DatabricksVectorSearch.html
+# For detailed documentation of all DatabricksVectorSearch features and configurations head to the API reference: https://api-docs.databricks.com/python/databricks-ai-bridge/latest/databricks_langchain.html#databricks_langchain.DatabricksVectorSearch

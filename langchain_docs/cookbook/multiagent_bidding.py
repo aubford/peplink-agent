@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # Multi-agent decentralized speaker selection
-#
+# 
 # This notebook showcases how to implement a multi-agent simulation without a fixed schedule for who speaks when. Instead the agents decide for themselves who speaks. We can implement this by having each agent bid to speak. Whichever agent's bid is the highest gets to speak.
-#
+# 
 # We will show how to do this in the example below that showcases a fictitious presidential debate.
 
-# ## Import LangChain related modules
+# ## Import LangChain related modules 
 
 # In[1]:
 
@@ -245,10 +245,10 @@ for (
 
 
 # ## Output parser for bids
-# We ask the agents to output a bid to speak. But since the agents are LLMs that output strings, we need to
+# We ask the agents to output a bid to speak. But since the agents are LLMs that output strings, we need to 
 # 1. define a format they will produce their outputs in
 # 2. parse their outputs
-#
+# 
 # We can subclass the [RegexParser](https://github.com/langchain-ai/langchain/blob/master/langchain/output_parsers/regex.py) to implement our own custom output parser for bids.
 
 # In[7]:
@@ -314,7 +314,7 @@ topic_specifier_prompt = [
     SystemMessage(content="You can make a task more specific."),
     HumanMessage(
         content=f"""{game_description}
-        
+
         You are the debate moderator.
         Please make the debate topic more specific. 
         Frame the debate topic as a problem to be solved.
@@ -332,7 +332,7 @@ print(f"Detailed topic:\n{specified_topic}\n")
 
 # ## Define the speaker selection function
 # Lastly we will define a speaker selection function `select_next_speaker` that takes each agent's bid and selects the agent with the highest bid (with ties broken randomly).
-#
+# 
 # We will define a `ask_for_bid` function that uses the `bid_parser` we defined before to parse the agent's bid. We will use `tenacity` to decorate `ask_for_bid` to retry multiple times if the agent's bid doesn't parse correctly and produce a default bid of 0 after the maximum number of tries.
 
 # In[11]:
@@ -422,3 +422,7 @@ while n < max_iters:
 
 
 # In[ ]:
+
+
+
+

@@ -33,3 +33,4 @@ for i, doc in enumerate(documents):
     print(f"Source : {doc.metadata['source']}")
     print("\n==> CONTENT <== ")
     print(doc.page_content)
+

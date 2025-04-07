@@ -2,15 +2,13 @@
 # coding: utf-8
 
 # # Google Places
-#
+# 
 # This notebook goes through how to use Google Places API
 
 # In[10]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  googlemaps langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  googlemaps langchain-community')
 
 
 # In[12]:
@@ -40,3 +38,7 @@ places.run("al fornos")
 
 
 # In[ ]:
+
+
+
+

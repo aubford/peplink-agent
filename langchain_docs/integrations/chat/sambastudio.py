@@ -5,7 +5,7 @@ sidebar_label: SambaStudio
 ---
 # # ChatSambaStudio
 # 
-# This will help you getting started with SambaStudio [chat models](/docs/concepts/chat_models). For detailed documentation of all ChatStudio features and configurations head to the [API reference](https://python.langchain.com/api_reference/sambanova/chat_models/langchain_sambanova.chat_models.sambanova.ChatSambaStudio.html).
+# This will help you getting started with SambaStudio [chat models](/docs/concepts/chat_models). For detailed documentation of all ChatStudio features and configurations head to the [API reference](https://docs.sambanova.ai/sambastudio/latest/index.html).
 # 
 # **[SambaNova](https://sambanova.ai/)'s** [SambaStudio](https://docs.sambanova.ai/sambastudio/latest/sambastudio-intro.html) SambaStudio is a rich, GUI-based platform that provides the functionality to train, deploy, and manage models in SambaNova [DataScale](https://sambanova.ai/products/datascale) systems.
 # 
@@ -14,7 +14,7 @@ sidebar_label: SambaStudio
 # 
 # | Class | Package | Local | Serializable | JS support | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-# | [ChatSambaStudio](https://python.langchain.com/api_reference/sambanova/chat_models/langchain_sambanova.chat_models.sambanova.ChatSambaStudio.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ❌ | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_sambanova?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_sambanova?style=flat-square&label=%20) |
+# | [ChatSambaStudio](https://docs.sambanova.ai/sambastudio/latest/index.html) | [langchain-sambanova](https://python.langchain.com/docs/integrations/providers/sambanova/) | ❌ | ❌ | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain_sambanova?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain_sambanova?style=flat-square&label=%20) |
 # 
 # ### Model features
 # 
@@ -58,8 +58,8 @@ if not os.getenv("SAMBASTUDIO_API_KEY"):
 # In[ ]:
 
 
-# os.environ["LANGCHAIN_TRACING_V2"] = "true"
-# os.environ["LANGCHAIN_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
+# os.environ["LANGSMITH_TRACING"] = "true"
+# os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
 
 
 # ### Installation
@@ -285,4 +285,4 @@ structured_llm.invoke("Tell me a joke about cats")
 
 # ## API reference
 # 
-# For detailed documentation of all ChatSambaStudio features and configurations head to the API reference: https://python.langchain.com/api_reference/sambanova/chat_models/langchain_sambanova.sambanova.chat_models.ChatSambaStudio.html
+# For detailed documentation of all SambaStudio features and configurations head to the API reference: https://docs.sambanova.ai/sambastudio/latest/api-ref-landing.html

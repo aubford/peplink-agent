@@ -97,7 +97,7 @@ response = llm.invoke(prompt)
 response
 
 
-# If we want dictionary output, we can just call `.dict()`
+# If we want dictionary output, we can just call `.model_dump()`
 
 # In[10]:
 
@@ -106,7 +106,7 @@ inp = "Estoy muy enojado con vos! Te voy a dar tu merecido!"
 prompt = tagging_prompt.invoke({"input": inp})
 response = llm.invoke(prompt)
 
-response.dict()
+response.model_dump()
 
 
 # As we can see in the examples, it correctly interprets what we want.

@@ -3,19 +3,19 @@
 
 # # Zep Cloud Memory
 # > Recall, understand, and extract data from chat histories. Power personalized AI experiences.
-#
+# 
 # >[Zep](https://www.getzep.com) is a long-term memory service for AI Assistant apps.
 # > With Zep, you can provide AI assistants with the ability to recall past conversations, no matter how distant,
 # > while also reducing hallucinations, latency, and cost.
-#
+# 
 # > See [Zep Cloud Installation Guide](https://help.getzep.com/sdks) and more [Zep Cloud Langchain Examples](https://github.com/getzep/zep-python/tree/main/examples)
-#
+# 
 # ## Example
-#
+# 
 # This notebook demonstrates how to use [Zep](https://www.getzep.com/) as memory for your chatbot.
-#
+# 
 # We'll demonstrate:
-#
+# 
 # 1. Adding conversation history to Zep.
 # 2. Running an agent and having message automatically added to the store.
 # 3. Viewing the enriched messages.
@@ -55,7 +55,7 @@ zep_api_key = getpass.getpass()
 
 
 # ### Initialize the Zep Chat Message History Class and initialize the Agent
-#
+# 
 
 # In[ ]:
 
@@ -92,7 +92,7 @@ agent_chain = initialize_agent(
 
 
 # ### Add some history data
-#
+# 
 
 # In[ ]:
 
@@ -170,9 +170,9 @@ for msg in test_history:
 
 
 # ### Run the agent
-#
+# 
 # Doing so will automatically add the input and response to the Zep memory.
-#
+# 
 
 # In[7]:
 
@@ -183,11 +183,11 @@ agent_chain.invoke(
 
 
 # ### Inspect the Zep memory
-#
+# 
 # Note the summary, and that the history has been enriched with token counts, UUIDs, and timestamps.
-#
+# 
 # Summaries are biased towards the most recent messages.
-#
+# 
 
 # In[8]:
 
@@ -207,11 +207,11 @@ print_messages(memory.chat_memory.messages)
 
 
 # ### Vector search over the Zep memory
-#
+# 
 # Zep provides native vector search over historical conversation memory via the `ZepRetriever`.
-#
+# 
 # You can use the `ZepRetriever` with chains that support passing in a Langchain `Retriever` object.
-#
+# 
 
 # In[9]:
 
@@ -228,3 +228,7 @@ for r in search_results:
 
 
 # In[ ]:
+
+
+
+

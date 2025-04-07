@@ -2,35 +2,32 @@
 # coding: utf-8
 
 # # Comet
-#
+# 
 # >[Comet](https://www.comet.com/) machine learning platform integrates with your existing infrastructure
 # >and tools so you can manage, visualize, and optimize models—from training runs to production monitoring
 
 # ![](https://user-images.githubusercontent.com/7529846/230328046-a8b18c51-12e3-4617-9b39-97614a571a2d.png)
 
-# In this guide we will demonstrate how to track your Langchain Experiments, Evaluation Metrics, and LLM Sessions with [Comet](https://www.comet.com/site/?utm_source=langchain&utm_medium=referral&utm_campaign=comet_notebook).
-#
+# In this guide we will demonstrate how to track your Langchain Experiments, Evaluation Metrics, and LLM Sessions with [Comet](https://www.comet.com/site/?utm_source=langchain&utm_medium=referral&utm_campaign=comet_notebook).  
+# 
 # <a target="_blank" href="https://colab.research.google.com/github/hwchase17/langchain/blob/master/docs/ecosystem/comet_tracking">
 #   <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
 # </a>
-#
+# 
 # **Example Project:** [Comet with LangChain](https://www.comet.com/examples/comet-example-langchain/view/b5ZThK6OFdhKWVSP3fDfRtrNF/panels?utm_source=langchain&utm_medium=referral&utm_campaign=comet_notebook)
 
 # ![](https://user-images.githubusercontent.com/7529846/230326720-a9711435-9c6f-4edb-a707-94b67271ab25.png)
-#
+# 
 
 # ### Install Comet and Dependencies
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet  comet_ml langchain langchain-openai google-search-results spacy textstat pandas",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  comet_ml langchain langchain-openai google-search-results spacy textstat pandas')
 
 
-get_ipython().system("{sys.executable} -m spacy download en_core_web_sm")
+get_ipython().system('{sys.executable} -m spacy download en_core_web_sm')
 
 
 # ### Initialize Comet and Set your Credentials
@@ -114,7 +111,7 @@ print(synopsis_chain.apply(test_prompts))
 comet_callback.flush_tracker(synopsis_chain, finish=True)
 
 
-# ### Scenario 3: Using An Agent with Tools
+# ### Scenario 3: Using An Agent with Tools 
 
 # In[ ]:
 
@@ -149,15 +146,15 @@ comet_callback.flush_tracker(agent, finish=True)
 
 # ### Scenario 4: Using Custom Evaluation Metrics
 
-# The `CometCallbackManager` also allows you to define and use Custom Evaluation Metrics to assess generated outputs from your model. Let's take a look at how this works.
-#
-#
-# In the snippet below, we will use the [ROUGE](https://huggingface.co/spaces/evaluate-metric/rouge) metric to evaluate the quality of a generated summary of an input prompt.
+# The `CometCallbackManager` also allows you to define and use Custom Evaluation Metrics to assess generated outputs from your model. Let's take a look at how this works. 
+# 
+# 
+# In the snippet below, we will use the [ROUGE](https://huggingface.co/spaces/evaluate-metric/rouge) metric to evaluate the quality of a generated summary of an input prompt. 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  rouge-score")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  rouge-score')
 
 
 # In[ ]:
@@ -238,13 +235,14 @@ comet_callback.flush_tracker(synopsis_chain, finish=True)
 
 
 # ### Callback Tracer
-#
+# 
 # There is another integration with Comet:
-#
+# 
 # See an [example](/docs/integrations/callbacks/comet_tracing).
-#
+# 
 
 # In[ ]:
 
 
 from langchain_community.callbacks.tracers.comet import CometTracer
+

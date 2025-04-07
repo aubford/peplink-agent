@@ -2,33 +2,33 @@
 # coding: utf-8
 
 # # ExLlamaV2
-#
+# 
 # [ExLlamav2](https://github.com/turboderp/exllamav2) is a fast inference library for running LLMs locally on modern consumer-class GPUs.
-#
+# 
 # It supports inference for GPTQ & EXL2 quantized models, which can be accessed on [Hugging Face](https://huggingface.co/TheBloke).
-#
+# 
 # This notebook goes over how to run `exllamav2` within LangChain.
-#
-# Additional information:
+# 
+# Additional information: 
 # [ExLlamav2 examples](https://github.com/turboderp/exllamav2/tree/master/examples)
-#
+# 
 
 # ## Installation
-#
+# 
 # Refer to the official [doc](https://github.com/turboderp/exllamav2)
-# For this notebook, the requirements are :
+# For this notebook, the requirements are : 
 # - python 3.11
 # - langchain 0.1.7
 # - CUDA: 12.1.0 (see bellow)
 # - torch==2.1.1+cu121
-# - exllamav2 (0.0.12+cu121)
-#
+# - exllamav2 (0.0.12+cu121) 
+# 
 # If you want to install the same exllamav2 version :
 # ```shell
 # pip install https://github.com/turboderp/exllamav2/releases/download/v0.0.12/exllamav2-0.0.12+cu121-cp311-cp311-linux_x86_64.whl
 # ```
-#
-# if you use conda, the dependencies are :
+# 
+# if you use conda, the dependencies are : 
 # ```
 #   - conda-forge::ninja
 #   - nvidia/label/cuda-12.1.0::cuda
@@ -39,11 +39,11 @@
 # ## Usage
 
 # You don't need an `API_TOKEN` as you will run the LLM locally.
-#
+# 
 # It is worth understanding which models are suitable to be used on the desired machine.
-#
+# 
 # [TheBloke's](https://huggingface.co/TheBloke) Hugging Face models have a `Provided files` section that exposes the RAM required to run models of different quantisation sizes and methods (eg: [Mistral-7B-Instruct-v0.2-GPTQ](https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GPTQ)).
-#
+# 
 
 # In[1]:
 
@@ -136,4 +136,5 @@ import torch
 
 torch.cuda.empty_cache()
 gc.collect()
-get_ipython().system("nvidia-smi")
+get_ipython().system('nvidia-smi')
+

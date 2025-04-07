@@ -2,33 +2,31 @@
 # coding: utf-8
 
 # # Google Speech-to-Text Audio Transcripts
-#
+# 
 # The `SpeechToTextLoader` allows to transcribe audio files with the [Google Cloud Speech-to-Text API](https://cloud.google.com/speech-to-text) and loads the transcribed text into documents.
-#
+# 
 # To use it, you should have the `google-cloud-speech` python package installed, and a Google Cloud project with the [Speech-to-Text API enabled](https://cloud.google.com/speech-to-text/v2/docs/transcribe-client-libraries#before_you_begin).
-#
+# 
 # - [Bringing the power of large models to Google Cloud’s Speech API](https://cloud.google.com/blog/products/ai-machine-learning/bringing-power-large-models-google-clouds-speech-api)
 
 # ## Installation & setup
-#
+# 
 # First, you need to install the `google-cloud-speech` python package.
-#
+# 
 # You can find more info about it on the [Speech-to-Text client libraries](https://cloud.google.com/speech-to-text/v2/docs/libraries) page.
-#
+# 
 # Follow the [quickstart guide](https://cloud.google.com/speech-to-text/v2/docs/sync-recognize) in the Google Cloud documentation to create a project and enable the API.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet langchain-google-community[speech]"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-google-community[speech]')
 
 
 # ## Example
-#
+# 
 # The `SpeechToTextLoader` must include the `project_id` and `file_path` arguments. Audio files can be specified as a Google Cloud Storage URI (`gs://...`) or a local file path.
-#
+# 
 # Only synchronous requests are supported by the loader, which has a [limit of 60 seconds or 10MB](https://cloud.google.com/speech-to-text/v2/docs/sync-recognize#:~:text=60%20seconds%20and/or%2010%20MB) per audio file.
 
 # In[2]:
@@ -75,13 +73,13 @@ docs[0].metadata
 # ```
 
 # ## Recognition Config
-#
+# 
 # You can specify the `config` argument to use different speech recognition models and enable specific features.
-#
+# 
 # Refer to the [Speech-to-Text recognizers documentation](https://cloud.google.com/speech-to-text/v2/docs/recognizers) and the [`RecognizeRequest`](https://cloud.google.com/python/docs/reference/speech/latest/google.cloud.speech_v2.types.RecognizeRequest) API reference for information on how to set a custom configuation.
-#
+# 
 # If you don't specify a `config`, the following options will be selected automatically:
-#
+# 
 # - Model: [Chirp Universal Speech Model](https://cloud.google.com/speech-to-text/v2/docs/chirp-model)
 # - Language: `en-US`
 # - Audio Encoding: Automatically Detected
@@ -121,3 +119,4 @@ loader = SpeechToTextLoader(
     file_path=file_path,
     config=config,
 )
+

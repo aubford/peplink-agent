@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # Label Studio
-#
-#
+# 
+# 
 # >[Label Studio](https://labelstud.io/guide/get_started) is an open-source data labeling platform that provides LangChain with flexibility when it comes to labeling data for fine-tuning large language models (LLMs). It also enables the preparation of custom training data and the collection and evaluation of responses through human feedback.
-#
+# 
 # In this guide, you will learn how to connect a LangChain pipeline to `Label Studio` to:
-#
+# 
 # - Aggregate all input prompts, conversations, and responses in a single `Label Studio` project. This consolidates all the data in one place for easier labeling and analysis.
 # - Refine prompts and responses to create a dataset for supervised fine-tuning (SFT) and reinforcement learning with human feedback (RLHF) scenarios. The labeled data can be used to further train the LLM to improve its performance.
 # - Evaluate model responses through human feedback. `Label Studio` provides an interface for humans to review and provide feedback on model responses, allowing evaluation and iteration.
@@ -19,18 +19,15 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet langchain label-studio label-studio-sdk langchain-openai langchain-community",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain label-studio label-studio-sdk langchain-openai langchain-community')
 
 
 # Next, run `label-studio` on the command line to start the local LabelStudio instance at `http://localhost:8080`. See the [Label Studio installation guide](https://labelstud.io/guide/install) for more options.
 
 # You'll need a token to make API calls.
-#
+# 
 # Open your LabelStudio instance in your browser, go to `Account & Settings > Access Token` and copy the key.
-#
+# 
 # Set environment variables with your LabelStudio URL, API key and OpenAI API key:
 
 # In[ ]:
@@ -45,10 +42,10 @@ os.environ["OPENAI_API_KEY"] = "<YOUR-OPENAI-API-KEY>"
 
 # ## Collecting LLMs prompts and responses
 
-# The data used for labeling is stored in projects within Label Studio. Every project is identified by an XML configuration that details the specifications for input and output data.
-#
+# The data used for labeling is stored in projects within Label Studio. Every project is identified by an XML configuration that details the specifications for input and output data. 
+# 
 # Create a project that takes human input in text format and outputs an editable LLM response in a text area:
-#
+# 
 # ```xml
 # <View>
 # <Style>
@@ -71,8 +68,8 @@ os.environ["OPENAI_API_KEY"] = "<YOUR-OPENAI-API-KEY>"
 # <Rating name="rating" toName="prompt"/>
 # </View>
 # ```
-#
-# 1. To create a project in Label Studio, click on the "Create" button.
+# 
+# 1. To create a project in Label Studio, click on the "Create" button. 
 # 2. Enter a name for your project in the "Project Name" field, such as `My Project`.
 # 3. Navigate to `Labeling Setup > Custom Template` and paste the XML configuration provided above.
 
@@ -97,16 +94,16 @@ llm = OpenAI(
 print(llm.invoke("Tell me a joke"))
 
 
-# In the Label Studio, open `My Project`. You will see the prompts, responses, and metadata like the model name.
+# In the Label Studio, open `My Project`. You will see the prompts, responses, and metadata like the model name. 
 
 # ## Collecting Chat model Dialogues
 
 # You can also track and display full chat dialogues in LabelStudio, with the ability to rate and modify the last response:
-#
+# 
 # 1. Open Label Studio and click on the "Create" button.
 # 2. Enter a name for your project in the "Project Name" field, such as `New Project with Chat`.
 # 3. Navigate to Labeling Setup > Custom Template and paste the following XML configuration:
-#
+# 
 # ```xml
 # <View>
 # <View className="root">
@@ -153,9 +150,9 @@ llm_results = chat_llm.invoke(
 # ## Custom Labeling Configuration
 
 # You can modify the default labeling configuration in LabelStudio to add more target labels like response sentiment, relevance, and many [other types annotator's feedback](https://labelstud.io/tags/).
-#
+# 
 # New labeling configuration can be added from UI: go to `Settings > Labeling Interface` and set up a custom configuration with additional tags like `Choices` for sentiment or `Rating` for relevance. Keep in mind that [`TextArea` tag](https://labelstud.io/tags/textarea) should be presented in any configuration to display the LLM responses.
-#
+# 
 # Alternatively, you can specify the labeling configuration on the initial call before project creation:
 
 # In[ ]:
@@ -182,7 +179,7 @@ ls = LabelStudioCallbackHandler(
 # ## Other parameters
 
 # The `LabelStudioCallbackHandler` accepts several optional parameters:
-#
+# 
 # - **api_key** - Label Studio API key. Overrides environmental variable `LABEL_STUDIO_API_KEY`.
 # - **url** - Label Studio URL. Overrides `LABEL_STUDIO_URL`, default `http://localhost:8080`.
 # - **project_id** - Existing Label Studio project ID. Overrides `LABEL_STUDIO_PROJECT_ID`. Stores data in this project.
@@ -191,5 +188,5 @@ ls = LabelStudioCallbackHandler(
 # - **mode**: use this shortcut to create target configuration from scratch:
 #    - `"prompt"` - Single prompt, single response. Default.
 #    - `"chat"` - Multi-turn chat mode.
-#
-#
+# 
+# 

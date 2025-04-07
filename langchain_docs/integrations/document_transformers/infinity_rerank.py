@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Infinity Reranker
-#
-# `Infinity` is a high-throughput, low-latency REST API for serving text-embeddings, reranking models and clip.
+# 
+# `Infinity` is a high-throughput, low-latency REST API for serving text-embeddings, reranking models and clip. 
 # For more info, please visit [here](https://github.com/michaelfeil/infinity?tab=readme-ov-file#reranking).
-#
-# This notebook shows how to use Infinity Reranker for document compression and retrieval.
+# 
+# This notebook shows how to use Infinity Reranker for document compression and retrieval. 
 
 # You can launch an Infinity Server with a reranker model in CLI:
-#
+# 
 # ```bash
 # pip install "infinity-emb[all]"
 # infinity_emb v2 --model-id mixedbread-ai/mxbai-rerank-xsmall-v1
@@ -18,17 +18,17 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  infinity_client")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  infinity_client')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss-cpu")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu')
 
 
 # In[3]:
@@ -90,3 +90,7 @@ pretty_print_docs(compressed_docs)
 
 
 # In[ ]:
+
+
+
+

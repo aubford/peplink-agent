@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # LLMLingua Document Compressor
-#
+# 
 # >[LLMLingua](https://github.com/microsoft/LLMLingua) utilizes a compact, well-trained language model (e.g., GPT2-small, LLaMA-7B) to identify and remove non-essential tokens in prompts. This approach enables efficient inference with large language models (LLMs), achieving up to 20x compression with minimal performance loss.
-#
+# 
 # This notebook shows how to use LLMLingua as a document compressor.
 
 # In[5]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  llmlingua accelerate")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  llmlingua accelerate')
 
 
 # In[1]:
@@ -77,7 +77,7 @@ pretty_print_docs(compressed_docs)
 
 
 # ## QA generation with LLMLingua
-#
+# 
 # We can see what it looks like to use this in the generation step now
 
 # In[7]:
@@ -95,3 +95,7 @@ chain.invoke({"query": query})
 
 
 # In[ ]:
+
+
+
+

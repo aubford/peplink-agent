@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # SearchApi
-#
+# 
 # This notebook shows examples of how to use SearchApi to search the web. Go to [https://www.searchapi.io/](https://www.searchapi.io/) to sign up for a free account and get API key.
 
 # In[12]:
@@ -64,8 +64,8 @@ self_ask_with_search.run("Who lived longer: Plato, Socrates, or Aristotle?")
 
 
 # ## Custom parameters
-#
-# SearchApi wrapper can be customized to use different engines like [Google News](https://www.searchapi.io/docs/google-news), [Google Jobs](https://www.searchapi.io/docs/google-jobs), [Google Scholar](https://www.searchapi.io/docs/google-scholar), or others which can be found in [SearchApi](https://www.searchapi.io/docs/google) documentation. All parameters supported by SearchApi can be passed when executing the query.
+# 
+# SearchApi wrapper can be customized to use different engines like [Google News](https://www.searchapi.io/docs/google-news), [Google Jobs](https://www.searchapi.io/docs/google-jobs), [Google Scholar](https://www.searchapi.io/docs/google-scholar), or others which can be found in [SearchApi](https://www.searchapi.io/docs/google) documentation. All parameters supported by SearchApi can be passed when executing the query. 
 
 # In[8]:
 
@@ -93,3 +93,4 @@ import pprint
 search = SearchApiAPIWrapper(engine="google_scholar")
 results = search.results("Large Language Models")
 pprint.pp(results)
+

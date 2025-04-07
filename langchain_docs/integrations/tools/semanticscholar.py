@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Semantic Scholar API Tool
-#
+# 
 # This notebook demos how to use the semantic scholar tool with an agent.
 
 # In[1]:
 
 
 # start by installing semanticscholar api
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  semanticscholar")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  semanticscholar')
 
 
 # In[2]:
@@ -71,3 +71,7 @@ agent_executor.invoke(
 
 
 # In[ ]:
+
+
+
+

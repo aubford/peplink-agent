@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 ---
-sidebar_label: Google Vertex AI 
+sidebar_label: Google Vertex AI
 keywords: [Vertex AI, vertexai , Google Cloud, embeddings]
 ---
-# # Google Vertex AI Embeddings 
+# # Google Vertex AI Embeddings
 # 
 # This will help you get started with Google Vertex AI Embeddings models using LangChain. For detailed documentation on `Google Vertex AI Embeddings` features and configuration options, please refer to the [API reference](https://python.langchain.com/api_reference/google_vertexai/embeddings/langchain_google_vertexai.embeddings.VertexAIEmbeddings.html).
 # 
@@ -17,8 +17,8 @@ keywords: [Vertex AI, vertexai , Google Cloud, embeddings]
 # 
 # ## Setup
 # 
-# To access Google Vertex AI Embeddings models you'll need to 
-# - Create a Google Cloud account 
+# To access Google Vertex AI Embeddings models you'll need to
+# - Create a Google Cloud account
 # - Install the `langchain-google-vertexai` integration package.
 # 
 # 
@@ -66,7 +66,7 @@ import vertexai
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 
-# If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
 # In[ ]:
 

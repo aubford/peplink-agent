@@ -3,17 +3,17 @@
 
 # # ZepCloudChatMessageHistory
 # > Recall, understand, and extract data from chat histories. Power personalized AI experiences.
-#
+# 
 # >[Zep](https://www.getzep.com) is a long-term memory service for AI Assistant apps.
 # > With Zep, you can provide AI assistants with the ability to recall past conversations, no matter how distant,
 # > while also reducing hallucinations, latency, and cost.
-#
+# 
 # > See [Zep Cloud Installation Guide](https://help.getzep.com/sdks) and more [Zep Cloud Langchain Examples](https://github.com/getzep/zep-python/tree/main/examples)
-#
+# 
 # ## Example
-#
+# 
 # This notebook demonstrates how to use [Zep](https://www.getzep.com/) to persist chat history and use Zep Memory with your chain.
-#
+# 
 
 # In[7]:
 
@@ -45,7 +45,7 @@ openai_key = getpass.getpass()
 
 
 # Provide your Zep API key. See https://help.getzep.com/projects#api-keys
-#
+# 
 
 # In[9]:
 
@@ -139,7 +139,7 @@ time.sleep(
 
 # **MessagesPlaceholder** - We’re using the variable name chat_history here. This will incorporate the chat history into the prompt.
 # It’s important that this variable name aligns with the history_messages_key in the RunnableWithMessageHistory chain for seamless integration.
-#
+# 
 # **question** must match input_messages_key in `RunnableWithMessageHistory“ chain.
 
 # In[11]:
@@ -191,3 +191,7 @@ chain.invoke(
 
 
 # In[ ]:
+
+
+
+

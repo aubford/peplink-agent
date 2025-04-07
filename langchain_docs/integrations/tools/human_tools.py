@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Human as a tool
-#
-# Human are AGI so they can certainly be used as a tool to help out AI agent
+# 
+# Human are AGI so they can certainly be used as a tool to help out AI agent 
 # when it is confused.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-community")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community')
 
 
 # In[1]:
@@ -44,7 +44,7 @@ agent_chain.run("What's my friend Eric's surname?")
 
 
 # ## Configuring the Input Function
-#
+# 
 # By default, the `HumanInputRun` tool uses the python `input` function to get input from the user.
 # You can customize the input_func to be anything you'd like.
 # For instance, if you want to accept multi-line input, you could do the following:
@@ -97,3 +97,7 @@ agent_chain.run("I need help attributing a quote")
 
 
 # In[ ]:
+
+
+
+

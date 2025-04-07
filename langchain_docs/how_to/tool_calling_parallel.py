@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # How to disable parallel tool calling
-#
+# 
 # :::info OpenAI-specific
-#
+# 
 # This API is currently only supported by OpenAI.
-#
+# 
 # :::
-#
+# 
 # OpenAI tool calling performs tool calling in parallel by default. That means that if we ask a question like "What is the weather in Tokyo, New York, and Chicago?" and we have a tool for getting the weather, it will call the tool 3 times in parallel. We can force it to call only a single tool once by using the ``parallel_tool_call`` parameter.
 
 # First let's set up our tools and model:
@@ -59,4 +59,4 @@ llm_with_tools.invoke("Please call the first tool two times").tool_calls
 
 # As we can see, even though we explicitly told the model to call a tool twice, by disabling parallel tool calls the model was constrained to only calling one.
 
-#
+# 

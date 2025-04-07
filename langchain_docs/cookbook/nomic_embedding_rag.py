@@ -2,43 +2,41 @@
 # coding: utf-8
 
 # # Nomic Embeddings
-#
+# 
 # Nomic has released a new embedding model with strong performance for long context retrieval (8k context window).
-#
+# 
 # The cookbook walks through the process of building and deploying (via LangServe) a RAG app using Nomic embeddings.
-#
+# 
 # ![Screenshot 2024-02-01 at 9.14.15 AM.png](attachment:4015a2e2-3400-4539-bd93-0d987ec5a44e.png)
-#
+# 
 # ## Signup
-#
+# 
 # Get your API token, then run:
 # ```
 # ! nomic login
 # ```
-#
-# Then run with your generated API token
+# 
+# Then run with your generated API token 
 # ```
-# ! nomic login < token >
+# ! nomic login < token > 
 # ```
 
 # In[ ]:
 
 
-get_ipython().system(" nomic login")
+get_ipython().system(' nomic login')
 
 
 # In[ ]:
 
 
-get_ipython().system(" nomic login token")
+get_ipython().system(' nomic login token')
 
 
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install -U langchain-nomic langchain-chroma langchain-community tiktoken langchain-openai langchain"
-)
+get_ipython().system(' pip install -U langchain-nomic langchain-chroma langchain-community tiktoken langchain-openai langchain')
 
 
 # In[ ]:
@@ -53,7 +51,7 @@ os.environ["LANGSMITH_API_KEY"] = "api_key"
 
 
 # ## Document Loading
-#
+# 
 # Let's test 3 interesting blog posts.
 
 # In[ ]:
@@ -71,9 +69,9 @@ docs = [WebBaseLoader(url).load() for url in urls]
 docs_list = [item for sublist in docs for item in sublist]
 
 
-# ## Splitting
-#
-# Long context retrieval
+# ## Splitting 
+# 
+# Long context retrieval 
 
 # In[ ]:
 
@@ -97,9 +95,9 @@ for d in doc_splits:
     print("The document is %s tokens" % len(encoding.encode(d.page_content)))
 
 
-# ## Index
-#
-# Nomic embeddings [here](https://docs.nomic.ai/reference/endpoints/nomic-embed-text).
+# ## Index 
+# 
+# Nomic embeddings [here](https://docs.nomic.ai/reference/endpoints/nomic-embed-text). 
 
 # In[ ]:
 
@@ -126,15 +124,15 @@ retriever = vectorstore.as_retriever()
 
 
 # ## RAG Chain
-#
+# 
 # We can use the Mistral `v0.2`, which is [fine-tuned for 32k context](https://x.com/dchaplot/status/1734198245067243629?s=20).
-#
+# 
 # We can [use Ollama](https://ollama.ai/library/mistral) -
 # ```
 # ollama pull mistral:instruct
 # ```
-#
-# We can also run [GPT-4 128k](https://openai.com/blog/new-models-and-developer-products-announced-at-devday).
+# 
+# We can also run [GPT-4 128k](https://openai.com/blog/new-models-and-developer-products-announced-at-devday). 
 
 # In[ ]:
 
@@ -175,23 +173,23 @@ chain.invoke("What are the types of agent memory?")
 
 
 # **Mistral**
-#
+# 
 # Trace: 24k prompt tokens.
-#
+# 
 # * https://smith.langchain.com/public/3e04d475-ea08-4ee3-ae66-6416a93d8b08/r
-#
-# ---
-#
+# 
+# --- 
+# 
 # Some considerations are noted in the [needle in a haystack analysis](https://twitter.com/GregKamradt/status/1722386725635580292?lang=en):
-#
+# 
 # * LLMs may suffer with retrieval from large context depending on where the information is placed.
 
 # ## LangServe
-#
-# Create a LangServe app.
-#
+# 
+# Create a LangServe app. 
+# 
 # ![Screenshot 2024-02-01 at 10.36.05 AM.png](attachment:0afd4ea4-7ba2-4bfb-8e6d-57300e7a651f.png)
-#
+# 
 # ```
 # $ conda create -n template-testing-env python=3.11
 # $ conda activate template-testing-env
@@ -200,23 +198,27 @@ chain.invoke("What are the types of agent memory?")
 # $ poetry add langchain-nomic langchain_community tiktoken langchain-openai chromadb langchain
 # $ poetry install
 # ```
-#
+# 
 # ---
-#
+# 
 # Add above logic to new file `chain.py`.
-#
+# 
 # ---
-#
+# 
 # Add to `server.py` -
-#
+# 
 # ```
 # from app.chain import chain as nomic_chain
 # add_routes(app, nomic_chain, path="/nomic-rag")
 # ```
-#
-# Run -
+# 
+# Run - 
 # ```
 # $ poetry run langchain serve
 # ```
 
 # In[ ]:
+
+
+
+

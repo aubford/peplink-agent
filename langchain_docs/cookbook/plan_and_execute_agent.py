@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Plan-and-execute
-#
+# 
 # Plan-and-execute agents accomplish an objective by first planning what to do, then executing the sub tasks. This idea is largely inspired by [BabyAGI](https://github.com/yoheinakajima/babyagi) and then the ["Plan-and-Solve" paper](https://arxiv.org/abs/2305.04091).
-#
+# 
 # The planning is almost always done by an LLM.
-#
+# 
 # The execution is usually done by a separate agent (equipped with tools).
 
 # ## Imports
@@ -48,7 +48,7 @@ tools = [
 
 
 # ## Planner, Executor, and Agent
-#
+# 
 
 # In[5]:
 
@@ -70,3 +70,7 @@ agent.run(
 
 
 # In[ ]:
+
+
+
+

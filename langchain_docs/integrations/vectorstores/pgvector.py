@@ -67,17 +67,14 @@ from langchain_openai import OpenAIEmbeddings
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
 
-# In[2]:
+# In[ ]:
 
 
-from langchain_core.documents import Document
 from langchain_postgres import PGVector
-from langchain_postgres.vectorstores import PGVector
 
 # See docker command above to launch a postgres instance with pgvector enabled.
 connection = "postgresql+psycopg://langchain:langchain@localhost:6024/langchain"  # Uses psycopg3!
 collection_name = "my_docs"
-
 
 vector_store = PGVector(
     embeddings=embeddings,
@@ -95,6 +92,8 @@ vector_store = PGVector(
 
 # In[6]:
 
+
+from langchain_core.documents import Document
 
 docs = [
     Document(

@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # You.com
-#
+# 
 # >[you.com API](https://api.you.com) is a suite of tools designed to help developers ground the output of LLMs in the most recent, most accurate, most relevant information that may not have been included in their training dataset.
 
 # ## Setup
 
 # The retriever lives in the `langchain-community` package.
-#
+# 
 # You also need to set your you.com API key.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-community")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community')
 
 
 # In[4]:
@@ -114,7 +114,7 @@ print(response)
 
 
 # you need a model to use in the chain
-get_ipython().system("pip install --upgrade --quiet langchain-openai")
+get_ipython().system('pip install --upgrade --quiet langchain-openai')
 
 
 # In[98]:
@@ -213,3 +213,4 @@ output = chain.batch(
 
 for o in output:
     print(o)
+

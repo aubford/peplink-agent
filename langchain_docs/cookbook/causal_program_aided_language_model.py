@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Causal program-aided language (CPAL) chain
-#
+# 
 # The CPAL chain builds on the recent PAL to stop LLM hallucination. The problem with the PAL approach is that it hallucinates on a math problem with a nested chain of dependence. The innovation here is that this new CPAL approach includes causal structure to fix hallucination.
-#
+# 
 # The original [PR's description](https://github.com/langchain-ai/langchain/pull/6255) contains a full overview.
-#
+# 
 # Using the CPAL chain, the LLM translated this
-#
+# 
 #     "Tim buys the same number of pets as Cindy and Boris."
 #     "Cindy buys the same number of pets as Bill plus Bob."
 #     "Boris buys the same number of pets as Ben plus Beth."
@@ -17,21 +17,21 @@
 #     "Ben buys the same number of pets as Obama."
 #     "Beth buys the same number of pets as Obama."
 #     "If Obama buys one pet, how many pets total does everyone buy?"
-#
-#
+# 
+# 
 # into this
-#
+# 
 # ![complex-graph.png](/img/cpal_diagram.png).
-#
+# 
 # Outline of code examples demoed in this notebook.
-#
-# 1. CPAL's value against hallucination: CPAL vs PAL
-#     1.1 Complex narrative
-#     1.2 Unanswerable math word problem
-# 2. CPAL's three types of causal diagrams ([The Book of Why](https://en.wikipedia.org/wiki/The_Book_of_Why)).
-#     2.1 Mediator
-#     2.2 Collider
-#     2.3 Confounder
+# 
+# 1. CPAL's value against hallucination: CPAL vs PAL  
+#     1.1 Complex narrative  
+#     1.2 Unanswerable math word problem  
+# 2. CPAL's three types of causal diagrams ([The Book of Why](https://en.wikipedia.org/wiki/The_Book_of_Why)).   
+#     2.1 Mediator   
+#     2.2 Collider   
+#     2.3 Confounder   
 
 # In[1]:
 
@@ -47,17 +47,17 @@ pal_chain = PALChain.from_math_prompt(llm=llm, verbose=True)
 
 
 # ## CPAL's value against hallucination: CPAL vs PAL
-#
+# 
 # Like PAL, CPAL intends to reduce large language model (LLM) hallucination.
-#
+# 
 # The CPAL chain is different from the PAL chain for a couple of reasons.
-#
+# 
 # CPAL adds a causal structure (or DAG) to link entity actions (or math expressions).
 # The CPAL math expressions are modeling a chain of cause and effect relations, which can be intervened upon, whereas for the PAL chain math expressions are projected math identities.
-#
+# 
 
 # ### 1.1 Complex narrative
-#
+# 
 # Takeaway: PAL hallucinates, CPAL does not hallucinate.
 
 # In[2]:
@@ -96,7 +96,7 @@ SVG("web.svg")
 
 
 # ### Unanswerable math
-#
+# 
 # Takeaway: PAL hallucinates, where CPAL, rather than hallucinate, answers with _"unanswerable, narrative question and plot are incoherent"_
 
 # In[6]:
@@ -125,7 +125,7 @@ except Exception as e_msg:
 
 
 # ### Basic math
-#
+# 
 # #### Causal mediator
 
 # In[9]:
@@ -219,5 +219,6 @@ SVG("web.svg")
 # In[19]:
 
 
-get_ipython().run_line_magic("load_ext", "autoreload")
-get_ipython().run_line_magic("autoreload", "2")
+get_ipython().run_line_magic('load_ext', 'autoreload')
+get_ipython().run_line_magic('autoreload', '2')
+

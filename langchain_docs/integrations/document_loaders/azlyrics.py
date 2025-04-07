@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # AZLyrics
-#
+# 
 # >[AZLyrics](https://www.azlyrics.com/) is a large, legal, every day growing collection of lyrics.
-#
+# 
 # This covers how to load AZLyrics webpages into a document format that we can use downstream.
 
 # In[1]:
@@ -32,3 +32,7 @@ data
 
 
 # In[ ]:
+
+
+
+

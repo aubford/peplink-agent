@@ -2,85 +2,81 @@
 # coding: utf-8
 
 # ## Multi-modal RAG
-#
-# Many documents contain a mixture of content types, including text and images.
-#
+# 
+# Many documents contain a mixture of content types, including text and images. 
+# 
 # Yet, information captured in images is lost in most RAG applications.
-#
+# 
 # With the emergence of multimodal LLMs, like [GPT-4V](https://openai.com/research/gpt-4v-system-card), it is worth considering how to utilize images in RAG:
-#
-# `Option 1:`
-#
+# 
+# `Option 1:` 
+# 
 # * Use multimodal embeddings (such as [CLIP](https://openai.com/research/clip)) to embed images and text
 # * Retrieve both using similarity search
-# * Pass raw images and text chunks to a multimodal LLM for answer synthesis
-#
-# `Option 2:`
-#
+# * Pass raw images and text chunks to a multimodal LLM for answer synthesis 
+# 
+# `Option 2:` 
+# 
 # * Use a multimodal LLM (such as [GPT-4V](https://openai.com/research/gpt-4v-system-card), [LLaVA](https://llava.hliu.cc/), or [FUYU-8b](https://www.adept.ai/blog/fuyu-8b)) to produce text summaries from images
-# * Embed and retrieve text
-# * Pass text chunks to an LLM for answer synthesis
-#
+# * Embed and retrieve text 
+# * Pass text chunks to an LLM for answer synthesis 
+# 
 # `Option 3`
-#
+# 
 # * Use a multimodal LLM (such as [GPT-4V](https://openai.com/research/gpt-4v-system-card), [LLaVA](https://llava.hliu.cc/), or [FUYU-8b](https://www.adept.ai/blog/fuyu-8b)) to produce text summaries from images
-# * Embed and retrieve image summaries with a reference to the raw image
-# * Pass raw images and text chunks to a multimodal LLM for answer synthesis
-#
+# * Embed and retrieve image summaries with a reference to the raw image 
+# * Pass raw images and text chunks to a multimodal LLM for answer synthesis   
+# 
 # ---
-#
-# This cookbook highlights `Option 3`.
-#
+# 
+# This cookbook highlights `Option 3`. 
+# 
 # * We will use [Unstructured](https://unstructured.io/) to parse images, text, and tables from documents (PDFs).
 # * We will use the [multi-vector retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector) with [Chroma](https://www.trychroma.com/) to store raw text and images along with their summaries for retrieval.
 # * We will use GPT-4V for both image summarization (for retrieval) as well as final answer synthesis from join review of images and texts (or tables).
-#
+# 
 # ---
-#
+# 
 # A separate cookbook highlights `Option 1` [here](https://github.com/langchain-ai/langchain/blob/master/cookbook/multi_modal_RAG_chroma.ipynb).
-#
+# 
 # And option `Option 2` is appropriate for cases when a multi-modal LLM cannot be used for answer synthesis (e.g., cost, etc).
-#
+# 
 # ![ss_mm_rag.png](attachment:9bbbcfe4-2b85-4e76-996a-ce8d1497d34e.png)
-#
+# 
 # ## Packages
-#
+# 
 # In addition to the below pip packages, you will also need `poppler` ([installation instructions](https://pdf2image.readthedocs.io/en/latest/installation.html)) and `tesseract` ([installation instructions](https://tesseract-ocr.github.io/tessdoc/Installation.html)) in your system.
 
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install -U langchain openai langchain-chroma langchain-experimental # (newest versions required for multi-modal)"
-)
+get_ipython().system(' pip install -U langchain openai langchain-chroma langchain-experimental # (newest versions required for multi-modal)')
 
 
 # In[ ]:
 
 
-get_ipython().system(
-    ' pip install "unstructured[all-docs]" pillow pydantic lxml pillow matplotlib chromadb tiktoken'
-)
+get_ipython().system(' pip install "unstructured[all-docs]" pillow pydantic lxml pillow matplotlib chromadb tiktoken')
 
 
 # ## Data Loading
-#
+# 
 # ### Partition PDF tables, text, and images
-#
+#   
 # Let's look at a [popular blog](https://cloudedjudgement.substack.com/p/clouded-judgement-111023) by Jamin Ball.
-#
+# 
 # This is a great use-case because much of the information is captured in images (of tables or charts).
-#
+# 
 # We use `Unstructured` to partition it (see [blog post](https://blog.langchain.dev/semi-structured-multi-modal-rag/)).
-#
+# 
 # ---
-#
+# 
 # To skip `Unstructured` extraction:
-#
+# 
 # [Here](https://drive.google.com/file/d/1QlhGFIFwEkNEjQGOvV_hQe4bnOLDJwCR/view?usp=sharing) is a zip file with a sub-set of the extracted images and pdf.
-#
+# 
 # If you want to use the provided folder, then simply opt for a [pdf loader](https://python.langchain.com/docs/modules/data_connection/document_loaders/pdf) for the document:
-#
+# 
 # ```
 # from langchain_community.document_loaders import PyPDFLoader
 # loader = PyPDFLoader(path + fname)
@@ -150,15 +146,15 @@ texts_4k_token = text_splitter.split_text(joined_texts)
 
 
 # ## Multi-vector retriever
-#
+# 
 # Use [multi-vector-retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary) to index image (and / or text, table) summaries, but retrieve raw images (along with raw texts or tables).
-#
+# 
 # ### Text and Table summaries
-#
+# 
 # We will use GPT-4 to produce table and, optionall, text summaries.
-#
+# 
 # Text summaries are advised if using large chunk sizes (e.g., as set above, we use 4k token chunks).
-#
+# 
 # Summaries are used to retrieve raw tables and / or raw chunks of text.
 
 # In[33]:
@@ -211,12 +207,12 @@ text_summaries, table_summaries = generate_text_summaries(
 )
 
 
-# ### Image summaries
-#
+# ### Image summaries 
+# 
 # We will use [GPT-4V](https://openai.com/research/gpt-4v-system-card) to produce the image summaries.
-#
+# 
 # The API docs [here](https://platform.openai.com/docs/guides/vision):
-#
+# 
 # * We pass base64 encoded images
 
 # In[3]:
@@ -287,9 +283,9 @@ img_base64_list, image_summaries = generate_img_summaries(fpath)
 
 
 # ### Add to vectorstore
-#
-# Add raw docs and doc summaries to [Multi Vector Retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary):
-#
+# 
+# Add raw docs and doc summaries to [Multi Vector Retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/multi_vector#summary): 
+# 
 # * Store the raw texts, tables, and images in the `docstore`.
 # * Store the texts, table summaries, and image summaries in the `vectorstore` for efficient semantic retrieval.
 
@@ -365,9 +361,9 @@ retriever_multi_vector_img = create_multi_vector_retriever(
 
 
 # ## RAG
-#
+# 
 # ### Build retriever
-#
+# 
 # We need to bin the retrieved doc(s) into the correct parts of the GPT-4V prompt template.
 
 # In[47]:
@@ -510,7 +506,7 @@ chain_multimodal_rag = multi_modal_rag_chain(retriever_multi_vector_img)
 
 
 # ### Check
-#
+# 
 # Examine retrieval; we get back images that are relevant to our question.
 
 # In[48]:
@@ -543,7 +539,7 @@ plt_img_base64(docs[0])
 
 
 # ### Sanity Check
-#
+# 
 # Why does this work? Let's look back at the image that we stored ...
 
 # In[45]:
@@ -553,7 +549,7 @@ plt_img_base64(img_base64_list[3])
 
 
 # ... here is the corresponding summary, which we embedded and used in similarity search.
-#
+# 
 # It's pretty reasonable that this image is indeed retrieved from our `query` based on it's similarity to this summary.
 
 # In[44]:
@@ -563,7 +559,7 @@ image_summaries[3]
 
 
 # ### RAG
-#
+# 
 # Now let's run RAG and test the ability to synthesize an answer to our question.
 
 # In[62]:
@@ -574,23 +570,23 @@ chain_multimodal_rag.invoke(query)
 
 
 # Here is the trace where we can see what is passed to the LLM:
-#
+#  
 # * Question 1 [Trace focused on investment advice](https://smith.langchain.com/public/d77b7b52-4128-4772-82a7-c56eb97e8b97/r)
 # * Question 2 [Trace focused on table extraction](https://smith.langchain.com/public/4624f086-1bd7-4284-9ca9-52fd7e7a4568/r)
-#
+# 
 # For question 1, we can see that we pass 3 images along with a text chunk:
 
 # ![trace.png](attachment:2f72d65f-e9b5-4e2e-840a-8d111792d20b.png)
 
 # ### Considerations
-#
+# 
 # **Retrieval**
-#
+#  
 # * Retrieval is performed based upon similarity to image summaries as well as text chunks.
 # * This requires some careful consideration because image retrieval can fail if there are competing text chunks.
 # * To mitigate this, I produce larger (4k token) text chunks and summarize them for retrieval.
-#
+# 
 # **Image Size**
-#
+# 
 # * The quality of answer synthesis appears to be sensitive to image size, [as expected](https://platform.openai.com/docs/guides/vision).
 # * I'll do evals soon to test this more carefully.

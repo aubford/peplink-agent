@@ -4,34 +4,32 @@
 # # Tavily Search
 
 # [Tavily's Search API](https://tavily.com) is a search engine built specifically for AI agents (LLMs), delivering real-time, accurate, and factual results at speed.
-#
+# 
 # ## Overview
-#
+# 
 # ### Integration details
-# | Class | Package | Serializable | [JS support](https://js.langchain.com/docs/integrations/tools/tavily_search) |  Package latest |
-# | :--- | :--- | :---: | :---: | :---: |
-# | [TavilySearchResults](https://python.langchain.com/api_reference/community/tools/langchain_community.tools.tavily_search.tool.TavilySearchResults.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ❌ | ✅ |  ![PyPI - Version](https://img.shields.io/pypi/v/langchain-community?style=flat-square&label=%20) |
-#
+# | Class                                                         | Package                                                        | Serializable | [JS support](https://js.langchain.com/docs/integrations/tools/tavily_search) |  Package latest |
+# |:--------------------------------------------------------------|:---------------------------------------------------------------| :---: | :---: | :---: |
+# | [TavilySearch](https://github.com/tavily-ai/langchain-tavily) | [langchain-tavily](https://pypi.org/project/langchain-tavily/) | ✅ | ❌  |  ![PyPI - Version](https://img.shields.io/pypi/v/langchain-tavily?style=flat-square&label=%20) |
+# 
 # ### Tool features
-# | [Returns artifact](/docs/how_to/tool_artifacts/) | Native async | Return data | Pricing |
-# | :---: | :---: | :---: | :---: |
-# | ✅ | ✅ | Title, URL, content, answer | 1,000 free searches / month |
-#
-#
+# | [Returns artifact](/docs/how_to/tool_artifacts/) | Native async |                       Return data                        | Pricing |
+# | :---: | :---: |:--------------------------------------------------------:| :---: |
+# | ❌ | ✅ | title, URL, content snippet, raw_content, answer, images | 1,000 free searches / month |
+# 
+# 
 # ## Setup
-#
-# The integration lives in the `langchain-community` package. We also need to install the `tavily-python` package.
+# 
+# The integration lives in the `langchain-tavily` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", 'install -qU "langchain-community>=0.2.11" tavily-python'
-)
+get_ipython().run_line_magic('pip', 'install -qU langchain-tavily')
 
 
 # ### Credentials
-#
+# 
 # We also need to set our Tavily API key. You can get an API key by visiting [this site](https://app.tavily.com/sign-in) and creating an account.
 
 # In[2]:
@@ -44,52 +42,65 @@ if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 
 
-# It's also helpful (but not needed) to set up [LangSmith](https://smith.langchain.com/) for best-in-class observability:
-
-# In[3]:
-
-
-# os.environ["LANGSMITH_TRACING"] = "true"
-# os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
-
-
 # ## Instantiation
-#
-# Here we show how to instantiate an instance of the Tavily search tools, with
+# 
+# Here we show how to instantiate an instance of the Tavily search tool. The tool accepts various parameters to customize the search. After instantiation we invoke the tool with a simple query. This tool allows you to complete search queries using Tavily's Search API endpoint.
+# 
+# Instantiation
+# The tool accepts various parameters during instantiation:
+# 
+# - max_results (optional, int): Maximum number of search results to return. Default is 5.
+# - topic (optional, str): Category of the search. Can be "general", "news", or "finance". Default is "general".
+# - include_answer (optional, bool): Include an answer to original query in results. Default is False.
+# - include_raw_content (optional, bool): Include cleaned and parsed HTML of each search result. Default is False.
+# - include_images (optional, bool): Include a list of query related images in the response. Default is False.
+# - include_image_descriptions (optional, bool): Include descriptive text for each image. Default is False.
+# - search_depth (optional, str): Depth of the search, either "basic" or "advanced". Default is "basic".
+# - time_range (optional, str): The time range back from the current date to filter results - "day", "week", "month", or "year". Default is None.
+# - include_domains (optional, List[str]): List of domains to specifically include. Default is None.
+# - exclude_domains (optional, List[str]): List of domains to specifically exclude. Default is None.
+# 
+# For a comprehensive overview of the available parameters, refer to the [Tavily Search API documentation](https://docs.tavily.com/documentation/api-reference/endpoint/search)
 
-# In[1]:
+# In[ ]:
 
 
-from langchain_community.tools import TavilySearchResults
+from langchain_tavily import TavilySearch
 
-tool = TavilySearchResults(
+tool = TavilySearch(
     max_results=5,
-    search_depth="advanced",
-    include_answer=True,
-    include_raw_content=True,
-    include_images=True,
-    # include_domains=[...],
-    # exclude_domains=[...],
-    # name="...",            # overwrite default tool name
-    # description="...",     # overwrite default tool description
-    # args_schema=...,       # overwrite default args_schema: BaseModel
+    topic="general",
+    # include_answer=False,
+    # include_raw_content=False,
+    # include_images=False,
+    # include_image_descriptions=False,
+    # search_depth="basic",
+    # time_range="day",
+    # include_domains=None,
+    # exclude_domains=None
 )
 
 
 # ## Invocation
-#
+# 
 # ### [Invoke directly with args](/docs/concepts/tools)
-#
-# The `TavilySearchResults` tool takes a single "query" argument, which should be a natural language query:
+# 
+# The Tavily search tool accepts the following arguments during invocation:
+# - `query` (required): A natural language search query
+# - The following arguments can also be set during invocation : `include_images`, `search_depth` , `time_range`, `include_domains`, `exclude_domains`, `include_images`
+# - For reliability and performance reasons, certain parameters that affect response size cannot be modified during invocation: `include_answer` and `include_raw_content`. These limitations prevent unexpected context window issues and ensure consistent results.
+# 
+# 
+# NOTE: The optional arguments are available for agents to dynamically set, if you set an argument during instantiation and then invoke the tool with a different value, the tool will use the value you passed during invocation.
 
-# In[2]:
+# In[ ]:
 
 
 tool.invoke({"query": "What happened at the last wimbledon"})
 
 
 # ### [Invoke with ToolCall](/docs/concepts/tools)
-#
+# 
 # We can also invoke the tool with a model-generated ToolCall, in which case a ToolMessage will be returned:
 
 # In[5]:
@@ -108,32 +119,25 @@ tool_msg = tool.invoke(model_generated_tool_call)
 print(tool_msg.content[:400])
 
 
-# In[20]:
-
-
-# The artifact is a dict with richer, raw results
-{k: type(v) for k, v in tool_msg.artifact.items()}
-
-
-# In[21]:
-
-
-import json
-
-# Abbreviate the results for demo purposes
-print(json.dumps({k: str(v)[:200] for k, v in tool_msg.artifact.items()}, indent=2))
-
-
-# ## Chaining
-#
-# We can use our tool in a chain by first binding it to a [tool-calling model](/docs/how_to/tool_calling/) and then calling it:
-#
+# ## Use within an agent
+# 
+# We can use our tools directly with an agent executor by binding the tool to the agent. This gives the agent the ability to dynamically set the available arguments to the Tavily search tool.
+# 
+# In the below example when we ask the agent to find "What nation hosted the Euro 2024? Include only wikipedia sources." the agent will dynamically set the argments and invoke Tavily search tool : Invoking `tavily_search` with `{'query': 'Euro 2024 host nation', 'include_domains': ['wikipedia.org']`
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs customVarName="llm" />
-#
+# 
 
-# In[ ]:
+# In[10]:
+
+
+if not os.environ.get("OPENAI_API_KEY"):
+    os.environ["OPENAI_API_KEY"] = getpass.getpass("OPENAI_API_KEY:\n")
+
+
+# In[1]:
 
 
 # | output: false
@@ -145,42 +149,37 @@ from langchain.chat_models import init_chat_model
 llm = init_chat_model(model="gpt-4o", model_provider="openai", temperature=0)
 
 
-# In[23]:
+# We will need to install langgraph:
+
+# In[ ]:
 
 
-import datetime
+get_ipython().run_line_magic('pip', 'install -qU langgraph')
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnableConfig, chain
 
-today = datetime.datetime.today().strftime("%D")
-prompt = ChatPromptTemplate(
-    [
-        ("system", f"You are a helpful assistant. The date today is {today}."),
-        ("human", "{user_input}"),
-        ("placeholder", "{messages}"),
-    ]
+# In[2]:
+
+
+from langchain_tavily import TavilySearch
+from langgraph.prebuilt import create_react_agent
+
+# Initialize Tavily Search Tool
+tavily_search_tool = TavilySearch(
+    max_results=5,
+    topic="general",
 )
 
-# specifying tool_choice will force the model to call this tool.
-llm_with_tools = llm.bind_tools([tool])
+agent = create_react_agent(llm, [tavily_search_tool])
 
-llm_chain = prompt | llm_with_tools
+user_input = "What nation hosted the Euro 2024? Include only wikipedia sources."
 
+for step in agent.stream(
+    {"messages": user_input},
+    stream_mode="values",
+):
+    step["messages"][-1].pretty_print()
 
-@chain
-def tool_chain(user_input: str, config: RunnableConfig):
-    input_ = {"user_input": user_input}
-    ai_msg = llm_chain.invoke(input_, config=config)
-    tool_msgs = tool.batch(ai_msg.tool_calls, config=config)
-    return llm_chain.invoke({**input_, "messages": [ai_msg, *tool_msgs]}, config=config)
-
-
-tool_chain.invoke("who won the last womens singles wimbledon")
-
-
-# Here's the [LangSmith trace](https://smith.langchain.com/public/b43232c1-b243-4a7f-afeb-5fba8c84ba56/r) for this run.
 
 # ## API reference
-#
-# For detailed documentation of all TavilySearchResults features and configurations head to the API reference: https://python.langchain.com/api_reference/community/tools/langchain_community.tools.tavily_search.tool.TavilySearchResults.html
+# 
+# For detailed documentation of all Tavily Search API features and configurations head to the API reference: https://docs.tavily.com/documentation/api-reference/endpoint/search

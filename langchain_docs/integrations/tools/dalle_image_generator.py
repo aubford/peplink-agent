@@ -2,33 +2,31 @@
 # coding: utf-8
 
 # # Dall-E Image Generator
-#
+# 
 # >[OpenAI Dall-E](https://openai.com/dall-e-3) are text-to-image models developed by `OpenAI` using deep learning methodologies to generate digital images from natural language descriptions, called "prompts".
-#
+# 
 # This notebook shows how you can generate images from a prompt synthesized using an OpenAI LLM. The images are generated using `Dall-E`, which uses the same OpenAI API key as the LLM.
 
 # In[ ]:
 
 
 # Needed if you would like to display images in the notebook
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  opencv-python scikit-image langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  opencv-python scikit-image langchain-community')
 
 
-# In[4]:
+# In[ ]:
 
 
 import os
 
 from langchain_openai import OpenAI
 
-os.environ["OPENAI_API_KEY"] = "<your-key-here>"
+os.environ["OPENAI_API_KEY"] = "insertapikey"
 
 
 # ## Run as a chain
 
-# In[2]:
+# In[ ]:
 
 
 from langchain.chains import LLMChain
@@ -50,7 +48,7 @@ chain = LLMChain(llm=llm, prompt=prompt)
 image_url = DallEAPIWrapper().run(chain.run("halloween night at a haunted museum"))
 
 
-# In[4]:
+# In[ ]:
 
 
 image_url
@@ -87,11 +85,35 @@ else:
 
 # ## Run as a tool with an agent
 
-# In[9]:
+# In[ ]:
 
 
-from langchain.agents import initialize_agent, load_tools
+from langchain_community.tools.openai_dalle_image_generation import (
+    OpenAIDALLEImageGenerationTool,
+)
+from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
-tools = load_tools(["dalle-image-generator"])
-agent = initialize_agent(tools, llm, agent="zero-shot-react-description", verbose=True)
-output = agent.run("Create an image of a halloween night at a haunted museum")
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+api_wrapper = DallEAPIWrapper()
+dalle_tool = OpenAIDALLEImageGenerationTool(api_wrapper=api_wrapper)
+
+tools = [dalle_tool]
+
+agent = create_react_agent(llm, tools, debug=True)
+
+# User prompt
+prompt = "Create an image of a halloween night at a haunted museum"
+
+messages = [
+    # "role": "user" Indicates message is coming from user
+    # "content": prompt is where the user's input is placed
+    {"role": "user", "content": prompt}
+]
+
+# Sending the message to be processed and adjusted by ChatGPT, after which is sent through DALL-E
+response = agent.invoke({"messages": messages})
+
+print(response)
+

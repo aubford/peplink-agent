@@ -52,7 +52,7 @@ async for chunk in chat.astream("Write me a 1 verse song about goldfish on the m
 # 
 # This method is useful if you're streaming output from a larger LLM application that contains multiple steps (e.g., an LLM chain composed of a prompt, llm and parser).
 
-# In[11]:
+# In[3]:
 
 
 from langchain_anthropic.chat_models import ChatAnthropic
@@ -61,7 +61,7 @@ chat = ChatAnthropic(model="claude-3-haiku-20240307")
 idx = 0
 
 async for event in chat.astream_events(
-    "Write me a 1 verse song about goldfish on the moon", version="v1"
+    "Write me a 1 verse song about goldfish on the moon"
 ):
     idx += 1
     if idx >= 5:  # Truncate the output

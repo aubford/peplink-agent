@@ -2,38 +2,38 @@
 # coding: utf-8
 
 # # Outlines
-#
+# 
 # This will help you getting started with Outlines LLM. For detailed documentation of all Outlines features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/llms/langchain_community.llms.outlines.Outlines.html).
-#
+# 
 # [Outlines](https://github.com/outlines-dev/outlines) is a library for constrained language generation. It allows you to use large language models (LLMs) with various backends while applying constraints to the generated output.
-#
+# 
 # ## Overview
-#
+# 
 # ### Integration details
 # | Class | Package | Local | Serializable | JS support | Package downloads | Package latest |
 # | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
 # | [Outlines](https://python.langchain.com/api_reference/community/llms/langchain_community.llms.outlines.Outlines.html) | [langchain-community](https://python.langchain.com/api_reference/community/index.html) | ✅ | beta | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain-community?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-community?style=flat-square&label=%20) |
-#
+# 
 # ## Setup
-#
+# 
 # To access Outlines models you'll need to have an internet connection to download the model weights from huggingface. Depending on the backend you need to install the required dependencies (see [Outlines docs](https://dottxt-ai.github.io/outlines/latest/installation/))
-#
+# 
 # ### Credentials
-#
+# 
 # There is no built-in auth mechanism for Outlines.
-#
+# 
 # ## Installation
-#
+# 
 # The LangChain Outlines integration lives in the `langchain-community` package and requires the `outlines` library:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-community outlines")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community outlines')
 
 
 # ## Instantiation
-#
+# 
 # Now we can instantiate our model object and generate chat completions:
 
 # In[ ]:
@@ -83,7 +83,7 @@ chain.invoke(
 
 
 # ### Streaming
-#
+# 
 # Outlines supports streaming of tokens:
 
 # In[ ]:
@@ -94,9 +94,9 @@ for chunk in model.stream("Count to 10 in French:"):
 
 
 # ### Constrained Generation
-#
+# 
 # Outlines allows you to apply various constraints to the generated output:
-#
+# 
 # #### Regex Constraint
 
 # In[ ]:
@@ -156,9 +156,9 @@ response
 
 
 # ## API reference
-#
+# 
 # For detailed documentation of all ChatOutlines features and configurations head to the API reference: https://python.langchain.com/api_reference/community/chat_models/langchain_community.chat_models.outlines.ChatOutlines.html
-#
-# ## Outlines Documentation:
-#
+# 
+# ## Outlines Documentation: 
+# 
 # https://dottxt-ai.github.io/outlines/latest/

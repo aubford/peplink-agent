@@ -2,17 +2,15 @@
 # coding: utf-8
 
 # # Google Cloud Storage File
-#
+# 
 # >[Google Cloud Storage](https://en.wikipedia.org/wiki/Google_Cloud_Storage) is a managed service for storing unstructured data.
-#
+# 
 # This covers how to load document objects from an `Google Cloud Storage (GCS) file object (blob)`.
 
 # In[2]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain-google-community[gcs]"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-google-community[gcs]')
 
 
 # In[1]:
@@ -48,3 +46,4 @@ def load_pdf(file_path):
 loader = GCSFileLoader(
     project_name="aist", bucket="testing-hwc", blob="fake.pdf", loader_func=load_pdf
 )
+

@@ -2,35 +2,35 @@
 # coding: utf-8
 
 # # Amazon MemoryDB
-#
+# 
 # >[Vector Search](https://docs.aws.amazon.com/memorydb/latest/devguide/vector-search.html/) introduction and langchain integration guide.
-#
+# 
 # ## What is Amazon MemoryDB?
-#
+# 
 # MemoryDB is compatible with Redis OSS, a popular open source data store, enabling you to quickly build applications using the same flexible and friendly Redis OSS data structures, APIs, and commands that they already use today. With MemoryDB, all of your data is stored in memory, which enables you to achieve microsecond read and single-digit millisecond write latency and high throughput. MemoryDB also stores data durably across multiple Availability Zones (AZs) using a Multi-AZ transactional log to enable fast failover, database recovery, and node restarts.
-#
-#
-# ## Vector search for MemoryDB
-#
+# 
+# 
+# ## Vector search for MemoryDB 
+# 
 # Vector search for MemoryDB extends the functionality of MemoryDB. Vector search can be used in conjunction with existing MemoryDB functionality. Applications that do not use vector search are unaffected by its presence. Vector search is available in all Regions that MemoryDB is available. You can use your existing MemoryDB data or Redis OSS API to build machine learning and generative AI use cases, such as retrieval-augmented generation, anomaly detection, document retrieval, and real-time recommendations.
-#
+# 
 # * Indexing of multiple fields in Redis hashes and `JSON`
 # * Vector similarity search (with `HNSW` (ANN) or `FLAT` (KNN))
 # * Vector Range Search (e.g. find all vectors within a radius of a query vector)
 # * Incremental indexing without performance loss
-#
+# 
 
 # ## Setting up
-#
-#
+# 
+# 
 # ### Install Redis Python client
-#
+# 
 # `Redis-py` is a python  client that can be used to connect to MemoryDB
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  redis langchain-aws")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  redis langchain-aws')
 
 
 # In[3]:
@@ -42,15 +42,15 @@ embeddings = BedrockEmbeddings()
 
 
 # ### MemoryDB Connection
-#
+# 
 # Valid Redis Url schemas are:
 # 1. `redis://`  - Connection to Redis cluster, unencrypted
 # 2. `rediss://` - Connection to Redis cluster, with TLS encryption
-#
+# 
 # More information about additional connection parameters can be found in the [redis-py documentation](https://redis-py.readthedocs.io/en/stable/connections.html).
 
 # ### Sample data
-#
+# 
 # First we will describe some sample data so that the various attributes of the Redis vector store can be demonstrated.
 
 # In[4]:
@@ -93,13 +93,13 @@ index_name = "users"
 
 
 # ### Create MemoryDB vector store
-#
-# The InMemoryVectorStore instance can be initialized using the below methods
+# 
+# The InMemoryVectorStore instance can be initialized using the below methods 
 # - ``InMemoryVectorStore.__init__`` - Initialize directly
 # - ``InMemoryVectorStore.from_documents`` - Initialize from a list of ``Langchain.docstore.Document`` objects
 # - ``InMemoryVectorStore.from_texts`` - Initialize from a list of texts (optionally with metadata)
 # - ``InMemoryVectorStore.from_existing_index`` - Initialize from an existing MemoryDB index
-#
+# 
 
 # In[7]:
 
@@ -119,9 +119,9 @@ vds.index_name
 
 
 # ## Querying
-#
+# 
 # There are multiple ways to query the ``InMemoryVectorStore``  implementation based on what use case you have:
-#
+# 
 # - ``similarity_search``: Find the most similar vectors to a given vector.
 # - ``similarity_search_with_score``: Find the most similar vectors to a given vector and return the vector distance
 # - ``similarity_search_limit_score``: Find the most similar vectors to a given vector and limit the number of results to the ``score_threshold``
@@ -173,9 +173,9 @@ vds.add_texts(new_document, new_metadata)
 
 
 # ## MemoryDB as Retriever
-#
+# 
 # Here we go over different options for using the vector store as a retriever.
-#
+# 
 # There are three different search methods we can use to do retrieval. By default, it will use semantic similarity.
 
 # In[26]:
@@ -258,3 +258,4 @@ InMemoryVectorStore.drop_index(
     delete_documents=True,
     redis_url="redis://localhost:6379",
 )
+

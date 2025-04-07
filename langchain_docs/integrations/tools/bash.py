@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Shell (bash)
-#
+# 
 # Giving agents access to the shell is powerful (though risky outside a sandboxed environment).
-#
+# 
 # The LLM can use it to execute any shell commands. A common use case for this is letting the LLM interact with your local file system.
-#
+# 
 # **Note:** Shell tool does not work with Windows OS.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-community")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community')
 
 
 # In[ ]:
@@ -30,7 +30,7 @@ print(shell_tool.run({"commands": ["echo 'Hello World!'", "time"]}))
 
 
 # ### Use with Agents
-#
+# 
 # As with all tools, these can be given to an agent to accomplish more complex tasks. Let's have the agent fetch some links from a web page.
 
 # In[3]:
@@ -53,3 +53,7 @@ self_ask_with_search.run(
 
 
 # In[ ]:
+
+
+
+

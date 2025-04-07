@@ -6,23 +6,23 @@
 # ## Overview
 
 # The intention of this notebook is to provide a means of testing functionality in the Langchain Document Loader for Blockchain.
-#
+# 
 # Initially this Loader supports:
-#
+# 
 # *   Loading NFTs as Documents from NFT Smart Contracts (ERC721 and ERC1155)
 # *   Ethereum Mainnnet, Ethereum Testnet, Polygon Mainnet, Polygon Testnet (default is eth-mainnet)
 # *   Alchemy's getNFTsForCollection API
-#
+# 
 # It can be extended if the community finds value in this loader.  Specifically:
-#
+# 
 # *   Additional APIs can be added (e.g. Tranction-related APIs)
-#
+# 
 # This Document Loader Requires:
-#
+# 
 # *   A free [Alchemy API Key](https://www.alchemy.com/)
-#
+# 
 # The output takes the following format:
-#
+# 
 # - pageContent= Individual NFT
 # - metadata=\{'source': '0x1a92f7381b9f03921564a437210bb9396471050c', 'blockchain': 'eth-mainnet', 'tokenId': '0x15'\}
 
@@ -79,3 +79,4 @@ blockchainLoader = BlockchainDocumentLoader(
 nfts = blockchainLoader.load()
 
 nfts[:2]
+

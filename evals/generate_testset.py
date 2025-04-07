@@ -301,8 +301,9 @@ class GenerateTestSet:
         llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
 
         # Create four examples with different devices and use cases
-        example_1_documents = """
-DOCUMENT 1:
+        example_1_documents = '''
+<DOCUMENT 1>
+"""
 ## Post
 
 ### Title: My connection IS SLOW
@@ -325,13 +326,18 @@ Does this mean that if I am using Strong DNS, this might be slowing it down?
     No, you just need to configure outbound policy rules.
   </reply>
 </comment>
+"""
 
-DOCUMENT 2:
+<DOCUMENT 2>
+"""
 hi this is Dan and in this video I want to explain how to configure the outbound policy rules there are several options available and they all have different use cases when in doubt the best option is the power-fusion option that will use the fastest connection based on the FQDN protocol it is the best option to use for most simple use cases or if you are unsure I would recommend taking a look at the manual to learn about the other options available to you
+"""
 
-DOCUMENT 3:
+<DOCUMENT 3>
+"""
 You know about classes, but you may be thinking which traffic goes into each class? And how many classes should I configure? Well, let me help you simplify this You don't need to use every combination of class and drop probability. There is a real time class for voice and interactive video. This is a high priority class next, a class for critical data. This is for your business applications, databases, website, traffic. We could split this into two classes. If you do end up splitting your high priority class into two classes, make sure you set the outbound policy to use low-latency otherwise your equipment will not be able to handle the load and you may encounter a "unable to handle load" error. I would recommend starting with the default settings and then adding classes as needed. In all classes are not as complex as they may seem.
 """
+'''
 
         example_1_output = """
 {
@@ -340,8 +346,9 @@ You know about classes, but you may be thinking which traffic goes into each cla
 }
 """
 
-        example_2_documents = """
-DOCUMENT 1:
+        example_2_documents = '''
+<DOCUMENT 1>
+"""
 ## Post
 
 ### Title: How to optimize for MLRPV protocol?
@@ -355,8 +362,10 @@ Our setup is using MLRPV protocol with 3 patchworked units in a BAFTA cluster.  
 <comment> 
 To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
 </comment>
+"""
 
-DOCUMENT 2:
+<DOCUMENT 2>
+"""
 ## Post
 
 ### Title: What does the MLRPV-ensemble mode do?
@@ -370,10 +379,13 @@ MLRPV protocol is a protocol that is typically used for section 9434 robotics im
 <comment> 
 To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
 </comment>
+"""
 
-DOCUMENT 3:
+<DOCUMENT 3>
+"""
 one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for section 9434 robotics situations it was added to the system controller in version 6.1 and can be used with any type of robot cluster you might come across and what have you I would recommend also taking a look at the ensemble controller section because that also has some features that are relevant to that protocol at the end of the day it just makes it really easy to get your robots synchronized well
 """
+'''
 
         example_2_output = """
 {
@@ -382,9 +394,20 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
 }
 """
 
-        # Create separate system and human message templates
+        # Create system prompt with examples
+        system_prompt_with_examples = (
+            self.system_prompt + "\n\nHere are some examples:\n\n"
+        )
+
+        # Add example 1
+        system_prompt_with_examples += f"Example 1:\n# Documents:\n{example_1_documents}\n\nOutput:\n{example_1_output}\n\n"
+
+        # Add example 2
+        system_prompt_with_examples += f"Example 2:\nDocuments:\n{example_2_documents}\n\nOutput:\n{example_2_output}\n\n"
+
+        # Create system and human message templates
         system_message_template = SystemMessagePromptTemplate.from_template(
-            "{system_prompt}"
+            "{system_prompt_with_examples}"
         )
 
         human_template = """
@@ -393,22 +416,6 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
 {documents}
 
 {format_instructions}
-
-Here are some examples:
-
-Example 1:
-# Documents:
-{example_1_documents}
-
-Output:
-{example_1_output}
-
-Example 2:
-Documents:
-{example_2_documents}
-
-Output:
-{example_2_output}
 
 Generate a query and answer based on the documents provided above according to the guidelines provided.
 """
@@ -442,13 +449,9 @@ Generate a query and answer based on the documents provided above according to t
 
             # Prepare the messages
             chat_messages = prompt.format_messages(
-                system_prompt=self.system_prompt,
+                system_prompt_with_examples=system_prompt_with_examples,
                 documents=documents_text,
                 format_instructions=format_instructions,
-                example_1_documents=example_1_documents,
-                example_1_output=example_1_output,
-                example_2_documents=example_2_documents,
-                example_2_output=example_2_output,
             )
 
             # Call the LLM with structured messages

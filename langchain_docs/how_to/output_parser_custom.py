@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # How to create a custom Output Parser
-#
+# 
 # In some situations you may want to implement a custom [parser](/docs/concepts/output_parsers/) to structure the model output into a custom format.
-#
+# 
 # There are two ways to implement a custom parser:
-#
+# 
 # 1. Using `RunnableLambda` or `RunnableGenerator` in [LCEL](/docs/concepts/lcel/) -- we strongly recommend this for most use cases
 # 2. By inheriting from one of the base classes for out parsing -- this is the hard way of doing things
-#
+# 
 # The difference between the two approaches are mostly superficial and are mainly in terms of which callbacks are triggered (e.g., `on_chain_start` vs. `on_parser_start`), and how a runnable lambda vs. a parser might be visualized in a tracing platform like LangSmith.
 
 # ## Runnable Lambdas and Generators
-#
+# 
 # The recommended way to parse is using **runnable lambdas** and **runnable generators**!
-#
+# 
 # Here, we will make a simple parse that inverts the case of the output from the model.
-#
+# 
 # For example, if the model outputs: "Meow", the parser will produce "mEOW".
 
 # In[1]:
@@ -41,9 +41,9 @@ chain.invoke("hello")
 
 
 # :::tip
-#
+# 
 # LCEL automatically upgrades the function `parse` to `RunnableLambda(parse)` when composed using a `|`  syntax.
-#
+# 
 # If you don't like that you can manually import `RunnableLambda` and then run`parse = RunnableLambda(parse)`.
 # :::
 
@@ -57,7 +57,7 @@ for chunk in chain.stream("tell me about yourself in one sentence"):
 
 
 # No, it doesn't because the parser aggregates the input before parsing the output.
-#
+# 
 # If we want to implement a streaming parser, we can have the parser accept an iterable over the input instead and yield
 # the results as they're available.
 
@@ -76,7 +76,7 @@ streaming_parse = RunnableGenerator(streaming_parse)
 
 
 # :::important
-#
+# 
 # Please wrap the streaming parser in `RunnableGenerator` as we may stop automatically upgrading it with the `|` syntax.
 # :::
 
@@ -99,21 +99,21 @@ for chunk in chain.stream("tell me about yourself in one sentence"):
 # ## Inheriting from Parsing Base Classes
 
 # Another approach to implement a parser is by inheriting from `BaseOutputParser`, `BaseGenerationOutputParser` or another one of the base parsers depending on what you need to do.
-#
+# 
 # In general, we **do not** recommend this approach for most use cases as it results in more code to write without significant benefits.
-#
+# 
 # The simplest kind of output parser extends the `BaseOutputParser` class and must implement the following methods:
-#
+# 
 # * `parse`: takes the string output from the model and parses it
 # * (optional) `_type`: identifies the name of the parser.
-#
+# 
 # When the output from the chat model or LLM is malformed, the can throw an `OutputParserException` to indicate that parsing fails because of bad input. Using this exception allows code that utilizes the parser to handle the exceptions in a consistent manner.
-#
+# 
 # :::tip Parsers are Runnables! 🏃
-#
+# 
 # Because `BaseOutputParser` implements the `Runnable` interface, any custom parser you will create this way will become valid LangChain Runnables and will benefit from automatic async support, batch interface, logging support etc.
 # :::
-#
+# 
 
 # ### Simple Parser
 
@@ -212,11 +212,11 @@ chain.invoke("say OKAY or NO")
 # :::
 
 # ### Parsing Raw Model Outputs
-#
-# Sometimes there is additional metadata on the model output that is important besides the raw text. One example of this is tool calling, where arguments intended to be passed to called functions are returned in a separate property. If you need this finer-grained control, you can instead subclass the `BaseGenerationOutputParser` class.
-#
+# 
+# Sometimes there is additional metadata on the model output that is important besides the raw text. One example of this is tool calling, where arguments intended to be passed to called functions are returned in a separate property. If you need this finer-grained control, you can instead subclass the `BaseGenerationOutputParser` class. 
+# 
 # This class requires a single method `parse_result`. This method takes raw model output (e.g., list of `Generation` or `ChatGeneration`) and returns the parsed output.
-#
+# 
 # Supporting both `Generation` and `ChatGeneration` allows the parser to work with both regular LLMs as well as with Chat Models.
 
 # In[22]:
@@ -270,3 +270,4 @@ chain = anthropic | StrInvertCase()
 
 
 chain.invoke("Tell me a short sentence about yourself")
+

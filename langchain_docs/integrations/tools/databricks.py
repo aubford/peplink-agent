@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # Databricks Unity Catalog (UC)
-#
+# 
 # This notebook shows how to use UC functions as LangChain tools, with both LangChain and LangGraph agent APIs.
-#
+# 
 # See Databricks documentation ([AWS](https://docs.databricks.com/en/sql/language-manual/sql-ref-syntax-ddl-create-sql-function.html)|[Azure](https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/sql-ref-syntax-ddl-create-sql-function)|[GCP](https://docs.gcp.databricks.com/en/sql/language-manual/sql-ref-syntax-ddl-create-sql-function.html)) to learn how to create SQL or Python functions in UC. Do not skip function and parameter comments, which are critical for LLMs to call functions properly.
-#
+# 
 # In this example notebook, we create a simple Python function that executes arbitrary code and use it as a LangChain tool:
-#
+# 
 # ```sql
 # CREATE FUNCTION main.tools.python_exec (
 #   code STRING COMMENT 'Python code to execute. Remember to print the final result to stdout.'
@@ -25,16 +25,13 @@
 #   return stdout.getvalue()
 # $$
 # ```
-#
+# 
 # It runs in a secure and isolated environment within a Databricks SQL warehouse.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet databricks-sdk langchain-community databricks-langchain langgraph mlflow",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet databricks-sdk langchain-community databricks-langchain langgraph mlflow')
 
 
 # In[ ]:
@@ -48,21 +45,20 @@ llm = ChatDatabricks(endpoint="databricks-meta-llama-3-70b-instruct")
 # In[3]:
 
 
-from databricks.sdk import WorkspaceClient
-from langchain_community.tools.databricks import UCFunctionToolkit
-
-tools = (
-    UCFunctionToolkit(
-        # You can find the SQL warehouse ID in its UI after creation.
-        warehouse_id="xxxx123456789"
-    )
-    .include(
-        # Include functions as tools using their qualified names.
-        # You can use "{catalog_name}.{schema_name}.*" to get all functions in a schema.
-        "main.tools.python_exec",
-    )
-    .get_tools()
+from databricks_langchain.uc_ai import (
+    DatabricksFunctionClient,
+    UCFunctionToolkit,
+    set_uc_function_client,
 )
+
+client = DatabricksFunctionClient()
+set_uc_function_client(client)
+
+tools = UCFunctionToolkit(
+    # Include functions as tools using their qualified names.
+    # You can use "{catalog_name}.{schema_name}.*" to get all functions in a schema.
+    function_names=["main.tools.python_exec"]
+).tools
 
 
 # (Optional) To increase the retry time for getting a function execution response, set environment variable UC_TOOL_CLIENT_EXECUTION_TIMEOUT. Default retry time value is 120s.
@@ -119,3 +115,4 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 agent_executor.invoke({"input": "36939 * 8922.4"})
+

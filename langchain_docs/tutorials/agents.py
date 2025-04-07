@@ -18,7 +18,7 @@ keywords: [agent, agents]
 # 
 # In the rest of the guide, we will walk through the individual components and what each part does - but if you want to just grab some code and get started, feel free to use this!
 
-# In[2]:
+# In[1]:
 
 
 # Import relevant functionality
@@ -35,19 +35,29 @@ search = TavilySearchResults(max_results=2)
 tools = [search]
 agent_executor = create_react_agent(model, tools, checkpointer=memory)
 
+
+# In[2]:
+
+
 # Use the agent
 config = {"configurable": {"thread_id": "abc123"}}
-for chunk in agent_executor.stream(
-    {"messages": [HumanMessage(content="hi im bob! and i live in sf")]}, config
+for step in agent_executor.stream(
+    {"messages": [HumanMessage(content="hi im bob! and i live in sf")]},
+    config,
+    stream_mode="values",
 ):
-    print(chunk)
-    print("----")
+    step["messages"][-1].pretty_print()
 
-for chunk in agent_executor.stream(
-    {"messages": [HumanMessage(content="whats the weather where I live?")]}, config
+
+# In[3]:
+
+
+for step in agent_executor.stream(
+    {"messages": [HumanMessage(content="whats the weather where I live?")]},
+    config,
+    stream_mode="values",
 ):
-    print(chunk)
-    print("----")
+    step["messages"][-1].pretty_print()
 
 
 # ## Setup
@@ -116,7 +126,7 @@ get_ipython().run_line_magic('pip', 'install -U langchain-community langgraph la
 # We first need to create the tools we want to use. Our main tool of choice will be [Tavily](/docs/integrations/tools/tavily_search) - a search engine. We have a built-in tool in LangChain to easily use Tavily search engine as tool.
 # 
 
-# In[2]:
+# In[4]:
 
 
 from langchain_community.tools.tavily_search import TavilySearchResults
@@ -135,7 +145,7 @@ tools = [search]
 # 
 # import ChatModelTabs from "@theme/ChatModelTabs";
 # 
-# <ChatModelTabs openaiParams={`model="gpt-4"`} />
+# <ChatModelTabs overrideParams={{openai: {model: "gpt-4"}}} />
 # 
 
 # In[3]:
@@ -245,64 +255,37 @@ response["messages"]
 # 
 # We've seen how the agent can be called with `.invoke` to get  a final response. If the agent executes multiple steps, this may take a while. To show intermediate progress, we can stream back messages as they occur.
 
-# In[ ]:
+# In[14]:
 
 
-for chunk in agent_executor.stream(
-    {"messages": [HumanMessage(content="whats the weather in sf?")]}
+for step in agent_executor.stream(
+    {"messages": [HumanMessage(content="whats the weather in sf?")]},
+    stream_mode="values",
 ):
-    print(chunk)
-    print("----")
+    step["messages"][-1].pretty_print()
 
 
 # ## Streaming tokens
 # 
 # In addition to streaming back messages, it is also useful to stream back tokens.
-# We can do this with the `.astream_events` method.
+# We can do this by specifying `stream_mode="messages"`.
 # 
-# :::important
-# This `.astream_events` method only works with Python 3.11 or higher.
+# 
+# ::: note
+# 
+# Below we use `message.text()`, which requires `langchain-core>=0.3.37`.
+# 
 # :::
 
-# In[ ]:
+# In[21]:
 
 
-async for event in agent_executor.astream_events(
-    {"messages": [HumanMessage(content="whats the weather in sf?")]}, version="v1"
+for step, metadata in agent_executor.stream(
+    {"messages": [HumanMessage(content="whats the weather in sf?")]},
+    stream_mode="messages",
 ):
-    kind = event["event"]
-    if kind == "on_chain_start":
-        if (
-            event["name"] == "Agent"
-        ):  # Was assigned when creating the agent with `.with_config({"run_name": "Agent"})`
-            print(
-                f"Starting agent: {event['name']} with input: {event['data'].get('input')}"
-            )
-    elif kind == "on_chain_end":
-        if (
-            event["name"] == "Agent"
-        ):  # Was assigned when creating the agent with `.with_config({"run_name": "Agent"})`
-            print()
-            print("--")
-            print(
-                f"Done agent: {event['name']} with output: {event['data'].get('output')['output']}"
-            )
-    if kind == "on_chat_model_stream":
-        content = event["data"]["chunk"].content
-        if content:
-            # Empty content in the context of OpenAI means
-            # that the model is asking for a tool to be invoked.
-            # So we only print non-empty content
-            print(content, end="|")
-    elif kind == "on_tool_start":
-        print("--")
-        print(
-            f"Starting tool: {event['name']} with inputs: {event['data'].get('input')}"
-        )
-    elif kind == "on_tool_end":
-        print(f"Done tool: {event['name']}")
-        print(f"Tool output was: {event['data'].get('output')}")
-        print("--")
+    if metadata["langgraph_node"] == "agent" and (text := step.text()):
+        print(text, end="|")
 
 
 # ## Adding in memory

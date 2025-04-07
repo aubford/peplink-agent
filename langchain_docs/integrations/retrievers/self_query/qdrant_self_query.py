@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Qdrant
-#
+# 
 # >[Qdrant](https://qdrant.tech/documentation/) (read: quadrant) is a vector similarity search engine. It provides a production-ready service with a convenient API to store, search, and manage points - vectors with an additional payload. `Qdrant` is tailored to extended filtering support.
-#
-# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Qdrant` vector store.
+# 
+# In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Qdrant` vector store. 
 
 # ## Creating a Qdrant vector store
 # First we'll want to create a Qdrant vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `qdrant-client` package.
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark qdrant-client")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark qdrant-client')
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -159,9 +159,9 @@ retriever.invoke(
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[12]:
@@ -182,3 +182,4 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
+

@@ -9,7 +9,7 @@ keywords: [ConfigurableField, configurable_fields, ConfigurableAlternatives, con
 # :::info Prerequisites
 # 
 # This guide assumes familiarity with the following concepts:
-# - [LangChain Expression Language (LCEL)](/docs/concepts/lcel)
+# - [The Runnable interface](/docs/concepts/runnables/)
 # - [Chaining runnables](/docs/how_to/sequence/)
 # - [Binding runtime arguments](/docs/how_to/binding/)
 # 
@@ -38,6 +38,85 @@ from getpass import getpass
 if "OPENAI_API_KEY" not in os.environ:
     os.environ["OPENAI_API_KEY"] = getpass()
 
+
+# ### Configuring fields on a chat model
+# 
+# If using [init_chat_model](/docs/how_to/chat_models_universal_init/) to create a chat model, you can specify configurable fields in the constructor:
+
+# In[1]:
+
+
+from langchain.chat_models import init_chat_model
+
+llm = init_chat_model(
+    "openai:gpt-4o-mini",
+    # highlight-next-line
+    configurable_fields=("temperature",),
+)
+
+
+# You can then set the parameter at runtime using `.with_config`:
+
+# In[2]:
+
+
+response = llm.with_config({"temperature": 0}).invoke("Hello")
+print(response.content)
+
+
+# :::tip
+# 
+# In addition to invocation parameters like temperature, configuring fields this way extends to clients and other attributes.
+# 
+# :::
+
+# #### Use with tools
+# 
+# This method is applicable when [binding tools](/docs/concepts/tool_calling/) as well:
+
+# In[3]:
+
+
+from langchain_core.tools import tool
+
+
+@tool
+def get_weather(location: str):
+    """Get the weather."""
+    return "It's sunny."
+
+
+llm_with_tools = llm.bind_tools([get_weather])
+response = llm_with_tools.with_config({"temperature": 0}).invoke(
+    "What's the weather in SF?"
+)
+response.tool_calls
+
+
+# In addition to `.with_config`, we can now include the parameter when passing a configuration directly. See example below, where we allow the underlying model temperature to be configurable inside of a [langgraph agent](/docs/tutorials/agents/):
+
+# In[ ]:
+
+
+get_ipython().system(' pip install --upgrade langgraph')
+
+
+# In[4]:
+
+
+from langgraph.prebuilt import create_react_agent
+
+agent = create_react_agent(llm, [get_weather])
+
+response = agent.invoke(
+    {"messages": "What's the weather in Boston?"},
+    {"configurable": {"temperature": 0}},
+)
+
+
+# ### Configuring fields on arbitrary Runnables
+# 
+# You can also use the `.configurable_fields` method on arbitrary [Runnables](/docs/concepts/runnables/), as shown below:
 
 # In[2]:
 

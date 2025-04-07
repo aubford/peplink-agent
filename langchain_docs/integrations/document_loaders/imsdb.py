@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # IMSDb
-#
+# 
 # >[IMSDb](https://imsdb.com/) is the `Internet Movie Script Database`.
-#
+# 
 # This covers how to load `IMSDb` webpages into a document format that we can use downstream.
 
 # In[1]:
@@ -35,3 +35,4 @@ data[0].page_content[:500]
 
 
 data[0].metadata
+

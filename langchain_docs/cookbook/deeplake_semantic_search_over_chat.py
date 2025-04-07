@@ -3,7 +3,7 @@
 
 # # QA using Activeloop's DeepLake
 # In this tutorial, we are going to use Langchain + Activeloop's Deep Lake with GPT4 to semantically search and ask questions over a group chat.
-#
+# 
 # View a working demo [here](https://twitter.com/thisissukh_/status/1647223328363679745)
 
 # ## 1. Install required packages
@@ -11,14 +11,12 @@
 # In[ ]:
 
 
-get_ipython().system(
-    "python3 -m pip install --upgrade langchain 'deeplake[enterprise]' openai tiktoken"
-)
+get_ipython().system("python3 -m pip install --upgrade langchain 'deeplake[enterprise]' openai tiktoken")
 
 
 # ## 2. Add API keys
 
-#
+# 
 
 # In[2]:
 
@@ -45,20 +43,20 @@ embeddings = OpenAIEmbeddings()
 dataset_path = "hub://" + org_id + "/data"
 
 
-#
-#
+# 
+# 
 # ## 2. Create sample data
 
 # You can generate a sample group chat conversation using ChatGPT with this prompt:
-#
+# 
 # ```
 # Generate a group chat conversation with three friends talking about their day, referencing real places and fictional names. Make it funny and as detailed as possible.
 # ```
-#
+# 
 # I've already generated such a chat in `messages.txt`. We can keep it simple and use this for our example.
-#
+# 
 # ## 3. Ingest chat embeddings
-#
+# 
 # We load the messages in the text file, chunk and upload to ActiveLoop Vector store.
 
 # In[4]:
@@ -104,7 +102,7 @@ db = DeepLake.from_documents(
 
 
 # ## 4. Ask questions
-#
+# 
 # Now we can ask a question and get an answer back with a semantic search:
 
 # In[ ]:
@@ -127,3 +125,4 @@ query = input("Enter query:")
 ans = qa({"query": query})
 
 print(ans)
+

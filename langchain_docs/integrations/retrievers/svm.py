@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # SVM
-#
+# 
 # >[Support vector machines (SVMs)](https://scikit-learn.org/stable/modules/svm.html#support-vector-machines) are a set of supervised learning methods used for classification, regression and outliers detection.
-#
+# 
 # This notebook goes over how to use a retriever that under the hood uses an `SVM` using `scikit-learn` package.
-#
+# 
 # Largely based on https://github.com/karpathy/randomfun/blob/master/knn_vs_svm.html
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  scikit-learn")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  scikit-learn')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark')
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -51,7 +51,7 @@ retriever = SVMRetriever.from_texts(
 
 
 # ## Use Retriever
-#
+# 
 # We can now use the retriever!
 
 # In[9]:
@@ -67,3 +67,7 @@ result
 
 
 # In[ ]:
+
+
+
+

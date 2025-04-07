@@ -2,25 +2,23 @@
 # coding: utf-8
 
 # # How to deal with large databases when doing SQL question-answering
-#
+# 
 # In order to write valid queries against a database, we need to feed the model the table names, table schemas, and feature values for it to query over. When there are many tables, columns, and/or high-cardinality columns, it becomes impossible for us to dump the full information about our database in every prompt. Instead, we must find ways to dynamically insert into the prompt only the most relevant information.
-#
+# 
 # In this guide we demonstrate methods for identifying such relevant information, and feeding this into a query-generation step. We will cover:
-#
+# 
 # 1. Identifying a relevant subset of tables;
 # 2. Identifying a relevant subset of column values.
-#
-#
+# 
+# 
 # ## Setup
-#
+# 
 # First, get required packages and set environment variables:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain langchain-community langchain-openai"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-community langchain-openai')
 
 
 # In[ ]:
@@ -33,12 +31,12 @@ get_ipython().run_line_magic(
 
 
 # The below example will use a SQLite connection with Chinook database. Follow [these installation steps](https://database.guide/2-sample-databases-sqlite/) to create `Chinook.db` in the same directory as this notebook:
-#
+# 
 # * Save [this file](https://raw.githubusercontent.com/lerocha/chinook-database/master/ChinookDatabase/DataSources/Chinook_Sqlite.sql) as `Chinook_Sqlite.sql`
 # * Run `sqlite3 Chinook.db`
 # * Run `.read Chinook_Sqlite.sql`
 # * Test `SELECT * FROM Artist LIMIT 10;`
-#
+# 
 # Now, `Chinook.db` is in our directory and we can interface with it using the SQLAlchemy-driven [SQLDatabase](https://python.langchain.com/api_reference/community/utilities/langchain_community.utilities.sql_database.SQLDatabase.html) class:
 
 # In[1]:
@@ -53,15 +51,15 @@ print(db.run("SELECT * FROM Artist LIMIT 10;"))
 
 
 # ## Many tables
-#
+# 
 # One of the main pieces of information we need to include in our prompt is the schemas of the relevant tables. When we have very many tables, we can't fit all of the schemas in a single prompt. What we can do in such cases is first extract the names of the tables related to the user input, and then include only their schemas.
-#
+# 
 # One easy and reliable way to do this is using [tool-calling](/docs/how_to/tool_calling). Below, we show how we can use this feature to obtain output conforming to a desired format (in this case, a list of table names). We use the chat model's `.bind_tools` method to bind a tool in Pydantic format, and feed this into an output parser to reconstruct the object from the model's response.
-#
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs customVarName="llm" />
-#
+# 
 
 # In[3]:
 
@@ -196,15 +194,15 @@ db.run(query)
 
 
 # We can see the LangSmith trace for this run [here](https://smith.langchain.com/public/4fbad408-3554-4f33-ab47-1e510a1b52a3/r).
-#
+# 
 # We've seen how to dynamically include a subset of table schemas in a prompt within a chain. Another possible approach to this problem is to let an Agent decide for itself when to look up tables by giving it a Tool to do so. You can see an example of this in the [SQL: Agents](/docs/tutorials/agents) guide.
 
 # ## High-cardinality columns
-#
-# In order to filter columns that contain proper nouns such as addresses, song names or artists, we first need to double-check the spelling in order to filter the data correctly.
-#
+# 
+# In order to filter columns that contain proper nouns such as addresses, song names or artists, we first need to double-check the spelling in order to filter the data correctly. 
+# 
 # One naive strategy it to create a vector store with all the distinct proper nouns that exist in the database. We can then query that vector store each user input and inject the most relevant proper nouns into the prompt.
-#
+# 
 # First we need the unique values for each entity we want, for which we define a function that parses the result into a list of elements:
 
 # In[10]:
@@ -288,17 +286,6 @@ print(query)
 db.run(query)
 
 
-# In[15]:
-
-
-# Without retrieval
-query = query_chain.invoke(
-    {"question": "What are all the genres of elenis moriset songs", "proper_nouns": ""}
-)
-print(query)
-db.run(query)
-
-
 # In[14]:
 
 
@@ -309,5 +296,5 @@ db.run(query)
 
 
 # We can see that with retrieval we're able to correct the spelling from "Elenis Moriset" to "Alanis Morissette" and get back a valid result.
-#
+# 
 # Another possible approach to this problem is to let an Agent decide for itself when to look up proper nouns. You can see an example of this in the [SQL: Agents](/docs/tutorials/agents) guide.

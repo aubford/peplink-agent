@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Volc Engine Maas
-#
+# 
 # This notebook provides you with a guide on how to get started with Volc Engine's MaaS llm models.
 
 # In[ ]:
 
 
 # Install the package
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  volcengine")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  volcengine')
 
 
 # In[2]:
@@ -37,3 +37,4 @@ llm = VolcEngineMaasLLM(volc_engine_maas_ak="your ak", volc_engine_maas_sk="your
 
 chain = PromptTemplate.from_template("给我讲个笑话") | llm | StrOutputParser()
 chain.invoke({})
+

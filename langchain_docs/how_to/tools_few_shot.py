@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # How to use few-shot prompting with tool calling
-#
+# 
 # For more complex tool use it's very useful to add [few-shot examples](/docs/concepts/few_shot_prompting/) to the prompt. We can do this by adding `AIMessage`s with `ToolCall`s and corresponding `ToolMessage`s to our prompt.
-#
+# 
 # First let's define our tools and model.
 
 # In[ ]:
@@ -43,7 +43,7 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 llm_with_tools = llm.bind_tools(tools)
 
 
-# Let's run our model where we can notice that even with some special instructions our model can get tripped up by order of operations.
+# Let's run our model where we can notice that even with some special instructions our model can get tripped up by order of operations. 
 
 # In[ ]:
 
@@ -54,7 +54,7 @@ llm_with_tools.invoke(
 
 
 # The model shouldn't be trying to add anything yet, since it technically can't know the results of 119 * 8 yet.
-#
+# 
 # By adding a prompt with some examples we can correct this behavior:
 
 # In[ ]:
@@ -104,5 +104,5 @@ chain.invoke("Whats 119 times 8 minus 20").tool_calls
 
 
 # And we get the correct output this time.
-#
+# 
 # Here's what the [LangSmith trace](https://smith.langchain.com/public/f70550a1-585f-4c9d-a643-13148ab1616f/r) looks like.

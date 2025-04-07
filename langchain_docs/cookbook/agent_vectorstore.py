@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Combine agents and vector stores
-#
+# 
 # This notebook covers how to combine agents and vector stores. The use case for this is that you've ingested your data into a vector store and want to interact with it in an agentic manner.
-#
+# 
 # The recommended method for doing so is to create a `RetrievalQA` and then use that as a tool in the overall agent. Let's take a look at doing this below. You can do this with multiple different vector DBs, and use the agent as a way to route between them. There are two different ways of doing this - you can either let the agent use the vector stores as normal tools, or you can set `return_direct=True` to really just use the agent as a router.
 
 # ## Create the vector store
@@ -81,6 +81,9 @@ ruff = RetrievalQA.from_chain_type(
 # In[ ]:
 
 
+
+
+
 # ## Create the Agent
 
 # In[43]:
@@ -135,7 +138,7 @@ agent.run("Why use ruff over flake8?")
 # ## Use the Agent solely as a router
 
 # You can also set `return_direct=True` if you intend to use the agent as a router and just want to directly return the result of the RetrievalQAChain.
-#
+# 
 # Notice that in the above examples the agent did some extra work after querying the RetrievalQAChain. You can avoid that and just return the result directly.
 
 # In[48]:
@@ -180,7 +183,7 @@ agent.run("Why use ruff over flake8?")
 
 
 # ## Multi-Hop vector store reasoning
-#
+# 
 # Because vector stores are easily usable as tools in agents, it is easy to use answer multi-hop questions that depend on vector stores using the existing agent framework.
 
 # In[57]:
@@ -219,3 +222,7 @@ agent.run(
 
 
 # In[ ]:
+
+
+
+

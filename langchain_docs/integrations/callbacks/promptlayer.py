@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # # PromptLayer
-#
+# 
 # >[PromptLayer](https://docs.promptlayer.com/introduction) is a platform for prompt engineering. It also helps with the LLM observability to visualize requests, version prompts, and track usage.
 # >
 # >While `PromptLayer` does have LLMs that integrate directly with LangChain (e.g. [`PromptLayerOpenAI`](/docs/integrations/llms/promptlayer_openai)), using a callback is the recommended way to integrate `PromptLayer` with LangChain.
-#
-# In this guide, we will go over how to setup the `PromptLayerCallbackHandler`.
-#
+# 
+# In this guide, we will go over how to setup the `PromptLayerCallbackHandler`. 
+# 
 # See [PromptLayer docs](https://docs.promptlayer.com/languages/langchain) for more information.
 
 # ## Installation and Setup
@@ -16,25 +16,23 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain-community promptlayer --upgrade"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community promptlayer --upgrade')
 
 
 # ### Getting API Credentials
-#
+# 
 # If you do not have a PromptLayer account, create one on [promptlayer.com](https://www.promptlayer.com). Then get an API key by clicking on the settings cog in the navbar and
 # set it as an environment variabled called `PROMPTLAYER_API_KEY`
-#
+# 
 
 # ## Usage
-#
+# 
 # Getting started with `PromptLayerCallbackHandler` is fairly simple, it takes two optional arguments:
 # 1. `pl_tags` - an optional list of strings that will be tracked as tags on PromptLayer.
 # 2. `pl_id_callback` - an optional function that will take `promptlayer_request_id` as an argument. This ID can be used with all of PromptLayer's tracking features to track, metadata, scores, and prompt usage.
 
 # ## Simple OpenAI Example
-#
+# 
 # In this simple example we use `PromptLayerCallbackHandler` with `ChatOpenAI`. We add a PromptLayer tag named `chatopenai`
 
 # In[1]:
@@ -82,11 +80,11 @@ response = model.invoke(
 
 
 # ## Full Featured Example
-#
+# 
 # In this example, we unlock more of the power of `PromptLayer`.
-#
+# 
 # PromptLayer allows you to visually create, version, and track prompt templates. Using the [Prompt Registry](https://docs.promptlayer.com/features/prompt-registry), we can programmatically fetch the prompt template called `example`.
-#
+# 
 # We also define a `pl_id_callback` function which takes in the `promptlayer_request_id` and logs a score, metadata and links the prompt template used. Read more about tracking on [our docs](https://docs.promptlayer.com/features/prompt-history/request-id).
 
 # In[ ]:

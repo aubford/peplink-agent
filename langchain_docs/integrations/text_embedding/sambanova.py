@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 # coding: utf-8
 ---
-sidebar_label: SambaStudio
+sidebar_label: SambaNovaCloud
 ---
-# # SambaStudioEmbeddings
+# # SambaNovaCloudEmbeddings
 # 
-# This will help you get started with SambaNova's SambaStudio embedding models using LangChain. For detailed documentation on `SambaStudioEmbeddings` features and configuration options, please refer to the [API reference](https://python.langchain.com/api_reference/sambanova/embeddings/langchain_sambanova.embeddingsSambaStudioEmbeddings.html).
+# This will help you getting started with SambaNovaCloud embedding models using LangChain. For detailed documentation on `SambaNovaCloudEmbeddings` features and configuration options, please refer to the [API reference](https://docs.sambanova.ai/cloud/docs/get-started/overview).
 # 
-# **[SambaNova](https://sambanova.ai/)'s** [Sambastudio](https://sambanova.ai/technology/full-stack-ai-platform) is a platform for running your own open-source models
+# **[SambaNova](https://sambanova.ai/)'s** [SambaNova Cloud](https://cloud.sambanova.ai/) is a platform for performing inference with open-source models
 # 
 # ## Overview
 # ### Integration details
 # 
 # | Provider | Package |
 # |:--------:|:-------:|
-# | [SambaNova](/docs/integrations/providers/sambanova/) | [langchain-sambanova](https://python.langchain.com/api_reference/langchain_sambanova/embeddings/langchain_sambanova.embeddings.SambaStudioEmbeddings.html) |
+# | [SambaNova](/docs/integrations/providers/sambanova/) | [langchain-sambanova](https://python.langchain.com/docs/integrations/providers/sambanova/) |
 # 
 # ## Setup
 # 
-# To access ChatSambaStudio models you will need to [deploy an endpoint](https://docs.sambanova.ai/sambastudio/latest/language-models.html) in your SambaStudio platform, install the `langchain_sambanova` integration package.
+# To access ChatSambaNovaCloud models you will need to create a [SambaNovaCloud](https://cloud.sambanova.ai/) account, get an API key, install the `langchain_sambanova` integration package.
 # 
 # ```bash
 # pip install langchain-sambanova
@@ -26,11 +26,10 @@ sidebar_label: SambaStudio
 # 
 # ### Credentials
 # 
-# Get the URL and API Key from your SambaStudio deployed endpoint and add them to your environment variables:
+# Get an API Key from [cloud.sambanova.ai](https://cloud.sambanova.ai/apis) and add it to your environment variables:
 # 
 # ``` bash
-# export SAMBASTUDIO_URL="sambastudio-url-key-here"
-# export SAMBASTUDIO_API_KEY="your-api-key-here"
+# export SAMBANOVA_API_KEY="your-api-key-here"
 # ```
 
 # In[ ]:
@@ -39,10 +38,8 @@ sidebar_label: SambaStudio
 import getpass
 import os
 
-if not os.getenv("SAMBASTUDIO_API_KEY"):
-    os.environ["SAMBASTUDIO_API_KEY"] = getpass.getpass(
-        "Enter your SambaNova API key: "
-    )
+if not os.getenv("SAMBANOVA_API_KEY"):
+    os.environ["SAMBANOVA_API_KEY"] = getpass.getpass("Enter your SambaNova API key: ")
 
 
 # If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
@@ -50,8 +47,8 @@ if not os.getenv("SAMBASTUDIO_API_KEY"):
 # In[ ]:
 
 
-# os.environ["LANGCHAIN_TRACING_V2"] = "true"
-# os.environ["LANGCHAIN_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
+# os.environ["LANGSMITH_TRACING"] = "true"
+# os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
 
 
 # ### Installation
@@ -71,10 +68,10 @@ get_ipython().run_line_magic('pip', 'install -qU langchain-sambanova')
 # In[ ]:
 
 
-from langchain_sambanova import SambaStudioEmbeddings
+from langchain_sambanova import SambaNovaCloudEmbeddings
 
-embeddings = SambaStudioEmbeddings(
-    model="e5-mistral-7b-instruct",
+embeddings = SambaNovaCloudEmbeddings(
+    model="E5-Mistral-7B-Instruct",
 )
 
 
@@ -141,5 +138,5 @@ for vector in two_vectors:
 
 # ## API Reference
 # 
-# For detailed documentation on `SambaNovaEmbeddings` features and configuration options, please refer to the [API reference](https://python.langchain.com/api_reference/langchain_sambanova/embeddings/langchain_sambanova.embeddings.SambaStudioEmbeddings.html).
+# For detailed documentation on `SambaNovaCloud` features and configuration options, please refer to the [API reference](https://docs.sambanova.ai/cloud/docs/get-started/overview).
 # 

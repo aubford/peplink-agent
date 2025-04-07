@@ -3,21 +3,21 @@
 
 # # Azure OpenAI Whisper Parser
 
-# >[Azure OpenAI Whisper Parser](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/whisper-overview) is a wrapper around the Azure OpenAI Whisper API which utilizes machine learning to transcribe audio files to english text.
+# >[Azure OpenAI Whisper Parser](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/whisper-overview) is a wrapper around the Azure OpenAI Whisper API which utilizes machine learning to transcribe audio files to english text. 
 # >
 # >The Parser supports `.mp3`, `.mp4`, `.mpeg`, `.mpga`, `.m4a`, `.wav`, and `.webm`.
-#
+# 
 # The current implementation follows LangChain core principles and can be used with other loaders to handle both audio downloading and parsing. As a result of this the parser will `yield` an `Iterator[Document]`.
 
 # ## Prerequisites
 
 # The service requires Azure credentials, Azure endpoint and Whisper Model deployment, which can be set up by following the guide [here](https://learn.microsoft.com/en-us/azure/ai-services/openai/whisper-quickstart?tabs=command-line%2Cpython-new%2Cjavascript&pivots=programming-language-python). Furthermore, the required dependencies must be installed.
-#
+# 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -Uq  langchain langchain-community openai")
+get_ipython().run_line_magic('pip', 'install -Uq  langchain langchain-community openai')
 
 
 # ## Example 1
@@ -100,3 +100,4 @@ docs = loader.load()
 
 for doc in documents:
     print(doc.page_content)
+

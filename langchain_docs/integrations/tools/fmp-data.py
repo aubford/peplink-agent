@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # FMP Data
-#
+# 
 # Access financial market data through natural language queries.
-#
+# 
 # ## Overview
-#
+# 
 # The FMP (Financial Modeling Prep) LangChain integration provides a seamless way to access financial market data through natural language queries. This integration offers two main components:
-#
+# 
 # - `FMPDataToolkit`: Creates collections of tools based on natural language queries
 # - `FMPDataTool`: A single unified tool that automatically selects and uses the appropriate endpoints
-#
+# 
 # The integration leverages LangChain's semantic search capabilities to match user queries with the most relevant FMP API endpoints, making financial data access more intuitive and efficient.
 # ## Setup
 
 # In[ ]:
 
 
-get_ipython().system("pip install -U langchain-fmp-data")
+get_ipython().system('pip install -U langchain-fmp-data')
 
 
 # In[ ]:
@@ -36,8 +36,8 @@ os.environ["OPENAI_API_KEY"] = "your-openai-api-key"  # pragma: allowlist secret
 # In[ ]:
 
 
-# os.environ["LANGCHAIN_TRACING_V2"] = "true"
-# os.environ["LANGCHAIN_API_KEY"] = getpass.getpass()
+# os.environ["LANGSMITH_TRACING"] = "true"
+# os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
 
 
 # ## Instantiation
@@ -88,7 +88,7 @@ advanced_tool = FMPDataTool(
 
 # ## Invocation
 # The tools can be invoked in several ways:
-#
+# 
 # ### Direct Invocation
 
 # In[ ]:
@@ -145,8 +145,8 @@ response = agent_executor.invoke({"input": "What's the PE ratio of Microsoft?"})
 
 # ## Advanced Usage
 # You can customize the tool's behavior:
-#
-#
+# 
+# 
 
 # In[ ]:
 
@@ -206,7 +206,7 @@ response = runner.invoke(
 
 
 # ## API reference
-#
+# 
 # ### FMPDataToolkit
 # Main class for creating collections of FMP API tools:
 
@@ -273,3 +273,4 @@ class ResponseFormat(str, Enum):
     RAW = "raw"  # Raw API response
     ANALYSIS = "text"  # Natural language analysis
     BOTH = "both"  # Both raw data and analysis
+

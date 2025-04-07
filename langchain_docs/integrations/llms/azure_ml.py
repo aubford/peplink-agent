@@ -2,16 +2,16 @@
 # coding: utf-8
 
 # # Azure ML
-#
+# 
 # [Azure ML](https://azure.microsoft.com/en-us/products/machine-learning/) is a platform used to build, train, and deploy machine learning models. Users can explore the types of models to deploy in the Model Catalog, which provides foundational and general purpose models from different providers.
-#
+# 
 # This notebook goes over how to use an LLM hosted on an `Azure ML Online Endpoint`.
 
 # In[ ]:
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # In[ ]:
@@ -21,23 +21,23 @@ from langchain_community.llms.azureml_endpoint import AzureMLOnlineEndpoint
 
 
 # ## Set up
-#
+# 
 # You must [deploy a model on Azure ML](https://learn.microsoft.com/en-us/azure/machine-learning/how-to-use-foundation-models?view=azureml-api-2#deploying-foundation-models-to-endpoints-for-inferencing) or [to Azure AI studio](https://learn.microsoft.com/en-us/azure/ai-studio/how-to/deploy-models-open) and obtain the following parameters:
-#
+# 
 # * `endpoint_url`: The REST endpoint url provided by the endpoint.
 # * `endpoint_api_type`: Use `endpoint_type='dedicated'` when deploying models to **Dedicated endpoints** (hosted managed infrastructure). Use `endpoint_type='serverless'` when deploying models using the **Pay-as-you-go** offering (model as a service).
 # * `endpoint_api_key`: The API key provided by the endpoint.
 # * `deployment_name`: (Optional) The deployment name of the model using the endpoint.
 
 # ## Content Formatter
-#
+# 
 # The `content_formatter` parameter is a handler class for transforming the request and response of an AzureML endpoint to match with required schema. Since there are a wide range of models in the model catalog, each of which may process data differently from one another, a `ContentFormatterBase` class is provided to allow users to transform data to their liking. The following content formatters are provided:
-#
+# 
 # * `GPT2ContentFormatter`: Formats request and response data for GPT2
 # * `DollyContentFormatter`: Formats request and response data for the Dolly-v2
 # * `HFContentFormatter`: Formats request and response data for text-generation Hugging Face models
 # * `CustomOpenAIContentFormatter`: Formats request and response data for models like LLaMa2 that follow OpenAI API compatible scheme.
-#
+# 
 # *Note: `OSSContentFormatter` is being deprecated and replaced with `GPT2ContentFormatter`. The logic is the same but `GPT2ContentFormatter` is a more suitable name. You can still continue to use `OSSContentFormatter` as the changes are backwards compatible.*
 
 # ## Examples
@@ -96,7 +96,7 @@ response
 
 
 # ### Example: Custom content formatter
-#
+# 
 # Below is an example using a summarization model from Hugging Face.
 
 # In[ ]:
@@ -217,3 +217,4 @@ save_llm.save("azureml.json")
 loaded_llm = load_llm("azureml.json")
 
 print(loaded_llm)
+

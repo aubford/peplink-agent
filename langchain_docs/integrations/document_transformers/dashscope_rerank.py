@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # DashScope Reranker
-#
+# 
 # This notebook shows how to use DashScope Reranker for document compression and retrieval. [DashScope](https://dashscope.aliyun.com/) is the generative AI service from Alibaba Cloud (Aliyun).
-#
+# 
 # DashScope's [Text ReRank Model](https://help.aliyun.com/document_detail/2780058.html?spm=a2c4g.2780059.0.0.6d995024FlrJ12) supports reranking documents with a maximum of 4000 tokens. Moreover, it supports Chinese, English, Japanese, Korean, Thai, Spanish, French, Portuguese, Indonesian, Arabic, and over 50 other languages. For more details, please visit [here](https://help.aliyun.com/document_detail/2780059.html?spm=a2c4g.2780058.0.0.3a9e5b1dWeOQjI).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  dashscope")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  dashscope')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss')
 
 # OR  (depending on Python version)
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  faiss-cpu")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  faiss-cpu')
 
 
 # In[ ]:
@@ -91,3 +91,7 @@ pretty_print_docs(compressed_docs)
 
 
 # In[ ]:
+
+
+
+

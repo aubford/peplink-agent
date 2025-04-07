@@ -3,15 +3,13 @@
 
 # # OpenVINO
 # [OpenVINO™](https://github.com/openvinotoolkit/openvino) is an open-source toolkit for optimizing and deploying AI inference. The OpenVINO™ Runtime supports various hardware [devices](https://github.com/openvinotoolkit/openvino?tab=readme-ov-file#supported-hardware-matrix) including x86 and ARM CPUs, and Intel GPUs. It can help to boost deep learning performance in Computer Vision, Automatic Speech Recognition, Natural Language Processing and other common tasks.
-#
+# 
 # Hugging Face embedding model can be supported by OpenVINO through ``OpenVINOEmbeddings`` class. If you have an Intel GPU, you can specify `model_kwargs={"device": "GPU"}` to run inference on it.
 
 # In[3]:
 
 
-get_ipython().run_line_magic(
-    "pip", 'install --upgrade-strategy eager "optimum[openvino,nncf]" --quiet'
-)
+get_ipython().run_line_magic('pip', 'install --upgrade-strategy eager "optimum[openvino,nncf]" --quiet')
 
 
 # In[1]:
@@ -82,7 +80,7 @@ ov_embeddings = OpenVINOEmbeddings(
 
 
 # ## BGE with OpenVINO
-# We can also access BGE embedding models via the ``OpenVINOBgeEmbeddings`` class with OpenVINO.
+# We can also access BGE embedding models via the ``OpenVINOBgeEmbeddings`` class with OpenVINO. 
 
 # In[ ]:
 
@@ -107,11 +105,11 @@ len(embedding)
 
 
 # For more information refer to:
-#
+# 
 # * [OpenVINO LLM guide](https://docs.openvino.ai/2024/learn-openvino/llm_inference_guide.html).
-#
+# 
 # * [OpenVINO Documentation](https://docs.openvino.ai/2024/home.html).
-#
+# 
 # * [OpenVINO Get Started Guide](https://www.intel.com/content/www/us/en/content-details/819067/openvino-get-started-guide.html).
-#
+# 
 # * [RAG Notebook with LangChain](https://github.com/openvinotoolkit/openvino_notebooks/tree/latest/notebooks/llm-rag-langchain).

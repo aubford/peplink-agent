@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # China Mobile ECloud ElasticSearch VectorSearch
-#
-# >[China Mobile ECloud VectorSearch](https://ecloud.10086.cn/portal/product/elasticsearch) is a fully managed, enterprise-level distributed search and analysis service. China Mobile ECloud VectorSearch provides low-cost, high-performance, and reliable retrieval and analysis platform level product services for structured/unstructured data. As a vector database , it supports multiple index types and similarity distance methods.
-#
+# 
+# >[China Mobile ECloud VectorSearch](https://ecloud.10086.cn/portal/product/elasticsearch) is a fully managed, enterprise-level distributed search and analysis service. China Mobile ECloud VectorSearch provides low-cost, high-performance, and reliable retrieval and analysis platform level product services for structured/unstructured data. As a vector database , it supports multiple index types and similarity distance methods. 
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # This notebook shows how to use functionality related to the `ECloud ElasticSearch VectorStore`.
 # To run, you should have an [China Mobile ECloud VectorSearch](https://ecloud.10086.cn/portal/product/elasticsearch) instance up and running:
-#
+# 
 # Read the [help document](https://ecloud.10086.cn/op-help-center/doc/category/1094) to quickly familiarize and configure China Mobile ECloud ElasticSearch instance.
 
 # After the instance is up and running, follow these steps to split documents, get embeddings, connect to the baidu cloud elasticsearch instance, index documents, and perform vector retrieval.
@@ -75,7 +75,7 @@ docsearch = EcloudESVectorStore.from_documents(
 )
 
 
-# Finally, Query and retrive data
+# Finally, Query and retrieve data
 
 # In[ ]:
 
@@ -220,3 +220,4 @@ def test_dense_float_vectore_exact_with_filter() -> None:
         },
     )
     print(docs[0].page_content)
+

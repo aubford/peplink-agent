@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # OpenSearch
-#
+# 
 # > [OpenSearch](https://opensearch.org/) is a scalable, flexible, and extensible open-source software suite for search, analytics, and observability applications licensed under Apache 2.0. `OpenSearch` is a distributed search and analytics engine based on `Apache Lucene`.
-#
+# 
 # In this notebook, we'll demo the `SelfQueryRetriever` with an `OpenSearch` vector store.
 
 # ## Creating an OpenSearch vector store
-#
+# 
 # First, we'll want to create an `OpenSearch` vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # **Note:** The self-query retriever requires you to have `lark` installed (`pip install lark`). We also need the `opensearch-py` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark opensearch-py")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark opensearch-py')
 
 
 # In[3]:
@@ -146,9 +146,9 @@ retriever.invoke("What's a highly rated (above 8.5) science fiction film?")
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[14]:
@@ -186,3 +186,4 @@ retriever.invoke(
 
 
 vectorstore.client.indices.delete(index="opensearch-self-query-demo")
+

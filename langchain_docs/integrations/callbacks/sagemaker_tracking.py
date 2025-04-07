@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # SageMaker Tracking
-#
-# >[Amazon SageMaker](https://aws.amazon.com/sagemaker/) is a fully managed service that is used to quickly and easily build, train and deploy machine learning (ML) models.
-#
+# 
+# >[Amazon SageMaker](https://aws.amazon.com/sagemaker/) is a fully managed service that is used to quickly and easily build, train and deploy machine learning (ML) models. 
+# 
 # >[Amazon SageMaker Experiments](https://docs.aws.amazon.com/sagemaker/latest/dg/experiments.html) is a capability of `Amazon SageMaker` that lets you organize, track, compare and evaluate ML experiments and model versions.
-#
+# 
 # This notebook shows how LangChain Callback can be used to log and track prompts and other LLM hyperparameters into `SageMaker Experiments`. Here, we use different scenarios to showcase the capability:
-#
+# 
 # * **Scenario 1**: *Single LLM* - A case where a single LLM model is used to generate output based on a given prompt.
 # * **Scenario 2**: *Sequential Chain* - A case where a sequential chain of two LLM models is used.
 # * **Scenario 3**: *Agent with Tools (Chain of Thought)* - A case where multiple tools (search and math) are used in addition to an LLM.
-#
-#
+# 
+# 
 # In this notebook, we will create a single experiment to log the prompts from each scenario.
 
 # ## Installation and Setup
@@ -21,13 +21,13 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  sagemaker")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-openai")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  google-search-results")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  sagemaker')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  google-search-results')
 
 
 # First, setup the required API keys
-#
+# 
 # * OpenAI: https://platform.openai.com/account/api-keys (For OpenAI LLM model)
 # * Google SERP API: https://serpapi.com/manage-api-key (For Google Search Tool)
 
@@ -205,7 +205,7 @@ with Run(
 
 
 # ## Load Log Data
-#
+# 
 # Once the prompts are logged, we can easily load and convert them to Pandas DataFrame as follows.
 
 # In[ ]:
@@ -224,3 +224,7 @@ df.head()
 # As can be seen above, there are three runs (rows) in the experiment corresponding to each scenario. Each run logs the prompts and related LLM settings/hyperparameters as json and are saved in s3 bucket. Feel free to load and explore the log data from each json path.
 
 # In[ ]:
+
+
+
+

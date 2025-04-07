@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # Runhouse
-#
+# 
 # [Runhouse](https://github.com/run-house/runhouse) allows remote compute and data across environments and users. See the [Runhouse docs](https://www.run.house/docs).
-#
+# 
 # This example goes over how to use LangChain and [Runhouse](https://github.com/run-house/runhouse) to interact with models hosted on your own GPU, or on-demand GPUs on AWS, GCP, AWS, or Lambda.
-#
+# 
 # **Note**: Code uses `SelfHosted` name instead of the `Runhouse`.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  runhouse")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  runhouse')
 
 
 # In[1]:
@@ -151,3 +151,4 @@ rh.blob(pickle.dumps(pipeline), path="models/pipeline.pkl").save().to(
 )
 
 llm = SelfHostedPipeline.from_pipeline(pipeline="models/pipeline.pkl", hardware=gpu)
+

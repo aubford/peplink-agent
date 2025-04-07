@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Browserbase
-#
+# 
 # [Browserbase](https://browserbase.com) is a developer platform to reliably run, manage, and monitor headless browsers.
-#
+# 
 # Power your AI data retrievals with:
 # - [Serverless Infrastructure](https://docs.browserbase.com/under-the-hood) providing reliable browsers to extract data from complex UIs
 # - [Stealth Mode](https://docs.browserbase.com/features/stealth-mode) with included fingerprinting tactics and automatic captcha solving
 # - [Session Debugger](https://docs.browserbase.com/features/sessions) to inspect your Browser Session with networks timeline and logs
 # - [Live Debug](https://docs.browserbase.com/guides/session-debug-connection/browser-remote-control) to quickly debug your automation
-#
+# 
 # ## Installation and Setup
-#
+# 
 # - Get an API key and Project ID from [browserbase.com](https://browserbase.com) and set it in environment variables (`BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID`).
 # - Install the [Browserbase SDK](http://github.com/browserbase/python-sdk):
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install browserbase")
+get_ipython().run_line_magic('pip', 'install browserbase')
 
 
 # ## Loading documents
@@ -48,7 +48,7 @@ print(docs[0].page_content[:61])
 
 
 # ### Loader Options
-#
+# 
 # - `urls` Required. A list of URLs to fetch.
 # - `text_content` Retrieve only text content. Default is `False`.
 # - `api_key` Optional. Browserbase API key. Default is `BROWSERBASE_API_KEY` env variable.
@@ -57,9 +57,9 @@ print(docs[0].page_content[:61])
 # - `proxy` Optional. Enable/Disable Proxies.
 
 # ## Loading images
-#
+# 
 # You can also load screenshots of webpages (as bytes) for multi-modal models.
-#
+# 
 # Full example using GPT-4V:
 
 # In[ ]:
@@ -87,3 +87,4 @@ result = chat.invoke(
 )
 
 print(result.content)
+

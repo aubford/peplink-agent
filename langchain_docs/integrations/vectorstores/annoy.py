@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Annoy
-#
+# 
 # > [Annoy](https://github.com/spotify/annoy) (`Approximate Nearest Neighbors Oh Yeah`) is a C++ library with Python bindings to search for points in space that are close to a given query point. It also creates large read-only file-based data structures that are mapped into memory so that many processes may share the same data.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # This notebook shows how to use functionality related to the `Annoy` vector database.
 
 # ```{note}
@@ -17,7 +17,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  annoy")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  annoy')
 
 
 # ## Create VectorStore from texts
@@ -235,3 +235,4 @@ db_manually = Annoy(
 
 
 db_manually.similarity_search_with_score("eating!", k=3)
+

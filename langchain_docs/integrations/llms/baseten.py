@@ -2,37 +2,37 @@
 # coding: utf-8
 
 # # Baseten
-#
+# 
 # [Baseten](https://baseten.co) is a [Provider](/docs/integrations/providers/baseten) in the LangChain ecosystem that implements the LLMs component.
-#
+# 
 # This example demonstrates using an LLM — Mistral 7B hosted on Baseten — with LangChain.
 
 # # Setup
-#
+# 
 # To run this example, you'll need:
-#
+# 
 # * A [Baseten account](https://baseten.co)
 # * An [API key](https://docs.baseten.co/observability/api-keys)
-#
+# 
 # Export your API key to your as an environment variable called `BASETEN_API_KEY`.
-#
+# 
 # ```sh
 # export BASETEN_API_KEY="paste_your_api_key_here"
 # ```
 
 # # Single model call
-#
+# 
 # First, you'll need to deploy a model to Baseten.
-#
+# 
 # You can deploy foundation models like Mistral and Llama 2 with one click from the [Baseten model library](https://app.baseten.co/explore/) or if you have your own model, [deploy it with Truss](https://truss.baseten.co/welcome).
-#
+# 
 # In this example, we'll work with Mistral 7B. [Deploy Mistral 7B here](https://app.baseten.co/explore/mistral_7b_instruct) and follow along with the deployed model's ID, found in the model dashboard.
 
 # In[ ]:
 
 
 ##Installing the langchain packages needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # In[ ]:
@@ -56,9 +56,9 @@ mistral("What is the Mistral wind?")
 
 
 # # Chained model calls
-#
+# 
 # We can chain together multiple calls to one or multiple models, which is the whole point of Langchain!
-#
+# 
 # For example, we can replace GPT with Mistral in this demo of terminal emulation.
 
 # In[ ]:

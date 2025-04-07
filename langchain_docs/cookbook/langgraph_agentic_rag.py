@@ -4,15 +4,13 @@
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install langchain-chroma langchain_community tiktoken langchain-openai langchainhub langchain langgraph"
-)
+get_ipython().system(' pip install langchain-chroma langchain_community tiktoken langchain-openai langchainhub langchain langgraph')
 
 
 # # LangGraph Retrieval Agent
-#
+# 
 # We can implement [Retrieval Agents](https://python.langchain.com/docs/use_cases/question_answering/conversational_retrieval_agents) in [LangGraph](https://python.langchain.com/docs/langgraph).
-#
+# 
 # ## Retriever
 
 # In[1]:
@@ -65,13 +63,13 @@ tool_executor = ToolExecutor(tools)
 
 
 # ## Agent state
-#
+#  
 # We will defined a graph.
-#
+# 
 # A `state` object that it passes around to each node.
-#
+# 
 # Our state will be a list of `messages`.
-#
+# 
 # Each node in our graph will append to it.
 
 # In[6]:
@@ -88,17 +86,17 @@ class AgentState(TypedDict):
 
 
 # ## Nodes and Edges
-#
-# Each node will -
-#
+# 
+# Each node will - 
+# 
 # 1/ Either be a function or a runnable.
-#
+# 
 # 2/ Modify the `state`.
-#
+# 
 # The edges choose which node to call next.
-#
+# 
 # We can lay out an agentic RAG graph like this:
-#
+# 
 # ![Screenshot 2024-02-02 at 1.36.50 PM.png](attachment:f886806c-0aec-4c2a-8027-67339530cb60.png)
 
 # In[12]:
@@ -274,7 +272,7 @@ def call_tool(state):
 
 
 # ## Graph
-#
+# 
 # * Start with an agent, `call_model`
 # * Agent make a decision to call a function
 # * If so, then `action` to call tool (retriever)
@@ -350,7 +348,11 @@ for output in app.stream(inputs):
 
 
 # Trace:
-#
+# 
 # https://smith.langchain.com/public/6f45c61b-69a0-4b35-bab9-679a8840a2d6/r
 
 # In[ ]:
+
+
+
+

@@ -3,29 +3,29 @@
 
 # # Couchbase
 # > Couchbase is an award-winning distributed NoSQL cloud database that delivers unmatched versatility, performance, scalability, and financial value for all of your cloud, mobile, AI, and edge computing applications. Couchbase embraces AI with coding assistance for developers and vector search for their applications.
-#
+# 
 # This notebook goes over how to use the `CouchbaseChatMessageHistory` class to store the chat message history in a Couchbase cluster
-#
+# 
 
 # ## Set Up Couchbase Cluster
-# To run this demo, you need a Couchbase Cluster.
-#
+# To run this demo, you need a Couchbase Cluster. 
+# 
 # You can work with both [Couchbase Capella](https://www.couchbase.com/products/capella/) and your self-managed Couchbase Server.
 
 # ## Install Dependencies
-# `CouchbaseChatMessageHistory` lives inside the `langchain-couchbase` package.
+# `CouchbaseChatMessageHistory` lives inside the `langchain-couchbase` package. 
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet langchain-couchbase")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-couchbase')
 
 
 # ## Create Couchbase Connection Object
-# We create a connection to the Couchbase cluster initially and then pass the cluster object to the Vector Store.
-#
-# Here, we are connecting using the username and password. You can also connect using any other supported way to your cluster.
-#
+# We create a connection to the Couchbase cluster initially and then pass the cluster object to the Vector Store. 
+# 
+# Here, we are connecting using the username and password. You can also connect using any other supported way to your cluster. 
+# 
 # For more information on connecting to the Couchbase cluster, please check the [Python SDK documentation](https://docs.couchbase.com/python-sdk/current/hello-world/start-using-sdk.html#connect).
 
 # In[2]:
@@ -56,7 +56,7 @@ cluster.wait_until_ready(timedelta(seconds=5))
 
 
 # We will now set the bucket, scope, and collection names in the Couchbase cluster that we want to use for storing the message history.
-#
+# 
 # Note that the bucket, scope, and collection need to exist before using them to store the message history.
 
 # In[4]:
@@ -74,7 +74,7 @@ COLLECTION_NAME = "conversational_cache"
 # - scope_name: Scope in bucket to store the message history
 # - collection_name: Collection in scope to store the message history
 # - session_id: Unique identifier for the session
-#
+# 
 # Optionally you can configure the following:
 # - session_id_key: Field in the chat message documents to store the `session_id`
 # - message_key: Field in the chat message documents to store the message content
@@ -188,3 +188,4 @@ chain_with_history.invoke({"question": "Hi! I'm bob"}, config=config)
 
 
 chain_with_history.invoke({"question": "Whats my name"}, config=config)
+

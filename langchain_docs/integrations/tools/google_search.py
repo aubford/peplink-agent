@@ -2,19 +2,17 @@
 # coding: utf-8
 
 # # Google Search
-#
+# 
 # This notebook goes over how to use the google search component.
-#
+# 
 # First, you need to set up the proper API keys and environment variables. To set it up, create the GOOGLE_API_KEY in the Google Cloud credential console (https://console.cloud.google.com/apis/credentials) and a GOOGLE_CSE_ID using the Programmable Search Engine (https://programmablesearchengine.google.com/controlpanel/create). Next, it is good to follow the instructions found [here](https://stackoverflow.com/questions/37083058/programmatically-searching-google-in-python-using-custom-search).
-#
+# 
 # Then we will need to set some environment variables.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain-google-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-google-community')
 
 
 # In[1]:
@@ -73,7 +71,7 @@ tool.run("python")
 # ## Metadata Results
 
 # Run query through GoogleSearch and return snippet, title, and link metadata.
-#
+# 
 # - Snippet: The description of the result.
 # - Title: The title of the result.
 # - Link: The link to the result.
@@ -96,3 +94,7 @@ tool = Tool(
 
 
 # In[ ]:
+
+
+
+

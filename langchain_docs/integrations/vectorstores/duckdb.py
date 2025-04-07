@@ -7,12 +7,10 @@
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install duckdb langchain langchain-community langchain-openai"
-)
+get_ipython().system(' pip install duckdb langchain langchain-community langchain-openai')
 
 
-# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
+# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key. 
 
 # In[2]:
 
@@ -57,3 +55,4 @@ docs = docsearch.similarity_search(query)
 
 
 print(docs[0].page_content)
+

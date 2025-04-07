@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # MongoDB
-#
+# 
 # >`MongoDB` is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, `MongoDB` uses `JSON`-like documents with optional schemas.
 # >
 # >`MongoDB` is developed by MongoDB Inc. and licensed under the Server Side Public License (SSPL). - [Wikipedia](https://en.wikipedia.org/wiki/MongoDB)
-#
+# 
 # This notebook goes over how to use the `MongoDBChatMessageHistory` class to store chat message history in a Mongodb database.
-#
+# 
 
 # ## Setup
-#
+# 
 # The integration lives in the `langchain-mongodb` package, so we need to install that.
-#
+# 
 # ```bash
 # pip install -U --quiet langchain-mongodb
 # ```
@@ -28,12 +28,12 @@
 
 
 # ## Usage
-#
+# 
 # To use the storage you need to provide only 2 things:
-#
+# 
 # 1. Session Id - a unique identifier of the session, like user name, email, chat id etc.
 # 2. Connection string - a string that specifies the database connection. It will be passed to MongoDB create_engine function.
-#
+# 
 # If you want to customize where the chat histories go, you can also pass:
 # 1. *database_name* - name of the database to use
 # 1. *collection_name* - collection to use within that database
@@ -61,11 +61,11 @@ chat_message_history.messages
 
 
 # ## Chaining
-#
+# 
 # We can easily combine this message history class with [LCEL Runnables](/docs/how_to/message_history)
-#
+# 
 # To do this we will want to use OpenAI, so we need to install that.  You will also need to set the OPENAI_API_KEY environment variable to your OpenAI key.
-#
+# 
 
 # In[5]:
 
@@ -132,3 +132,4 @@ chain_with_history.invoke({"question": "Hi! I'm bob"}, config=config)
 
 
 chain_with_history.invoke({"question": "Whats my name"}, config=config)
+

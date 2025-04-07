@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Google Generative AI Embeddings
-#
+# 
 # Connect to Google's generative AI embeddings service using the `GoogleGenerativeAIEmbeddings` class, found in the [langchain-google-genai](https://pypi.org/project/langchain-google-genai/) package.
 
 # ## Installation
@@ -10,7 +10,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-google-genai")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-google-genai')
 
 
 # ## Credentials
@@ -22,7 +22,7 @@ import getpass
 import os
 
 if "GOOGLE_API_KEY" not in os.environ:
-    os.environ["GOOGLE_API_KEY"] = getpass("Provide your Google API key here")
+    os.environ["GOOGLE_API_KEY"] = getpass.getpass("Provide your Google API key here")
 
 
 # ## Usage
@@ -32,13 +32,13 @@ if "GOOGLE_API_KEY" not in os.environ:
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
 vector = embeddings.embed_query("hello, world!")
 vector[:5]
 
 
 # ## Batch
-#
+# 
 # You can also embed multiple strings at once for a processing speedup:
 
 # In[7]:
@@ -56,22 +56,20 @@ len(vectors), len(vectors[0])
 
 # ## Task type
 # `GoogleGenerativeAIEmbeddings` optionally support a `task_type`, which currently must be one of:
-#
+# 
 # - task_type_unspecified
 # - retrieval_query
 # - retrieval_document
 # - semantic_similarity
 # - classification
 # - clustering
-#
+# 
 # By default, we use `retrieval_document` in the `embed_documents` method and `retrieval_query` in the `embed_query` method. If you provide a task type, we will use that for all methods.
 
 # In[15]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  matplotlib scikit-learn"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  matplotlib scikit-learn')
 
 
 # In[33]:
@@ -97,8 +95,8 @@ doc_embeddings = GoogleGenerativeAIEmbeddings(
 # In retrieval, relative distance matters. In the image above, you can see the difference in similarity scores between the "relevant doc" and "simil stronger delta between the similar query and relevant doc on the latter case.
 
 # ## Additional Configuration
-#
+# 
 # You can pass the following parameters to ChatGoogleGenerativeAI in order to customize the SDK's behavior:
-#
+# 
 # - `client_options`: [Client Options](https://googleapis.dev/python/google-api-core/latest/client_options.html#module-google.api_core.client_options) to pass to the Google API Client, such as a custom `client_options["api_endpoint"]`
 # - `transport`: The transport method to use, such as `rest`, `grpc`, or `grpc_asyncio`.

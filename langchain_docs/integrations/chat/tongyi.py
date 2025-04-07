@@ -8,14 +8,14 @@ sidebar_label: Tongyi Qwen
 # In this notebook, we will introduce how to use langchain with [Tongyi](https://www.aliyun.com/product/dashscope) mainly in `Chat` corresponding
 #  to the package `langchain/chat_models` in langchain
 
-# In[1]:
+# In[ ]:
 
 
 # Install the package
 get_ipython().run_line_magic('pip', 'install --upgrade --quiet  dashscope')
 
 
-# In[2]:
+# In[1]:
 
 
 # Get a new token: https://help.aliyun.com/document_detail/611472.html?spm=a2c4g.2399481.0.0
@@ -24,7 +24,7 @@ from getpass import getpass
 DASHSCOPE_API_KEY = getpass()
 
 
-# In[3]:
+# In[2]:
 
 
 import os
@@ -132,6 +132,28 @@ messages = [
 chatLLM = ChatTongyi()
 llm_kwargs = {"tools": tools, "result_format": "message"}
 ai_message = chatLLM.bind(**llm_kwargs).invoke(messages)
+ai_message
+
+
+# ## Partial Mode
+# Enable the large model to continue generating content from the initial text you provide.
+
+# In[4]:
+
+
+from langchain_community.chat_models.tongyi import ChatTongyi
+from langchain_core.messages import AIMessage, HumanMessage
+
+messages = [
+    HumanMessage(
+        content="""Please continue the sentence "Spring has arrived, and the earth" to express the beauty of spring and the author's joy."""
+    ),
+    AIMessage(
+        content="Spring has arrived, and the earth", additional_kwargs={"partial": True}
+    ),
+]
+chatLLM = ChatTongyi()
+ai_message = chatLLM.invoke(messages)
 ai_message
 
 

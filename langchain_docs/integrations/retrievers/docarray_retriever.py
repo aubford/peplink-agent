@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # # DocArray
-#
+# 
 # >[DocArray](https://github.com/docarray/docarray) is a versatile, open-source tool for managing your multi-modal data. It lets you shape your data however you want, and offers the flexibility to store and search it using various document index backends. Plus, it gets even better - you can utilize your `DocArray` document index to create a `DocArrayRetriever`, and build awesome Langchain apps!
-#
-# This notebook is split into two sections. The [first section](#document-index-backends) offers an introduction to all five supported document index backends. It provides guidance on setting up and indexing each backend and also instructs you on how to build a `DocArrayRetriever` for finding relevant documents.
+# 
+# This notebook is split into two sections. The [first section](#document-index-backends) offers an introduction to all five supported document index backends. It provides guidance on setting up and indexing each backend and also instructs you on how to build a `DocArrayRetriever` for finding relevant documents. 
 # In the [second section](#movie-retrieval-using-hnswdocumentindex), we'll select one of these backends and illustrate how to use it through a basic example.
-#
+# 
 
 # ## Document Index Backends
 
@@ -25,7 +25,7 @@ embeddings = FakeEmbeddings(size=32)
 
 
 # Before you start building the index, it's important to define your document schema. This determines what fields your documents will have and what type of data each field will hold.
-#
+# 
 # For this demonstration, we'll create a somewhat random schema containing 'title' (str), 'title_embedding' (numpy array), 'year' (int), and 'color' (str)
 
 # In[2]:
@@ -39,9 +39,9 @@ class MyDoc(BaseDoc):
 
 
 # ### InMemoryExactNNIndex
-#
+# 
 # `InMemoryExactNNIndex` stores all Documents in memory. It is a great starting point for small datasets, where you may not want to launch a database server.
-#
+# 
 # Learn more here: https://docs.docarray.org/user_guide/storing/index_in_memory/
 
 # In[3]:
@@ -85,9 +85,9 @@ print(doc)
 
 
 # ### HnswDocumentIndex
-#
+# 
 # `HnswDocumentIndex` is a lightweight Document Index implementation that runs fully locally and is best suited for small- to medium-sized datasets. It stores vectors on disk in [hnswlib](https://github.com/nmslib/hnswlib), and stores all other data in [SQLite](https://www.sqlite.org/index.html).
-#
+# 
 # Learn more here: https://docs.docarray.org/user_guide/storing/index_hnswlib/
 
 # In[5]:
@@ -132,9 +132,9 @@ print(doc)
 
 
 # ### WeaviateDocumentIndex
-#
+# 
 # `WeaviateDocumentIndex` is a document index that is built upon [Weaviate](https://weaviate.io/) vector database.
-#
+# 
 # Learn more here: https://docs.docarray.org/user_guide/storing/index_weaviate/
 
 # In[7]:
@@ -197,9 +197,9 @@ print(doc)
 
 
 # ### ElasticDocIndex
-#
+# 
 # `ElasticDocIndex` is a document index that is built upon [ElasticSearch](https://github.com/elastic/elasticsearch)
-#
+# 
 # Learn more [here](https://docs.docarray.org/user_guide/storing/index_elastic/)
 
 # In[10]:
@@ -246,9 +246,9 @@ print(doc)
 
 
 # ### QdrantDocumentIndex
-#
+# 
 # `QdrantDocumentIndex` is a document index that is built upon [Qdrant](https://qdrant.tech/) vector database
-#
+# 
 # Learn more [here](https://docs.docarray.org/user_guide/storing/index_qdrant/)
 
 # In[12]:
@@ -468,3 +468,7 @@ print(docs)
 
 
 # In[ ]:
+
+
+
+

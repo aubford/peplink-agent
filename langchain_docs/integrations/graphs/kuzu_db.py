@@ -2,28 +2,28 @@
 # coding: utf-8
 
 # # Kuzu
-#
+# 
 # > [Kùzu](https://kuzudb.com/) is an embeddable, scalable, extremely fast graph database.
 # > It is permissively licensed with an MIT license, and you can see its source code [here](https://github.com/kuzudb/kuzu).
-#
+# 
 # > Key characteristics of Kùzu:
 # >- Performance and scalability: Implements modern, state-of-the-art join algorithms for graphs.
 # >- Usability: Very easy to set up and get started with, as there are no servers (embedded architecture).
 # >- Interoperability: Can conveniently scan and copy data from external columnar formats, CSV, JSON and relational databases.
 # >- Structured property graph model: Implements the property graph model, with added structure.
 # >- Cypher support: Allows convenient querying of the graph in Cypher, a declarative query language.
-#
+# 
 # > Get started with Kùzu by visiting their [documentation](https://docs.kuzudb.com/).
 
 # ## Setting up
-#
+# 
 # Kùzu is an embedded database (it runs in-process), so there are no servers to manage. Install the
 # following dependencies to get started:
-#
+# 
 # ```bash
 # pip install -U langchain-kuzu langchain-openai langchain-experimental
 # ```
-#
+# 
 # This installs Kùzu along with the LangChain integration for it, as well as the OpenAI Python package
 # so that we can use OpenAI's LLMs. If you want to use other LLM providers, you can install their
 # respective Python packages that come with LangChain.
@@ -86,9 +86,7 @@ from langchain_openai import ChatOpenAI
 
 # Define the LLMGraphTransformer
 llm_transformer = LLMGraphTransformer(
-    llm=ChatOpenAI(
-        model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY
-    ),  # noqa: F821
+    llm=ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY),  # noqa: F821
     allowed_nodes=allowed_nodes,
     allowed_relationships=allowed_relationships,
 )
@@ -117,7 +115,7 @@ graph.add_graph_documents(
 
 
 # ## Creating `KuzuQAChain`
-#
+# 
 # To query the graph via a Text2Cypher pipeline, we can define a `KuzuQAChain` object. Then, we can invoke the chain with a query by connecting to the existing database that's stored in the `test_db` directory defined above.
 
 # In[9]:
@@ -127,9 +125,7 @@ from langchain_kuzu.chains.graph_qa.kuzu import KuzuQAChain
 
 # Create the KuzuQAChain with verbosity enabled to see the generated Cypher queries
 chain = KuzuQAChain.from_llm(
-    llm=ChatOpenAI(
-        model="gpt-4o-mini", temperature=0.3, api_key=OPENAI_API_KEY
-    ),  # noqa: F821
+    llm=ChatOpenAI(model="gpt-4o-mini", temperature=0.3, api_key=OPENAI_API_KEY),  # noqa: F821
     graph=graph,
     verbose=True,
     allow_dangerous_requests=True,
@@ -153,7 +149,7 @@ chain.invoke("Where is Apple headquartered?")
 
 
 # ## Refresh graph schema
-#
+# 
 # If you mutate or update the graph, you can inspect the refreshed schema information that's used by the Text2Cypher chain to generate Cypher statements.
 # You don't need to manually call `refresh_schema()` each time as it's called automatically when you invoke the chain.
 
@@ -166,7 +162,7 @@ print(graph.get_schema)
 
 
 # ## Use separate LLMs for Cypher and answer generation
-#
+# 
 # You can specify `cypher_llm` and `qa_llm` separately to use different LLMs for Cypher generation and answer generation.
 
 # In[13]:
@@ -185,3 +181,4 @@ chain = KuzuQAChain.from_llm(
 
 
 chain.invoke("Who is the CEO of Apple?")
+

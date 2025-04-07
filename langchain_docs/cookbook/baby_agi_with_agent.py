@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # BabyAGI with Tools
-#
+# 
 # This notebook builds on top of [baby agi](baby_agi.html), but shows how you can swap out the execution chain. The previous execution chain was just an LLM which made stuff up. By swapping it out with an agent that has access to tools, we can hopefully get real reliable information
 
 # ## Install and Import Required Modules
@@ -19,14 +19,14 @@ from langchain_openai import OpenAI, OpenAIEmbeddings
 
 
 # ## Connect to the Vector Store
-#
+# 
 # Depending on what vectorstore you use, this step may look different.
 
 # In[2]:
 
 
-get_ipython().run_line_magic("pip", "install faiss-cpu > /dev/null")
-get_ipython().run_line_magic("pip", "install google-search-results > /dev/null")
+get_ipython().run_line_magic('pip', 'install faiss-cpu > /dev/null')
+get_ipython().run_line_magic('pip', 'install google-search-results > /dev/null')
 from langchain.docstore import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 
@@ -45,13 +45,13 @@ vectorstore = FAISS(embeddings_model.embed_query, index, InMemoryDocstore({}), {
 
 
 # ## Define the Chains
-#
+# 
 # BabyAGI relies on three LLM chains:
 # - Task creation chain to select new tasks to add to the list
 # - Task prioritization chain to re-prioritize tasks
 # - Execution Chain to execute the tasks
-#
-#
+# 
+# 
 # NOTE: in this notebook, the Execution chain will now be an agent.
 
 # In[4]:
@@ -105,7 +105,7 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 
 
 # ### Run the BabyAGI
-#
+# 
 # Now it's time to create the BabyAGI controller and watch it try to accomplish your objective.
 
 # In[6]:
@@ -137,3 +137,7 @@ baby_agi({"objective": OBJECTIVE})
 
 
 # In[ ]:
+
+
+
+

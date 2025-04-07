@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # Apache Cassandra
-#
+# 
 # This page provides a quickstart for using [Apache Cassandra®](https://cassandra.apache.org/) as a Vector Store.
 
 # > [Cassandra](https://cassandra.apache.org/) is a NoSQL, row-oriented, highly scalable and highly available database.Starting with version 5.0, the database ships with [vector search capabilities](https://cassandra.apache.org/doc/trunk/cassandra/vector-search/overview.html).
@@ -16,9 +16,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", 'install --upgrade --quiet langchain-community "cassio>=0.1.4"'
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community "cassio>=0.1.4"')
 
 
 # _Note: depending on your LangChain setup, you may need to install/upgrade other dependencies needed for this demo_
@@ -64,15 +62,15 @@ from langchain_community.vectorstores import Cassandra
 
 
 # ## Connection parameters
-#
+# 
 # The Vector Store integration shown in this page can be used with Cassandra as well as other derived databases, such as Astra DB, which use the CQL (Cassandra Query Language) protocol.
-#
+# 
 # > DataStax [Astra DB](https://docs.datastax.com/en/astra-serverless/docs/vector-search/quickstart.html) is a managed serverless database built on Cassandra, offering the same interface and strengths.
-#
+# 
 # Depending on whether you connect to a Cassandra cluster or to Astra DB through CQL, you will provide different parameters when creating the vector store object.
 
 # ### Connecting to a Cassandra cluster
-#
+# 
 # You first need to create a `cassandra.cluster.Session` object, as described in the [Cassandra driver documentation](https://docs.datastax.com/en/developer/python-driver/latest/api/cassandra/cluster/#module-cassandra.cluster). The details vary (e.g. with network settings and authentication), but this might be something like:
 
 # In[ ]:
@@ -113,7 +111,7 @@ vstore = Cassandra(
 # ### Connecting to Astra DB through CQL
 
 # In this case you initialize CassIO with the following connection parameters:
-#
+# 
 # - the Database ID, e.g. `01234567-89ab-cdef-0123-456789abcdef`
 # - the Token, e.g. `AstraCS:6gBhNmsk135....` (it must be a "Database Administrator" token)
 # - Optionally a Keyspace name (if omitted, the default one for the database will be used)
@@ -265,9 +263,7 @@ print(f"some_succeeds={delete_2}")  # True, though some IDs were gone already
 # In[ ]:
 
 
-get_ipython().system(
-    'curl -L      "https://github.com/awesome-astra/datasets/blob/main/demo-resources/what-is-philosophy/what-is-philosophy.pdf?raw=true"      -o "what-is-philosophy.pdf"'
-)
+get_ipython().system('curl -L      "https://github.com/awesome-astra/datasets/blob/main/demo-resources/what-is-philosophy/what-is-philosophy.pdf?raw=true"      -o "what-is-philosophy.pdf"')
 
 
 # In[ ]:
@@ -323,7 +319,7 @@ chain.invoke("How does Russel elaborate on Peirce's idea of the security blanket
 # ## Cleanup
 
 # the following essentially retrieves the `Session` object from CassIO and runs a CQL `DROP TABLE` statement with it:
-#
+# 
 # _(You will lose the data you stored in it.)_
 
 # In[ ]:
@@ -339,6 +335,6 @@ cassio.config.resolve_session().execute(
 # For more information, extended quickstarts and additional usage examples, please visit the [CassIO documentation](https://cassio.org/frameworks/langchain/about/) for more on using the LangChain `Cassandra` vector store.
 
 # #### Attribution statement
-#
+# 
 # > Apache Cassandra, Cassandra and Apache are either registered trademarks or trademarks of the [Apache Software Foundation](http://www.apache.org/) in the United States and/or other countries.
-#
+# 

@@ -2,15 +2,13 @@
 # coding: utf-8
 
 # # Vector SQL Retriever with MyScale
-#
+# 
 # >[MyScale](https://docs.myscale.com/en/) is an integrated vector database. You can access your database in SQL and also from here, LangChain. MyScale can make a use of [various data types and functions for filters](https://blog.myscale.com/2023/06/06/why-integrated-database-solution-can-boost-your-llm-apps/#filter-on-anything-without-constraints). It will boost up your LLM app no matter if you are scaling up your data or expand your system to broader application.
 
 # In[ ]:
 
 
-get_ipython().system(
-    "pip3 install clickhouse-sqlalchemy InstructorEmbedding sentence_transformers openai langchain-experimental"
-)
+get_ipython().system('pip3 install clickhouse-sqlalchemy InstructorEmbedding sentence_transformers openai langchain-experimental')
 
 
 # In[ ]:
@@ -141,3 +139,7 @@ print(ans["answer"])
 
 
 # In[ ]:
+
+
+
+

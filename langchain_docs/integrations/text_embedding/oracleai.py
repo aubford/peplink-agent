@@ -5,9 +5,9 @@
 # Oracle AI Vector Search is designed for Artificial Intelligence (AI) workloads that allows you to query data based on semantics, rather than keywords.
 # One of the biggest benefits of Oracle AI Vector Search is that semantic search on unstructured data can be combined with relational search on business data in one single system.
 # This is not only powerful but also significantly more effective because you don't need to add a specialized vector database, eliminating the pain of data fragmentation between multiple systems.
-#
+# 
 # In addition, your vectors can benefit from all of Oracle Database’s most powerful features, like the following:
-#
+# 
 #  * [Partitioning Support](https://www.oracle.com/database/technologies/partitioning.html)
 #  * [Real Application Clusters scalability](https://www.oracle.com/database/real-application-clusters/)
 #  * [Exadata smart scans](https://www.oracle.com/database/technologies/exadata/software/smartscan/)
@@ -21,14 +21,14 @@
 #  * [Oracle Spatial and Graph](https://www.oracle.com/database/spatial/)
 #  * [Oracle Blockchain](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_blockchain_table.html#GUID-B469E277-978E-4378-A8C1-26D3FF96C9A6)
 #  * [JSON](https://docs.oracle.com/en/database/oracle/oracle-database/23/adjsn/json-in-oracle-database.html)
-#
-#
+# 
+# 
 # The guide demonstrates how to use Embedding Capabilities within Oracle AI Vector Search to generate embeddings for your documents using OracleEmbeddings.
 
 # If you are just starting with Oracle Database, consider exploring the [free Oracle 23 AI](https://www.oracle.com/database/free/#resources) which provides a great introduction to setting up your database environment. While working with the database, it is often advisable to avoid using the system user by default; instead, you can create your own user for enhanced security and customization. For detailed steps on user creation, refer to our [end-to-end guide](https://github.com/langchain-ai/langchain/blob/master/cookbook/oracleai_demo.ipynb) which also shows how to set up a user in Oracle. Additionally, understanding user privileges is crucial for managing database security effectively. You can learn more about this topic in the official [Oracle guide](https://docs.oracle.com/en/database/oracle/oracle-database/19/admqs/administering-user-accounts-and-security.html#GUID-36B21D72-1BBB-46C9-A0C9-F0D2A8591B8D) on administering user accounts and security.
 
 # ### Prerequisites
-#
+# 
 # Ensure you have the Oracle Python Client driver installed to facilitate the integration of Langchain with Oracle AI Vector Search.
 
 # In[ ]:
@@ -63,13 +63,13 @@ except Exception as e:
 # For embedding generation, several provider options are available to users, including embedding generation within the database and third-party services such as OcigenAI, Hugging Face, and OpenAI. Users opting for third-party providers must establish credentials that include the requisite authentication information. Alternatively, if users select 'database' as their provider, they are required to load an ONNX model into the Oracle Database to facilitate embeddings.
 
 # ### Load ONNX Model
-#
+# 
 # Oracle accommodates a variety of embedding providers, enabling users to choose between proprietary database solutions and third-party services such as OCIGENAI and HuggingFace. This selection dictates the methodology for generating and managing embeddings.
-#
+# 
 # ***Important*** : Should users opt for the database option, they must upload an ONNX model into the Oracle Database. Conversely, if a third-party provider is selected for embedding generation, uploading an ONNX model to Oracle Database is not required.
-#
+# 
 # A significant advantage of utilizing an ONNX model directly within Oracle is the enhanced security and performance it offers by eliminating the need to transmit data to external parties. Additionally, this method avoids the latency typically associated with network or REST API calls.
-#
+# 
 # Below is the example code to upload an ONNX model into Oracle Database:
 
 # In[ ]:
@@ -92,11 +92,11 @@ except Exception as e:
 
 
 # ### Create Credential
-#
+# 
 # When selecting third-party providers for generating embeddings, users are required to establish credentials to securely access the provider's endpoints.
-#
+# 
 # ***Important:*** No credentials are necessary when opting for the 'database' provider to generate embeddings. However, should users decide to utilize a third-party provider, they must create credentials specific to the chosen provider.
-#
+# 
 # Below is an illustrative example:
 
 # In[ ]:
@@ -139,7 +139,7 @@ except Exception as ex:
 
 
 # ### Generate Embeddings
-#
+# 
 # Oracle AI Vector Search provides multiple methods for generating embeddings, utilizing either locally hosted ONNX models or third-party APIs. For comprehensive instructions on configuring these alternatives, please refer to the [Oracle AI Vector Search Guide](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_vector_chain1.html#GUID-C6439E94-4E86-4ECD-954E-4B73D53579DE).
 
 # ***Note:*** Users may need to configure a proxy to utilize third-party embedding generation providers, excluding the 'database' provider that utilizes an ONNX model.
@@ -191,4 +191,4 @@ print(f"Embedding generated by OracleEmbeddings: {embed}")
 
 # ### End to End Demo
 # Please refer to our complete demo guide [Oracle AI Vector Search End-to-End Demo Guide](https://github.com/langchain-ai/langchain/tree/master/cookbook/oracleai_demo.ipynb) to build an end to end RAG pipeline with the help of Oracle AI Vector Search.
-#
+# 

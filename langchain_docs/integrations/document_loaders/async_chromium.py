@@ -2,22 +2,20 @@
 # coding: utf-8
 
 # # Async Chromium
-#
-# Chromium is one of the browsers supported by Playwright, a library used to control browser automation.
-#
-# By running `p.chromium.launch(headless=True)`, we are launching a headless instance of Chromium.
-#
+# 
+# Chromium is one of the browsers supported by Playwright, a library used to control browser automation. 
+# 
+# By running `p.chromium.launch(headless=True)`, we are launching a headless instance of Chromium. 
+# 
 # Headless mode means that the browser is running without a graphical user interface.
-#
+# 
 # In the below example we'll use the `AsyncChromiumLoader` to loads the page, and then the [`Html2TextTransformer`](/docs/integrations/document_transformers/html2text/) to strip out the HTML tags and other semantic information.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet playwright beautifulsoup4 html2text"
-)
-get_ipython().system("playwright install")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet playwright beautifulsoup4 html2text')
+get_ipython().system('playwright install')
 
 
 # **Note:** If you are using Jupyter notebooks, you might also need to install and apply `nest_asyncio` before loading the documents like this:
@@ -25,7 +23,7 @@ get_ipython().system("playwright install")
 # In[ ]:
 
 
-get_ipython().system("pip install nest-asyncio")
+get_ipython().system('pip install nest-asyncio')
 import nest_asyncio
 
 nest_asyncio.apply()
@@ -52,3 +50,4 @@ from langchain_community.document_transformers import Html2TextTransformer
 html2text = Html2TextTransformer()
 docs_transformed = html2text.transform_documents(docs)
 docs_transformed[0].page_content[0:500]
+

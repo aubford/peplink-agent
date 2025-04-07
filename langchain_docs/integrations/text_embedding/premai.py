@@ -2,22 +2,22 @@
 # coding: utf-8
 
 # # PremAI
-#
+# 
 # [PremAI](https://premai.io/) is an all-in-one platform that simplifies the creation of robust, production-ready applications powered by Generative AI. By streamlining the development process, PremAI allows you to concentrate on enhancing user experience and driving overall growth for your application. You can quickly start using our platform [here](https://docs.premai.io/quick-start).
-#
+# 
 # ### Installation and setup
-#
+# 
 # We start by installing `langchain` and `premai-sdk`. You can type the following command to install:
-#
+# 
 # ```bash
 # pip install premai langchain
 # ```
-#
+# 
 # Before proceeding further, please make sure that you have made an account on PremAI and already created a project. If not, please refer to the [quick start](https://docs.premai.io/introduction) guide to get started with the PremAI platform. Create your first project and grab your API key.
 
 # ## PremEmbeddings
-#
-# In this section we are going to dicuss how we can get access to different embedding model using `PremEmbeddings` with LangChain. Lets start by importing our modules and setting our API Key.
+# 
+# In this section we are going to dicuss how we can get access to different embedding model using `PremEmbeddings` with LangChain. Lets start by importing our modules and setting our API Key. 
 
 # In[1]:
 
@@ -28,7 +28,7 @@ from langchain_community.embeddings import PremAIEmbeddings
 
 
 # Once we imported our required modules, let's setup our client. For now let's assume that our `project_id` is `8`. But make sure you use your project-id, otherwise it will throw error.
-#
+# 
 # > Note: Setting `model_name` argument in mandatory for PremAIEmbeddings unlike [ChatPremAI.](https://python.langchain.com/v0.1/docs/integrations/chat/premai/)
 
 # In[2]:
@@ -74,3 +74,4 @@ doc_result = embedder.embed_documents(documents)
 # of the first document vector
 
 print(doc_result[0][:5])
+

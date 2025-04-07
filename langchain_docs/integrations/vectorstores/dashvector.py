@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # DashVector
-#
+# 
 # > [DashVector](https://help.aliyun.com/document_detail/2510225.html) is a fully-managed vectorDB service that supports high-dimension dense and sparse vectors, real-time insertion and filtered search. It is built to scale automatically and can adapt to different application requirements.
-#
+# 
 # This notebook shows how to use functionality related to the `DashVector` vector database.
-#
+# 
 # To use DashVector, you must have an API key.
 # Here are the [installation instructions](https://help.aliyun.com/document_detail/2510223.html).
 
@@ -15,9 +15,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain-community dashvector dashscope"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-community dashvector dashscope')
 
 
 # We want to use `DashScopeEmbeddings` so we also have to get the Dashscope API Key.
@@ -86,7 +84,7 @@ print(docs)
 
 # ### Operating band `partition` parameters
 
-# The `partition` parameter defaults to default, and if a non-existent `partition` parameter is passed in, the `partition` will be created automatically.
+# The `partition` parameter defaults to default, and if a non-existent `partition` parameter is passed in, the `partition` will be created automatically. 
 
 # In[ ]:
 
@@ -105,3 +103,4 @@ docs = dashvector.similarity_search(query, partition=partition)
 
 # delete
 dashvector.delete(ids=ids, partition=partition)
+

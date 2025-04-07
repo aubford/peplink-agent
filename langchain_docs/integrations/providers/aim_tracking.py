@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Aim
-#
-# Aim makes it super easy to visualize and debug LangChain executions. Aim tracks inputs and outputs of LLMs and tools, as well as actions of agents.
-#
+# 
+# Aim makes it super easy to visualize and debug LangChain executions. Aim tracks inputs and outputs of LLMs and tools, as well as actions of agents. 
+# 
 # With Aim, you can easily debug and examine an individual execution:
-#
+# 
 # ![](https://user-images.githubusercontent.com/13848158/227784778-06b806c7-74a1-4d15-ab85-9ece09b458aa.png)
-#
+# 
 # Additionally, you have the option to compare multiple executions side by side:
-#
+# 
 # ![](https://user-images.githubusercontent.com/13848158/227784994-699b24b7-e69b-48f9-9ffa-e6a6142fd719.png)
-#
+# 
 # Aim is fully open source, [learn more](https://github.com/aimhubio/aim) about Aim on GitHub.
-#
+# 
 # Let's move forward and see how to enable and configure Aim callback.
 
 # <h3>Tracking LangChain Executions with Aim</h3>
@@ -24,10 +24,10 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  aim")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-openai")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  google-search-results")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  aim')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  google-search-results')
 
 
 # In[ ]:
@@ -42,7 +42,7 @@ from langchain_openai import OpenAI
 
 
 # Our examples use a GPT model as the LLM, and OpenAI offers an API for this purpose. You can obtain the key from the following link: https://platform.openai.com/account/api-keys .
-#
+# 
 # We will use the SerpApi to retrieve search results from Google. To acquire the SerpApi key, please go to https://serpapi.com/manage-api-key .
 
 # In[ ]:
@@ -137,3 +137,4 @@ agent.run(
     "Who is Leo DiCaprio's girlfriend? What is her current age raised to the 0.43 power?"
 )
 aim_callback.flush_tracker(langchain_asset=agent, reset=False, finish=True)
+

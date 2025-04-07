@@ -2,17 +2,17 @@
 # coding: utf-8
 
 # # How to merge consecutive messages of the same type
-#
+# 
 # Certain models do not support passing in consecutive [messages](/docs/concepts/messages/) of the same type (a.k.a. "runs" of the same message type).
-#
+# 
 # The `merge_message_runs` utility makes it easy to merge consecutive messages of the same type.
-#
+# 
 # ### Setup
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-core langchain-anthropic")
+get_ipython().run_line_magic('pip', 'install -qU langchain-core langchain-anthropic')
 
 
 # ## Basic usage
@@ -45,7 +45,7 @@ print("\n\n".join([repr(x) for x in merged]))
 # Notice that if the contents of one of the messages to merge is a list of content blocks then the merged message will have a list of content blocks. And if both messages to merge have string contents then those are concatenated with a newline character.
 
 # ## Chaining
-#
+# 
 # `merge_message_runs` can be used in an imperatively (like above) or declaratively, making it easy to compose with other components in a chain:
 
 # In[9]:
@@ -62,7 +62,7 @@ chain.invoke(messages)
 
 
 # Looking at the LangSmith trace we can see that before the messages are passed to the model they are merged: https://smith.langchain.com/public/ab558677-cac9-4c59-9066-1ecce5bcd87c/r
-#
+# 
 # Looking at just the merger, we can see that it's a Runnable object that can be invoked like all Runnables:
 
 # In[10]:
@@ -92,5 +92,5 @@ chain.invoke({"skill": "math", "query": "what's the definition of a convergent s
 # LangSmith Trace: https://smith.langchain.com/public/432150b6-9909-40a7-8ae7-944b7e657438/r/f4ad5fb2-4d38-42a6-b780-25f62617d53f
 
 # ## API reference
-#
+# 
 # For a complete description of all arguments head to the API reference: https://python.langchain.com/api_reference/core/messages/langchain_core.messages.utils.merge_message_runs.html

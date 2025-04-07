@@ -2,15 +2,15 @@
 # coding: utf-8
 
 # # Together AI
-#
+# 
 # :::caution
 # You are currently on a page documenting the use of Together AI models as [text completion models](/docs/concepts/text_llms). Many popular Together AI models are [chat completion models](/docs/concepts/chat_models).
-#
+# 
 # You may be looking for [this page instead](/docs/integrations/chat/together/).
 # :::
-#
+# 
 # [Together AI](https://www.together.ai/) offers an API to query [50+ leading open-source models](https://docs.together.ai/docs/inference-models) in a couple lines of code.
-#
+# 
 # This example goes over how to use LangChain to interact with Together AI models.
 
 # ## Installation
@@ -18,15 +18,15 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade langchain-together")
+get_ipython().run_line_magic('pip', 'install --upgrade langchain-together')
 
 
 # ## Environment
-#
+# 
 # To use Together AI, you'll need an API key which you can find here:
 # https://api.together.ai/settings/api-keys. This can be passed in as an init param
 # ``together_api_key`` or set as environment variable ``TOGETHER_API_KEY``.
-#
+# 
 
 # ## Example
 
@@ -64,3 +64,4 @@ llm = Together(
 )
 
 print(llm.invoke("def bubble_sort(): "))
+

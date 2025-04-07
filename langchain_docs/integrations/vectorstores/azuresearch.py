@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # Azure AI Search
-#
+# 
 # [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search) (formerly known as `Azure Search` and `Azure Cognitive Search`) is a cloud search service that gives developers infrastructure, APIs, and tools for information retrieval of vector, keyword, and hybrid queries at scale.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
 
 # ## Install Azure AI Search SDK
-#
+# 
 # Use azure-search-documents package version 11.4.0 or later.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  azure-search-documents")
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  azure-identity")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-search-documents')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  azure-identity')
 
 
 # ## Import required libraries
-#
+# 
 # `OpenAIEmbeddings` is assumed, but if you're using Azure OpenAI, import `AzureOpenAIEmbeddings` instead.
 
 # In[2]:
@@ -32,7 +32,7 @@ from langchain_openai import AzureOpenAIEmbeddings, OpenAIEmbeddings
 
 
 # ## Configure OpenAI settings
-# Set variables for your OpenAI provider. You need either an [OpenAI account](https://platform.openai.com/docs/quickstart?context=python) or an [Azure OpenAI account](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource) to generate the embeddings.
+# Set variables for your OpenAI provider. You need either an [OpenAI account](https://platform.openai.com/docs/quickstart?context=python) or an [Azure OpenAI account](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource) to generate the embeddings. 
 
 # In[3]:
 
@@ -54,9 +54,9 @@ azure_deployment: str = "text-embedding-ada-002"
 
 
 # ## Configure vector store settings
-#
+# 
 # You need an [Azure subscription](https://azure.microsoft.com/en-us/free/search) and [Azure AI Search service](https://learn.microsoft.com/azure/search/search-create-service-portal) to use this vector store integration. No-cost versions are available for small and limited workloads.
-#
+#  
 # Set variables for your Azure AI Search URL and admin API key. You can get these variables from the [Azure portal](https://portal.azure.com/#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.Search%2FsearchServices).
 
 # In[24]:
@@ -67,7 +67,7 @@ vector_store_password: str = "YOUR_AZURE_SEARCH_ADMIN_KEY"
 
 
 # ## Create embeddings and vector store instances
-#
+#  
 # Create instances of the OpenAIEmbeddings and AzureSearch classes. When you complete this step, you should have an empty search index on your Azure AI Search resource. The integration module provides a default schema.
 
 # In[6]:
@@ -92,7 +92,7 @@ embeddings: AzureOpenAIEmbeddings = AzureOpenAIEmbeddings(
 
 
 # ## Create vector store instance
-#
+#  
 # Create instance of the AzureSearch class using the embeddings from above
 
 # In[30]:
@@ -122,7 +122,7 @@ vector_store: AzureSearch = AzureSearch(
 
 
 # ## Insert text and embeddings into vector store
-#
+#  
 # This step loads, chunks, and vectorizes the sample document, and then indexes the content into a search index on Azure AI Search.
 
 # In[31]:
@@ -141,7 +141,7 @@ vector_store.add_documents(documents=docs)
 
 
 # ## Perform a vector similarity search
-#
+#  
 # Execute a pure vector similarity search using the similarity_search() method:
 
 # In[11]:
@@ -157,7 +157,7 @@ print(docs[0].page_content)
 
 
 # ## Perform a vector similarity search with relevance scores
-#
+#  
 # Execute a pure vector similarity search using the similarity_search_with_relevance_scores() method. Queries that don't meet the threshold requirements are exluded.
 
 # In[12]:
@@ -174,7 +174,7 @@ pprint(docs_and_scores)
 
 
 # ## Perform a hybrid search
-#
+# 
 # Execute hybrid search using the search_type or hybrid_search() method. Vector and nonvector text fields are queried in parallel, results are merged, and top matches of the unified result set are returned.
 
 # In[13]:
@@ -200,14 +200,14 @@ print(docs[0].page_content)
 
 
 # ## Custom schemas and queries
-#
+# 
 # This section shows you how to replace the default schema with a custom schema.
-#
+# 
 
-# ### Create a new index with custom filterable fields
-#
+# ### Create a new index with custom filterable fields 
+# 
 # This schema shows field definitions. It's the default schema, plus several new fields attributed as filterable. Because it's using the default vector configuration, you won't see vector configuration or vector profile overrides here. The name of the default vector profile is "myHnswProfile" and it's using a vector configuration of Hierarchical Navigable Small World (HNSW) for indexing and queries against the content_vector field.
-#
+# 
 # There's no data for this schema in this step. When you execute the cell, you should get an empty index on Azure AI Search.
 
 # In[15]:
@@ -278,7 +278,7 @@ vector_store: AzureSearch = AzureSearch(
 
 
 # ### Add data and perform a query that includes a filter
-#
+# 
 # This example adds data to the vector store based on the custom schema. It loads text into the title and source fields. The source field is filterable. The sample query in this section filters the results based on content in the source field.
 
 # In[16]:
@@ -315,7 +315,7 @@ res
 
 
 # ### Create a new index with a scoring profile
-#
+# 
 # Here's another custom schema that includes a scoring profile definition. A scoring profile is used for relevance tuning of nonvector content, which is helpful in hybrid search scenarios.
 
 # In[19]:
@@ -453,3 +453,4 @@ vector_store.add_texts(
 
 res = vector_store.similarity_search(query="Test 1", k=3, search_type="similarity")
 res
+

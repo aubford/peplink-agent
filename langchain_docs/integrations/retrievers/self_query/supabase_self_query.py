@@ -2,20 +2,20 @@
 # coding: utf-8
 
 # # Supabase (Postgres)
-#
-# >[Supabase](https://supabase.com/docs) is an open-source `Firebase` alternative.
-# > `Supabase` is built on top of `PostgreSQL`, which offers strong `SQL`
+# 
+# >[Supabase](https://supabase.com/docs) is an open-source `Firebase` alternative. 
+# > `Supabase` is built on top of `PostgreSQL`, which offers strong `SQL` 
 # > querying capabilities and enables a simple interface with already-existing tools and frameworks.
-#
+# 
 # >[PostgreSQL](https://en.wikipedia.org/wiki/PostgreSQL) also known as `Postgres`,
-# > is a free and open-source relational database management system (RDBMS)
+# > is a free and open-source relational database management system (RDBMS) 
 # > emphasizing extensibility and `SQL` compliance.
 # >
 # >[Supabase](https://supabase.com/docs/guides/ai) provides an open-source toolkit for developing AI applications
 # >using Postgres and pgvector. Use the Supabase client libraries to store, index, and query your vector embeddings at scale.
-#
+# 
 # In the notebook, we'll demo the `SelfQueryRetriever` wrapped around a `Supabase` vector store.
-#
+# 
 # Specifically, we will:
 # 1. Create a Supabase database
 # 2. Enable the `pgvector` extension
@@ -24,13 +24,13 @@
 # 5. Build and test a self-querying retriever
 
 # ## Setup Supabase Database
-#
+# 
 # 1. Head over to https://database.new to provision your Supabase database.
 # 2. In the studio, jump to the [SQL editor](https://supabase.com/dashboard/project/_/sql/new) and run the following script to enable `pgvector` and setup your database as a vector store:
 #     ```sql
 #     -- Enable the pgvector extension to work with embedding vectors
 #     create extension if not exists vector;
-#
+# 
 #     -- Create a table to store your documents
 #     create table
 #       documents (
@@ -39,7 +39,7 @@
 #         metadata jsonb, -- corresponds to Document.metadata
 #         embedding vector (1536) -- 1536 works for OpenAI embeddings, change if needed
 #       );
-#
+# 
 #     -- Create a function to search for documents
 #     create function match_documents (
 #       query_embedding vector (1536),
@@ -67,15 +67,13 @@
 
 # ## Creating a Supabase vector store
 # Next we'll want to create a Supabase vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # Be sure to install the latest version of `langchain` with `openai` support:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  langchain langchain-openai tiktoken"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain-openai tiktoken')
 
 
 # The self-query retriever requires you to have `lark` installed:
@@ -83,7 +81,7 @@ get_ipython().run_line_magic(
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark')
 
 
 # We also need the `supabase` package:
@@ -91,15 +89,15 @@ get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark")
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  supabase")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  supabase')
 
 
 # Since we are using `SupabaseVectorStore` and `OpenAIEmbeddings`, we have to load their API keys.
-#
+# 
 # - To find your `SUPABASE_URL` and `SUPABASE_SERVICE_KEY`, head to your Supabase project's [API settings](https://supabase.com/dashboard/project/_/settings/api).
 #   - `SUPABASE_URL` corresponds to the Project URL
 #   - `SUPABASE_SERVICE_KEY` corresponds to the `service_role` API key
-#
+# 
 # - To get your `OPENAI_API_KEY`, navigate to [API keys](https://platform.openai.com/account/api-keys) on your OpenAI account and create a new secret key.
 
 # In[1]:
@@ -121,7 +119,7 @@ if "OPENAI_API_KEY" not in os.environ:
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  python-dotenv")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  python-dotenv')
 
 
 # In[ ]:
@@ -275,9 +273,9 @@ retriever.invoke(
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[10]:
@@ -298,3 +296,4 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("what are two movies about dinosaurs")
+

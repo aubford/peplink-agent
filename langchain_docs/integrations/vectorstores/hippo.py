@@ -2,29 +2,26 @@
 # coding: utf-8
 
 # # Hippo
-#
+# 
 # >[Transwarp Hippo](https://www.transwarp.cn/en/subproduct/hippo) is an enterprise-level cloud-native distributed vector database that supports storage, retrieval, and management of massive vector-based datasets. It efficiently solves problems such as vector similarity search and high-density vector clustering. `Hippo` features high availability, high performance, and easy scalability. It has many functions, such as multiple vector search indexes, data partitioning and sharding, data persistence, incremental data ingestion, vector scalar field filtering, and mixed queries. It can effectively meet the high real-time search demands of enterprises for massive vector data
-#
+# 
 # ## Getting Started
-#
+# 
 # The only prerequisite here is an API key from the OpenAI website. Make sure you have already started a Hippo instance.
 
 # ## Installing Dependencies
-#
+# 
 # Initially, we require the installation of certain dependencies, such as OpenAI, Langchain, and Hippo-API. Please note, that you should install the appropriate versions tailored to your environment.
 
 # In[15]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet  langchain langchain_community tiktoken langchain-openai",
-)
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  hippo-api==1.1.0.rc3")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain langchain_community tiktoken langchain-openai')
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  hippo-api==1.1.0.rc3')
 
 
 # Note: Python version needs to be >=3.8.
-#
+# 
 # ## Best Practices
 # ### Importing Dependency Packages
 
@@ -50,7 +47,7 @@ documents = loader.load()
 
 
 # ### Segmenting the Knowledge Document
-#
+# 
 # Here, we use Langchain's CharacterTextSplitter for segmentation. The delimiter is a period. After segmentation, the text segment does not exceed 1000 characters, and the number of repeated characters is 0.
 
 # In[18]:
@@ -163,3 +160,7 @@ print(f"response_without_hippo:{response}")
 
 
 # In[ ]:
+
+
+
+

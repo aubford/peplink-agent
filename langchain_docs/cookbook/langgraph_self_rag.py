@@ -4,60 +4,58 @@
 # In[ ]:
 
 
-get_ipython().system(
-    " pip install langchain-chroma langchain_community tiktoken langchain-openai langchainhub langchain langgraph"
-)
+get_ipython().system(' pip install langchain-chroma langchain_community tiktoken langchain-openai langchainhub langchain langgraph')
 
 
 # # Self-RAG
-#
-# Self-RAG is a recent paper that introduces an interesting approach for active RAG.
-#
+# 
+# Self-RAG is a recent paper that introduces an interesting approach for active RAG. 
+# 
 # The framework trains a single arbitrary LM (LLaMA2-7b, 13b) to generate tokens that govern the RAG process:
-#
+# 
 # 1. Should I retrieve from retriever, `R` -
-#
+# 
 # * Token: `Retrieve`
 # * Input: `x (question)` OR `x (question)`, `y (generation)`
 # * Decides when to retrieve `D` chunks with `R`
 # * Output: `yes, no, continue`
-#
+# 
 # 2. Are the retrieved passages `D` relevant to the question `x` -
-#
+# 
 # * Token: `ISREL`
 # * * Input: (`x (question)`, `d (chunk)`) for `d` in `D`
 # * `d` provides useful information to solve `x`
 # * Output: `relevant, irrelevant`
-#
-#
+# 
+# 
 # 3. Are the LLM generation from each chunk in `D` is relevant to the chunk (hallucinations, etc)  -
-#
+# 
 # * Token: `ISSUP`
 # * Input: `x (question)`, `d (chunk)`,  `y (generation)` for `d` in `D`
 # * All of the verification-worthy statements in `y (generation)` are supported by `d`
 # * Output: `{fully supported, partially supported, no support`
-#
+# 
 # 4. The LLM generation from each chunk in `D` is a useful response to `x (question)` -
-#
+# 
 # * Token: `ISUSE`
 # * Input: `x (question)`, `y (generation)` for `d` in `D`
 # * `y (generation)` is a useful response to `x (question)`.
 # * Output: `{5, 4, 3, 2, 1}`
-#
+# 
 # We can represent this as a graph:
-#
+# 
 # ![Screenshot 2024-02-02 at 1.36.44 PM.png](attachment:ea6a57d2-f2ec-4061-840a-98deb3207248.png)
-#
+# 
 # Paper -
-#
+# 
 # https://arxiv.org/abs/2310.11511
-#
+# 
 # ---
-#
+# 
 # Let's implement this from scratch using [LangGraph](https://python.langchain.com/docs/langgraph).
 
 # ## Retriever
-#
+#  
 # Let's index 3 blog posts.
 
 # In[ ]:
@@ -92,11 +90,11 @@ retriever = vectorstore.as_retriever()
 
 
 # ## State
-#
+#  
 # We will define a graph.
-#
+# 
 # Our state will be a `dict`.
-#
+# 
 # We can access this from any graph node as `state['keys']`.
 
 # In[ ]:
@@ -121,13 +119,13 @@ class GraphState(TypedDict):
 
 
 # ## Nodes and Edges
-#
+# 
 # Each `node` will simply modify the `state`.
-#
+# 
 # Each `edge` will choose which `node` to call next.
-#
+# 
 # We can lay out `self-RAG` as a graph:
-#
+# 
 # ![Screenshot 2024-02-02 at 9.01.01 PM.png](attachment:e61fbd0c-e667-4160-a96c-82f95a560b44.png)
 
 # In[ ]:
@@ -564,7 +562,7 @@ for output in app.stream(inputs):
     pprint.pprint("\n---\n")
 
 
-# Trace -
-#
+# Trace - 
+#  
 # * https://smith.langchain.com/public/55d6180f-aab8-42bc-8799-dadce6247d9b/r
 # * https://smith.langchain.com/public/f85ebc95-81d9-47fc-91c6-b54e5b78f359/r

@@ -3,7 +3,7 @@
 
 # # Video Captioning
 # This notebook shows how to use VideoCaptioningChain, which is implemented using Langchain's ImageCaptionLoader and AssemblyAI to produce .srt files.
-#
+# 
 # This system autogenerates both subtitles and closed captions from a video URL.
 
 # ## Installing Dependencies
@@ -42,12 +42,12 @@ ASSEMBLYAI_API_KEY = getpass.getpass("AssemblyAI API Key:")
 
 
 # **Required parameters:**
-#
+# 
 # * llm: The language model this chain will use to get suggestions on how to refine the closed-captions
 # * assemblyai_key: The API key for AssemblyAI, used to generate the subtitles
-#
+# 
 # **Optional Parameters:**
-#
+# 
 # * verbose (Default: True): Sets verbose mode for downstream chain calls
 # * use_logging (Default: True): Log the chain's processes in run manager
 # * frame_skip (Default: None): Choose how many video frames to skip during processing. Increasing it results in faster execution, but less accurate results. If None, frame skip is calculated manually based on the framerate Set this to 0 to sample all frames
@@ -83,3 +83,4 @@ print(srt_content)
 
 with open("output.srt", "w") as file:
     file.write(srt_content)
+

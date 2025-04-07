@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Human input chat model
-#
+# 
 # Along with HumanInputLLM, LangChain also provides a pseudo chat model class that can be used for testing, debugging, or educational purposes. This allows you to mock out calls to the chat model and simulate how a human would respond if they received the messages.
-#
+# 
 # In this notebook, we go over how to use this.
-#
+# 
 # We start this with using the HumanInputChatModel in an agent.
 
 # In[1]:
@@ -20,7 +20,7 @@ from langchain_community.chat_models.human import HumanInputChatModel
 # In[2]:
 
 
-get_ipython().run_line_magic("pip", "install wikipedia")
+get_ipython().run_line_magic('pip', 'install wikipedia')
 
 
 # In[3]:
@@ -48,3 +48,4 @@ agent = initialize_agent(
 
 
 agent("What is Bocchi the Rock?")
+

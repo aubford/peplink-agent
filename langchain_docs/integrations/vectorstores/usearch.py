@@ -3,18 +3,16 @@
 
 # # USearch
 # >[USearch](https://unum-cloud.github.io/usearch/) is a Smaller & Faster Single-File Vector Search Engine
-#
+# 
 # >USearch's base functionality is identical to FAISS, and the interface should look familiar if you have ever investigated Approximate Nearest Neigbors search. FAISS is a widely recognized standard for high-performance vector search engines. USearch and FAISS both employ the same HNSW algorithm, but they differ significantly in their design principles. USearch is compact and broadly compatible without sacrificing performance, with a primary focus on user-defined metrics and fewer dependencies.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  usearch langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  usearch langchain-community')
 
 
-# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key.
+# We want to use OpenAIEmbeddings so we have to get the OpenAI API Key. 
 
 # In[2]:
 
@@ -79,3 +77,7 @@ docs_and_scores[0]
 
 
 # In[ ]:
+
+
+
+

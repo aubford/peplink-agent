@@ -2,20 +2,17 @@
 # coding: utf-8
 
 # # Google Cloud Vertex AI Reranker
-#
+# 
 # > The [Vertex Search Ranking API](https://cloud.google.com/generative-ai-app-builder/docs/ranking) is one of the standalone APIs in [Vertex AI Agent Builder](https://cloud.google.com/generative-ai-app-builder/docs/builder-apis). It takes a list of documents and reranks those documents based on how relevant the documents are to a query. Compared to embeddings, which look only at the semantic similarity of a document and a query, the ranking API can give you precise scores for how well a document answers a given query. The ranking API can be used to improve the quality of search results after retrieving an initial set of candidate documents.
-#
+# 
 # >The ranking API is stateless so there's no need to index documents before calling the API. All you need to do is pass in the query and documents. This makes the API well suited for reranking documents from any document retrievers.
-#
+# 
 # >For more information, see [Rank and rerank documents](https://cloud.google.com/generative-ai-app-builder/docs/ranking).
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet langchain langchain-community langchain-google-community langchain-google-community[vertexaisearch] langchain-google-vertexai langchain-chroma langchain-text-splitters beautifulsoup4",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain langchain-community langchain-google-community langchain-google-community[vertexaisearch] langchain-google-vertexai langchain-chroma langchain-text-splitters beautifulsoup4')
 
 
 # ### Setup
@@ -34,11 +31,11 @@ aiplatform.init(project=PROJECT_ID, location=REGION)
 
 
 # ### Load and Prepare data
-#
+# 
 # For this example, we will be using the [Google Wiki page](https://en.wikipedia.org/wiki/Google)to demonstrate how the Vertex Ranking API works.
-#
+# 
 # We use a standard pipeline of `load -> split -> embed data`.
-#
+# 
 # The embeddings are created using the [Vertex Embeddings API](https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#supported_models) model - `textembedding-gecko@003`
 
 # In[6]:
@@ -93,13 +90,13 @@ retriever_with_reranker = ContextualCompressionRetriever(
 
 
 # ### Testing out the Vertex Ranking API
-#
+# 
 # Let's query both the `basic_retriever` and `retriever_with_reranker` with the same query and compare the retrieved documents.
-#
+# 
 # The Ranking API takes in the input from the `basic_retriever` and passes it to the Ranking API.
-#
+# 
 # The ranking API is used to improve the quality of the ranking and determine a score that indicates the relevance of each record to the query.
-#
+# 
 # You can see the difference between the Unranked and the Ranked Documents. The Ranking API moves the most semantically relevant documents to the top of the context window of the LLM thus helping it form a better answer with reasoning.
 
 # In[8]:
@@ -127,7 +124,7 @@ comparison_df = pd.DataFrame(
 comparison_df
 
 
-# Let's inspect a couple of reranked documents. We observe that the retriever still returns the relevant Langchain type [documents](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html) but as part of the metadata field, we also recieve the `relevance_score` from the Ranking API.
+# Let's inspect a couple of reranked documents. We observe that the retriever still returns the relevant Langchain type [documents](https://python.langchain.com/api_reference/core/documents/langchain_core.documents.base.Document.html) but as part of the metadata field, we also receive the `relevance_score` from the Ranking API.
 
 # In[10]:
 
@@ -139,10 +136,10 @@ for i in range(2):
 
 
 # ### Putting it all together
-#
+# 
 # This shows an example of a complete RAG chain with a simple prompt template on how you can perform reranking using the Vertex Ranking API.
-#
-#
+# 
+# 
 
 # In[15]:
 
@@ -203,3 +200,4 @@ query = "how did the name google originate?"
 
 
 chain.invoke(query)
+

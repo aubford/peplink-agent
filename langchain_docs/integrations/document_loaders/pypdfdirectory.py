@@ -2,30 +2,30 @@
 # coding: utf-8
 
 # # PyPDFDirectoryLoader
-#
+# 
 # This loader loads all PDF files from a specific directory.
-#
+# 
 # ## Overview
 # ### Integration details
-#
-#
+# 
+# 
 # | Class | Package | Local | Serializable | JS support|
 # | :--- | :--- | :---: | :---: |  :---: |
-# | [PyPDFDirectoryLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyPDFDirectoryLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ |
+# | [PyPDFDirectoryLoader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyPDFDirectoryLoader.html) | [langchain_community](https://python.langchain.com/api_reference/community/index.html) | ✅ | ❌ | ❌ | 
 # ### Loader features
 # | Source | Document Lazy Loading | Native Async Support
-# | :---: | :---: | :---: |
-# | PyPDFDirectoryLoader | ✅ | ❌ |
-#
+# | :---: | :---: | :---: | 
+# | PyPDFDirectoryLoader | ✅ | ❌ | 
+# 
 # ## Setup
-#
+# 
 # ### Credentials
-#
+# 
 # No credentials are needed for this loader.
 
-# If you want to get automated best in-class tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+# To enable automated tracing of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
 
-# In[ ]:
+# In[1]:
 
 
 # os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
@@ -33,20 +33,20 @@
 
 
 # ### Installation
-#
+# 
 # Install **langchain_community**.
 
-# In[ ]:
+# In[2]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain_community")
+get_ipython().run_line_magic('pip', 'install -qU langchain_community pypdf pillow')
 
 
 # ## Initialization
-#
+# 
 # Now we can instantiate our model object and load documents:
 
-# In[1]:
+# In[3]:
 
 
 from langchain_community.document_loaders import PyPDFDirectoryLoader
@@ -59,14 +59,14 @@ loader = PyPDFDirectoryLoader("example_data/")
 
 # ## Load
 
-# In[2]:
+# In[4]:
 
 
 docs = loader.load()
 docs[0]
 
 
-# In[3]:
+# In[5]:
 
 
 print(docs[0].metadata)
@@ -74,7 +74,7 @@ print(docs[0].metadata)
 
 # ## Lazy Load
 
-# In[4]:
+# In[6]:
 
 
 page = []
@@ -88,5 +88,11 @@ for doc in loader.lazy_load():
 
 
 # ## API reference
-#
+# 
 # For detailed documentation of all PyPDFDirectoryLoader features and configurations head to the API reference: https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.pdf.PyPDFDirectoryLoader.html
+
+# In[ ]:
+
+
+
+

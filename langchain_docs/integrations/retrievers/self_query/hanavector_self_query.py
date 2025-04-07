@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # SAP HANA Cloud Vector Engine
-#
+# 
 # For more information on how to setup the SAP HANA vetor store, take a look at the [documentation](/docs/integrations/vectorstores/sap_hanavector.ipynb).
-#
+# 
 # We use the same setup here:
 
 # In[ ]:
@@ -88,7 +88,7 @@ db.add_documents(docs)
 
 
 # ## Self querying
-#
+# 
 # Now for the main act: here is how to construct a SelfQueryRetriever for HANA vectorstore:
 
 # In[ ]:
@@ -172,3 +172,4 @@ sq = query_constructor.invoke(input=query_prompt)
 print("Structured query: ", sq)
 
 print("Translated for hana vector store: ", hana_translator.visit_structured_query(sq))
+

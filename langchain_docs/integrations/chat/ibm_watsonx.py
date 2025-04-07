@@ -122,7 +122,7 @@ chat = ChatWatsonx(
 )
 
 
-# Instead of `model_id`, you can also pass the `deployment_id` of the previously tuned model. The entire model tuning workflow is described in [Working with TuneExperiment and PromptTuner](https://ibm.github.io/watsonx-ai-python-sdk/pt_working_with_class_and_prompt_tuner.html).
+# Instead of `model_id`, you can also pass the `deployment_id` of the previously [deployed model with reference to a Prompt Template](https://cloud.ibm.com/apidocs/watsonx-ai#deployments-text-chat).
 
 # In[ ]:
 
@@ -132,6 +132,21 @@ chat = ChatWatsonx(
     url="https://us-south.ml.cloud.ibm.com",
     project_id="PASTE YOUR PROJECT_ID HERE",
     params=parameters,
+)
+
+
+# For certain requirements, there is an option to pass the IBM's [`APIClient`](https://ibm.github.io/watsonx-ai-python-sdk/base.html#apiclient) object into the `ChatWatsonx` class.
+
+# In[ ]:
+
+
+from ibm_watsonx_ai import APIClient
+
+api_client = APIClient(...)
+
+chat = ChatWatsonx(
+    model_id="ibm/granite-34b-code-instruct",
+    watsonx_client=api_client,
 )
 
 
@@ -244,8 +259,6 @@ chat.batch([message_1, message_2])
 # ## Tool calling
 # 
 # ### ChatWatsonx.bind_tools()
-# 
-# Please note that `ChatWatsonx.bind_tools` is on beta state, so we recommend using `mistralai/mistral-large` model.
 
 # In[ ]:
 

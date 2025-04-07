@@ -2,25 +2,25 @@
 # coding: utf-8
 
 # # How to get log probabilities
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
 # - [Tokens](/docs/concepts/tokens)
-#
+# 
 # :::
-#
+# 
 # Certain [chat models](/docs/concepts/chat_models/) can be configured to return token-level log probabilities representing the likelihood of a given token. This guide walks through how to get this information in LangChain.
 
 # ## OpenAI
-#
+# 
 # Install the LangChain x OpenAI package and set your API key
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-openai")
+get_ipython().run_line_magic('pip', 'install -qU langchain-openai')
 
 
 # In[2]:
@@ -65,7 +65,7 @@ for chunk in llm.stream(("human", "how are you today")):
 
 
 # ## Next steps
-#
+# 
 # You've now learned how to get logprobs from OpenAI models in LangChain.
-#
+# 
 # Next, check out the other how-to guides chat models in this section, like [how to get a model to return structured output](/docs/how_to/structured_output) or [how to track token usage](/docs/how_to/chat_token_usage_tracking).

@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # How to use a SmartLLMChain
-#
+# 
 # A SmartLLMChain is a form of self-critique chain that can help you if have particularly complex questions to answer. Instead of doing a single LLM pass, it instead performs these 3 steps:
-# 1. Ideation: Pass the user prompt n times through the LLM to get n output proposals (called "ideas"), where n is a parameter you can set
-# 2. Critique: The LLM critiques all ideas to find possible flaws and picks the best one
+# 1. Ideation: Pass the user prompt n times through the LLM to get n output proposals (called "ideas"), where n is a parameter you can set 
+# 2. Critique: The LLM critiques all ideas to find possible flaws and picks the best one 
 # 3. Resolve: The LLM tries to improve upon the best idea (as chosen in the critique step) and outputs it. This is then the final output.
-#
+# 
 # SmartLLMChains are based on the SmartGPT workflow proposed in https://youtu.be/wVzuvf9D9BU.
-#
+# 
 # Note that SmartLLMChains
 # - use more LLM passes (ie n+2 instead of just 1)
 # - only work then the underlying LLM has the capability for reflection, which smaller models often don't
 # - only work with underlying models that return exactly 1 output, not multiple
-#
+# 
 # This notebook demonstrates how to use a SmartLLMChain.
 
 # ##### Same LLM for all steps
@@ -36,8 +36,8 @@ from langchain_openai import ChatOpenAI
 
 
 # As example question, we will use "I have a 12 liter jug and a 6 liter jug. I want to measure 6 liters. How do I do it?". This is an example from the original SmartGPT video (https://youtu.be/wVzuvf9D9BU?t=384). While this seems like a very easy question, LLMs struggle do these kinds of questions that involve numbers and physical reasoning.
-#
-# As we will see, all 3 initial ideas are completely wrong - even though we're using GPT4! Only when using self-reflection do we get a correct answer.
+# 
+# As we will see, all 3 initial ideas are completely wrong - even though we're using GPT4! Only when using self-reflection do we get a correct answer. 
 
 # In[ ]:
 
@@ -89,3 +89,7 @@ chain = SmartLLMChain(
 
 
 # In[ ]:
+
+
+
+

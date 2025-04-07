@@ -2,23 +2,21 @@
 # coding: utf-8
 
 # # OpenClip
-#
+# 
 # [OpenClip](https://github.com/mlfoundations/open_clip/tree/main) is an source implementation of OpenAI's CLIP.
-#
+# 
 # These multi-modal embeddings can be used to embed images or text.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-experimental")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-experimental')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  pillow open_clip_torch torch matplotlib"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pillow open_clip_torch torch matplotlib')
 
 
 # We can the list of available CLIP embedding models and checkpoints:
@@ -36,17 +34,17 @@ open_clip.list_pretrained()
 # model_name = "ViT-g-14"
 # checkpoint = "laion2b_s34b_b88k"
 # ```
-#
+# 
 # But, you can also opt for a smaller, less performant model:
 # ```
 # model_name = "ViT-B-32"
 # checkpoint = "laion2b_s34b_b79k"
 # ```
-#
+# 
 # The model `model_name`,`checkpoint`  are set in `langchain_experimental.open_clip.py`.
-#
+# 
 # For text, use the same method `embed_documents` as with other embedding models.
-#
+# 
 # For images, use `embed_image` and simply pass a list of uris for the images.
 
 # In[3]:
@@ -69,7 +67,7 @@ text_feat_house = clip_embd.embed_documents(["house"])
 
 
 # ## Sanity Check
-#
+# 
 # Let's reproduce results shown in the OpenClip Colab [here](https://colab.research.google.com/github/mlfoundations/open_clip/blob/master/docs/Interacting_with_open_clip.ipynb#scrollTo=tMc1AXzBlhzm).
 
 # In[8]:
@@ -82,8 +80,8 @@ import IPython.display
 import matplotlib.pyplot as plt
 import skimage
 
-get_ipython().run_line_magic("matplotlib", "inline")
-get_ipython().run_line_magic("config", "InlineBackend.figure_format = 'retina'")
+get_ipython().run_line_magic('matplotlib', 'inline')
+get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'retina'")
 
 descriptions = {
     "page": "a page of text about segmentation",
@@ -166,3 +164,4 @@ plt.xlim([-0.5, count - 0.5])
 plt.ylim([count + 0.5, -2])
 
 plt.title("Cosine similarity between text and image features", size=20)
+

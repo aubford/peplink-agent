@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # SearxNG Search
-#
+# 
 # This notebook goes over how to use a self hosted `SearxNG` search API to search the web.
-#
+# 
 # You can [check this link](https://docs.searxng.org/dev/search_api.html) for more informations about `Searx API` parameters.
 
 # In[ ]:
@@ -30,7 +30,7 @@ search.run("What is the capital of France")
 
 
 # ## Custom Parameters
-#
+# 
 # SearxNG supports [135 search engines](https://docs.searxng.org/user/configured_engines.html). You can also customize the Searx wrapper with arbitrary named parameters that will be passed to the Searx search API . In the below example we will making a more interesting use of custom search parameters from searx search api.
 
 # In this example we will be using the `engines` parameters to query wikipedia
@@ -61,7 +61,7 @@ search.run("deep learning", language="es", engines=["wiki"])
 # ## Obtaining results with metadata
 
 # In this example we will be looking for scientific paper using the `categories` parameter and limiting the results to a `time_range` (not all engines support the time range option).
-#
+# 
 # We also would like to obtain the results in a structured way including metadata. For this we will be using the `results` method of the wrapper.
 
 # In[ ]:
@@ -111,3 +111,4 @@ results = search.results(
     "large language model", num_results=20, engines=["github", "gitlab"]
 )
 pprint.pp(results)
+

@@ -2,30 +2,30 @@
 # coding: utf-8
 
 # # How to create a custom chat model class
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
 # - [Chat models](/docs/concepts/chat_models)
-#
+# 
 # :::
-#
+# 
 # In this guide, we'll learn how to create a custom [chat model](/docs/concepts/chat_models/) using LangChain abstractions.
-#
+# 
 # Wrapping your LLM with the standard [`BaseChatModel`](https://python.langchain.com/api_reference/core/language_models/langchain_core.language_models.chat_models.BaseChatModel.html) interface allow you to use your LLM in existing LangChain programs with minimal code modifications!
-#
+# 
 # As an bonus, your LLM will automatically become a LangChain [Runnable](/docs/concepts/runnables/) and will benefit from some optimizations out of the box (e.g., batch via a threadpool), async support, the `astream_events` API, etc.
-#
+# 
 # ## Inputs and outputs
-#
+# 
 # First, we need to talk about **[messages](/docs/concepts/messages/)**, which are the inputs and outputs of chat models.
-#
+# 
 # ### Messages
-#
-# Chat models take messages as inputs and return a message as output.
-#
+# 
+# Chat models take messages as inputs and return a message as output. 
+# 
 # LangChain has a few [built-in message types](/docs/concepts/messages):
-#
+# 
 # | Message Type          | Description                                                                                     |
 # |-----------------------|-------------------------------------------------------------------------------------------------|
 # | `SystemMessage`       | Used for priming AI behavior, usually passed in as the first of a sequence of input messages.   |
@@ -33,11 +33,11 @@
 # | `AIMessage`           | Represents a message from the chat model. This can be either text or a request to invoke a tool.|
 # | `FunctionMessage` / `ToolMessage` | Message for passing the results of tool invocation back to the model.               |
 # | `AIMessageChunk` / `HumanMessageChunk` / ... | Chunk variant of each type of message. |
-#
-#
+# 
+# 
 # :::note
 # `ToolMessage` and `FunctionMessage` closely follow OpenAI's `function` and `tool` roles.
-#
+# 
 # This is a rapidly developing field and as more models add function calling capabilities. Expect that there will be additions to this schema.
 # :::
 
@@ -55,7 +55,7 @@ from langchain_core.messages import (
 
 
 # ### Streaming Variant
-#
+# 
 # All the chat messages have a streaming variant that contains `Chunk` in the name.
 
 # In[2]:
@@ -79,11 +79,11 @@ AIMessageChunk(content="Hello") + AIMessageChunk(content=" World!")
 
 
 # ## Base Chat Model
-#
+# 
 # Let's implement a chat model that echoes back the first `n` characters of the last message in the prompt!
-#
+# 
 # To do so, we will inherit from `BaseChatModel` and we'll need to implement the following:
-#
+# 
 # | Method/Property                    | Description                                                       | Required/Optional  |
 # |------------------------------------|-------------------------------------------------------------------|--------------------|
 # | `_generate`                        | Use to generate a chat result from a prompt                       | Required           |
@@ -92,11 +92,11 @@ AIMessageChunk(content="Hello") + AIMessageChunk(content=" World!")
 # | `_stream`                          | Use to implement streaming.                                       | Optional           |
 # | `_agenerate`                       | Use to implement a native async method.                           | Optional           |
 # | `_astream`                         | Use to implement async version of `_stream`.                      | Optional           |
-#
-#
+# 
+# 
 # :::tip
 # The `_astream` implementation uses `run_in_executor` to launch the sync `_stream` in a separate thread if `_stream` is implemented, otherwise it fallsback to use `_agenerate`.
-#
+# 
 # You can use this trick if you want to reuse the `_stream` implementation, but if you're able to implement code that's natively async that's a better solution since that code will run with less overhead.
 # :::
 
@@ -183,6 +183,7 @@ class ChatParrotLink(BaseChatModel):
             additional_kwargs={},  # Used to add additional payload to the message
             response_metadata={  # Use for response metadata
                 "time_in_seconds": 3,
+                "model_name": self.model_name,
             },
             usage_metadata={
                 "input_tokens": ct_input_tokens,
@@ -245,7 +246,10 @@ class ChatParrotLink(BaseChatModel):
 
         # Let's add some other information (e.g., response metadata)
         chunk = ChatGenerationChunk(
-            message=AIMessageChunk(content="", response_metadata={"time_in_sec": 3})
+            message=AIMessageChunk(
+                content="",
+                response_metadata={"time_in_sec": 3, "model_name": self.model_name},
+            )
         )
         if run_manager:
             # This is optional in newer versions of LangChain
@@ -275,7 +279,7 @@ class ChatParrotLink(BaseChatModel):
 
 
 # ### Let's test it 🧪
-#
+# 
 # The chat model will implement the standard `Runnable` interface of LangChain which many of the LangChain abstractions support!
 
 # In[5]:
@@ -330,49 +334,49 @@ async for event in model.astream_events("cat", version="v1"):
 
 
 # ## Contributing
-#
-# We appreciate all chat model integration contributions.
-#
+# 
+# We appreciate all chat model integration contributions. 
+# 
 # Here's a checklist to help make sure your contribution gets added to LangChain:
-#
+# 
 # Documentation:
-#
+# 
 # * The model contains doc-strings for all initialization arguments, as these will be surfaced in the [API Reference](https://python.langchain.com/api_reference/langchain/index.html).
 # * The class doc-string for the model contains a link to the model API if the model is powered by a service.
-#
+# 
 # Tests:
-#
+# 
 # * [ ] Add unit or integration tests to the overridden methods. Verify that `invoke`, `ainvoke`, `batch`, `stream` work if you've over-ridden the corresponding code.
-#
-#
+# 
+# 
 # Streaming (if you're implementing it):
-#
+# 
 # * [ ] Implement the _stream method to get streaming working
-#
+# 
 # Stop Token Behavior:
-#
+# 
 # * [ ] Stop token should be respected
 # * [ ] Stop token should be INCLUDED as part of the response
-#
+# 
 # Secret API Keys:
-#
+# 
 # * [ ] If your model connects to an API it will likely accept API keys as part of its initialization. Use Pydantic's `SecretStr` type for secrets, so they don't get accidentally printed out when folks print the model.
-#
-#
+# 
+# 
 # Identifying Params:
-#
+# 
 # * [ ] Include a `model_name` in identifying params
-#
-#
+# 
+# 
 # Optimizations:
-#
+# 
 # Consider providing native async support to reduce the overhead from the model!
-#
+#  
 # * [ ] Provided a native async of `_agenerate` (used by `ainvoke`)
 # * [ ] Provided a native async of `_astream` (used by `astream`)
-#
+# 
 # ## Next steps
-#
+# 
 # You've now learned how to create your own custom chat models.
-#
+# 
 # Next, check out the other how-to guides chat models in this section, like [how to get a model to return structured output](/docs/how_to/structured_output) or [how to track chat model token usage](/docs/how_to/chat_token_usage_tracking).

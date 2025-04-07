@@ -4,19 +4,19 @@
 # # FalkorDB
 
 # >[FalkorDB](https://www.falkordb.com/) is a low-latency Graph Database that delivers knowledge to GenAI.
-#
-#
+# 
+# 
 # This notebook shows how to use LLMs to provide a natural language interface to `FalkorDB` database.
-#
-#
+# 
+# 
 # ## Setting up
-#
+# 
 # You can run the `falkordb` Docker container locally:
-#
+# 
 # ```bash
 # docker run -p 6379:6379 -it --rm falkordb/falkordb
 # ```
-#
+# 
 # Once launched, you create a database on the local machine and connect to it.
 
 # In[1]:
@@ -102,3 +102,4 @@ chain.run("Who is the oldest actor who played in The Godfather: Part II?")
 
 
 chain.run("Robert De Niro played in which movies?")
+

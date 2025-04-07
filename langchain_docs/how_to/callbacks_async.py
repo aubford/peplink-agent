@@ -2,24 +2,24 @@
 # coding: utf-8
 
 # # How to use callbacks in async environments
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
-#
+# 
 # - [Callbacks](/docs/concepts/callbacks)
 # - [Custom callback handlers](/docs/how_to/custom_callbacks)
 # :::
-#
+# 
 # If you are planning to use the async APIs, it is recommended to use and extend [`AsyncCallbackHandler`](https://python.langchain.com/api_reference/core/callbacks/langchain_core.callbacks.base.AsyncCallbackHandler.html) to avoid blocking the event.
-#
-#
+# 
+# 
 # :::warning
 # If you use a sync `CallbackHandler` while using an async method to run your LLM / Chain / Tool / Agent, it will still work. However, under the hood, it will be called with [`run_in_executor`](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor) which can cause issues if your `CallbackHandler` is not thread-safe.
 # :::
-#
+# 
 # :::danger
-#
+# 
 # If you're on `python<=3.10`, you need to remember to propagate `config` or `callbacks` when invoking other `runnable` from within a `RunnableLambda`, `RunnableGenerator` or `@tool`. If you do not do this,
 # the callbacks will not be propagated to the child runnables being invoked.
 # :::
@@ -30,7 +30,7 @@
 # | output: false
 # | echo: false
 
-get_ipython().run_line_magic("pip", "install -qU langchain langchain_anthropic")
+get_ipython().run_line_magic('pip', 'install -qU langchain langchain_anthropic')
 
 import getpass
 import os
@@ -87,7 +87,7 @@ await chat.agenerate([[HumanMessage(content="Tell me a joke")]])
 
 
 # ## Next steps
-#
+# 
 # You've now learned how to create your own custom callback handlers.
-#
+# 
 # Next, check out the other how-to guides in this section, such as [how to attach callbacks to a runnable](/docs/how_to/callbacks_attach).

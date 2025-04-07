@@ -2,37 +2,34 @@
 # coding: utf-8
 
 # # Xata
-#
+# 
 # > [Xata](https://xata.io) is a serverless data platform, based on PostgreSQL. It provides a Python SDK for interacting with your database, and a UI for managing your data.
 # > Xata has a native vector type, which can be added to any table, and supports similarity search. LangChain inserts vectors directly to Xata, and queries it for the nearest neighbors of a given vector, so that you can use all the LangChain Embeddings integrations with Xata.
 
 # This notebook guides you how to use Xata as a VectorStore.
 
 # ## Setup
-#
+# 
 # ### Create a database to use as a vector store
-#
+# 
 # In the [Xata UI](https://app.xata.io) create a new database. You can name it whatever you want, in this notepad we'll use `langchain`.
 # Create a table, again you can name it anything, but we will use `vectors`. Add the following columns via the UI:
-#
+# 
 # * `content` of type "Text". This is used to store the `Document.pageContent` values.
 # * `embedding` of type "Vector". Use the dimension used by the model you plan to use. In this notebook we use OpenAI embeddings, which have 1536 dimensions.
 # * `source` of type "Text". This is used as a metadata column by this example.
 # * any other columns you want to use as metadata. They are populated from the `Document.metadata` object. For example, if in the `Document.metadata` object you have a `title` property, you can create a `title` column in the table and it will be populated.
-#
+# 
 
 # Let's first install our dependencies:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet  xata langchain-openai langchain-community tiktoken langchain",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  xata langchain-openai langchain-community tiktoken langchain')
 
 
-# Let's load the OpenAI key to the environemnt. If you don't have one you can create an OpenAI account and create a key on this [page](https://platform.openai.com/account/api-keys).
+# Let's load the OpenAI key to the environment. If you don't have one you can create an OpenAI account and create a key on this [page](https://platform.openai.com/account/api-keys).
 
 # In[ ]:
 
@@ -116,3 +113,4 @@ query = "What did the president say about Ketanji Brown Jackson"
 result = vector_store.similarity_search_with_score(query)
 for doc, score in result:
     print(f"document={doc}, score={score}")
+

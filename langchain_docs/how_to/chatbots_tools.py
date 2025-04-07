@@ -2,43 +2,40 @@
 # coding: utf-8
 
 # # How to add tools to chatbots
-#
+# 
 # :::info Prerequisites
-#
+# 
 # This guide assumes familiarity with the following concepts:
-#
+# 
 # - [Chatbots](/docs/concepts/messages)
 # - [Agents](/docs/tutorials/agents)
 # - [Chat history](/docs/concepts/chat_history)
-#
+# 
 # :::
-#
+# 
 # This section will cover how to create conversational agents: chatbots that can interact with other systems and APIs using tools.
-#
+# 
 # :::note
-#
+# 
 # This how-to guide previously built a chatbot using [RunnableWithMessageHistory](https://python.langchain.com/api_reference/core/runnables/langchain_core.runnables.history.RunnableWithMessageHistory.html). You can access this version of the guide in the [v0.2 docs](https://python.langchain.com/v0.2/docs/how_to/chatbots_tools/).
-#
+# 
 # As of the v0.3 release of LangChain, we recommend that LangChain users take advantage of [LangGraph persistence](https://langchain-ai.github.io/langgraph/concepts/persistence/) to incorporate `memory` into new LangChain applications.
-#
+# 
 # If your code is already relying on `RunnableWithMessageHistory` or `BaseChatMessageHistory`, you do **not** need to make any changes. We do not plan on deprecating this functionality in the near future as it works for simple chat applications and any code that uses `RunnableWithMessageHistory` will continue to work as expected.
-#
+# 
 # Please see [How to migrate to LangGraph Memory](/docs/versions/migrating_memory/) for more details.
 # :::
-#
+# 
 # ## Setup
-#
+# 
 # For this guide, we'll be using a [tool calling agent](https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/#tool-calling-agent) with a single tool for searching the web. The default will be powered by [Tavily](/docs/integrations/tools/tavily_search), but you can switch it out for any similar tool. The rest of this section will assume you're using Tavily.
-#
+# 
 # You'll need to [sign up for an account](https://tavily.com/) on the Tavily website, and install the following packages:
 
 # In[1]:
 
 
-get_ipython().run_line_magic(
-    "pip",
-    "install --upgrade --quiet langchain-community langchain-openai tavily-python langgraph",
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet langchain-community langchain-openai tavily-python langgraph')
 
 import getpass
 import os
@@ -53,9 +50,9 @@ if not os.environ.get("TAVILY_API_KEY"):
 # You will also need your OpenAI key set as `OPENAI_API_KEY` and your Tavily API key set as `TAVILY_API_KEY`.
 
 # ## Creating an agent
-#
+# 
 # Our end goal is to create an agent that can respond conversationally to user questions while looking up information as needed.
-#
+# 
 # First, let's initialize Tavily and an OpenAI [chat model](/docs/concepts/chat_models/) capable of tool calling:
 
 # In[2]:
@@ -96,7 +93,7 @@ agent = create_react_agent(model, tools, prompt=prompt)
 
 
 # ## Running the agent
-#
+# 
 # Now that we've set up our agent, let's try interacting with it! It can handle both trivial queries that require no lookup:
 
 # In[5]:
@@ -124,7 +121,7 @@ agent.invoke(
 
 
 # ## Conversational responses
-#
+# 
 # Because our prompt contains a placeholder for chat history messages, our agent can also take previous interactions into account and respond conversationally like a standard chatbot:
 
 # In[7]:
@@ -177,13 +174,13 @@ agent.invoke(
 
 
 # This [LangSmith trace](https://smith.langchain.com/public/9e6b000d-08aa-4c5a-ac83-2fdf549523cb/r) shows what's going on under the hood.
-#
+# 
 # ## Further reading
-#
+# 
 # For more on how to build agents, check these [LangGraph](https://langchain-ai.github.io/langgraph/) guides:
-#
+# 
 # * [agents conceptual guide](https://langchain-ai.github.io/langgraph/concepts/agentic_concepts/)
 # * [agents tutorials](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/multi-agent-collaboration/)
 # * [create_react_agent](https://langchain-ai.github.io/langgraph/how-tos/create-react-agent/)
-#
+# 
 # For more on tool usage, you can also check out [this use case section](/docs/how_to#tools).

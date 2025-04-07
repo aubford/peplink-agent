@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Yuan2.0
-#
+# 
 # [Yuan2.0](https://github.com/IEIT-Yuan/Yuan-2.0) is a new generation Fundamental Large Language Model developed by IEIT System. We have published all three models, Yuan 2.0-102B, Yuan 2.0-51B, and Yuan 2.0-2B. And we provide relevant scripts for pretraining, fine-tuning, and inference services for other developers. Yuan2.0 is based on Yuan1.0, utilizing a wider range of high-quality pre training data and instruction fine-tuning datasets to enhance the model's understanding of semantics, mathematics, reasoning, code, knowledge, and other aspects.
-#
+# 
 # This example goes over how to use LangChain to interact with `Yuan2.0`(2B/51B/102B) Inference for text generation.
-#
+# 
 # Yuan2.0 set up an inference service so user just need request the inference api to get result, which is introduced in [Yuan2.0 Inference-Server](https://github.com/IEIT-Yuan/Yuan-2.0/blob/main/docs/inference_server.md).
 
 # In[ ]:
@@ -49,3 +49,4 @@ question = "请介绍一下中国。"
 
 
 print(yuan_llm.invoke(question))
+

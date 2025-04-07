@@ -8,12 +8,12 @@
 # In[1]:
 
 
-get_ipython().system("pip install --upgrade langchain langchain-google-vertexai")
+get_ipython().system('pip install --upgrade langchain langchain-google-vertexai')
 
 
 # ### Running the model
 
-# Go to the VertexAI Model Garden on Google Cloud [console](https://pantheon.corp.google.com/vertex-ai/publishers/google/model-garden/335), and deploy the desired version of Gemma to VertexAI. It will take a few minutes, and after the endpoint it ready, you need to copy its number.
+# Go to the VertexAI Model Garden on Google Cloud [console](https://pantheon.corp.google.com/vertex-ai/publishers/google/model-garden/335), and deploy the desired version of Gemma to VertexAI. It will take a few minutes, and after the endpoint is ready, you need to copy its number.
 
 # In[1]:
 
@@ -95,13 +95,13 @@ print(answer2)
 # In[7]:
 
 
-get_ipython().system("mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/kaggle.json")
+get_ipython().system('mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/kaggle.json')
 
 
 # In[11]:
 
 
-get_ipython().system("pip install keras>=3 keras_nlp")
+get_ipython().system('pip install keras>=3 keras_nlp')
 
 
 # ### Usage
@@ -259,3 +259,7 @@ print(answer2)
 
 
 # In[ ]:
+
+
+
+

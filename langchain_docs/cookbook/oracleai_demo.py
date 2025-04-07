@@ -5,9 +5,9 @@
 # Oracle AI Vector Search is designed for Artificial Intelligence (AI) workloads that allows you to query data based on semantics, rather than keywords.
 # One of the biggest benefits of Oracle AI Vector Search is that semantic search on unstructured data can be combined with relational search on business data in one single system.
 # This is not only powerful but also significantly more effective because you don't need to add a specialized vector database, eliminating the pain of data fragmentation between multiple systems.
-#
+# 
 # In addition, your vectors can benefit from all of Oracle Database’s most powerful features, like the following:
-#
+# 
 #  * [Partitioning Support](https://www.oracle.com/database/technologies/partitioning.html)
 #  * [Real Application Clusters scalability](https://www.oracle.com/database/real-application-clusters/)
 #  * [Exadata smart scans](https://www.oracle.com/database/technologies/exadata/software/smartscan/)
@@ -21,9 +21,9 @@
 #  * [Oracle Spatial and Graph](https://www.oracle.com/database/spatial/)
 #  * [Oracle Blockchain](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_blockchain_table.html#GUID-B469E277-978E-4378-A8C1-26D3FF96C9A6)
 #  * [JSON](https://docs.oracle.com/en/database/oracle/oracle-database/23/adjsn/json-in-oracle-database.html)
-#
+# 
 # This guide demonstrates how Oracle AI Vector Search can be used with Langchain to serve an end-to-end RAG pipeline. This guide goes through examples of:
-#
+# 
 #  * Loading the documents from various sources using OracleDocLoader
 #  * Summarizing them within/outside the database using OracleSummary
 #  * Generating embeddings for them within/outside the database using OracleEmbeddings
@@ -33,8 +33,8 @@
 # If you are just starting with Oracle Database, consider exploring the [free Oracle 23 AI](https://www.oracle.com/database/free/#resources) which provides a great introduction to setting up your database environment. While working with the database, it is often advisable to avoid using the system user by default; instead, you can create your own user for enhanced security and customization. For detailed steps on user creation, refer to our [end-to-end guide](https://github.com/langchain-ai/langchain/blob/master/cookbook/oracleai_demo.ipynb) which also shows how to set up a user in Oracle. Additionally, understanding user privileges is crucial for managing database security effectively. You can learn more about this topic in the official [Oracle guide](https://docs.oracle.com/en/database/oracle/oracle-database/19/admqs/administering-user-accounts-and-security.html#GUID-36B21D72-1BBB-46C9-A0C9-F0D2A8591B8D) on administering user accounts and security.
 
 # ### Prerequisites
-#
-# Please install Oracle Python Client driver to use Langchain with Oracle AI Vector Search.
+# 
+# Please install Oracle Python Client driver to use Langchain with Oracle AI Vector Search. 
 
 # In[ ]:
 
@@ -43,7 +43,7 @@
 
 
 # ### Create Demo User
-# First, create a demo user with all the required privileges.
+# First, create a demo user with all the required privileges. 
 
 # In[37]:
 
@@ -73,14 +73,14 @@ try:
                     when others then
                         dbms_output.put_line('Error dropping user: ' || SQLERRM);
                 end;
-                
+
                 -- Create user and grant privileges
                 execute immediate 'create user testuser identified by testuser';
                 execute immediate 'grant connect, unlimited tablespace, create credential, create procedure, create any index to testuser';
                 execute immediate 'create or replace directory DEMO_PY_DIR as ''/scratch/hroy/view_storage/hroy_devstorage/demo/orachain''';
                 execute immediate 'grant read, write on directory DEMO_PY_DIR to public';
                 execute immediate 'grant create mining model to testuser';
-                
+
                 -- Network access
                 begin
                     DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE(
@@ -106,11 +106,11 @@ except Exception as e:
 
 # ## Process Documents using Oracle AI
 # Consider the following scenario: users possess documents stored either in an Oracle Database or a file system and intend to utilize this data with Oracle AI Vector Search powered by Langchain.
-#
+# 
 # To prepare the documents for analysis, a comprehensive preprocessing workflow is necessary. Initially, the documents must be retrieved, summarized (if required), and chunked as needed. Subsequent steps involve generating embeddings for these chunks and integrating them into the Oracle AI Vector Store. Users can then conduct semantic searches on this data.
-#
+# 
 # The Oracle AI Vector Search Langchain library encompasses a suite of document processing tools that facilitate document loading, chunking, summary generation, and embedding creation.
-#
+# 
 # In the sections that follow, we will detail the utilization of Oracle AI Langchain APIs to effectively implement each of these processes.
 
 # ### Connect to Demo User
@@ -182,13 +182,13 @@ except Exception as e:
 # With the inclusion of a demo user and a populated sample table, the remaining configuration involves setting up embedding and summary functionalities. Users are presented with multiple provider options, including local database solutions and third-party services such as Ocigenai, Hugging Face, and OpenAI. Should users opt for a third-party provider, they are required to establish credentials containing the necessary authentication details. Conversely, if selecting a database as the provider for embeddings, it is necessary to upload an ONNX model to the Oracle Database. No additional setup is required for summary functionalities when using the database option.
 
 # ### Load ONNX Model
-#
+# 
 # Oracle accommodates a variety of embedding providers, enabling users to choose between proprietary database solutions and third-party services such as OCIGENAI and HuggingFace. This selection dictates the methodology for generating and managing embeddings.
-#
+# 
 # ***Important*** : Should users opt for the database option, they must upload an ONNX model into the Oracle Database. Conversely, if a third-party provider is selected for embedding generation, uploading an ONNX model to Oracle Database is not required.
-#
+# 
 # A significant advantage of utilizing an ONNX model directly within Oracle is the enhanced security and performance it offers by eliminating the need to transmit data to external parties. Additionally, this method avoids the latency typically associated with network or REST API calls.
-#
+# 
 # Below is the example code to upload an ONNX model into Oracle Database:
 
 # In[47]:
@@ -211,11 +211,11 @@ except Exception as e:
 
 
 # ### Create Credential
-#
+# 
 # When selecting third-party providers for generating embeddings, users are required to establish credentials to securely access the provider's endpoints.
-#
+# 
 # ***Important:*** No credentials are necessary when opting for the 'database' provider to generate embeddings. However, should users decide to utilize a third-party provider, they must create credentials specific to the chosen provider.
-#
+# 
 # Below is an illustrative example:
 
 # In[ ]:
@@ -259,9 +259,9 @@ except Exception as ex:
 
 # ### Load Documents
 # Users have the flexibility to load documents from either the Oracle Database, a file system, or both, by appropriately configuring the loader parameters. For comprehensive details on these parameters, please consult the [Oracle AI Vector Search Guide](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_vector_chain1.html#GUID-73397E89-92FB-48ED-94BB-1AD960C4EA1F).
-#
+# 
 # A significant advantage of utilizing OracleDocLoader is its capability to process over 150 distinct file formats, eliminating the need for multiple loaders for different document types. For a complete list of the supported formats, please refer to the [Oracle Text Supported Document Formats](https://docs.oracle.com/en/database/oracle/oracle-database/23/ccref/oracle-text-supported-document-formats.html).
-#
+# 
 # Below is a sample code snippet that demonstrates how to use OracleDocLoader
 
 # In[48]:
@@ -332,7 +332,7 @@ print(f"Number of Summaries: {len(list_summary)}")
 
 # ### Split Documents
 # The documents may vary in size, ranging from small to very large. Users often prefer to chunk their documents into smaller sections to facilitate the generation of embeddings. A wide array of customization options is available for this splitting process. For comprehensive details regarding these parameters, please consult the [Oracle AI Vector Search Guide](https://docs.oracle.com/en/database/oracle/oracle-database/23/arpls/dbms_vector_chain1.html#GUID-4E145629-7098-4C7C-804F-FC85D1F24240).
-#
+# 
 # Below is a sample code illustrating how to implement this:
 
 # In[50]:
@@ -502,7 +502,7 @@ print(f"Number of total chunks with metadata: {len(chunks_with_mdata)}")
 
 
 # At this point, we have processed the documents and generated chunks with metadata. Next, we will create Oracle AI Vector Store with those chunks.
-#
+# 
 # Here is the sample code how to do that:
 
 # In[55]:
@@ -524,9 +524,9 @@ print(f"Vector Store Table: {vectorstore.table_name}")
 # The example provided illustrates the creation of a vector store using the DOT_PRODUCT distance strategy. Users have the flexibility to employ various distance strategies with the Oracle AI Vector Store, as detailed in our [comprehensive guide](https://python.langchain.com/v0.1/docs/integrations/vectorstores/oracle/).
 
 # With embeddings now stored in vector stores, it is advisable to establish an index to enhance semantic search performance during query execution.
-#
+# 
 # ***Note*** Should you encounter an "insufficient memory" error, it is recommended to increase the  ***vector_memory_size*** in your database configuration
-#
+# 
 # Below is a sample code snippet for creating an index:
 
 # In[56]:
@@ -540,15 +540,15 @@ print("Index created.")
 
 
 # This example demonstrates the creation of a default HNSW index on embeddings within the 'oravs' table. Users may adjust various parameters according to their specific needs. For detailed information on these parameters, please consult the [Oracle AI Vector Search Guide book](https://docs.oracle.com/en/database/oracle/oracle-database/23/vecse/manage-different-categories-vector-indexes.html).
-#
+# 
 # Additionally, various types of vector indices can be created to meet diverse requirements. More details can be found in our [comprehensive guide](https://python.langchain.com/v0.1/docs/integrations/vectorstores/oracle/).
-#
+# 
 
 # ## Perform Semantic Search
 # All set!
-#
+# 
 # We have successfully processed the documents and stored them in the vector store, followed by the creation of an index to enhance query performance. We are now prepared to proceed with semantic searches.
-#
+# 
 # Below is the sample code for this process:
 
 # In[58]:
@@ -578,3 +578,4 @@ print(
         query, 1, fetch_k=20, lambda_mult=0.5, filter=filter
     )
 )
+

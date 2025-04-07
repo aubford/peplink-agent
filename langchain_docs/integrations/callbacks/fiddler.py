@@ -2,8 +2,8 @@
 # coding: utf-8
 
 # # Fiddler
-#
-# >[Fiddler](https://www.fiddler.ai/) is the pioneer in enterprise Generative and Predictive system ops, offering a unified platform that enables Data Science, MLOps, Risk, Compliance, Analytics, and other LOB teams to monitor, explain, analyze, and improve ML deployments at enterprise scale.
+# 
+# >[Fiddler](https://www.fiddler.ai/) is the pioneer in enterprise Generative and Predictive system ops, offering a unified platform that enables Data Science, MLOps, Risk, Compliance, Analytics, and other LOB teams to monitor, explain, analyze, and improve ML deployments at enterprise scale. 
 
 # ## 1. Installation and Setup
 
@@ -13,14 +13,14 @@
 #!pip install langchain langchain-community langchain-openai fiddler-client
 
 
-# ## 2. Fiddler connection details
+# ## 2. Fiddler connection details 
 
 # *Before you can add information about your model with Fiddler*
-#
+# 
 # 1. The URL you're using to connect to Fiddler
 # 2. Your organization ID
 # 3. Your authorization token
-#
+# 
 # These can be found by navigating to the *Settings* page of your Fiddler environment.
 
 # In[ ]:
@@ -123,3 +123,4 @@ chain = final_prompt | llm
 
 # Invoke the chain. Invocation will be logged to Fiddler, and metrics automatically generated
 chain.invoke({"input": "What's the square of a triangle?"})
+

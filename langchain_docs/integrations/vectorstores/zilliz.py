@@ -2,19 +2,19 @@
 # coding: utf-8
 
 # # Zilliz
-#
+# 
 # >[Zilliz Cloud](https://zilliz.com/doc/quick_start) is a fully managed service on cloud for `LF AI Milvus®`,
-#
+# 
 # This notebook shows how to use functionality related to the Zilliz Cloud managed vector database.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # To run, you should have a `Zilliz Cloud` instance up and running. Here are the [installation instructions](https://zilliz.com/cloud)
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  pymilvus")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  pymilvus')
 
 
 # We want to use `OpenAIEmbeddings` so we have to get the OpenAI API Key.
@@ -91,3 +91,7 @@ docs[0].page_content
 
 
 # In[ ]:
+
+
+
+

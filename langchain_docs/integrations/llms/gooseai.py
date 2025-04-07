@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # GooseAI
-#
+# 
 # `GooseAI` is a fully managed NLP-as-a-Service, delivered via API. GooseAI provides access to [these models](https://goose.ai/docs/models).
-#
+# 
 # This notebook goes over how to use Langchain with [GooseAI](https://goose.ai/).
-#
+# 
 
 # ## Install openai
 # The `openai` package is required to use the GooseAI API. Install `openai` using `pip install openai`.
@@ -14,7 +14,7 @@
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  langchain-openai")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  langchain-openai')
 
 
 # ## Imports
@@ -85,3 +85,4 @@ llm_chain = LLMChain(prompt=prompt, llm=llm)
 question = "What NFL team won the Super Bowl in the year Justin Beiber was born?"
 
 llm_chain.run(question)
+

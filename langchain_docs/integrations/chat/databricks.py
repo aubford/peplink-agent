@@ -320,4 +320,4 @@ print(model.invoke(messages))
 
 # ## API reference
 # 
-# For detailed documentation of all ChatDatabricks features and configurations head to the API reference: https://python.langchain.com/api_reference/databricks/chat_models/langchain_databricks.chat_models.ChatDatabricks.html
+# For detailed documentation of all ChatDatabricks features and configurations head to the API reference: https://api-docs.databricks.com/python/databricks-ai-bridge/latest/databricks_langchain.html#databricks_langchain.ChatDatabricks

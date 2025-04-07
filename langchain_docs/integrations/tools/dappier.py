@@ -2,31 +2,31 @@
 # coding: utf-8
 
 # # Dappier
-#
+# 
 # [Dappier](https://dappier.com) connects any LLM or your Agentic AI to real-time, rights-cleared, proprietary data from trusted sources, making your AI an expert in anything. Our specialized models include Real-Time Web Search, News, Sports, Financial Stock Market Data, Crypto Data, and exclusive content from premium publishers. Explore a wide range of data models in our marketplace at [marketplace.dappier.com](https://marketplace.dappier.com).
-#
+# 
 # [Dappier](https://dappier.com) delivers enriched, prompt-ready, and contextually relevant data strings, optimized for seamless integration with LangChain. Whether you're building conversational AI, recommendation engines, or intelligent search, Dappier's LLM-agnostic RAG models ensure your AI has access to verified, up-to-date data—without the complexity of building and managing your own retrieval pipeline.
 
 # # Dappier Tool
-#
+# 
 # This will help you getting started with the Dappier [tool](https://python.langchain.com/docs/concepts/tools/). For detailed documentation of all DappierRetriever features and configurations head to the [API reference](https://python.langchain.com/en/latest/tools/langchain_dappier.tools.Dappier.DappierRealTimeSearchTool.html).
-#
+# 
 # ## Overview
-#
+# 
 # The DappierRealTimeSearchTool and DappierAIRecommendationTool empower AI applications with real-time data and AI-driven insights. The former provides access to up-to-date information across news, weather, travel, and financial markets, while the latter supercharges applications with factual, premium content from diverse domains like News, Finance, and Sports, all powered by Dappier's pre-trained RAG models and natural language APIs.
 
 # ### Setup
-#
+# 
 # This tool lives in the `langchain-dappier` package.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-dappier")
+get_ipython().run_line_magic('pip', 'install -qU langchain-dappier')
 
 
 # ### Credentials
-#
+# 
 # We also need to set our Dappier API credentials, which can be generated at the [Dappier site.](https://platform.dappier.com/profile/api-keys).
 
 # In[ ]:
@@ -49,17 +49,17 @@ if not os.environ.get("DAPPIER_API_KEY"):
 
 
 # ## DappierRealTimeSearchTool
-#
+# 
 # Access real-time Google search results, including the latest news, weather, travel, and deals, along with up-to-date financial news, stock prices, and trades from polygon.io, all powered by AI insights to keep you informed.
 
 # ### Instantiation
-#
+# 
 # - ai_model_id: str
 #     The AI model ID to use for the query. The AI model ID always starts
 #     with the prefix "am_".
-#
+# 
 #     Defaults to "am_01j06ytn18ejftedz6dyhz2b15".
-#
+# 
 #     Multiple AI model IDs are available, which can be found at:
 #     https://marketplace.dappier.com/marketplace
 
@@ -77,9 +77,9 @@ tool = DappierRealTimeSearchTool(
 
 
 # ### Invocation
-#
+# 
 # #### [Invoke directly with args](/docs/concepts/tools)
-#
+# 
 # The `DappierRealTimeSearchTool` takes a single "query" argument, which should be a natural language query:
 
 # In[5]:
@@ -89,7 +89,7 @@ tool.invoke({"query": "What happened at the last wimbledon"})
 
 
 # ### [Invoke with ToolCall](/docs/concepts/tools)
-#
+# 
 # We can also invoke the tool with a model-generated ToolCall, in which case a ToolMessage will be returned:
 
 # In[6]:
@@ -109,13 +109,13 @@ print(tool_msg.content[:400])
 
 
 # ### Chaining
-#
+# 
 # We can use our tool in a chain by first binding it to a [tool-calling model](/docs/how_to/tool_calling/) and then calling it:
-#
+# 
 # import ChatModelTabs from "@theme/ChatModelTabs";
-#
+# 
 # <ChatModelTabs customVarName="llm" />
-#
+# 
 
 # In[11]:
 
@@ -164,26 +164,26 @@ tool_chain.invoke("who won the last womens singles wimbledon")
 
 
 # ## DappierAIRecommendationTool
-#
+# 
 # Supercharge your AI applications with Dappier's pre-trained RAG models and natural language APIs, delivering factual and up-to-date responses from premium content providers across verticals like News, Finance, Sports, Weather, and more.
 
 # ### Instantiation
-#
-# - data_model_id: str
-#   The data model ID to use for recommendations. Data model IDs always start with the prefix "dm_". Defaults to "dm_01j0pb465keqmatq9k83dthx34".
-#   Multiple data model IDs are available, which can be found at [Dappier marketplace](https://marketplace.dappier.com/marketplace).
-#
-# - similarity_top_k: int
-#   The number of top documents to retrieve based on similarity. Defaults to "9".
-#
+# 
+# - data_model_id: str  
+#   The data model ID to use for recommendations. Data model IDs always start with the prefix "dm_". Defaults to "dm_01j0pb465keqmatq9k83dthx34".  
+#   Multiple data model IDs are available, which can be found at [Dappier marketplace](https://marketplace.dappier.com/marketplace).  
+# 
+# - similarity_top_k: int  
+#   The number of top documents to retrieve based on similarity. Defaults to "9".  
+# 
 # - ref: Optional[str]
-#   The site domain where AI recommendations should be displayed. Defaults to "None".
-#
+#   The site domain where AI recommendations should be displayed. Defaults to "None".  
+# 
 # - num_articles_ref: int
-#   The minimum number of articles to return from the specified reference domain ("ref"). The remaining articles will come from other sites in the RAG model. Defaults to "0".
-#
+#   The minimum number of articles to return from the specified reference domain ("ref"). The remaining articles will come from other sites in the RAG model. Defaults to "0".  
+# 
 # - search_algorithm: Literal["most_recent", "semantic", "most_recent_semantic", "trending"]
-#   The search algorithm to use for retrieving articles. Defaults to "most_recent".
+#   The search algorithm to use for retrieving articles. Defaults to "most_recent".  
 
 # In[15]:
 
@@ -203,9 +203,9 @@ tool = DappierAIRecommendationTool(
 
 
 # ### Invocation
-#
+# 
 # #### [Invoke directly with args](/docs/concepts/tools)
-#
+# 
 # The `DappierAIRecommendationTool` takes a single "query" argument, which should be a natural language query:
 
 # In[16]:
@@ -215,7 +215,7 @@ tool.invoke({"query": "latest sports news"})
 
 
 # ### [Invoke with ToolCall](/docs/concepts/tools)
-#
+# 
 # We can also invoke the tool with a model-generated ToolCall, in which case a ToolMessage will be returned:
 
 # In[17]:
@@ -235,5 +235,5 @@ print(tool_msg.content[:400])
 
 
 # ## API reference
-#
+# 
 # For detailed documentation of all DappierRealTimeSearchTool features and configurations head to the [API reference](https://python.langchain.com/api_reference/community/tools/langchain_dappier.tools.dappier.tool.DappierRealTimeSearchTool.html)

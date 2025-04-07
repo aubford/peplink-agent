@@ -263,7 +263,7 @@ blob.source
 # 
 # While a parser encapsulates the logic needed to parse binary data into documents, *blob loaders* encapsulate the logic that's necessary to load blobs from a given storage location.
 # 
-# A the moment, `LangChain` only supports `FileSystemBlobLoader`.
+# At the moment, `LangChain` only supports `FileSystemBlobLoader`.
 # 
 # You can use the `FileSystemBlobLoader` to load blobs and then use the parser to parse them.
 

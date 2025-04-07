@@ -2,21 +2,21 @@
 # coding: utf-8
 
 # # Predibase
-#
-# [Predibase](https://predibase.com/) allows you to train, fine-tune, and deploy any ML model—from linear regression to large language model.
-#
+# 
+# [Predibase](https://predibase.com/) allows you to train, fine-tune, and deploy any ML model—from linear regression to large language model. 
+# 
 # This example demonstrates using Langchain with models deployed on Predibase
 
 # # Setup
-#
+# 
 # To run this notebook, you'll need a [Predibase account](https://predibase.com/free-trial/?utm_source=langchain) and an [API key](https://docs.predibase.com/sdk-guide/intro).
-#
+# 
 # You'll also need to install the Predibase Python package:
 
 # In[ ]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  predibase")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  predibase')
 import os
 
 os.environ["PREDIBASE_API_TOKEN"] = "{PREDIBASE_API_TOKEN}"
@@ -213,3 +213,4 @@ model = Predibase(
 
 # Optionally use `kwargs` to dynamically overwrite "generate()" settings.
 # response = model.invoke("Can you help categorize the following emails into positive, negative, and neutral?", **{"temperature": 0.5, "max_new_tokens": 1024})
+

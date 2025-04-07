@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # How to pass runtime secrets to runnables
-#
+# 
 # :::info Requires `langchain-core >= 0.2.22`
-#
+# 
 # :::
-#
+# 
 # We can pass in secrets to our [runnables](/docs/concepts/runnables/) at runtime using the `RunnableConfig`. Specifically we can pass in secrets with a `__` prefix to the `configurable` field. This will ensure that these secrets aren't traced as part of the invocation:
 
 # In[6]:

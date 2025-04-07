@@ -2,18 +2,18 @@
 # coding: utf-8
 
 # # SQLite-VSS
-#
+# 
 # >[SQLite-VSS](https://alexgarcia.xyz/sqlite-vss/) is an `SQLite` extension designed for vector search, emphasizing local-first operations and easy integration into applications without external servers. Leveraging the `Faiss` library, it offers efficient similarity search and clustering capabilities.
-#
+# 
 # You'll need to install `langchain-community` with `pip install -qU langchain-community` to use this integration
-#
+# 
 # This notebook shows how to use the `SQLiteVSS` vector database.
 
 # In[ ]:
 
 
 # You need to install sqlite-vss as a dependency.
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  sqlite-vss")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  sqlite-vss')
 
 
 # ## Quickstart
@@ -109,3 +109,7 @@ os.remove("/tmp/vss.db")
 
 
 # In[ ]:
+
+
+
+

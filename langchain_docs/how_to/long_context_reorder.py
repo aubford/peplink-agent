@@ -2,21 +2,19 @@
 # coding: utf-8
 
 # # How to reorder retrieved results to mitigate the "lost in the middle" effect
-#
+# 
 # Substantial performance degradations in [RAG](/docs/tutorials/rag) applications have been [documented](https://arxiv.org/abs/2307.03172) as the number of retrieved documents grows (e.g., beyond ten). In brief: models are liable to miss relevant information in the middle of long contexts.
-#
+# 
 # By contrast, queries against vector stores will typically return documents in descending order of relevance (e.g., as measured by cosine similarity of [embeddings](/docs/concepts/embedding_models)).
-#
+# 
 # To mitigate the ["lost in the middle"](https://arxiv.org/abs/2307.03172) effect, you can re-order documents after retrieval such that the most relevant documents are positioned at extrema (e.g., the first and last pieces of context), and the least relevant documents are positioned in the middle. In some cases this can help surface the most relevant information to LLMs.
-#
+# 
 # The [LongContextReorder](https://python.langchain.com/api_reference/community/document_transformers/langchain_community.document_transformers.long_context_reorder.LongContextReorder.html) document transformer implements this re-ordering procedure. Below we demonstrate an example.
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install -qU langchain langchain-community langchain-openai"
-)
+get_ipython().run_line_magic('pip', 'install -qU langchain langchain-community langchain-openai')
 
 
 # First we embed some artificial documents and index them in a basic in-memory vector store. We will use [OpenAI](/docs/integrations/providers/openai/) embeddings, but any LangChain vector store or embeddings model will suffice.
@@ -102,3 +100,4 @@ prompt = PromptTemplate(
 chain = create_stuff_documents_chain(llm, prompt)
 response = chain.invoke({"context": reordered_docs, "query": query})
 print(response)
+

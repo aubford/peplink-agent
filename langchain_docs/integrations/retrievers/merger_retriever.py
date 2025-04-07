@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # LOTR (Merger Retriever)
-#
+# 
 # >`Lord of the Retrievers (LOTR)`, also known as `MergerRetriever`, takes a list of retrievers as input and merges the results of their get_relevant_documents() methods into a single list. The merged results will be a list of documents that are relevant to the query and that have been ranked by the different retrievers.
-#
+# 
 # The `MergerRetriever` class can be used to improve the accuracy of document retrieval in a number of ways. First, it can combine the results of multiple retrievers, which can help to reduce the risk of bias in the results. Second, it can rank the results of the different retrievers, which can help to ensure that the most relevant documents are returned first.
 
 # In[ ]:
@@ -126,3 +126,4 @@ pipeline = DocumentCompressorPipeline(transformers=[filter, reordering])
 compression_retriever_reordered = ContextualCompressionRetriever(
     base_compressor=pipeline, base_retriever=lotr
 )
+

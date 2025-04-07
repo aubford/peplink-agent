@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # kNN
-#
+# 
 # >In statistics, the [k-nearest neighbours algorithm (k-NN)](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm) is a non-parametric supervised learning method first developed by `Evelyn Fix` and `Joseph Hodges` in 1951, and later expanded by `Thomas Cover`. It is used for classification and regression.
-#
+# 
 # This notebook goes over how to use a retriever that under the hood uses a kNN.
-#
+# 
 # Largely based on the code of [Andrej Karpathy](https://github.com/karpathy/randomfun/blob/master/knn_vs_svm.html).
 
 # In[ ]:
@@ -27,7 +27,7 @@ retriever = KNNRetriever.from_texts(
 
 
 # ## Use Retriever
-#
+# 
 # We can now use the retriever!
 
 # In[3]:
@@ -40,3 +40,4 @@ result = retriever.invoke("foo")
 
 
 result
+

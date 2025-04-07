@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Spark SQL Toolkit
-#
+# 
 # This notebook shows how to use agents to interact with `Spark SQL`. Similar to [SQL Database Agent](/docs/integrations/tools/sql_database), it is designed to address general inquiries about `Spark SQL` and facilitate error recovery.
-#
+# 
 # **NOTE: Note that, as this agent is in active development, all answers might not be correct. Additionally, it is not guaranteed that the agent won't perform DML statements on your Spark cluster given certain questions. Be careful running it on sensitive data!**
 
 # ## Initialization
@@ -63,3 +63,4 @@ agent_executor.run("whats the square root of the average age?")
 
 
 agent_executor.run("What's the name of the oldest survived passenger?")
+

@@ -2,66 +2,64 @@
 # coding: utf-8
 
 # # Gitlab Toolkit
-#
-# The `Gitlab` toolkit contains tools that enable an LLM agent to interact with a gitlab repository.
-# The tool is a wrapper for the [python-gitlab](https://github.com/python-gitlab/python-gitlab) library.
-#
+# 
+# The `Gitlab` toolkit contains tools that enable an LLM agent to interact with a gitlab repository. 
+# The tool is a wrapper for the [python-gitlab](https://github.com/python-gitlab/python-gitlab) library. 
+# 
 # ## Quickstart
 # 1. Install the python-gitlab library
 # 2. Create a Gitlab personal access token
 # 3. Set your environmental variables
 # 4. Pass the tools to your agent with `toolkit.get_tools()`
-#
+# 
 # Each of these steps will be explained in great detail below.
-#
+# 
 # 1. **Get Issues**- fetches issues from the repository.
-#
+# 
 # 2. **Get Issue**- fetches details about a specific issue.
-#
+# 
 # 3. **Comment on Issue**- posts a comment on a specific issue.
-#
+# 
 # 4. **Create Merge Request**- creates a merge request from the bot's working branch to the base branch.
-#
+# 
 # 5. **Create File**- creates a new file in the repository.
-#
+# 
 # 6. **Read File**- reads a file from the repository.
-#
+# 
 # 7. **Update File**- updates a file in the repository.
-#
+# 
 # 8. **Delete File**- deletes a file from the repository.
-#
-#
+# 
+# 
 
 # ## Setup
 
-# ### 1. Install the `python-gitlab` library
+# ### 1. Install the `python-gitlab` library 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet  python-gitlab langchain-community"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  python-gitlab langchain-community')
 
 
 # ### 2. Create a Gitlab personal access token
-#
+# 
 # [Follow the instructions here](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) to create a Gitlab personal access token. Make sure your app has the following repository permissions:
-#
+# 
 # * read_api
 # * read_repository
 # * write_repository
-#
+# 
 # ### 3. Set Environmental Variables
-#
+# 
 # Before initializing your agent, the following environmental variables need to be set:
-#
-# * **GITLAB_URL** - The URL hosted Gitlab. Defaults to "https://gitlab.com".
+# 
+# * **GITLAB_URL** - The URL hosted Gitlab. Defaults to "https://gitlab.com". 
 # * **GITLAB_PERSONAL_ACCESS_TOKEN**- The personal access token you created in the last step
 # * **GITLAB_REPOSITORY**- The name of the Gitlab repository you want your bot to act upon. Must follow the format \{username\}/\{repo-name\}.
 # * **GITLAB_BRANCH**- The branch where the bot will make its commits. Defaults to 'main.'
 # * **GITLAB_BASE_BRANCH**- The base branch of your repo, usually either 'main' or 'master.' This is where merge requests will base from. Defaults to 'main.'
-#
+# 
 
 # ## Example: Simple Agent
 
@@ -110,3 +108,7 @@ agent.run(
 
 
 # In[ ]:
+
+
+
+

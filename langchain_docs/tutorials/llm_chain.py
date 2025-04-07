@@ -27,6 +27,7 @@ sidebar_position: 0
 # 
 # To install LangChain run:
 # 
+# <!-- HIDE_IN_NB
 # import Tabs from '@theme/Tabs';
 # import TabItem from '@theme/TabItem';
 # import CodeBlock from "@theme/CodeBlock";
@@ -39,9 +40,18 @@ sidebar_position: 0
 #     <CodeBlock language="bash">conda install langchain -c conda-forge</CodeBlock>
 #   </TabItem>
 # </Tabs>
-# 
-# 
-# 
+# HIDE_IN_NB -->
+
+# In[1]:
+
+
+# | output: false
+
+# %pip install langchain
+# OR
+# %conda install langchain -c conda-forge
+
+
 # For more details, see our [Installation guide](/docs/how_to/installation).
 # 
 # ### LangSmith
@@ -55,6 +65,7 @@ sidebar_position: 0
 # ```shell
 # export LANGSMITH_TRACING="true"
 # export LANGSMITH_API_KEY="..."
+# export LANGSMITH_PROJECT="default" # or any other project name
 # ```
 # 
 # Or, if in a notebook, you can set them with:
@@ -63,18 +74,40 @@ sidebar_position: 0
 # import getpass
 # import os
 # 
+# try:
+#     # load environment variables from .env file (requires `python-dotenv`)
+#     from dotenv import load_dotenv
+# 
+#     load_dotenv()
+# except ImportError:
+#     pass
+# 
 # os.environ["LANGSMITH_TRACING"] = "true"
-# os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
+# if "LANGSMITH_API_KEY" not in os.environ:
+#     os.environ["LANGSMITH_API_KEY"] = getpass.getpass(
+#         prompt="Enter your LangSmith API key (optional): "
+#     )
+# if "LANGSMITH_PROJECT" not in os.environ:
+#     os.environ["LANGSMITH_PROJECT"] = getpass.getpass(
+#         prompt='Enter your LangSmith Project Name (default = "default"): '
+#     )
+#     if not os.environ.get("LANGSMITH_PROJECT"):
+#         os.environ["LANGSMITH_PROJECT"] = "default"
+# if "OPENAI_API_KEY" not in os.environ:
+#     os.environ["OPENAI_API_KEY"] = getpass.getpass(
+#         prompt="Enter your OpenAI API key (required if using OpenAI): "
+#     )
 # ```
 
 # ## Using Language Models
 # 
 # First up, let's learn how to use a language model by itself. LangChain supports many different language models that you can use interchangeably. For details on getting started with a specific model, refer to [supported integrations](/docs/integrations/chat/).
 # 
+# <!-- HIDE_IN_NB>
 # import ChatModelTabs from "@theme/ChatModelTabs";
 # 
-# <ChatModelTabs openaiParams={`model="gpt-4o-mini"`} />
-# 
+# <ChatModelTabs overrideParams={{openai: {model: "gpt-4o-mini"}}} />
+# HIDE_IN_NB -->
 
 # In[2]:
 

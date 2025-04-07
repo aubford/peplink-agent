@@ -2,23 +2,23 @@
 # coding: utf-8
 
 # # Aleph Alpha
-#
+# 
 # [The Luminous series](https://docs.aleph-alpha.com/docs/category/luminous/) is a family of large language models.
-#
+# 
 # This example goes over how to use LangChain to interact with Aleph Alpha models
 
 # In[ ]:
 
 
 # Installing the langchain package needed to use the integration
-get_ipython().run_line_magic("pip", "install -qU langchain-community")
+get_ipython().run_line_magic('pip', 'install -qU langchain-community')
 
 
 # In[ ]:
 
 
 # Install the package
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  aleph-alpha-client")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  aleph-alpha-client')
 
 
 # In[1]:
@@ -74,3 +74,7 @@ llm_chain.invoke({"question": question})
 
 
 # In[ ]:
+
+
+
+

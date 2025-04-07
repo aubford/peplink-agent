@@ -2,11 +2,11 @@
 # coding: utf-8
 
 # # Natural Language API Toolkits
-#
-# `Natural Language API` Toolkits (`NLAToolkits`) permit LangChain Agents to efficiently plan and combine calls across endpoints.
-#
+# 
+# `Natural Language API` Toolkits (`NLAToolkits`) permit LangChain Agents to efficiently plan and combine calls across endpoints. 
+# 
 # This notebook demonstrates a sample composition of the `Speak`, `Klarna`, and `Spoonacluar` APIs.
-#
+# 
 # ### First, import dependencies and load the LLM
 
 # In[1]:
@@ -80,13 +80,13 @@ mrkl.run(
 
 
 # ### Use Auth and add more Endpoints
-#
+# 
 # Some endpoints may require user authentication via things like access tokens. Here we show how to pass in the authentication information via the `Requests` wrapper object.
-#
+# 
 # Since each NLATool exposes a concisee natural language interface to its wrapped API, the top level conversational agent has an easier job incorporating each endpoint to satisfy a user's request.
 
 # **Adding the Spoonacular endpoints.**
-#
+# 
 # 1. Go to the [Spoonacular API Console](https://spoonacular.com/food-api/console#Profile) and make a free account.
 # 2. Click on `Profile` and copy your API key below.
 
@@ -160,3 +160,7 @@ natural_language_api_tools[1].run(
 
 
 # In[ ]:
+
+
+
+

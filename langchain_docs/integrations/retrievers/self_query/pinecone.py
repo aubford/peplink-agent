@@ -2,30 +2,28 @@
 # coding: utf-8
 
 # # Pinecone
-#
+# 
 # >[Pinecone](https://docs.pinecone.io/docs/overview) is a vector database with broad functionality.
-#
+# 
 # In the walkthrough, we'll demo the `SelfQueryRetriever` with a `Pinecone` vector store.
 
 # ## Creating a Pinecone index
 # First we'll want to create a `Pinecone` vector store and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # To use Pinecone, you have to have `pinecone` package installed and you must have an API key and an environment. Here are the [installation instructions](https://docs.pinecone.io/docs/quickstart).
-#
+# 
 # **Note:** The self-query retriever requires you to have `lark` package installed.
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark')
 
 
 # In[ ]:
 
 
-get_ipython().run_line_magic(
-    "pip", "install --upgrade --quiet pinecone-notebooks pinecone-client==3.2.2"
-)
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet pinecone-notebooks pinecone-client==3.2.2')
 
 
 # In[1]:
@@ -200,9 +198,9 @@ retriever.invoke(
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[ ]:
@@ -223,3 +221,4 @@ retriever = SelfQueryRetriever.from_llm(
 
 # This example only specifies a relevant query
 retriever.invoke("What are two movies about dinosaurs")
+

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # # DashVector
-#
+# 
 # > [DashVector](https://help.aliyun.com/document_detail/2510225.html) is a fully managed vector DB service that supports high-dimension dense and sparse vectors, real-time insertion and filtered search. It is built to scale automatically and can adapt to different application requirements.
 # > The vector retrieval service `DashVector` is based on the `Proxima` core of the efficient vector engine independently developed by `DAMO Academy`,
 # >  and provides a cloud-native, fully managed vector retrieval service with horizontal expansion capabilities.
@@ -10,21 +10,21 @@
 # > easy-to-use SDK/API interface, which can be quickly integrated by upper-layer AI applications, thereby providing services
 # > including large model ecology, multi-modal AI search, molecular structure A variety of application scenarios, including analysis,
 # > provide the required efficient vector retrieval capabilities.
-#
+# 
 # In this notebook, we'll demo the `SelfQueryRetriever` with a `DashVector` vector store.
 
 # ## Create DashVector vectorstore
-#
+# 
 # First we'll want to create a `DashVector` VectorStore and seed it with some data. We've created a small demo set of documents that contain summaries of movies.
-#
+# 
 # To use DashVector, you have to have `dashvector` package installed, and you must have an API key and an Environment. Here are the [installation instructions](https://help.aliyun.com/document_detail/2510223.html).
-#
+# 
 # NOTE: The self-query retriever requires you to have `lark` package installed.
 
 # In[1]:
 
 
-get_ipython().run_line_magic("pip", "install --upgrade --quiet  lark dashvector")
+get_ipython().run_line_magic('pip', 'install --upgrade --quiet  lark dashvector')
 
 
 # In[1]:
@@ -90,7 +90,7 @@ vectorstore = DashVector.from_documents(
 
 
 # ## Create your self-querying retriever
-#
+# 
 # Now we can instantiate our retriever. To do this we'll need to provide some information upfront about the metadata fields that our documents support and a short description of the document contents.
 
 # In[4]:
@@ -128,7 +128,7 @@ retriever = SelfQueryRetriever.from_llm(
 
 
 # ## Testing it out
-#
+# 
 # And now we can try actually using our retriever!
 
 # In[6]:
@@ -160,9 +160,9 @@ retriever.invoke("What's a highly rated (above 8.5) science fiction film?")
 
 
 # ## Filter k
-#
+# 
 # We can also use the self query retriever to specify `k`: the number of documents to fetch.
-#
+# 
 # We can do this by passing `enable_limit=True` to the constructor.
 
 # In[10]:
@@ -186,3 +186,7 @@ retriever.invoke("what are two movies about dinosaurs")
 
 
 # In[ ]:
+
+
+
+

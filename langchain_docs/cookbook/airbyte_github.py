@@ -4,7 +4,7 @@
 # In[2]:
 
 
-get_ipython().run_line_magic("pip", "install -qU langchain-airbyte langchain_chroma")
+get_ipython().run_line_magic('pip', 'install -qU langchain-airbyte langchain_chroma')
 
 
 # In[3]:
@@ -81,3 +81,7 @@ retriever.invoke("pull requests related to IBM")
 
 
 # In[ ]:
+
+
+
+

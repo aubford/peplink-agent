@@ -2,9 +2,9 @@
 # coding: utf-8
 
 # # Upstash Redis
-#
+# 
 # >[Upstash](https://upstash.com/docs/introduction) is a provider of the serverless `Redis`, `Kafka`, and `QStash` APIs.
-#
+# 
 # This notebook goes over how to use `Upstash Redis` to store chat message history.
 
 # In[ ]:
@@ -29,3 +29,4 @@ history.add_ai_message("hello user!")
 
 
 history.messages
+
