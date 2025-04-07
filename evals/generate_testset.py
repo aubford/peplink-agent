@@ -5,6 +5,16 @@ import numpy as np
 from typing import Optional, Set, List, FrozenSet
 
 
+"""
+TODO:
+- Add sibling relationships to the clusters
+    - 1. Ask LLM if it's a good cluster
+    - 2. If so, find the most common node
+    - 3. Append all the siblings of that node to the cluster
+- Handicap same-data-type relationships
+"""
+
+
 def tack_on_node_col(
     clusters_df: pd.DataFrame, node_df: pd.DataFrame, col: str
 ) -> pd.DataFrame:
@@ -182,16 +192,11 @@ class GenerateTestSet:
 
         return clusters
 
-    def get_siblings_of_primary_node(self):
-        """
-        For each cluster, find the most common node and append its siblings.
-
-        Returns:
-            Dictionary mapping cluster index to a DataFrame of enhanced clusters with siblings
-        """
-        pass
-
     def _generate_cluster_info_parquet(self):
+        """
+        Generate a parquet file with the cluster information.
+        This may have duplicate clusters, but it's whatever...
+        """
         df = self.cluster_dfs_sample
         for i, cdf in enumerate(df):
             cdf["cluster"] = i
@@ -202,21 +207,19 @@ class GenerateTestSet:
         sample_df = tack_on_node_col(sample_df, self.nodes_df, "technical_summary")
         sample_df.to_parquet(self.output_dir / f"__clusters_sample.parquet")
 
-    def _cluster_reporting(self):
-        print("\n" + "-" * 100 + "\n")
-        print(f"Found {len(self.found_clusters)} relationship clusters.")
+    def _cluster_reporting(self, stage: str):
+        print("\n" + "-" * 50 + f" {stage} " + "-" * 50 + "\n")
+        print(f"Clusters count: {len(self.found_clusters)}")
+        print(
+            f"Total elements in relationship clusters: {sum(len(cluster) for cluster in self.found_clusters)}"
+        )
 
         # Get the set of all unique ids from relationship clusters
         all_unique_ids = set()
         for cluster in self.found_clusters:
             all_unique_ids.update(cluster)
 
-        print(
-            f"Total elements in relationship clusters: {sum(len(cluster) for cluster in self.found_clusters)}"
-        )
         print(f"Total unique IDs across all clusters: {len(all_unique_ids)}")
-
-        self._generate_cluster_info_parquet()
 
     def get_clusters(self) -> None:
         """
@@ -229,4 +232,20 @@ class GenerateTestSet:
         """
         # Find relationship clusters
         self.found_clusters = self.find_relationship_clusters()
-        self._cluster_reporting()
+        self._cluster_reporting("init")
+        self._generate_cluster_info_parquet()
+
+    def llm_filter_clusters(self):
+        """
+        Filter clusters based on LLM's assessment.
+        """
+        pass
+
+    def get_siblings_of_primary_node(self):
+        """
+        For each cluster, find the most common node and append its siblings.
+
+        Returns:
+            Dictionary mapping cluster index to a DataFrame of enhanced clusters with siblings
+        """
+        pass

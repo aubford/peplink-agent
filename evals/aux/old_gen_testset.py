@@ -6,15 +6,6 @@ import random
 import numpy as np
 from typing import Optional
 
-"""
-TODO:
-- Add sibling relationships to the clusters
-    - 1. Ask LLM if it's a good cluster
-    - 2. If so, find the most common node
-    - 3. Append all the siblings of that node to the cluster
-- Handicap same-data-type relationships
-"""
-
 
 load_dotenv()
 
