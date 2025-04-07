@@ -125,6 +125,9 @@ print(
 # We will reuse the example set and the formatter from the previous section. However, instead of feeding the examples directly into the `FewShotPromptTemplate` object, we will feed them into an implementation of `ExampleSelector` called [`SemanticSimilarityExampleSelector`](https://python.langchain.com/api_reference/core/example_selectors/langchain_core.example_selectors.semantic_similarity.SemanticSimilarityExampleSelector.html) instance. This class selects few-shot examples from the initial set based on their similarity to the input. It uses an embedding model to compute the similarity between the input and the few-shot examples, as well as a vector store to perform the nearest neighbor search.
 #
 # To show what it looks like, let's initialize an instance and call it in isolation:
+# %%
+
+prompt.format()
 
 # In[4]:
 

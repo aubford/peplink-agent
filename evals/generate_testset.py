@@ -3,13 +3,11 @@ import pandas as pd
 import random
 import numpy as np
 import json
-import re
-from typing import Optional, Set, List, FrozenSet, Union
+from typing import Optional, Set, List, FrozenSet
 from langchain_openai import ChatOpenAI
 from langchain.prompts import (
     ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
+    FewShotChatMessagePromptTemplate,
 )
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 
@@ -25,15 +23,113 @@ TODO:
 
 class GenerateTestSet:
 
+    main_prompt = "# Documents:\n\n{documents}\n\nGenerate a query and answer based on the documents provided above according to the provided instructions."
+
     system_prompt = """
-    You are a technical content analyst specializing in IT networking and Pepwave products.
-    Your task is to analyze a set of documents and generate a multifaceted multi-hop query that a technician might ask based solely on the information in those documents.
-    Each set of documents contains related information. Identify a topic, product, technology, or concept that exists in many of the documents. There should be a diversity of useful technical information about that topic in multiple documents.
-    Create a query from the technical facts that can be gleaned from the documents that incorporates different information from as many documents as possible and connects them meaningfully.
-    Some of the documents are forum posts and contain various sections like ## Content, and ## Comments. The ### Content section is the original post and usually contains a question. Information presented as part of a question is not factual information and should not used to create the query. The ### Comments section contains responses to the original post and should be used as a source of technical information.
-    Once you have created the query, write a detailed answer to the query using only the information in the documents.
-    The query and answer should be based solely on the documents provided.
+You are a technical content analyst specializing in IT networking and Pepwave products.
+Your task is to analyze a set of documents and generate a multifaceted multi-hop query that a technician might ask based solely on the information in those documents.
+Each set of documents contains related information. Identify a topic, product, technology, or concept that exists in many of the documents. There should be a diversity of useful technical information about that topic in multiple documents.
+Create a query from the technical facts that can be gleaned from the documents that incorporates different information from as many documents as possible and connects them meaningfully.
+Some of the documents are forum posts and contain various sections like ## Content, and ## Comments. The ### Content section is the original post and usually contains a question. Information presented as part of a question is not factual information and should not used to create the query. The ### Comments section contains responses to the original post and should be used as a source of technical information.
+Once you have created the query, write a detailed answer to the query using only the information in the documents.
+The query and answer should be based solely on the documents provided.
     """
+
+    examples = [
+        {
+            "documents": '''
+<DOCUMENT 1>
+"""
+## Post
+
+### Title: My connection IS SLOW
+
+### Content:
+
+I connected a 50mps fibre optic internet connection to port 1 and a 10mbps phone internet service to port two. 
+Then cabled from Lan 1 to a wi fi router and I connect my devices via wi fi to that router. 
+However this is slower and more unstable than if I just connect my 50mps straight to my wifi router, overriding the Peplink. 
+I can see this when I test on Speedtest.net.
+
+## Comments:
+
+<comment> 
+Speedtest.net does not give an accurate reading when using multiple WANs because it doesn't take the Pepwave's load balancing into account. You must configure outbound policy rules in order to implement your scenario. Set your outbound policy to use the low-latency option and it will use the fastest connection.
+  <reply> 
+  Hi Ron!
+Does this mean that if I am using Strong DNS, this might be slowing it down? 
+    <reply> 
+    No, you just need to configure outbound policy rules.
+  </reply>
+</comment>
+"""
+
+<DOCUMENT 2>
+"""
+hi this is Dan and in this video I want to explain how to configure the outbound policy rules there are several options available and they all have different use cases when in doubt the best option is the power-fusion option that will use the fastest connection based on the FQDN protocol it is the best option to use for most simple use cases or if you are unsure I would recommend taking a look at the manual to learn about the other options available to you
+"""
+
+<DOCUMENT 3>
+"""
+You know about classes, but you may be thinking which traffic goes into each class? And how many classes should I configure? Well, let me help you simplify this You don't need to use every combination of class and drop probability. There is a real time class for voice and interactive video. This is a high priority class next, a class for critical data. This is for your business applications, databases, website, traffic. We could split this into two classes. If you do end up splitting your high priority class into two classes, make sure you set the outbound policy to use low-latency otherwise your equipment will not be able to handle the load and you may encounter a "unable to handle load" error. I would recommend starting with the default settings and then adding classes as needed. In all classes are not as complex as they may seem.
+"""
+''',
+            "output": '''
+{
+    "query": "What outbound policy settings should be attempted to circumvent a slow connection when using multiple wired connections or when encountering an 'unable to handle load' error? Can you rely on Speedtest.net to accurately measure performance in this scenario when using multiple wired connections?",
+    "answer": "First, try the low-latency option. This is the best option when using multiple wired connections and is a solution to the 'unable to handle load' error. If that doesn't work, try the power-fusion option. Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account."
+}
+''',
+        },
+        {
+            "documents": '''
+<DOCUMENT 1>
+"""
+## Post
+
+### Title: How to optimize for MLRPV protocol?
+
+### Content:
+
+Our setup is using MLRPV protocol with 3 patchworked units in a BAFTA cluster.  The BAFTA cluster tends to be the best performing cluster for our use case with a class 5 ensemble transportation layer.  How do I optimize for this protocol?
+
+## Comments:
+
+<comment> 
+To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
+</comment>
+"""
+
+<DOCUMENT 2>
+"""
+## Post
+
+### Title: What does the MLRPV-ensemble mode do?
+
+### Content:
+
+MLRPV protocol is a protocol that is typically used for section 9434 robotics implementations. It is an expert-only feature.  If you're not working in distributed robotics, you probably don't need to worry about it and can just leave it off. You would turn it on if you have a robot farm and want to make sure that all the robots are working together correctly. It does this by synchronizing the clocks of the robots day-night entrainment cycles.
+
+## Comments:
+
+<comment> 
+To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
+</comment>
+"""
+
+<DOCUMENT 3>
+"""
+one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for section 9434 robotics situations it was added to the system controller in version 6.1 and can be used with any type of robot cluster you might come across and what have you I would recommend also taking a look at the ensemble controller section because that also has some features that are relevant to that protocol at the end of the day it just makes it really easy to get your robots synchronized well
+"""
+''',
+            "output": '''
+{
+    "query": "What is MLRPV-ensemble mode, how does it work, and how should you set up your BAFTA cluster patchwork when using it?",
+    "answer": "MLRPV-ensemble mode is a new mode for section 9434 robotics situations that was added to the system controller in version 6.1 and can be used with any type of robot cluster when working with the MLRPV protocol. Enable it if you have a robot farm and want to make sure that all the robots are working together correctly. It works by synchronizing the clocks of the robots day-night entrainment cycles. To use MLRPV-ensmble mode with a patchworked BAFTA cluster, you need to make sure the patchwork is grounded into at least 3 different antenna pods before you turn it on in the system controller."
+}
+''',
+        },
+    ]
 
     def __init__(
         self,
@@ -54,6 +150,8 @@ class GenerateTestSet:
             llm_model: LLM model to use
             testset_size: Number of clusters to generate for the test set
         """
+        self.llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
+
         self.output_dir = Path(output_dir)
         nodes_df_path = output_dir / "__nodes_LATEST.parquet"
         relationships_df_path = (
@@ -295,141 +393,26 @@ class GenerateTestSet:
         )
         response_schemas = [query_schema, answer_schema]
         output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
-        format_instructions = output_parser.get_format_instructions()
 
-        # Initialize the LLM
-        llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
-
-        # Create four examples with different devices and use cases
-        example_1_documents = '''
-<DOCUMENT 1>
-"""
-## Post
-
-### Title: My connection IS SLOW
-
-### Content:
-
-I connected a 50mps fibre optic internet connection to port 1 and a 10mbps phone internet service to port two. 
-Then cabled from Lan 1 to a wi fi router and I connect my devices via wi fi to that router. 
-However this is slower and more unstable than if I just connect my 50mps straight to my wifi router, overriding the Peplink. 
-I can see this when I test on Speedtest.net.
-
-## Comments:
-
-<comment> 
-Speedtest.net does not give an accurate reading when using multiple WANs because it doesn't take the Pepwave's load balancing into account. You must configure outbound policy rules in order to implement your scenario. Set your outbound policy to use the low-latency option and it will use the fastest connection.
-  <reply> 
-  Hi Ron!
-Does this mean that if I am using Strong DNS, this might be slowing it down? 
-    <reply> 
-    No, you just need to configure outbound policy rules.
-  </reply>
-</comment>
-"""
-
-<DOCUMENT 2>
-"""
-hi this is Dan and in this video I want to explain how to configure the outbound policy rules there are several options available and they all have different use cases when in doubt the best option is the power-fusion option that will use the fastest connection based on the FQDN protocol it is the best option to use for most simple use cases or if you are unsure I would recommend taking a look at the manual to learn about the other options available to you
-"""
-
-<DOCUMENT 3>
-"""
-You know about classes, but you may be thinking which traffic goes into each class? And how many classes should I configure? Well, let me help you simplify this You don't need to use every combination of class and drop probability. There is a real time class for voice and interactive video. This is a high priority class next, a class for critical data. This is for your business applications, databases, website, traffic. We could split this into two classes. If you do end up splitting your high priority class into two classes, make sure you set the outbound policy to use low-latency otherwise your equipment will not be able to handle the load and you may encounter a "unable to handle load" error. I would recommend starting with the default settings and then adding classes as needed. In all classes are not as complex as they may seem.
-"""
-'''
-
-        example_1_output = """
-{
-    "query": "What outbound policy settings should be attempted to circumvent a slow connection when using multiple wired connections or when encountering an 'unable to handle load' error? Can you rely on Speedtest.net to accurately measure performance in this scenario when using multiple wired connections?",
-    "answer": "First, try the low-latency option. This is the best option when using multiple wired connections and is a solution to the 'unable to handle load' error. If that doesn't work, try the power-fusion option. Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account."
-}
-"""
-
-        example_2_documents = '''
-<DOCUMENT 1>
-"""
-## Post
-
-### Title: How to optimize for MLRPV protocol?
-
-### Content:
-
-Our setup is using MLRPV protocol with 3 patchworked units in a BAFTA cluster.  The BAFTA cluster tends to be the best performing cluster for our use case with a class 5 ensemble transportation layer.  How do I optimize for this protocol?
-
-## Comments:
-
-<comment> 
-To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
-</comment>
-"""
-
-<DOCUMENT 2>
-"""
-## Post
-
-### Title: What does the MLRPV-ensemble mode do?
-
-### Content:
-
-MLRPV protocol is a protocol that is typically used for section 9434 robotics implementations. It is an expert-only feature.  If you're not working in distributed robotics, you probably don't need to worry about it and can just leave it off. You would turn it on if you have a robot farm and want to make sure that all the robots are working together correctly. It does this by synchronizing the clocks of the robots day-night entrainment cycles.
-
-## Comments:
-
-<comment> 
-To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
-</comment>
-"""
-
-<DOCUMENT 3>
-"""
-one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for section 9434 robotics situations it was added to the system controller in version 6.1 and can be used with any type of robot cluster you might come across and what have you I would recommend also taking a look at the ensemble controller section because that also has some features that are relevant to that protocol at the end of the day it just makes it really easy to get your robots synchronized well
-"""
-'''
-
-        example_2_output = """
-{
-    "query": "What is MLRPV-ensemble mode, how does it work, and how should you set up your BAFTA cluster patchwork when using it?",
-    "answer": "MLRPV-ensemble mode is a new mode for section 9434 robotics situations that was added to the system controller in version 6.1 and can be used with any type of robot cluster when working with the MLRPV protocol. Enable it if you have a robot farm and want to make sure that all the robots are working together correctly. It works by synchronizing the clocks of the robots day-night entrainment cycles. To use MLRPV-ensmble mode with a patchworked BAFTA cluster, you need to make sure the patchwork is grounded into at least 3 different antenna pods before you turn it on in the system controller."
-}
-"""
-
-        # Create system prompt with examples
-        system_prompt_with_examples = (
-            self.system_prompt + "\n\nHere are some examples:\n\n"
+        example_prompt = ChatPromptTemplate.from_messages(
+            [("human", self.main_prompt), ("ai", "{output}")]
         )
 
-        # Add example 1
-        system_prompt_with_examples += f"Example 1:\n# Documents:\n{example_1_documents}\n\nOutput:\n{example_1_output}\n\n"
-
-        # Add example 2
-        system_prompt_with_examples += f"Example 2:\nDocuments:\n{example_2_documents}\n\nOutput:\n{example_2_output}\n\n"
-
-        # Create system and human message templates
-        system_message_template = SystemMessagePromptTemplate.from_template(
-            "{system_prompt_with_examples}"
+        few_shot_prompt = FewShotChatMessagePromptTemplate(
+            example_prompt=example_prompt,
+            examples=self.examples,
         )
 
-        human_template = """
-# Documents:
-
-{documents}
-
-{format_instructions}
-
-Generate a query and answer based on the documents provided above according to the guidelines provided.
-"""
-        human_message_template = HumanMessagePromptTemplate.from_template(
-            human_template
-        )
-
-        # Combine into a chat prompt template
-        prompt = ChatPromptTemplate.from_messages(
+        final_prompt = ChatPromptTemplate.from_messages(
             [
-                system_message_template,
-                human_message_template,
+                ("system", self.system_prompt),
+                few_shot_prompt,
+                ("human", self.main_prompt),
             ]
         )
+
+        # Combine prompt with parser
+        chain = final_prompt | self.llm | output_parser
 
         # Process each cluster
         results = []
@@ -447,52 +430,22 @@ Generate a query and answer based on the documents provided above according to t
                 )
                 documents_text += f"DOCUMENT {doc_num}:\nTitle: {title}\nContent: {row['page_content']}\n\n"
 
-            # Prepare the messages
-            chat_messages = prompt.format_messages(
-                system_prompt_with_examples=system_prompt_with_examples,
-                documents=documents_text,
-                format_instructions=format_instructions,
-            )
-
-            # Call the LLM with structured messages
-            response = llm.invoke(chat_messages)
-
             try:
-                # Parse the response
-                if hasattr(response, 'content') and isinstance(response.content, str):
-                    parsed_response = output_parser.parse(response.content)
-                    query = parsed_response.get("query", "")
-                    answer = parsed_response.get("answer", "")
-                else:
-                    raise ValueError("Response content is not a string")
-            except Exception as e:
-                print(f"Error parsing response for cluster {i}: {e}")
-                if hasattr(response, 'content'):
-                    print(f"Raw response: {response.content}")
-                    response_text = response.content
-                else:
-                    response_text = str(response)
-                    print(f"Raw response: {response_text}")
+                # Call the chain with the documents
+                result = chain.invoke(
+                    {
+                        "documents": documents_text,
+                    }
+                )
 
-                # Try a simpler JSON parsing as fallback
-                try:
-                    # Find JSON-like content between curly braces
-                    if isinstance(response_text, str):
-                        json_match = re.search(r'\{[\s\S]*\}', response_text)
-                        if json_match:
-                            json_str = json_match.group(0)
-                            parsed_json = json.loads(json_str)
-                            query = parsed_json.get("query", "")
-                            answer = parsed_json.get("answer", "")
-                        else:
-                            query = ""
-                            answer = ""
-                    else:
-                        query = ""
-                        answer = ""
-                except Exception:
-                    query = ""
-                    answer = ""
+                # The parser already converts to a dict, no need for additional parsing
+                query = result.get("query", "")
+                answer = result.get("answer", "")
+
+            except Exception as e:
+                print(f"Error processing cluster {i}: {e}")
+                query = ""
+                answer = ""
 
             # Store the result
             results.append(
