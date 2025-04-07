@@ -279,9 +279,9 @@ with tracing_context(enabled=False):
         themes_overlap_sim = OverlapScoreBuilder(
             property_name="themes",
             new_property_name="themes_overlap_score",
-            distance_threshold=0.9,
-            noise_threshold=0.05,
-            threshold=overlap_threshold,
+            distance_threshold=0.94,
+            noise_threshold=0.1,
+            threshold=overlap_threshold * 1.5,
             filter_nodes=filter_themes_overlap,
         )
         entities_overlap_sim = OverlapScoreBuilder(

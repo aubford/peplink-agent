@@ -1,4 +1,3 @@
-# %%
 from ragas.testset.persona import Persona
 from pathlib import Path
 from dotenv import load_dotenv
@@ -34,9 +33,26 @@ TESTSET_SIZE = 50
 output_dir = Path(__file__).parent / "output"
 kg_path = output_dir / "kg_output__LATEST.json"
 
+nodes_df = pd.read_parquet(output_dir / "__nodes_LATEST.parquet")
+print(f"nodes: {len(nodes_df)}")
 df = pd.read_parquet(output_dir / "__relationships_MERGED__LATEST.parquet")
 sibling_df = df[df['relationship_type'].str.contains('sibling')]
 main_df = df[~df['relationship_type'].str.contains('sibling')]
+main_df = main_df.assign(
+    is_same_data_type=lambda df: df["source_id"].map(
+        nodes_df.set_index("node_id")["type"]
+    )
+    == df["target_id"].map(nodes_df.set_index("node_id")["type"])
+)
+
+# thresholds that non-multi relationships need to pass to be included
+single_rel_thresholds = {  # original score
+    "summary_similarity": 0.815,  # .8
+    "title_similarity": 0.805,  # .8
+    "themes_overlap_score": 0.24,  # .2
+    "entities_overlap_score": 0.24,  # .2
+    # "html_overlap_score": 0.01,  # .01
+}
 
 # print(f"info: {df.info()}")
 print(
@@ -51,8 +67,9 @@ def find_relationship_clusters(
     relationship_df: pd.DataFrame,
     n: int,
     cluster_size: int,
+    min_cluster_size: int = 3,
     random_seed: Optional[int] = None,
-) -> set[frozenset]:
+) -> set[frozenset[str]]:
     """
     Find n clusters of relationships by traversing the knowledge graph using dataframe operations.
 
@@ -78,13 +95,30 @@ def find_relationship_clusters(
     )
     # create separate df for merged relationships
     multi_df = graph_df[graph_df['relationship_type'] == 'multi']
+    non_multi_df = graph_df[~graph_df.index.isin(multi_df.index)]
+
+    # filter non_multi_df to only include rows that pass single_rel_thresholds
+    # null values (values that are not floats) should pass
+    for col, threshold in single_rel_thresholds.items():
+        # apply higher threshold for same-data-type relationships
+        threshold_boost = 0.02 if col == "title_similarity" else 0.01
+        effective_threshold = non_multi_df["is_same_data_type"].map(
+            {True: threshold + threshold_boost, False: threshold}
+        )
+        non_multi_df = non_multi_df[
+            non_multi_df[col].isna() | (non_multi_df[col] >= effective_threshold)
+        ]
+
     # Sort graph_df so that rows in multi_df come first, preserving relative order within each group
-    is_in_multi = graph_df.index.isin(multi_df.index)
     graph_df = pd.concat(
         [
-            graph_df[is_in_multi],
-            graph_df[~is_in_multi],
+            multi_df,
+            non_multi_df,
         ]
+    )
+
+    print(
+        f"\n\nPost-filtering non-multi {graph_df['relationship_type'].value_counts()}"
     )
 
     clusters: set = set()
@@ -116,32 +150,35 @@ def find_relationship_clusters(
             graph_df = graph_df.drop(filtered_neighbors.index, errors="ignore")
             cluster_df = pd.concat([cluster_df, filtered_neighbors])
 
-        cluster_dfs_sample.append(cluster_df)
-        node_ids = pd.unique(cluster_df[["source_id", "target_id"]].values.ravel())
-        clusters.add(frozenset(node_ids))
+        if len(cluster_df) >= min_cluster_size:
+            cluster_dfs_sample.append(cluster_df)
+            node_ids = pd.unique(cluster_df[["source_id", "target_id"]].values.ravel())
+            clusters.add(frozenset(node_ids))
 
     return clusters
 
 
 def tack_on_node_col(
-    clusters_df: pd.DataFrame, nodes_df: pd.DataFrame, col: str
+    clusters_df: pd.DataFrame, node_df: pd.DataFrame, col: str
 ) -> pd.DataFrame:
     clusters_df[f"source_{col}"] = clusters_df["source_id"].map(
-        nodes_df.set_index("node_id")[col]
+        node_df.set_index("node_id")[col]
     )
     clusters_df[f"target_{col}"] = clusters_df["target_id"].map(
-        nodes_df.set_index("node_id")[col]
+        node_df.set_index("node_id")[col]
     )
     return clusters_df
 
 
 ########################## FIND RELATIONSHIP CLUSTERS ######################################################################################################################################
 
-relationship_clusters: set[frozenset[str]] = find_relationship_clusters(main_df, 50, 5)
+relationship_clusters: set[frozenset[str]] = find_relationship_clusters(
+    main_df, TESTSET_SIZE, 7
+)
 print("\n" + "-" * 100 + "\n")
-print(f"Found {len(relationship_clusters)} relationship clusters:")
-for i, cluster in enumerate(relationship_clusters, 1):
-    print(f"Cluster {i}: {sorted(cluster)}")
+print(f"Found {len(relationship_clusters)} relationship clusters.")
+# for i, cluster in enumerate(relationship_clusters, 1):
+#     print(f"Cluster {i}: {sorted(cluster)}")
 
 # Get the set of all unique ids from relationship clusters
 all_unique_ids = set()
