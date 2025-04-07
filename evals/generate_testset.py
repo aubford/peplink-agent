@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import random
 import numpy as np
-from typing import Optional, Set, List, FrozenSet
+from typing import Optional, Set, List, FrozenSet, Union
 
 
 """
@@ -11,23 +11,20 @@ TODO:
     - 1. Ask LLM if it's a good cluster
     - 2. If so, find the most common node
     - 3. Append all the siblings of that node to the cluster
-- Handicap same-data-type relationships
 """
 
 
-def tack_on_node_col(
-    clusters_df: pd.DataFrame, node_df: pd.DataFrame, col: str
-) -> pd.DataFrame:
-    clusters_df[f"source_{col}"] = clusters_df["source_id"].map(
-        node_df.set_index("node_id")[col]
-    )
-    clusters_df[f"target_{col}"] = clusters_df["target_id"].map(
-        node_df.set_index("node_id")[col]
-    )
-    return clusters_df
-
-
 class GenerateTestSet:
+
+    system_prompt = """
+    You are a technical content analyst specializing in IT networking and Pepwave products.
+    Your task is to analyze a set of documents and generate a multifaceted multi-hop query that a technician might ask based solely on the information in those documents.
+    Each set of documents contains related information. Identify a topic, product, technology, or concept that exists in many of the documents. There should be a diversity of useful technical information about that topic in multiple documents.
+    Create a query from the technical information shared on that topic in the documents that incorporates different information from as many documents as possible and connects them meaningfully.
+    The query should be based solely on the documents provided.
+    Once you have created the query, write a detailed answer to the query using only the information in the documents.
+    """
+
     def __init__(
         self,
         output_dir: Path,
@@ -85,6 +82,7 @@ class GenerateTestSet:
         # Initialize storage for clusters
         self.cluster_dfs_sample: List[pd.DataFrame] = []
         self.found_clusters: Set[FrozenSet[str]] = set()
+        self.node_clusters: List[pd.DataFrame] = []
 
     def create_main_df(self):
         df = self.relationships_df[
@@ -192,23 +190,32 @@ class GenerateTestSet:
 
         return clusters
 
+    def tack_on_node_col(self, clusters_df: pd.DataFrame, col: str) -> pd.DataFrame:
+        clusters_df[f"source_{col}"] = clusters_df["source_id"].map(
+            self.nodes_df.set_index("node_id")[col]
+        )
+        clusters_df[f"target_{col}"] = clusters_df["target_id"].map(
+            self.nodes_df.set_index("node_id")[col]
+        )
+        return clusters_df
+
     def _generate_cluster_info_parquet(self):
         """
-        Generate a parquet file with the cluster information.
-        This may have duplicate clusters, but it's whatever...
+        Generate a parquet file with the cluster information for inspection.
+        This may have duplicate clusters that don't exist in the found_clusters set.
         """
         df = self.cluster_dfs_sample
         for i, cdf in enumerate(df):
             cdf["cluster"] = i
 
         sample_df = pd.concat(df)
-        sample_df = tack_on_node_col(sample_df, self.nodes_df, "page_content")
-        sample_df = tack_on_node_col(sample_df, self.nodes_df, "title")
-        sample_df = tack_on_node_col(sample_df, self.nodes_df, "technical_summary")
+        sample_df = self.tack_on_node_col(sample_df, "page_content")
+        sample_df = self.tack_on_node_col(sample_df, "title")
+        sample_df = self.tack_on_node_col(sample_df, "technical_summary")
         sample_df.to_parquet(self.output_dir / f"__clusters_sample.parquet")
 
-    def _cluster_reporting(self, stage: str):
-        print("\n" + "-" * 50 + f" {stage} " + "-" * 50 + "\n")
+    def _cluster_reporting(self):
+        print("\n" + "-" * 50 + "\n")
         print(f"Clusters count: {len(self.found_clusters)}")
         print(
             f"Total elements in relationship clusters: {sum(len(cluster) for cluster in self.found_clusters)}"
@@ -221,31 +228,60 @@ class GenerateTestSet:
 
         print(f"Total unique IDs across all clusters: {len(all_unique_ids)}")
 
-    def get_clusters(self) -> None:
-        """
-        Generate a test set by finding relationship clusters and enhancing them with siblings.
-
-        Args:
-            cluster_size: Size of each cluster
-            min_cluster_size: Minimum size for a valid cluster
-            random_seed: Optional seed for reproducibility
-        """
-        # Find relationship clusters
-        self.found_clusters = self.find_relationship_clusters()
-        self._cluster_reporting("init")
-        self._generate_cluster_info_parquet()
-
     def llm_filter_clusters(self):
         """
         Filter clusters based on LLM's assessment.
         """
         pass
 
-    def get_siblings_of_primary_node(self):
+    def _tokens_under_threshold(self, nodes_df: pd.DataFrame) -> bool:
         """
-        For each cluster, find the most common node and append its siblings.
+        Calculate token count and return whether it exceeds the threshold.
+
+        Args:
+            nodes_df: DataFrame containing nodes
 
         Returns:
-            Dictionary mapping cluster index to a DataFrame of enhanced clusters with siblings
+            Boolean indicating whether token count exceeds the threshold.
+        """
+        max_token_count = 30_000
+        token_count = nodes_df["page_content"].apply(len).sum()
+        return token_count < max_token_count
+
+    def get_node_clusters(self):
+        """
+        For each cluster, get the corresponding nodes andappend siblings up to a max token count.
+        """
+        for cluster in self.found_clusters:
+            nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)]
+            sibling_relationships = self.sibling_df[
+                (self.sibling_df["source_id"].isin(cluster))
+                | (self.sibling_df["target_id"].isin(cluster))
+            ]
+            sibling_nodes = self.nodes_df[
+                self.nodes_df["node_id"].isin(sibling_relationships["source_id"])
+            ]
+            while self._tokens_under_threshold(nodes_df) and not sibling_nodes.empty:
+                # Pop a sibling node and add it to nodes_df
+                sibling_node = sibling_nodes.iloc[0]
+                sibling_nodes = sibling_nodes.iloc[1:]
+                # Only add if not already in nodes_df
+                if sibling_node["node_id"] not in nodes_df["node_id"].values:
+                    nodes_df.loc[len(nodes_df)] = sibling_node
+            self.node_clusters.append(nodes_df)
+
+    def llm_generate_testset(self):
+        """
+        Query the LLM to create test data for each cluster.
         """
         pass
+
+    def create_testset(self):
+        """
+        Create a test set by filtering clusters and appending siblings.
+        """
+        self.found_clusters = self.find_relationship_clusters()
+        self._cluster_reporting()
+        self._generate_cluster_info_parquet()
+        self.get_node_clusters()
+        self.llm_generate_testset()
