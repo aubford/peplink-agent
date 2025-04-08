@@ -188,8 +188,8 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         )
 
         # Initialize storage for clusters
-        self.found_clusters: Set[FrozenSet[str]] = set()
-        self.cluster_info_dfs: List[pd.DataFrame] = []
+        self.found_relationship_clusters: Set[FrozenSet[str]] = set()
+        self.relationship_cluster_info_dfs: List[pd.DataFrame] = []
         self.node_clusters: List[pd.DataFrame] = []
 
     def create_main_df(self):
@@ -290,7 +290,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 cluster_df = pd.concat([cluster_df, filtered_neighbors])
 
             if len(cluster_df) >= self.min_cluster_size:
-                self.cluster_info_dfs.append(cluster_df)
+                self.relationship_cluster_info_dfs.append(cluster_df)
                 node_ids = pd.unique(
                     cluster_df[["source_id", "target_id"]].values.ravel()
                 )
@@ -316,21 +316,23 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             cdf["cluster"] = i
 
         sample_df = pd.concat(dfs)
-        sample_df = self.tack_on_node_col(sample_df, "page_content")
-        sample_df = self.tack_on_node_col(sample_df, "title")
-        sample_df = self.tack_on_node_col(sample_df, "technical_summary")
+        is_relationship_cluster = "source_id" in sample_df.columns
+        if is_relationship_cluster:
+            sample_df = self.tack_on_node_col(sample_df, "page_content")
+            sample_df = self.tack_on_node_col(sample_df, "title")
+            sample_df = self.tack_on_node_col(sample_df, "technical_summary")
         sample_df.to_parquet(self.output_dir / f"{filename}.parquet")
 
     def _cluster_reporting(self):
         print("\n" + "-" * 50 + "\n")
-        print(f"Clusters count: {len(self.found_clusters)}")
+        print(f"Clusters count: {len(self.found_relationship_clusters)}")
         print(
-            f"Total elements in relationship clusters: {sum(len(cluster) for cluster in self.found_clusters)}"
+            f"Total elements in relationship clusters: {sum(len(cluster) for cluster in self.found_relationship_clusters)}"
         )
 
         # Get the set of all unique ids from relationship clusters
         all_unique_ids = set()
-        for cluster in self.found_clusters:
+        for cluster in self.found_relationship_clusters:
             all_unique_ids.update(cluster)
 
         print(f"Total unique IDs across all clusters: {len(all_unique_ids)}")
@@ -359,7 +361,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         """
         For each cluster, get the corresponding nodes and append siblings up to a max token count.
         """
-        for cluster in self.found_clusters:
+        for cluster in self.found_relationship_clusters:
             nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)]
             sibling_relationships = self.sibling_df[
                 (self.sibling_df["source_id"].isin(cluster))
@@ -367,8 +369,12 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             ]
             sibling_nodes = self.nodes_df[
                 self.nodes_df["node_id"].isin(
-                    sibling_relationships["source_id"]
-                    | sibling_relationships["target_id"]
+                    pd.concat(
+                        [
+                            sibling_relationships["source_id"],
+                            sibling_relationships["target_id"],
+                        ]
+                    ).unique()
                 )
             ]
             while self._tokens_under_threshold(nodes_df) and not sibling_nodes.empty:
@@ -453,9 +459,11 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         """
         Create a test set by filtering clusters and appending siblings.
         """
-        self.found_clusters = self.find_relationship_clusters()
+        self.found_relationship_clusters = self.find_relationship_clusters()
         self._cluster_reporting()
-        self._generate_cluster_info_parquet(self.cluster_info_dfs, "__clusters_info")
+        self._generate_cluster_info_parquet(
+            self.relationship_cluster_info_dfs, "__relationship_clusters_info"
+        )
         self.get_node_clusters()
         self._generate_cluster_info_parquet(
             self.node_clusters, "__node_clusters_for_llm"
@@ -463,10 +471,11 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         self.llm_generate_testset()
 
 
+this_dir = Path(__file__).parent
 if __name__ == "__main__":
     generate_testset = GenerateTestSet(
-        output_dir=Path("evals/generated_testset"),
+        output_dir=this_dir / "output",
         llm_model="gpt-4o",
-        testset_size=50,
+        testset_size=5,
     )
     generate_testset.create_testset()
