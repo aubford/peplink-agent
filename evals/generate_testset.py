@@ -23,7 +23,7 @@ TODO:
 
 class GenerateTestSet:
 
-    main_prompt = "# Documents:\n\n{documents}\n\nGenerate a query and answer based on the documents provided above according to the provided instructions."
+    main_prompt = "# Documents:\n\n{documents}\n\n# Instructions:\nGenerate a query and answer based on the documents provided above according to the provided instructions"
 
     system_prompt = """
 You are a technical content analyst specializing in IT networking and Pepwave products.
@@ -33,7 +33,7 @@ Create a query from the technical facts that can be gleaned from the documents t
 Some of the documents are forum posts and contain various sections like ## Content, and ## Comments. The ### Content section is the original post and usually contains a question. Information presented as part of a question is not factual information and should not used to create the query. The ### Comments section contains responses to the original post and should be used as a source of technical information.
 Once you have created the query, write a detailed answer to the query using only the information in the documents.
 The query and answer should be based solely on the documents provided.
-    """
+"""
 
     examples = [
         {
@@ -188,8 +188,8 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         )
 
         # Initialize storage for clusters
-        self.cluster_dfs_sample: List[pd.DataFrame] = []
         self.found_clusters: Set[FrozenSet[str]] = set()
+        self.cluster_info_dfs: List[pd.DataFrame] = []
         self.node_clusters: List[pd.DataFrame] = []
 
     def create_main_df(self):
@@ -290,7 +290,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 cluster_df = pd.concat([cluster_df, filtered_neighbors])
 
             if len(cluster_df) >= self.min_cluster_size:
-                self.cluster_dfs_sample.append(cluster_df)
+                self.cluster_info_dfs.append(cluster_df)
                 node_ids = pd.unique(
                     cluster_df[["source_id", "target_id"]].values.ravel()
                 )
@@ -307,20 +307,19 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         )
         return clusters_df
 
-    def _generate_cluster_info_parquet(self):
+    def _generate_cluster_info_parquet(self, dfs: List[pd.DataFrame], filename: str):
         """
         Generate a parquet file with the cluster information for inspection.
         This may have duplicate clusters that don't exist in the found_clusters set.
         """
-        df = self.cluster_dfs_sample
-        for i, cdf in enumerate(df):
+        for i, cdf in enumerate(dfs):
             cdf["cluster"] = i
 
-        sample_df = pd.concat(df)
+        sample_df = pd.concat(dfs)
         sample_df = self.tack_on_node_col(sample_df, "page_content")
         sample_df = self.tack_on_node_col(sample_df, "title")
         sample_df = self.tack_on_node_col(sample_df, "technical_summary")
-        sample_df.to_parquet(self.output_dir / f"__clusters_sample.parquet")
+        sample_df.to_parquet(self.output_dir / f"{filename}.parquet")
 
     def _cluster_reporting(self):
         print("\n" + "-" * 50 + "\n")
@@ -358,7 +357,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
 
     def get_node_clusters(self):
         """
-        For each cluster, get the corresponding nodes andappend siblings up to a max token count.
+        For each cluster, get the corresponding nodes and append siblings up to a max token count.
         """
         for cluster in self.found_clusters:
             nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)]
@@ -367,7 +366,10 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 | (self.sibling_df["target_id"].isin(cluster))
             ]
             sibling_nodes = self.nodes_df[
-                self.nodes_df["node_id"].isin(sibling_relationships["source_id"])
+                self.nodes_df["node_id"].isin(
+                    sibling_relationships["source_id"]
+                    | sibling_relationships["target_id"]
+                )
             ]
             while self._tokens_under_threshold(nodes_df) and not sibling_nodes.empty:
                 # Pop a sibling node and add it to nodes_df
@@ -411,51 +413,33 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             ]
         )
 
-        # Combine prompt with parser
+        # Chain
         chain = final_prompt | self.llm | output_parser
 
-        # Process each cluster
         results = []
         for i, nodes_df in enumerate(self.node_clusters):
-            # Simply report the index and total count without arithmetic
-            print(f"Processing cluster {i} of {len(self.node_clusters) - 1}")
-
-            # Create a formatted string of documents
             documents_text = ""
             for idx, row in nodes_df.iterrows():
-                # Use string formatting that doesn't involve arithmetic on idx
-                doc_num = str(idx)
-                title = row.get('title', '') or row.get(
-                    'technical_summary', f'Document {doc_num}'
-                )
-                documents_text += f"DOCUMENT {doc_num}:\nTitle: {title}\nContent: {row['page_content']}\n\n"
+                documents_text += f"<DOCUMENT {idx}>\n{row['page_content']}\n\n"
 
             try:
-                # Call the chain with the documents
                 result = chain.invoke(
                     {
                         "documents": documents_text,
                     }
                 )
 
-                # The parser already converts to a dict, no need for additional parsing
-                query = result.get("query", "")
-                answer = result.get("answer", "")
-
+                results.append(
+                    {
+                        "cluster_id": i,
+                        "query": result["query"],
+                        "answer": result["answer"],
+                        "document_ids": nodes_df["id"].tolist(),
+                        "node_ids": nodes_df["node_id"].tolist(),
+                    }
+                )
             except Exception as e:
                 print(f"Error processing cluster {i}: {e}")
-                query = ""
-                answer = ""
-
-            # Store the result
-            results.append(
-                {
-                    "cluster_id": i,
-                    "query": query,
-                    "answer": answer,
-                    "document_ids": nodes_df["node_id"].tolist(),
-                }
-            )
 
         # Save results to a file
         output_path = self.output_dir / "generated_testset.json"
@@ -471,6 +455,18 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         """
         self.found_clusters = self.find_relationship_clusters()
         self._cluster_reporting()
-        self._generate_cluster_info_parquet()
+        self._generate_cluster_info_parquet(self.cluster_info_dfs, "__clusters_info")
         self.get_node_clusters()
+        self._generate_cluster_info_parquet(
+            self.node_clusters, "__node_clusters_for_llm"
+        )
         self.llm_generate_testset()
+
+
+if __name__ == "__main__":
+    generate_testset = GenerateTestSet(
+        output_dir=Path("evals/generated_testset"),
+        llm_model="gpt-4o",
+        testset_size=50,
+    )
+    generate_testset.create_testset()
