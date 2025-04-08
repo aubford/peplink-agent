@@ -139,16 +139,6 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         min_cluster_size: int = 3,
         random_seed: Optional[int] = None,
     ):
-        """
-        Initialize the GenerateTestSet class.
-
-        Args:
-            nodes_df_path: Path to the nodes dataframe parquet file
-            relationships_df_path: Path to the relationships dataframe parquet file
-            output_dir: Directory to store output files
-            llm_model: LLM model to use
-            testset_size: Number of clusters to generate for the test set
-        """
         self.llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
 
         self.output_dir = Path(output_dir)
@@ -207,14 +197,6 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
     def find_relationship_clusters(self) -> Set[FrozenSet[str]]:
         """
         Find n clusters of relationships by traversing the knowledge graph using dataframe operations.
-
-        Args:
-            relationship_df: DataFrame containing relationships with source_id and target_id columns
-            n: Number of clusters to find
-            cluster_size: Size of each cluster
-            min_cluster_size: Minimum size for a valid cluster
-            random_seed: Optional seed for reproducibility
-
         Returns:
             Set of frozensets, where each frozenset contains the IDs of nodes in a cluster/path
         """
@@ -344,10 +326,8 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
     def _tokens_under_threshold(self, nodes_df: pd.DataFrame) -> bool:
         """
         Calculate token count and return whether it exceeds the threshold.
-
         Args:
             nodes_df: DataFrame containing nodes
-
         Returns:
             Boolean indicating whether token count exceeds the threshold.
         """
@@ -385,10 +365,6 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             self.node_clusters.append(nodes_df)
 
     def llm_generate_testset(self):
-        """
-        Query the LLM to create test data for each cluster.
-        """
-        # Define the expected output format
         query_schema = ResponseSchema(
             name="query",
             description="A multifaceted multi-hop query based on the provided documents",
@@ -454,9 +430,6 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         return results
 
     def create_testset(self):
-        """
-        Create a test set by filtering clusters and appending siblings.
-        """
         self.found_relationship_clusters = self.find_relationship_clusters()
         self._cluster_reporting()
         self._generate_cluster_info_parquet(
@@ -474,6 +447,6 @@ if __name__ == "__main__":
     generate_testset = GenerateTestSet(
         output_dir=this_dir / "output",
         llm_model="gpt-4o",
-        testset_size=5,
+        testset_size=100,
     )
     generate_testset.create_testset()
