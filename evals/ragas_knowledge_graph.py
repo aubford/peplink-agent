@@ -1,24 +1,26 @@
 import json
-from pathlib import Path
 import pandas as pd
 import typing as t
 from langchain_core.documents import Document
 from util.document_utils import df_to_documents
 from ragas.testset.graph import KnowledgeGraph, Node, NodeType, Relationship
 from ragas.testset.transforms import apply_transforms
-from evals.analytics_utils import gen_nodes_parquet
 from ragas.testset.transforms.base import BaseGraphTransformation
-from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms.relationship_builders import (
     CosineSimilarityBuilder,
     OverlapScoreBuilder,
 )
 from ragas.utils import num_tokens_from_string
 from ragas.testset.transforms import Parallel
-from evals.evals_utils import node_meta
+from evals.evals_utils import (
+    node_meta,
+    gen_nodes_parquet,
+    output_nodes_path,
+    gen_relationships_parquet,
+    kg_input_data_path,
+    kg_json_path,
+)
 from langsmith import tracing_context
-
-this_file_path = Path(__file__).parent
 
 
 def construct_kg_nodes(docs: list[Document]) -> KnowledgeGraph:
@@ -60,7 +62,7 @@ def is_valid_metadata(v):
         return False
     try:
         return not pd.isna(v)
-    except:
+    except BaseException:
         return True
 
 
@@ -88,7 +90,6 @@ def count_relationship_types(kg: KnowledgeGraph) -> None:
         else:
             non_sibling_types[rel_type] = count
 
-    relationship_types = {**non_sibling_types, **sibling_types}  # Reorder for display
     print("\nRelationships:", flush=True)
     for rel_type, count in non_sibling_types.items():
         print(f"  {rel_type}: {count}", flush=True)
@@ -167,38 +168,16 @@ def merge_kg_relationships(kg: KnowledgeGraph):
     merged_count = original_count - final_count
     print(f"\n\nOriginal relationship count: {original_count}", flush=True)
     print(f"Merged relationship count: {final_count}", flush=True)
-    print(f"Reduction percentage: {(merged_count/original_count)*100:.2f}%", flush=True)
+    print(
+        f"Reduction percentage: {(merged_count / original_count) * 100:.2f}%",
+        flush=True,
+    )
     print(f"Sibling relationships preserved: {len(sibling_relationships)}", flush=True)
 
     return kg
 
 
-def _gen_relationships_parquet(kg: KnowledgeGraph, name: str) -> None:
-    # Prepare data with list comprehension for better performance
-    data = []
-    for rel in kg.relationships:
-        # Base relationship data
-        rel_data = {
-            "source_id": str(rel.source.id),
-            "target_id": str(rel.target.id),
-            "relationship_type": rel.type,
-            "bidirectional": rel.bidirectional,
-        }
-        rel_data.update(rel.properties)
-        data.append(rel_data)
-
-    # Create DataFrame from collected data
-    df = pd.DataFrame(data)
-    # Convert overlapped_items lists to JSON strings if present
-    df['overlapped_items'] = df['overlapped_items'].apply(
-        lambda x: json.dumps(x) if isinstance(x, list) else x
-    )
-    df.to_parquet(f"{this_file_path}/output/__relationships_{name}__LATEST.parquet")
-
-
-def create_kg(
-    df: pd.DataFrame, transforms: list[BaseGraphTransformation], label: str
-) -> None:
+def create_kg(df: pd.DataFrame, transforms: list[BaseGraphTransformation]) -> None:
     docs = df_to_documents(df)
     docs = [clean_meta(doc) for doc in docs]
     num_docs = len(docs)
@@ -206,20 +185,15 @@ def create_kg(
     kg = construct_kg_nodes(docs)
     print(f"KG has {len(kg.nodes)} nodes", flush=True)
     apply_transforms(kg, transforms)
-    _gen_relationships_parquet(kg, "TRANSFORMED")
     print(f"Transformed KG has {len(kg.nodes)} nodes", flush=True)
     print(f"Transformed KG has {len(kg.relationships)} relationships", flush=True)
     count_relationship_types(kg)
     kg = merge_kg_relationships(kg)
-    _gen_relationships_parquet(kg, "MERGED")
+    gen_relationships_parquet(kg)
     count_relationship_types(kg)
-    # timestamp = datetime.now().strftime("%m_%d_%H_%M")
-    # kg.save(
-    #     f"{this_file_path}/output/kg_output__n_{num_docs}__{label}__{timestamp}.json"
-    # )
     print(f"Saving KG.....", flush=True)
-    kg.save(f"{this_file_path}/output/kg_output__LATEST.json")
-    gen_nodes_parquet(kg, this_file_path / "output/__nodes_LATEST.parquet")
+    gen_nodes_parquet(kg, output_nodes_path)
+    kg.save(kg_json_path)
     print(f"KG saved.", flush=True)
 
 
@@ -233,7 +207,7 @@ def create_kg(
 - technical_summary
 - technical_summary_embedding
 2. Normalize the scores for each between 0 and 1
-3. Create a new KG that merges relationships with same source and target into a single relationship with a score based 
+3. Create a new KG that merges relationships with same source and target into a single relationship with a score based
 on a heuristic combining them.
 4. Filter out low scoring relationships (take the top half)?
 """
@@ -309,5 +283,5 @@ with tracing_context(enabled=False):
         )
         return transforms  # type: ignore
 
-    sample_df = pd.read_parquet(this_file_path / "sample_df.parquet")
-    create_kg(sample_df, get_transforms(), "subsample_with_four_transforms")
+    input_data_df = pd.read_parquet(kg_input_data_path)
+    create_kg(input_data_df, get_transforms())

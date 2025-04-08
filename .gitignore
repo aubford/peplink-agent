@@ -9,6 +9,7 @@ evals/output
 tutorial/
 load/**/*.jsonl
 load/**/batch/**/*
+!evals/testsets/***/*
 
 ### VisualStudioCode template
 !.vscode/settings.json

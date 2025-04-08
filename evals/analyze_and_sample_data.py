@@ -6,7 +6,7 @@ from load.html.html_load import HtmlLoad
 from load.youtube.youtube_load import YoutubeLoad
 from load.mongo.mongo_load import MongoLoad
 from util.util_main import to_serialized_parquet
-from pathlib import Path
+from evals.evals_utils import kg_input_data_path
 from rapidfuzz import distance
 
 
@@ -172,4 +172,4 @@ dataset_df_sample = get_dataset_df()
 dataset_df_sample = normalize_entities_and_themes(dataset_df_sample)
 
 # Save the sample dataframe to a parquet file
-to_serialized_parquet(dataset_df_sample, Path("evals/sample_df.parquet"))
+to_serialized_parquet(dataset_df_sample, kg_input_data_path)

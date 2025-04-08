@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 import pandas as pd
 import random
@@ -9,7 +10,8 @@ from langchain.prompts import (
     FewShotChatMessagePromptTemplate,
 )
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
-
+from evals.evals_utils import output_nodes_path, output_relationships_path
+import shutil
 
 """
 TODO:
@@ -45,19 +47,19 @@ The query and answer should be based solely on the documents provided.
 
 ### Content:
 
-I connected a 50mps fibre optic internet connection to port 1 and a 10mbps phone internet service to port two. 
-Then cabled from Lan 1 to a wi fi router and I connect my devices via wi fi to that router. 
-However this is slower and more unstable than if I just connect my 50mps straight to my wifi router, overriding the Peplink. 
+I connected a 50mps fibre optic internet connection to port 1 and a 10mbps phone internet service to port two.
+Then cabled from Lan 1 to a wi fi router and I connect my devices via wi fi to that router.
+However this is slower and more unstable than if I just connect my 50mps straight to my wifi router, overriding the Peplink.
 I can see this when I test on Speedtest.net.
 
 ## Comments:
 
-<comment> 
+<comment>
 Speedtest.net does not give an accurate reading when using multiple WANs because it doesn't take the Pepwave's load balancing into account. You must configure outbound policy rules in order to implement your scenario. Set your outbound policy to use the low-latency option and it will use the fastest connection.
-  <reply> 
+  <reply>
   Hi Ron!
-Does this mean that if I am using Strong DNS, this might be slowing it down? 
-    <reply> 
+Does this mean that if I am using Strong DNS, this might be slowing it down?
+    <reply>
     No, you just need to configure outbound policy rules.
   </reply>
 </comment>
@@ -73,12 +75,12 @@ hi this is Dan and in this video I want to explain how to configure the outbound
 You know about classes, but you may be thinking which traffic goes into each class? And how many classes should I configure? Well, let me help you simplify this You don't need to use every combination of class and drop probability. There is a real time class for voice and interactive video. This is a high priority class next, a class for critical data. This is for your business applications, databases, website, traffic. We could split this into two classes. If you do end up splitting your high priority class into two classes, make sure you set the outbound policy to use low-latency otherwise your equipment will not be able to handle the load and you may encounter a "unable to handle load" error. I would recommend starting with the default settings and then adding classes as needed. In all classes are not as complex as they may seem.
 """
 ''',
-            "output": '''
+            "output": """
 {
     "query": "What outbound policy settings should be attempted to circumvent a slow connection when using multiple wired connections or when encountering an 'unable to handle load' error? Can you rely on Speedtest.net to accurately measure performance in this scenario when using multiple wired connections?",
     "answer": "First, try the low-latency option. This is the best option when using multiple wired connections and is a solution to the 'unable to handle load' error. If that doesn't work, try the power-fusion option. Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account."
 }
-''',
+""",
         },
         {
             "documents": '''
@@ -94,7 +96,7 @@ Our setup is using MLRPV protocol with 3 patchworked units in a BAFTA cluster.  
 
 ## Comments:
 
-<comment> 
+<comment>
 To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
 </comment>
 """
@@ -111,7 +113,7 @@ MLRPV protocol is a protocol that is typically used for section 9434 robotics im
 
 ## Comments:
 
-<comment> 
+<comment>
 To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
 </comment>
 """
@@ -121,12 +123,12 @@ To optimize for MLRPV protocol, first make sure that the patchwork is grounded i
 one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for section 9434 robotics situations it was added to the system controller in version 6.1 and can be used with any type of robot cluster you might come across and what have you I would recommend also taking a look at the ensemble controller section because that also has some features that are relevant to that protocol at the end of the day it just makes it really easy to get your robots synchronized well
 """
 ''',
-            "output": '''
+            "output": """
 {
     "query": "What is MLRPV-ensemble mode, how does it work, and how should you set up your BAFTA cluster patchwork when using it?",
     "answer": "MLRPV-ensemble mode is a new mode for section 9434 robotics situations that was added to the system controller in version 6.1 and can be used with any type of robot cluster when working with the MLRPV protocol. Enable it if you have a robot farm and want to make sure that all the robots are working together correctly. It works by synchronizing the clocks of the robots day-night entrainment cycles. To use MLRPV-ensmble mode with a patchworked BAFTA cluster, you need to make sure the patchwork is grounded into at least 3 different antenna pods before you turn it on in the system controller."
 }
-''',
+""",
         },
     ]
 
@@ -141,11 +143,9 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
     ):
         self.llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
 
-        self.output_dir = Path(output_dir)
-        nodes_df_path = output_dir / "__nodes_LATEST.parquet"
-        relationships_df_path = (
-            self.output_dir / "__relationships_MERGED__LATEST.parquet"
-        )
+        self.output_dir = output_dir
+        self.output_dir.mkdir(parents=True, exist_ok=False)
+
         self.llm_model = llm_model
         self.testset_size = testset_size
         self.cluster_size = cluster_size
@@ -153,14 +153,14 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         self.random_seed = random_seed
 
         # Load data
-        self.nodes_df = pd.read_parquet(nodes_df_path)
+        self.nodes_df = pd.read_parquet(output_nodes_path)
         print(f"nodes: {len(self.nodes_df)}")
-        self.relationships_df = pd.read_parquet(relationships_df_path)
+        self.relationships_df = pd.read_parquet(output_relationships_path)
         print(f"relationships: {len(self.relationships_df)}")
 
         # Split relationships dataframe
         self.sibling_df = self.relationships_df[
-            self.relationships_df['relationship_type'].str.contains('sibling')
+            self.relationships_df["relationship_type"].str.contains("sibling")
         ]
         self.main_df = self.create_main_df()
 
@@ -182,12 +182,12 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         self.node_clusters: List[pd.DataFrame] = []
 
     def create_main_df(self):
-        df = self.relationships_df[
-            ~self.relationships_df['relationship_type'].str.contains('sibling')
+        main_df = self.relationships_df[
+            ~self.relationships_df["relationship_type"].str.contains("sibling")
         ]
 
         # Add data type relationship flag
-        return df.assign(
+        return main_df.assign(
             is_same_data_type=lambda df: df["source_id"].map(
                 self.nodes_df.set_index("node_id")["type"]
             )
@@ -209,10 +209,10 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         # create simplified graph df
         graph_df = graph_df.drop(columns=["bidirectional", "num_noisy_items"])
         graph_df = graph_df.drop_duplicates(
-            subset=['source_id', 'target_id', 'relationship_type']
+            subset=["source_id", "target_id", "relationship_type"]
         )
         # create separate df for merged relationships
-        multi_df = graph_df[graph_df['relationship_type'] == 'multi']
+        multi_df = graph_df[graph_df["relationship_type"] == "multi"]
         non_multi_df = graph_df[~graph_df.index.isin(multi_df.index)]
 
         # filter non_multi_df to only include rows that pass single_rel_thresholds
@@ -249,14 +249,14 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 neighbors = multi_df[
                     ~multi_df.index.isin(cluster_df.index)
                     & (
-                        (multi_df["source_id"].isin(cluster_df['target_id']))
-                        | (multi_df["target_id"].isin(cluster_df['source_id']))
+                        (multi_df["source_id"].isin(cluster_df["target_id"]))
+                        | (multi_df["target_id"].isin(cluster_df["source_id"]))
                     )
                 ]
                 if neighbors.empty:
                     neighbors = graph_df[
-                        graph_df["source_id"].isin(cluster_df['target_id'])
-                        | graph_df["target_id"].isin(cluster_df['source_id'])
+                        graph_df["source_id"].isin(cluster_df["target_id"])
+                        | graph_df["target_id"].isin(cluster_df["source_id"])
                     ]
                 if neighbors.empty:
                     break
@@ -307,7 +307,9 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         print("\n" + "-" * 50 + "\n")
         print(f"Clusters count: {len(self.found_relationship_clusters)}")
         print(
-            f"Total elements in relationship clusters: {sum(len(cluster) for cluster in self.found_relationship_clusters)}"
+            f"Total elements in relationship clusters: {
+                sum(
+                    len(cluster) for cluster in self.found_relationship_clusters)}"
         )
 
         # Get the set of all unique ids from relationship clusters
@@ -429,24 +431,36 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         print(f"Generated testset saved to {output_path}")
         return results
 
+    def copy_kg_data_to_testset_dir(self):
+        """
+        Copy the knowledge graph data files to the output directory.
+        """
+        shutil.copy(output_nodes_path, self.output_dir / output_nodes_path.name)
+        shutil.copy(
+            output_relationships_path, self.output_dir / output_relationships_path.name
+        )
+        print(f"Copied knowledge graph data files to {self.output_dir}")
+
     def create_testset(self):
         self.found_relationship_clusters = self.find_relationship_clusters()
         self._cluster_reporting()
         self._generate_cluster_info_parquet(
-            self.relationship_cluster_info_dfs, "__relationship_clusters_info"
+            self.relationship_cluster_info_dfs, "relationship_clusters_info"
         )
         self.get_node_clusters()
-        self._generate_cluster_info_parquet(
-            self.node_clusters, "__node_clusters_for_llm"
-        )
-        self.llm_generate_testset()
+        self._generate_cluster_info_parquet(self.node_clusters, "node_clusters_for_llm")
+        self.copy_kg_data_to_testset_dir()
+        # self.llm_generate_testset()
 
 
 this_dir = Path(__file__).parent
 if __name__ == "__main__":
+    testset_size = 10
     generate_testset = GenerateTestSet(
-        output_dir=this_dir / "output",
+        output_dir=this_dir
+        / "testsets"
+        / f"testset_{testset_size}__{datetime.now().strftime('%y-%m-%d-%H_%M')}",
         llm_model="gpt-4o",
-        testset_size=100,
+        testset_size=testset_size,
     )
     generate_testset.create_testset()
