@@ -2,7 +2,6 @@ from pathlib import Path
 import pandas as pd
 import random
 import numpy as np
-import json
 from typing import Optional, Set, List, FrozenSet
 from langchain_openai import ChatOpenAI
 from langchain.prompts import (
@@ -259,7 +258,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         )
 
         clusters: set = set()
-        while len(clusters) < self.testset_size and len(graph_df) > 1:
+        while len(clusters) <= self.testset_size and len(graph_df) > 1:
 
             cluster_df = graph_df.iloc[[0]]
             graph_df = graph_df.iloc[1:]
@@ -298,14 +297,13 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
 
         return clusters
 
-    def tack_on_node_col(self, clusters_df: pd.DataFrame, col: str) -> pd.DataFrame:
+    def tack_on_node_col(self, clusters_df: pd.DataFrame, col: str) -> None:
         clusters_df[f"source_{col}"] = clusters_df["source_id"].map(
             self.nodes_df.set_index("node_id")[col]
         )
         clusters_df[f"target_{col}"] = clusters_df["target_id"].map(
             self.nodes_df.set_index("node_id")[col]
         )
-        return clusters_df
 
     def _generate_cluster_info_parquet(self, dfs: List[pd.DataFrame], filename: str):
         """
@@ -318,9 +316,9 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         sample_df = pd.concat(dfs)
         is_relationship_cluster = "source_id" in sample_df.columns
         if is_relationship_cluster:
-            sample_df = self.tack_on_node_col(sample_df, "page_content")
-            sample_df = self.tack_on_node_col(sample_df, "title")
-            sample_df = self.tack_on_node_col(sample_df, "technical_summary")
+            self.tack_on_node_col(sample_df, "page_content")
+            self.tack_on_node_col(sample_df, "title")
+            self.tack_on_node_col(sample_df, "technical_summary")
         sample_df.to_parquet(self.output_dir / f"{filename}.parquet")
 
     def _cluster_reporting(self):
@@ -362,7 +360,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         For each cluster, get the corresponding nodes and append siblings up to a max token count.
         """
         for cluster in self.found_relationship_clusters:
-            nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)]
+            nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)].copy()
             sibling_relationships = self.sibling_df[
                 (self.sibling_df["source_id"].isin(cluster))
                 | (self.sibling_df["target_id"].isin(cluster))
@@ -425,7 +423,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         results = []
         for i, nodes_df in enumerate(self.node_clusters):
             documents_text = ""
-            for idx, row in nodes_df.iterrows():
+            for idx, (_, row) in enumerate(nodes_df.iterrows(), 1):
                 documents_text += f"<DOCUMENT {idx}>\n{row['page_content']}\n\n"
 
             try:
@@ -438,6 +436,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 results.append(
                     {
                         "cluster_id": i,
+                        "documents_text": documents_text,
                         "query": result["query"],
                         "answer": result["answer"],
                         "document_ids": nodes_df["id"].tolist(),
@@ -448,9 +447,8 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 print(f"Error processing cluster {i}: {e}")
 
         # Save results to a file
-        output_path = self.output_dir / "generated_testset.json"
-        with open(output_path, "w") as f:
-            json.dump(results, f, indent=2)
+        output_path = self.output_dir / "generated_testset.parquet"
+        pd.DataFrame(results).to_parquet(output_path)
 
         print(f"Generated testset saved to {output_path}")
         return results
