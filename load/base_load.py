@@ -3,7 +3,6 @@ import pandas as pd
 from pathlib import Path
 from langchain_core.documents import Document
 from pinecone import Pinecone, ServerlessSpec
-from langchain_pinecone import PineconeVectorStore
 from langchain_openai import OpenAIEmbeddings
 from config.logger import RotatingFileLogger
 from uuid import uuid4
@@ -13,7 +12,7 @@ from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 import spacy
 from load.html.html_util import get_settings_entities
 from load.batch_manager import BatchManager
-from util.util_main import serialize_df_for_parquet, to_serialized_parquet
+from util.util_main import to_serialized_parquet, drop_embedding_columns
 import json
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
@@ -90,7 +89,7 @@ class BaseLoad:
             )
         self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
         self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
-        self.vector_store: PineconeVectorStore | None = None
+        self.vector_store = None
         self.staging_folder = self.this_dir / self.folder_name
         self.staging_path = self.staging_folder / "staging.parquet"
         self.synth_data_path = self.staging_folder / "synth_data.parquet"
@@ -286,12 +285,10 @@ class BaseLoad:
             self.logger.info(f"Created new Pinecone index: {self.index_name}")
 
         # Initialize the index
-        index = pc.Index(self.index_name)
-        vector_store = PineconeVectorStore(index=index, embedding=self.embedding_model)
+        self.vector_store = pc.Index(self.index_name)
         self.logger.info(
             f"Initialized Pinecone vector store for index: {self.index_name}"
         )
-        self.vector_store = vector_store
 
     def staging_to_vector_store(self) -> None:
         """Upload staged documents to a new, versioned Pinecone index. DON'T FORGET TO CHANGE VERSION IN .env!!!"""
@@ -299,12 +296,27 @@ class BaseLoad:
             self._initialize_pinecone_index()
         if not self.staging_path.exists():
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
-
-        docs = self._parquet_to_documents(self.staging_path)
-        self._log_documents(docs)
         if self.vector_store is None:
             raise ValueError("Vector store initialization failed")
-        self.vector_store.add_documents(docs)
+
+        df = self._parquet_to_df(self.staging_path)
+        metadata_df = self._parquet_to_df(self.staging_path, drop_embeddings=True)
+
+        ids = df.index.tolist()
+        vectors = df["primary_content_embedding"].apply(json.loads).tolist()
+        metadata_dict = metadata_df.to_dict(orient="records")
+
+        docs = []
+        for id, vector, metadata in zip(ids, vectors, metadata_dict):
+            docs.append(
+                {
+                    "id": str(id),
+                    "values": vector,
+                    "metadata": metadata,
+                }
+            )
+
+        self.vector_store.upsert(docs, batch_size=50)
         self.logger.info(
             f"Uploaded {len(docs)} documents to Pinecone index: {self.index_name}"
         )
@@ -460,7 +472,7 @@ class BaseLoad:
         return df
 
     @staticmethod
-    def _parquet_to_df(file_path: Path) -> pd.DataFrame:
+    def _parquet_to_df(file_path: Path, drop_embeddings: bool = False) -> pd.DataFrame:
         if not str(file_path).endswith(".parquet"):
             raise FileNotFoundError(f"File {file_path} is not a parquet file")
 
@@ -470,10 +482,15 @@ class BaseLoad:
         if df.empty:
             raise ValueError(f"File {file_path} is empty")
 
+        if drop_embeddings:
+            df = drop_embedding_columns(df)
+
         return df
 
-    def _parquet_to_documents(self, file_path: Path) -> list[Document]:
-        df = self._parquet_to_df(file_path)
+    def _parquet_to_documents(
+        self, file_path: Path, drop_embeddings: bool = False
+    ) -> list[Document]:
+        df = self._parquet_to_df(file_path, drop_embeddings)
         return df_to_documents(df)
 
     def _log_documents(self, docs: list[Document]) -> None:

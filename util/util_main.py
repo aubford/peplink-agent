@@ -9,7 +9,7 @@ def serialize_document(document: Document) -> Dict[str, Any]:
     return {"page_content": document.page_content, "metadata": document.metadata}
 
 
-def empty_document_dict(metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+def empty_document_dict(metadata: Dict[str, Any] | None = None) -> Dict[str, Any]:
     if metadata is None:
         metadata = {}
     return {"page_content": "", "metadata": metadata}
@@ -148,6 +148,11 @@ def serialize_df_for_parquet(df: pd.DataFrame) -> pd.DataFrame:
             )
 
     return df
+
+
+def drop_embedding_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop all columns whose name contain the string 'embed' in the name."""
+    return df.loc[:, ~df.columns.str.contains("embed")]
 
 
 def to_serialized_parquet(df: pd.DataFrame, path: Path) -> pd.DataFrame:

@@ -13,7 +13,8 @@ def deserialize_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(value, np.ndarray):
             sanitized[key] = value.tolist()
         elif isinstance(value, str) and (
-            value.startswith('{') or value.startswith('[')
+            (value.startswith('{') and value.endswith('}'))
+            or (value.startswith('[') and value.endswith(']'))
         ):
             try:
                 sanitized[key] = json.loads(value)
