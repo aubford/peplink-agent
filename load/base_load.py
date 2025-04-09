@@ -1,3 +1,4 @@
+import tiktoken
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
@@ -121,7 +122,14 @@ class BaseLoad:
         # generate the title embeddings
         merged = self._generate_embeddings(merged, "title")
         merged = self._generate_embeddings(merged, "technical_summary")
+        merged = self._generate_embeddings(merged, "primary_content")
         to_serialized_parquet(merged, self.staging_path)
+
+    def append_primary_content_embeddings_to_staging_file(self, chunk_size: int = 1000):
+        """Append the primary_content_embeddings to the staging file."""
+        df = self._parquet_to_df(self.staging_path)
+        df = self._generate_embeddings(df, "primary_content", chunk_size)
+        to_serialized_parquet(df, self.staging_path)
 
     def create_synth_data_from_batch_results(self) -> None:
         """
@@ -160,11 +168,16 @@ class BaseLoad:
         df = df.set_index("id", verify_integrity=True)
         to_serialized_parquet(df, self.synth_data_path)
 
-    def _generate_embeddings(self, df, column_name):
+    def _generate_embeddings(self, df, column_name, chunk_size: int = 1000):
         """Generate embeddings for a specific column in a dataframe."""
         texts = df[column_name].tolist()
         self.logger.info(f"Generating embeddings for {len(texts)} {column_name}s")
-        embeddings = self.embedding_model.embed_documents(texts)
+
+        max_tokens = max(self.count_tokens(text) for text in texts)
+        self.logger.info(f"Max tokens in {column_name}: {max_tokens}")
+        self.logger.info(f"Max tokens per request: {chunk_size * max_tokens}")
+
+        embeddings = self.embedding_model.embed_documents(texts, chunk_size=chunk_size)
         df[f"{column_name}_embedding"] = embeddings
         return df
 
@@ -176,6 +189,12 @@ class BaseLoad:
     def create_merged_df(self, dfs: list[pd.DataFrame]) -> pd.DataFrame:
         """Merge all datasets into a single dataframe and perform operations like deduplication."""
         return pd.concat(dfs)
+
+    @staticmethod
+    def count_tokens(text: str) -> int:
+        """Count the tokens in a text."""
+        tokenizer = tiktoken.get_encoding("cl100k_base")
+        return len(tokenizer.encode(str(text)))
 
     def load_docs(self, documents: list[Document]) -> list[Document]:
         """Perform final operations like text splitting, synthetic data generation, and output final product for upload to vector store."""
@@ -290,6 +309,12 @@ class BaseLoad:
             f"Initialized Pinecone vector store for index: {self.index_name}"
         )
 
+    def clean_duplicate_columns_for_vector_store(
+        self, df: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Clean duplicate columns for vector store."""
+        return df.drop(columns=["post_title", "post_content", "comment_content"])
+
     def staging_to_vector_store(self) -> None:
         """Upload staged documents to a new, versioned Pinecone index. DON'T FORGET TO CHANGE VERSION IN .env!!!"""
         if self.vector_store is None:
@@ -301,6 +326,7 @@ class BaseLoad:
 
         df = self._parquet_to_df(self.staging_path)
         metadata_df = self._parquet_to_df(self.staging_path, drop_embeddings=True)
+        metadata_df = self.clean_duplicate_columns_for_vector_store(metadata_df)
 
         ids = df.index.tolist()
         vectors = df["primary_content_embedding"].apply(json.loads).tolist()

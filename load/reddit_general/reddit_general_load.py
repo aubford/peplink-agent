@@ -1,6 +1,6 @@
 from langchain_core.documents import Document
 from load.base_load import BaseLoad
-from load.synthetic_data_loaders import ForumSyntheticDataLoader, ModelResponse
+from load.synthetic_data_loaders import ForumSyntheticDataLoader
 import pandas as pd
 
 

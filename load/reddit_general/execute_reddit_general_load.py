@@ -2,5 +2,7 @@ from load.reddit_general.reddit_general_load import RedditGeneralLoad
 
 loader = RedditGeneralLoad()
 if __name__ == "__main__":
-    loader.load()
+    # loader.load()
     # loader.batch_manager.create_batch_job()
+    # loader.append_primary_content_embeddings_to_staging_file()
+    loader.staging_to_vector_store()
