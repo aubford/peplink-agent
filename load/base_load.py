@@ -133,12 +133,6 @@ class BaseLoad:
         merged = self._generate_embeddings(merged, "primary_content")
         to_serialized_parquet(merged, self.staging_path)
 
-    def append_primary_content_embeddings_to_staging_file(self, chunk_size: int = 1000):
-        """Append the primary_content_embeddings to the staging file."""
-        df = self._parquet_to_df(self.staging_path)
-        df = self._generate_embeddings(df, "primary_content", chunk_size)
-        to_serialized_parquet(df, self.staging_path)
-
     def create_synth_data_from_batch_results(self) -> None:
         """
         Create a parquet file from the batch results JSON file.
