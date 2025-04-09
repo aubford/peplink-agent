@@ -372,11 +372,10 @@ class BaseLoad:
                 f"Documents directory does not exist: {documents_dir}"
             )
 
-        # todo: reset!!!!!
-        # if self.staging_path.exists():
-        #     raise FileNotFoundError(
-        #         f"Staging data file already exists at {self.staging_path}"
-        #     )
+        if self.staging_path.exists():
+            raise FileNotFoundError(
+                f"Staging data file already exists at {self.staging_path}"
+            )
 
         dfs = []
         for file_path in documents_dir.glob("*"):

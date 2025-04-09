@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import dotenv
 import pandas as pd
 import random
 import numpy as np
@@ -12,6 +13,8 @@ from langchain.prompts import (
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from evals.evals_utils import output_nodes_path, output_relationships_path
 import shutil
+
+dotenv.load_dotenv()
 
 """
 TODO:
@@ -399,10 +402,12 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         chain = final_prompt | self.llm | output_parser
 
         results = []
-        for i, nodes_df in enumerate(self.node_clusters):
+        for i, node_cluster_df in enumerate(self.node_clusters):
             documents_text = ""
-            for idx, (_, row) in enumerate(nodes_df.iterrows(), 1):
-                documents_text += f"<DOCUMENT {idx}>\n{row['page_content']}\n\n"
+            for idx, (_, row) in enumerate(node_cluster_df.iterrows(), 1):
+                documents_text += (
+                    f'<DOCUMENT {idx}>\n"""\n{row["page_content"]}\n"""\n\n'
+                )
 
             try:
                 result = chain.invoke(
@@ -417,8 +422,8 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                         "documents_text": documents_text,
                         "query": result["query"],
                         "answer": result["answer"],
-                        "document_ids": nodes_df["id"].tolist(),
-                        "node_ids": nodes_df["node_id"].tolist(),
+                        "document_ids": node_cluster_df["id"].tolist(),
+                        "node_ids": node_cluster_df["node_id"].tolist(),
                     }
                 )
             except Exception as e:
@@ -450,12 +455,12 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         self.get_node_clusters()
         self._generate_cluster_info_parquet(self.node_clusters, "node_clusters_for_llm")
         self.copy_kg_data_to_testset_dir()
-        # self.llm_generate_testset()
+        self.llm_generate_testset()
 
 
 this_dir = Path(__file__).parent
 if __name__ == "__main__":
-    testset_size = 10
+    testset_size = 1
     generate_testset = GenerateTestSet(
         output_dir=this_dir
         / "testsets"
