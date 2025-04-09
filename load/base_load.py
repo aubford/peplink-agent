@@ -1,9 +1,11 @@
+from typing import Optional
 import tiktoken
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
 from langchain_core.documents import Document
 from pinecone import Pinecone, ServerlessSpec
+from pinecone.data.index import Index
 from langchain_openai import OpenAIEmbeddings
 from config.logger import RotatingFileLogger
 from uuid import uuid4
@@ -89,19 +91,25 @@ class BaseLoad:
                 f"folder_name must be defined as a string in the subclass, got {type(self.folder_name)}"
             )
         self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
-        self.logger = RotatingFileLogger(name=f"load_{self.folder_name}")
-        self.vector_store = None
-        self.staging_folder = self.this_dir / self.folder_name
-        self.staging_path = self.staging_folder / "staging.parquet"
-        self.synth_data_path = self.staging_folder / "synth_data.parquet"
-        deduplication_lock_path = self.staging_folder / "deduplication_lock.parquet"
+        self.logger: RotatingFileLogger = RotatingFileLogger(
+            name=f"load_{self.folder_name}"
+        )
+        self.vector_store: Optional[Index] = None
+        self.staging_folder: Path = self.this_dir / self.folder_name
+        self.staging_path: Path = self.staging_folder / "staging.parquet"
+        self.synth_data_path: Path = self.staging_folder / "synth_data.parquet"
+        deduplication_lock_path: Path = (
+            self.staging_folder / "deduplication_lock.parquet"
+        )
         self.deduplication_pipeline = (
             DeduplicationLockPipeline(deduplication_lock_path)
             if deduplication_lock_path.exists()
             else DeduplicationPipeline(self.folder_name)
         )
-        self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
-        self.batch_manager = BatchManager(self.staging_folder)
+        self.embedding_model: OpenAIEmbeddings = OpenAIEmbeddings(
+            model="text-embedding-3-large"
+        )
+        self.batch_manager: BatchManager = BatchManager(self.staging_folder)
         self.init_spacy()
 
     def apply_synth_data_to_staging(self):
@@ -168,7 +176,9 @@ class BaseLoad:
         df = df.set_index("id", verify_integrity=True)
         to_serialized_parquet(df, self.synth_data_path)
 
-    def _generate_embeddings(self, df, column_name, chunk_size: int = 1000):
+    def _generate_embeddings(
+        self, df: pd.DataFrame, column_name: str, chunk_size: int = 1000
+    ) -> pd.DataFrame:
         """Generate embeddings for a specific column in a dataframe."""
         texts = df[column_name].tolist()
         self.logger.info(f"Generating embeddings for {len(texts)} {column_name}s")
@@ -268,7 +278,7 @@ class BaseLoad:
             df["lead_entities"] = df.apply(lambda _: [], axis=1)
 
         # Combine entities from both columns, removing duplicates
-        def combine_entities(row):
+        def combine_entities(row: pd.Series) -> list[str]:
             all_entities = []
             if row["primary_entities"]:
                 all_entities.extend(row["primary_entities"])
@@ -290,6 +300,9 @@ class BaseLoad:
 
     def _initialize_pinecone_index(self) -> None:
         """Initialize or create Pinecone index. Note: DO NOT USE NAMESPACES!"""
+        if self.vector_store is not None:
+            return
+
         pc = Pinecone(api_key=self.config.get("PINECONE_API_KEY"))
 
         existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
@@ -309,16 +322,16 @@ class BaseLoad:
             f"Initialized Pinecone vector store for index: {self.index_name}"
         )
 
-    def clean_duplicate_columns_for_vector_store(
-        self, df: pd.DataFrame
-    ) -> pd.DataFrame:
+    def clean_metadata_for_vector_store(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean duplicate columns for vector store."""
-        return df.drop(columns=["post_title", "post_content", "comment_content"])
+        df = df.drop(columns=["post_title", "post_content", "comment_content"])
+        # Replace all null values with empty string
+        df = df.fillna("")
+        return df
 
-    def staging_to_vector_store(self) -> None:
+    def staging_to_vector_store(self, slice: int = 0) -> None:
         """Upload staged documents to a new, versioned Pinecone index. DON'T FORGET TO CHANGE VERSION IN .env!!!"""
-        if self.vector_store is None:
-            self._initialize_pinecone_index()
+        self._initialize_pinecone_index()
         if not self.staging_path.exists():
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
         if self.vector_store is None:
@@ -326,7 +339,7 @@ class BaseLoad:
 
         df = self._parquet_to_df(self.staging_path)
         metadata_df = self._parquet_to_df(self.staging_path, drop_embeddings=True)
-        metadata_df = self.clean_duplicate_columns_for_vector_store(metadata_df)
+        metadata_df = self.clean_metadata_for_vector_store(metadata_df)
 
         ids = df.index.tolist()
         vectors = df["primary_content_embedding"].apply(json.loads).tolist()
@@ -342,6 +355,10 @@ class BaseLoad:
                 }
             )
 
+        if slice > 0:
+            docs = docs[slice:]
+
+        print(f"Uploading {len(docs)}")
         self.vector_store.upsert(docs, batch_size=50)
         self.logger.info(
             f"Uploaded {len(docs)} documents to Pinecone index: {self.index_name}"
@@ -415,7 +432,7 @@ class BaseLoad:
                 f"Staging data file already exists at {self.staging_path}"
             )
 
-        dfs = []
+        dfs: list[pd.DataFrame] = []
         for file_path in documents_dir.glob("*"):
             # Skip system files
             if file_path.name.startswith("."):
@@ -546,3 +563,67 @@ class BaseLoad:
         if not staging_path.exists():
             raise FileNotFoundError(f"No staging file found at {staging_path}")
         return pd.read_parquet(staging_path)
+
+    def get_all_artifacts_merged(self) -> pd.DataFrame:
+        """Get all artifacts merged into a single dataframe."""
+        load_dir = self.config.root_dir / "load"
+
+        # Find all staging.parquet files
+        staging_files = list(load_dir.glob("*/staging.parquet"))
+        if not staging_files:
+            raise FileNotFoundError("No staging.parquet files found in load directory")
+
+        dfs = []
+        for file_path in staging_files:
+            try:
+                df = self._parquet_to_df(file_path)
+                dfs.append(df)
+            except Exception as e:
+                self.logger.error(f"Error loading {file_path}: {e}")
+                continue
+
+        if not dfs:
+            raise ValueError("No valid dataframes found to merge")
+
+        return pd.concat(dfs)
+
+    def validate_pinecone_index(self) -> None:
+        """Validate that all staging IDs exist in the Pinecone index."""
+        self._initialize_pinecone_index()
+        if not self.vector_store:
+            raise ValueError("Vector store initialization failed")
+
+        vector_store: Index = self.vector_store
+
+        vector_store_staging_data = self.get_all_artifacts_merged()
+        staging_ids = vector_store_staging_data.index.tolist()
+
+        # Get all IDs from Pinecone using pagination
+        pinecone_ids = []
+
+        try:
+            for ids in vector_store.list():
+                pinecone_ids.extend(ids)
+
+            # Compare the sets
+            missing_from_pinecone = set(staging_ids) - set(pinecone_ids)
+            extra_in_pinecone = set(pinecone_ids) - set(staging_ids)
+
+            if missing_from_pinecone or extra_in_pinecone:
+                print(
+                    f"Index validation failed:\n"
+                    f"IDs missing from Pinecone: {len(missing_from_pinecone)}\n"
+                    f"Extra IDs in Pinecone: {len(extra_in_pinecone)}"
+                )
+
+            # compare lengths
+            if len(staging_ids) != len(pinecone_ids):
+                print(
+                    f"Index validation failed:\n"
+                    f"Staging IDs: {len(staging_ids)}\n"
+                    f"Pinecone IDs: {len(pinecone_ids)}"
+                )
+
+        except Exception as e:
+            self.logger.error(f"Error validating Pinecone index: {e}")
+            raise

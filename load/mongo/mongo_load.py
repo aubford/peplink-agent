@@ -2,6 +2,7 @@
 from langchain_core.documents import Document
 from load.base_load import BaseLoad
 from load.synthetic_data_loaders import ForumSyntheticDataLoader
+from util.util_main import to_serialized_parquet
 import pandas as pd
 
 
@@ -35,3 +36,13 @@ class MongoLoad(BaseLoad, ForumSyntheticDataLoader):
 
         self.create_capped_batchfiles(documents)
         return documents
+
+    def drop_rows_with_longest_page_content(self, n: int = 15) -> None:
+        """
+        For Pinecone. A few rows have page_content that is too long for Pinecone.
+        This fixes that.  May need to increase n by a few more rows.
+        """
+        df = self.get_artifact()
+        df = df.drop(df["page_content"].str.len().nlargest(n).index)
+        to_serialized_parquet(df, self.staging_folder / "staging.parquet")
+        print(df.info())
