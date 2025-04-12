@@ -46,7 +46,6 @@ class BatchManager:
         self.file_name = batch_path / "batchfile.jsonl"
         self.output_file_name = batch_path / "batch_results.json"
         self.status_file_name = batch_path / "batch_status.json"
-        self.synth_data_path = base_path / "synth_data.parquet"
         self.endpoint: ValidEndpoints = endpoint
 
         # Load batch_id from status file if it exists

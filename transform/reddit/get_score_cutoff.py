@@ -56,23 +56,6 @@ def _log_engagement_norm():
     plt.yticks(np.arange(0, 1.1, 0.1))
     plt.legend()
 
-    print(f"get_engagement_norm(0): {_get_engagement_norm(0)}")
-    print(f"get_engagement_norm(1): {_get_engagement_norm(1)}")
-    print(f"get_engagement_norm(2): {_get_engagement_norm(2)}")
-    print(f"get_engagement_norm(3): {_get_engagement_norm(3)}")
-    print(f"get_engagement_norm(4): {_get_engagement_norm(4)}")
-    print(f"get_engagement_norm(5): {_get_engagement_norm(5)}")
-    print(f"get_engagement_norm(6): {_get_engagement_norm(6)}")
-    print(f"get_engagement_norm(7): {_get_engagement_norm(7)}")
-    print(f"get_engagement_norm(8): {_get_engagement_norm(8)}")
-    print(f"get_engagement_norm(9): {_get_engagement_norm(9)}")
-    print(f"get_engagement_norm(10): {_get_engagement_norm(10)}")
-    print(f"get_engagement_norm(20): {_get_engagement_norm(20)}")
-    print(f"get_engagement_norm(30): {_get_engagement_norm(30)}")
-    print(f"get_engagement_norm(100): {_get_engagement_norm(100)}")
-    print(f"get_engagement_norm(1000): {_get_engagement_norm(1000)}")
-    print(f"get_engagement_norm(100000): {_get_engagement_norm(10000000)}")
-
 
 # space = np.linspace(0, 100)
 # plt.plot(space, get_engagement_norm(space), label="engagement_norm")

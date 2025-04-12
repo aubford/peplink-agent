@@ -464,7 +464,7 @@ if __name__ == "__main__":
     generate_testset = GenerateTestSet(
         output_dir=this_dir
         / "testsets"
-        / f"testset_{testset_size}__{datetime.now().strftime('%y-%m-%d-%H_%M')}",
+        / f"testset_{testset_size}__{datetime.now().strftime('%y-%m-%d_%H_%M')}",
         llm_model="gpt-4o",
         testset_size=testset_size,
     )

@@ -8,6 +8,7 @@ langchain-experimental
 langchain-community
 langchain-google-community
 langchain-pinecone
+langchain-qdrant
 pinecone
 debugpy
 torch
