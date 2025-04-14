@@ -17,6 +17,7 @@ class RagInference:
         embedding_model: str = "text-embedding-3-large",
         llm_model: str = "gpt-4o-mini",
         temperature: float = 0,
+        streaming: bool = False,
     ):
         # Initialize Pinecone
         pinecone = Pinecone(api_key=global_config.get("PINECONE_API_KEY"))
@@ -28,7 +29,9 @@ class RagInference:
             index=self.index, embedding=self.embeddings, text_key="page_content"
         )
 
-        self.llm = ChatOpenAI(model=llm_model, temperature=temperature)
+        self.llm = ChatOpenAI(
+            model=llm_model, temperature=temperature, streaming=streaming
+        )
         self.prompt = hub.pull("aubford/retrieval-qa-chat")
 
         # Setup retriever
@@ -76,7 +79,7 @@ class RagInference:
 
 
 if __name__ == "__main__":
-    rag_inference = RagInference()
+    rag_inference = RagInference(streaming=True)
 
     while True:
         # Get user input

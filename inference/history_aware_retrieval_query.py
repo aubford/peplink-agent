@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableBranch
+from langchain_core.runnables import RunnableBranch, Runnable
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
-from langchain_core.messages.utils import convert_to_messages, get_buffer_string
+from langchain.prompts import PromptTemplate
+from langchain_core.messages.utils import convert_to_messages
 from langchain_core.messages import (
-    BaseMessage,
     HumanMessage,
     AIMessage,
     SystemMessage,
@@ -92,7 +91,7 @@ prompt_chain = {
 # print(output.text)
 
 
-def history_aware_retrieval_query() -> RunnableBranch:
+def history_aware_retrieval_query() -> Runnable:
     """Given a chat history, summarize it into a single question."""
 
     return RunnableBranch(
@@ -103,5 +102,5 @@ def history_aware_retrieval_query() -> RunnableBranch:
             (lambda x: x["input"]),
         ),
         # If chat history, then we pass inputs to LLM chain, then to retriever
-        prompt_chain | ChatOpenAI(model_name="o1-mini") | StrOutputParser(),
+        prompt_chain | ChatOpenAI(model="gpt-4o-mini") | StrOutputParser(),
     ).with_config(run_name="history_aware_retrieval_query")
