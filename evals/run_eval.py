@@ -1,4 +1,3 @@
-# %%
 from datetime import datetime
 from pathlib import Path
 from ragas.llms import LangchainLLMWrapper
@@ -18,6 +17,9 @@ from ragas.metrics import (
 )
 from inference.rag_inference import RagInference
 import pandas as pd
+import asyncio
+from langchain_core.runnables import RunnableParallel
+from util.util_main import print_replace
 
 
 class RagasEval:
@@ -37,7 +39,10 @@ class RagasEval:
         )
         self.testset_name = testset_name
         self.test_set: Testset = self.create_testset(generated_testset_df, nodes_df)
-        self.inference_llm_model = inference_llm_model
+
+        # Initialize the RAG inference component once
+        self.rag_inference = RagInference(llm_model=inference_llm_model)
+
         self.eval_llm = LangchainLLMWrapper(
             ChatOpenAI(
                 model=eval_llm_model,
@@ -67,19 +72,38 @@ class RagasEval:
 
         return Testset.from_list(df.to_dict(orient="records"))
 
-    def evaluate_rag(self) -> None:
-        for test_row in self.test_set:
-            # Create a new instance for each question as we're not trying to accumulate chat history.
-            rag_inference = RagInference(llm_model=self.inference_llm_model)
-            eval_sample = test_row.eval_sample
-            user_query = eval_sample.user_input
-            if not user_query:
-                raise ValueError("User query is empty")
-            result = rag_inference.query(user_query)
-            eval_sample.response = result["answer"]
-            eval_sample.retrieved_contexts = [
-                doc.page_content for doc in result["context"]
-            ]
+    async def process_all_rows(self):
+        """Process all test rows in parallel using LangChain's native parallelization."""
+        # Create a dictionary of tasks for each test row
+        async_tasks = {}
+
+        for i, test_row in enumerate(self.test_set):
+            async_tasks[f"query_{i}"] = test_row.eval_sample.user_input
+
+        # Use the batch query method from RagInference
+        results = await self.rag_inference.batch_query_for_eval(async_tasks)
+
+        # Process results and update test rows
+        for i, test_row in enumerate(self.test_set):
+            try:
+                result = results[f"query_{i}"]
+                eval_sample = test_row.eval_sample
+
+                if "answer" not in result or "context" not in result:
+                    raise ValueError(f"Unexpected result format: {result.keys()}")
+
+                eval_sample.response = result["answer"]
+                eval_sample.retrieved_contexts = [
+                    doc.page_content for doc in result["context"]
+                ]
+            except Exception as e:
+                print(f"Error processing result for query {i}: {e}")
+                raise
+
+    async def evaluate_rag(self) -> None:
+        """Run the evaluation on the test set."""
+        # Run the async processing using an event loop
+        await self.process_all_rows()
 
         evaluation_dataset = self.test_set.to_evaluation_dataset()
         eval_result = evaluate(
@@ -107,4 +131,4 @@ if __name__ == "__main__":
     evals_dir = Path(__file__).parent
     testset_name = "testset_100__25-04-08-16_44"
     eval = RagasEval(evals_dir, testset_name)
-    eval.evaluate_rag()
+    asyncio.run(eval.evaluate_rag())

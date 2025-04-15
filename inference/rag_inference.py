@@ -1,3 +1,4 @@
+import aiohttp
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
@@ -6,9 +7,14 @@ from langchain import hub
 from pinecone import Pinecone
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import history_aware_retrieval_query
+from typing import Callable, Any, Dict, List
+from langchain_core.rate_limiters import InMemoryRateLimiter
+from langchain_core.runnables import RunnableMap
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
+
+prompt = hub.pull("aubford/retrieval-qa-chat")
 
 
 class RagInference:
@@ -29,10 +35,19 @@ class RagInference:
             index=self.index, embedding=self.embeddings, text_key="page_content"
         )
 
-        self.llm = ChatOpenAI(
-            model=llm_model, temperature=temperature, streaming=streaming
+        # Create a rate limiter for the model to avoid API throttling
+        rate_limiter = InMemoryRateLimiter(
+            requests_per_second=3.0,  # 3 requests per second should be conservative
+            max_bucket_size=10,  # Allow bursts of up to 10 requests
         )
-        self.prompt = hub.pull("aubford/retrieval-qa-chat")
+
+        self.llm = ChatOpenAI(
+            model=llm_model,
+            temperature=temperature,
+            streaming=streaming,
+            rate_limiter=rate_limiter,  # Apply rate limiting to the model
+        )
+        self.prompt = prompt
 
         # Setup retriever
         self.retriever = (
@@ -41,7 +56,7 @@ class RagInference:
             search_type="mmr", search_kwargs={"k": 20, "fetch_k": 50}
         )
 
-        # Setup chain
+        # Setup regular chain with chat history
         self.retrieval_chain = (
             RunnablePassthrough.assign(retrieval_query=history_aware_retrieval_query())
             .assign(
@@ -49,6 +64,17 @@ class RagInference:
             )
             .assign(answer=create_stuff_documents_chain(self.llm, self.prompt))
         ).with_config(run_name="rag_inference")
+
+        # Setup evaluation chain without chat history
+        self.eval_chain = (
+            RunnablePassthrough.assign(
+                retrieval_query=lambda x: x["input"]  # Direct query without history
+            )
+            .assign(
+                context=self.retriever.with_config(run_name="retrieve_documents_eval"),
+            )
+            .assign(answer=create_stuff_documents_chain(self.llm, self.prompt))
+        ).with_config(run_name="rag_eval_inference")
 
         # Initialize chat history
         self.chat_history: list[tuple[str, str]] = []
@@ -76,6 +102,30 @@ class RagInference:
     def clear_history(self) -> None:
         """Clear the chat history."""
         self.chat_history = []
+
+    async def batch_query_for_eval(self, queries: dict[str, str]) -> dict[str, Any]:
+        """
+        Process multiple queries in parallel for evaluation purposes using LangChain's
+        native batch processing capabilities.
+
+        Args:
+            queries: Dictionary of query identifiers to queries
+
+        Returns:
+            dict: Mapping of query identifiers to results
+        """
+
+        # Get just the inputs for processing
+        batch_inputs = [
+            {"input": query, "chat_history": []} for query in queries.values()
+        ]
+        keys = list(queries.keys())
+
+        # Use native batch processing with proper rate limiting
+        results = await self.eval_chain.abatch(batch_inputs)
+
+        # Recombine results with their keys
+        return {key: result for key, result in zip(keys, results)}
 
 
 if __name__ == "__main__":
