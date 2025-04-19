@@ -149,13 +149,13 @@ class BaseLoad:
         processed_data = []
         for item in data:
             record = {
-                'id': item['custom_id'],
+                "id": item["custom_id"],
             }
 
             # Extract message content and parse it
             try:
-                message = item['response']['body']['choices'][0]['message']
-                content = json.loads(message['content'])
+                message = item["response"]["body"]["choices"][0]["message"]
+                content = json.loads(message["content"])
                 record.update(content)
             except (KeyError, json.JSONDecodeError) as e:
                 self.logger.error(
@@ -292,7 +292,7 @@ class BaseLoad:
     def _simple_dedupe(df: pd.DataFrame) -> None:
         df.drop_duplicates(subset=["page_content"], keep="first", inplace=True)
 
-    def _initialize_pinecone_index(self) -> None:
+    def _initialize_pinecone_index(self, alt_index: str | None = None) -> None:
         """Initialize or create Pinecone index. Note: DO NOT USE NAMESPACES!"""
         if self.vector_store is not None:
             return
@@ -301,20 +301,26 @@ class BaseLoad:
 
         existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
 
-        if self.index_name not in existing_indexes:
+        index_name = (
+            f"{self.index_name}-{alt_index.replace('_', '-')}"
+            if alt_index
+            else self.index_name
+        )
+        # Limit index name to 45 characters
+        index_name = index_name[:45]
+
+        if index_name not in existing_indexes:
             # Create new index
             pc.create_index(
-                name=self.index_name,
+                name=index_name,
                 dimension=3072,  # OpenAI embeddings dimension for text-embedding-3-large
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
-            self.logger.info(f"Created new Pinecone index: {self.index_name}")
+            self.logger.info(f"Created new Pinecone index: {index_name}")
 
         # Initialize the index
-        self.vector_store = pc.Index(self.index_name)
-        self.logger.info(
-            f"Initialized Pinecone vector store for index: {self.index_name}"
-        )
+        self.vector_store = pc.Index(index_name)
+        self.logger.info(f"Initialized Pinecone vector store for index: {index_name}")
 
     def clean_metadata_for_vector_store(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean duplicate columns for vector store."""
@@ -323,9 +329,11 @@ class BaseLoad:
         df = df.fillna("")
         return df
 
-    def staging_to_vector_store(self, slice: int = 0) -> None:
+    def staging_to_vector_store(
+        self, slice: int = 0, alt_column: str | None = None
+    ) -> None:
         """Upload staged documents to a new, versioned Pinecone index. DON'T FORGET TO CHANGE VERSION IN .env!!!"""
-        self._initialize_pinecone_index()
+        self._initialize_pinecone_index(alt_column)
         if not self.staging_path.exists():
             raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
         if self.vector_store is None:
@@ -336,7 +344,8 @@ class BaseLoad:
         metadata_df = self.clean_metadata_for_vector_store(metadata_df)
 
         ids = df.index.tolist()
-        vectors = df["primary_content_embedding"].apply(json.loads).tolist()
+        column = alt_column or "primary_content_embedding"
+        vectors = df[column].apply(json.loads).tolist()
         metadata_dict = metadata_df.to_dict(orient="records")
 
         docs = []

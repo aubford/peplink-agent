@@ -1,4 +1,3 @@
-from langchain_core.documents import Document
 from load.base_load import BaseLoad
 import pandas as pd
 import re

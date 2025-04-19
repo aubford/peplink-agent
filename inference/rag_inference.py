@@ -1,4 +1,3 @@
-import aiohttp
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
@@ -7,9 +6,8 @@ from langchain import hub
 from pinecone import Pinecone
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import history_aware_retrieval_query
-from typing import Callable, Any, Dict, List
+from typing import Any
 from langchain_core.rate_limiters import InMemoryRateLimiter
-from langchain_core.runnables import RunnableMap
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting

@@ -1,12 +1,10 @@
 from __future__ import annotations
 from collections.abc import Iterator
 from time import sleep
-from typing import Any, Iterable, List, Sequence
+from typing import Iterable, List, Sequence
 from langchain_core.documents import Document
 from langchain_community.document_loaders.base import BaseLoader
-from toolz import keyfilter
 import praw
-from praw.exceptions import APIException
 
 
 class ForkedRedditPostsLoader(BaseLoader):
