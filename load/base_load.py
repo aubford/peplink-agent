@@ -324,7 +324,9 @@ class BaseLoad:
 
     def clean_metadata_for_vector_store(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean duplicate columns for vector store."""
-        df = df.drop(columns=["post_title", "post_content", "comment_content"])
+        df = df.drop(
+            columns=["post_title", "post_content", "comment_content"], errors="ignore"
+        )
         # Replace all null values with empty string
         df = df.fillna("")
         return df
@@ -344,7 +346,11 @@ class BaseLoad:
         metadata_df = self.clean_metadata_for_vector_store(metadata_df)
 
         ids = df.index.tolist()
-        column = alt_column or "primary_content_embedding"
+        column = (
+            alt_column
+            if alt_column and alt_column in df.columns
+            else "primary_content_embedding"
+        )
         vectors = df[column].apply(json.loads).tolist()
         metadata_dict = metadata_df.to_dict(orient="records")
 

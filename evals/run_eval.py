@@ -18,8 +18,7 @@ from ragas.metrics import (
 from inference.rag_inference import RagInference
 import pandas as pd
 import asyncio
-from langchain_core.runnables import RunnableParallel
-from util.util_main import print_replace
+import os
 
 
 class RagasEval:
@@ -30,6 +29,7 @@ class RagasEval:
         eval_llm_model: str = "gpt-4o-mini",
         eval_boost_llm_model: str = "gpt-4o",
         inference_llm_model: str = "gpt-4o-mini",
+        run_name: str = datetime.now().strftime("%Y-%m-%d_%H_%M"),
     ):
         generated_testset_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "generated_testset.parquet"
@@ -37,7 +37,7 @@ class RagasEval:
         nodes_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
         )
-        self.testset_name = testset_name
+        self.test_run_name = f"{testset_name}__{run_name}"
         self.test_set: Testset = self.create_testset(generated_testset_df, nodes_df)
 
         # Initialize the RAG inference component once
@@ -100,6 +100,39 @@ class RagasEval:
                 print(f"Error processing result for query {i}: {e}")
                 raise
 
+    def save_metrics_summary(self, eval_result_df: pd.DataFrame) -> None:
+        """
+        Calculate mean for each metric column and append results to test_runs.parquet.
+
+        Args:
+            eval_result_df: DataFrame containing the evaluation results
+        """
+        # Extract only float columns (metrics)
+        float_cols = eval_result_df.select_dtypes(include=['float64']).columns
+
+        # Calculate mean for each metric
+        metrics_summary = {}
+        for col in float_cols:
+            metrics_summary[col] = eval_result_df[col].mean()
+
+        # Add testset name
+        metrics_summary['testset_name'] = self.test_run_name
+
+        # Create a DataFrame with the summary
+        summary_df = pd.DataFrame([metrics_summary])
+
+        # Check if file exists
+        test_runs_summary_path = self.output_dir / "test_runs_summary.parquet"
+        if os.path.exists(test_runs_summary_path):
+            # Read existing file and append
+            existing_df = pd.read_parquet(test_runs_summary_path)
+            updated_df = pd.concat([existing_df, summary_df], ignore_index=True)
+        else:
+            updated_df = summary_df
+
+        # Save to parquet
+        updated_df.to_parquet(test_runs_summary_path, index=False)
+
     async def evaluate_rag(self) -> None:
         """Run the evaluation on the test set."""
         # Run the async processing using an event loop
@@ -121,10 +154,16 @@ class RagasEval:
             ],
             llm=self.eval_llm,
         )
-        eval_result.to_pandas().to_parquet(
-            self.output_dir
-            / f"result__{self.testset_name}___{datetime.now().strftime('%Y-%m-%d_%H_%M')}.parquet"
+
+        eval_result_df = eval_result.to_pandas()
+
+        # Save the full results
+        eval_result_df.to_parquet(
+            self.output_dir / f"result__{self.test_run_name}.parquet"
         )
+
+        # Save metrics summary
+        self.save_metrics_summary(eval_result_df)
 
 
 if __name__ == "__main__":
