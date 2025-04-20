@@ -1,3 +1,4 @@
+from typing import Any
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
@@ -5,9 +6,11 @@ from config import global_config
 from langchain import hub
 from pinecone import Pinecone
 from langchain_core.runnables.passthrough import RunnablePassthrough
-from inference.history_aware_retrieval_query import history_aware_retrieval_query
-from typing import Any
+from inference.history_aware_retrieval_query import (
+    get_history_aware_retrieval_query_chain,
+)
 from langchain_core.rate_limiters import InMemoryRateLimiter
+from langchain_core.language_models.chat_models import BaseChatModel
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
@@ -19,13 +22,15 @@ class RagInference:
     def __init__(
         self,
         embedding_model: str = "text-embedding-3-large",
-        llm_model: str = "gpt-4o-mini",
-        temperature: float = 0,
+        llm_model: str = "gpt-4.1-mini",
+        temperature: float = 0.2,
         streaming: bool = False,
+        pinecone_index: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
+        eval_llm: BaseChatModel | None = None,
     ):
         # Initialize Pinecone
         pinecone = Pinecone(api_key=global_config.get("PINECONE_API_KEY"))
-        self.index = pinecone.Index(global_config.get("VERSIONED_PINECONE_INDEX_NAME"))
+        self.index = pinecone.Index(pinecone_index)
 
         # Initialize components
         self.embeddings = OpenAIEmbeddings(model=embedding_model)
@@ -45,6 +50,7 @@ class RagInference:
             streaming=streaming,
             rate_limiter=rate_limiter,  # Apply rate limiting to the model
         )
+
         self.prompt = prompt
 
         # Setup retriever
@@ -56,23 +62,20 @@ class RagInference:
 
         # Setup regular chain with chat history
         self.retrieval_chain = (
-            RunnablePassthrough.assign(retrieval_query=history_aware_retrieval_query())
+            RunnablePassthrough.assign(
+                retrieval_query=get_history_aware_retrieval_query_chain()
+            )
             .assign(
                 context=self.retriever.with_config(run_name="retrieve_documents"),
             )
-            .assign(answer=create_stuff_documents_chain(self.llm, self.prompt))
-        ).with_config(run_name="rag_inference")
-
-        # Setup evaluation chain without chat history
-        self.eval_chain = (
-            RunnablePassthrough.assign(
-                retrieval_query=lambda x: x["input"]  # Direct query without history
-            )
             .assign(
-                context=self.retriever.with_config(run_name="retrieve_documents_eval"),
+                answer=create_stuff_documents_chain(
+                    eval_llm or self.llm,
+                    self.prompt,
+                    document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
+                )
             )
-            .assign(answer=create_stuff_documents_chain(self.llm, self.prompt))
-        ).with_config(run_name="rag_eval_inference")
+        ).with_config(run_name="rag_inference")
 
         # Initialize chat history
         self.chat_history: list[tuple[str, str]] = []
@@ -101,7 +104,9 @@ class RagInference:
         """Clear the chat history."""
         self.chat_history = []
 
-    async def batch_query_for_eval(self, queries: dict[str, str]) -> dict[str, Any]:
+    async def batch_query_for_eval(
+        self, queries: dict[str, str]
+    ) -> dict[str, dict[str, Any]]:
         """
         Process multiple queries in parallel for evaluation purposes using LangChain's
         native batch processing capabilities.
@@ -120,7 +125,7 @@ class RagInference:
         keys = list(queries.keys())
 
         # Use native batch processing with proper rate limiting
-        results = await self.eval_chain.abatch(batch_inputs)
+        results = await self.retrieval_chain.abatch(batch_inputs)
 
         # Recombine results with their keys
         return {key: result for key, result in zip(keys, results)}

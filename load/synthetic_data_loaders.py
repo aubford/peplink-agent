@@ -99,11 +99,11 @@ class SyntheticDataLoader(ABC):
         # If we have batch items, create and run a batch job
         if batch_items:
             system_prompt = self.create_system_prompt_with_examples()
-            self.batch_manager.create_batch_tasks(
+            self.batch_manager.create_batch_tasks_to_batchfile(
                 items=batch_items,
                 schema=ModelResponse,
                 system_prompt=system_prompt,
-                model="gpt-4o-mini",
+                model="gpt-4.1-nano",
                 temperature=0.2,
                 max_tokens=max_tokens,
             )
@@ -154,7 +154,7 @@ class SyntheticDataLoader(ABC):
                 "method": "POST",
                 "url": self.batch_manager.endpoint,
                 "body": {
-                    "model": "gpt-4o-mini",
+                    "model": "gpt-4.1-nano",
                     "temperature": 0.2,
                     "max_tokens": max_tokens,
                     "messages": [

@@ -9,6 +9,7 @@ evals/output
 tutorial/
 load/**/*.jsonl
 load/**/batch/**/*
+evals/batches/**/*
 !evals/testsets/***/*
 
 ### VisualStudioCode template

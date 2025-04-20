@@ -91,7 +91,7 @@ prompt_chain = {
 # print(output.text)
 
 
-def history_aware_retrieval_query() -> Runnable:
+def get_history_aware_retrieval_query_chain() -> Runnable:
     """Given a chat history, summarize it into a single question."""
 
     return RunnableBranch(
@@ -102,5 +102,5 @@ def history_aware_retrieval_query() -> Runnable:
             (lambda x: x["input"]),
         ),
         # If chat history, then we pass inputs to LLM chain, then to retriever
-        prompt_chain | ChatOpenAI(model="gpt-4o-mini") | StrOutputParser(),
+        prompt_chain | ChatOpenAI(model="gpt-4.1-nano") | StrOutputParser(),
     ).with_config(run_name="history_aware_retrieval_query")

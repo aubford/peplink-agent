@@ -1,0 +1,188 @@
+[
+    {
+        "question": "What are the routing protocols supported by Balance/ MAX family?",
+        "choices": [
+            "OSPF",
+            "BGP",
+            "RIPv2",
+            "IS-IS",
+            "EIGRP"
+        ],
+        "correct_answers": [
+            0,
+            1,
+            2
+        ]
+    },
+    {
+        "question": "The customer is interested in deploying FusionHub into the HQ of the enterprise network. What is the sizing criteria to choose for the right FusionHub SKU?",
+        "choices": [
+            "Based on the number of peers supported.",
+            "Based on the amount of client devices connected to the FusionHub.",
+            "Based on the Hypervisor platform FusionHub is installed on.",
+            "Based on the number of WAN of the HQ network."
+        ],
+        "correct_answers": [
+            0
+        ]
+    },
+    {
+        "question": "Choose the statement(s) that correctly describe how the Outbound Policy rules are executed (choose two).",
+        "choices": [
+            "Order of processing from Top to Bottom",
+            "The policy always lower than PepVPN / OSPF / BGP / RIPv2/ SpeedFusion Cloud Routes",
+            "Able to control the traffic when no connections are available",
+            "Order of processing is go through all the policies then chose fitting one policy"
+        ],
+        "correct_answers": [
+            0,
+            2
+        ]
+    },
+    {
+        "question": "Please select the correct statement that explains the SD-WAN feature: WAN Virtualization.",
+        "choices": [
+            "Peplink routers enable you to build one logical WAN connection using multiple technologies (e.g. xDSL, MPLS, cellular, fiber)",
+            "Using InControl 2, network administrators gain full control over their networks using a single interface",
+            "Using SpeedFusion VPN technology, branch offices gain secure, local network access to cloud resources",
+            "Peplink routers actively monitor WAN quality and makes intelligent decisions to direct application traffic flow"
+        ],
+        "correct_answers": [
+            0
+        ]
+    },
+    {
+        "question": "When using PepVPN behind a firewall, one needs to open the incoming ports of:",
+        "choices": [
+            "TCP 32015",
+            "UDP 4500",
+            "TCP and UDP 4500",
+            "TCP port 4500 and UDP port 32015",
+            "TCP port 32015 and UDP port 4500 or according to either Data port 'default' or 'custom' settings."
+        ],
+        "correct_answers": [
+            4
+        ]
+    },
+    {
+        "question": "In a 3-site fully-meshed VPN deployment scenario, how many Internet lines at minimum are required in total to support SpeedFusion Hot Failover and Bonding at all locations?",
+        "choices": [
+            "3",
+            "4",
+            "5",
+            "6"
+        ],
+        "correct_answers": [
+            3
+        ]
+    },
+    {
+        "question": "Which is a possible misstep/problem that prevents SpeedFusion from establishing?",
+        "choices": [
+            "Not having the same amount of WAN connections on either end of SpeedFusion.",
+            "Same WAN subnet on either end of SpeedFusion",
+            "Same LAN subnet on either end of SpeedFusion",
+            "Not having the same model of Peplink on either end of SpeedFusion.",
+            "None of the above"
+        ],
+        "correct_answers": [
+            2
+        ]
+    },
+    {
+        "question": "For branches having the same LAN network, we should allow them to configure a \"virtual\" network range, which then maps this virtual network to the local network that is having conflict. So the HQ site will only see the virtual network, and the conflict network will be hidden from HQ. Which of the features best described above statement? (Choose One)",
+        "choices": [
+            "Virtual Network Mapping",
+            "SpeedFusion NAT Mode",
+            "NAT Mapping",
+            "Port Forwarding",
+            "Recommend to change the branches LAN subnet to avoid overlapping"
+        ],
+        "correct_answers": [
+            0
+        ]
+    },
+    {
+        "question": "When would you need to enable WAN Smoothing? (Choose two)",
+        "choices": [
+            "WAN Smoothing should be enabled when you establish SpeedFusion tunnel.",
+            "Users complain the speed is slow",
+            "Jitter when you do video streaming",
+            "One way audio for VOIP but no packet loss found",
+            "Jitter on your VOIP call",
+            "Intermittently when access the e-mail server in HQ."
+        ],
+        "correct_answers": [
+            2,
+            4
+        ]
+    },
+    {
+        "question": "Which of the following are officially supported hypervisors for FusionHub? (You may choose more than one.)",
+        "choices": [
+            "Amazon Web Service",
+            "VMware",
+            "Citrix",
+            "Hyper-V",
+            "KVM"
+        ],
+        "correct_answers": [
+            0,
+            1,
+            2,
+            3
+        ]
+    },
+    {
+        "question": "How do you implement WAN Bandwidth Bonding for internet traffic?",
+        "choices": [
+            "SpeedFusion Cloud",
+            "SpeedFusion",
+            "SpeedFusion Cloud with outbound policy",
+            "SpeedFusion with outbound policy",
+            "Outbound policy"
+        ],
+        "correct_answers": [
+            2
+        ]
+    },
+    {
+        "question": "Which statement(s) is/are true regarding the AP Controller on a Peplink router? (You may select more than one answer.)",
+        "choices": [
+            "Manages 3rd party AP devices",
+            "Manages Surf On-The-Go",
+            "Manages Pepwave AP devices",
+            "Manages multiple SSIDs",
+            "Manages as many as 5 APs"
+        ],
+        "correct_answers": [
+            2,
+            3
+        ]
+    },
+    {
+        "question": "Which statements are true about MAX Adapter 5G? (Choose two)",
+        "choices": [
+            "Provides a portable 6 connection for Windows and Linux devices",
+            "Is a 5G WAN option for other Peplink or Pepwave products which does not support 5G",
+            "Provides a portable 5G and GPS connection for Windows and Linux devices",
+            "Provides a GPS option for other Peplink or Pepwave products which do not support GPS"
+        ],
+        "correct_answers": [
+            0,
+            1
+        ]
+    },
+    {
+        "question": "What is the InControl2 API Request Rate Limit?",
+        "choices": [
+            "20 requests per hour per organization",
+            "20 requests per minute per organization",
+            "20 requests per second per organization",
+            "Unlimited"
+        ],
+        "correct_answers": [
+            2
+        ]
+    }
+]

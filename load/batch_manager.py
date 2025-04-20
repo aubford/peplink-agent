@@ -1,7 +1,8 @@
 import os
 import json
 import time
-from typing import List, Dict, Any, Literal
+import shutil
+from typing import Any, Literal
 from pathlib import Path
 from pydantic import BaseModel
 from openai import OpenAI
@@ -18,12 +19,18 @@ class BatchManager:
     Handles batch processing functionality using OpenAI's Batch API.
 
     This class provides methods to create, monitor, and retrieve results from a single batch job.
+
+    Step 1, Create Batchfile: Either self.create_batch_task() or self.create_batch_tasks_to_batchfile()
+    Step 2, Start the batch job: self.create_batch_job()
+    Step 3: Wait until the batch job is completed.
+    Step 4, Get results: self.check_batch_and_get_results() or self.get_content_if_ready()
     """
 
     def __init__(
         self,
         base_path: Path,
         endpoint: ValidEndpoints = "/v1/chat/completions",
+        batch_name: str = "batch",
     ):
         """
         Initialize the BatchManager with OpenAI client and a base path for file operations.
@@ -39,7 +46,7 @@ class BatchManager:
 
         # Ensure base_path and batch subfolder exist
         base_path.mkdir(parents=True, exist_ok=True)
-        batch_path = base_path / "batch"
+        batch_path = base_path / batch_name
         batch_path.mkdir(parents=True, exist_ok=True)
 
         self.batch_path = batch_path
@@ -68,47 +75,91 @@ class BatchManager:
         else:
             return self.batch_id
 
-    def create_batch_tasks(
+    def clear_batch_files(self) -> None:
+        """
+        Clear all batch files in the batch directory.
+        """
+        if self.batch_path.exists():
+            shutil.rmtree(self.batch_path)
+        self.batch_path.mkdir(parents=True, exist_ok=True)
+
+    def create_batch_task(
         self,
-        items: List[Dict[str, str]],
+        custom_id: str,
+        messages: list[dict],  # List of non-system messages
         system_prompt: str,
-        schema: type[BaseModel],
-        model: str = "gpt-4o-mini",
+        schema: type[BaseModel] | None = None,
+        model: str = "gpt-4.1-nano",
         temperature: float = 0.2,
         max_tokens: int = 5000,
-    ) -> List[Dict]:
+        **kwargs,
+    ) -> dict:
+        """
+        Create a single batch task dictionary.
+
+        Args:
+            custom_id: Unique identifier for the task
+            messages: List of non-system message dicts (e.g., user/assistant)
+            system_prompt: Content for the system message
+            schema: Pydantic schema for response_format
+            model: Model name
+            temperature: Sampling temperature
+            max_tokens: Max tokens for response
+            **kwargs: Additional keyword arguments for the body
+        """
+        task = {
+            "custom_id": custom_id,
+            "method": "POST",
+            "url": self.endpoint,
+            "body": {
+                "model": model,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    *messages,
+                ],
+                **kwargs,
+            },
+        }
+        if schema:
+            task["response_format"] = type_to_response_format_param(schema)
+        return task
+
+    def create_batch_tasks_to_batchfile(
+        self,
+        items: list[dict[str, str]],
+        system_prompt: str,
+        schema: type[BaseModel] | None = None,
+        model: str = "gpt-4.1-nano",
+        temperature: float = 0.2,
+        max_tokens: int = 5000,
+    ) -> list[dict]:
         """
         Create a list of batch tasks from item dictionaries.
 
         Returns:
             List of task dictionaries ready for batch processing
         """
-        tasks = []
-
-        for item in items:
-            task = {
-                "custom_id": item["id"],
-                "method": "POST",
-                "url": self.endpoint,
-                "body": {
-                    "model": model,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": item["prompt"]},
-                    ],
-                    "response_format": type_to_response_format_param(schema),
-                },
-            }
-            tasks.append(task)
+        tasks = [
+            self.create_batch_task(
+                custom_id=item["id"],
+                messages=[{"role": "user", "content": item["prompt"]}],
+                system_prompt=system_prompt,
+                schema=schema,
+                model=model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            for item in items
+        ]
 
         with open(self.file_name, "w") as file:
             for task in tasks:
                 file.write(json.dumps(task) + "\n")
         return tasks
 
-    def write_status_file(self, batch_job: Any) -> None:
+    def _write_status_file(self, batch_job: Any) -> None:
         """
         Write batch job status to a JSON file.
 
@@ -138,13 +189,13 @@ class BatchManager:
             completion_window="24h",
         )
         print(f"Batch job created: {batch_job.id}")
-        self.write_status_file(batch_job)
+        self._write_status_file(batch_job)
 
         self.batch_id = batch_job.id
 
         return batch_job
 
-    def get_batch_status(self) -> Any:
+    def _get_batch_status(self) -> Any:
         """
         Retrieve the status of a batch job.
 
@@ -156,13 +207,13 @@ class BatchManager:
             raise ValueError("No batch ID or status file found.")
         try:
             batch_job = self.client.batches.retrieve(batch_id)
-            self.write_status_file(batch_job)
+            self._write_status_file(batch_job)
             return batch_job
         except Exception as e:
             print(f"Error retrieving batch status: {str(e)}")
             return None
 
-    def check_batch_and_get_results(self) -> Dict[str, Any]:
+    def check_batch_and_get_results(self) -> dict[str, Any]:
         """
         Check the status of a batch job and retrieve results if complete.
         This is an on-demand method, no waiting or polling.
@@ -170,7 +221,7 @@ class BatchManager:
         Returns:
             Dictionary containing status information and results if complete
         """
-        batch_job = self.get_batch_status()
+        batch_job = self._get_batch_status()
         batch_id = batch_job.id
 
         if not batch_job:
@@ -182,7 +233,7 @@ class BatchManager:
         # If job completed, fetch and save results
         if batch_job.status == "completed":
             try:
-                results = self.get_results(batch_job)
+                results = self._get_results(batch_job)
                 return {
                     "status": "completed",
                     "batch_id": batch_id,
@@ -209,7 +260,20 @@ class BatchManager:
                 "message": f"Job is still {batch_job.status}. Check again later.",
             }
 
-    def get_results(self, batch_job: Any) -> List[Dict]:
+    def get_content_if_ready(self) -> dict[str, str]:
+        batch_job = self._get_batch_status()
+        if batch_job.status == "completed":
+            results = self._get_results(batch_job)
+            return {
+                item["custom_id"]: item["response"]["body"]["choices"][0]["message"][
+                    "content"
+                ]
+                for item in results
+            }
+        print(f"**Batch job status: {batch_job.status}")
+        raise ValueError("Batch job is not completed")
+
+    def _get_results(self, batch_job: Any) -> list[dict[str, Any]]:
         """
         Retrieve and parse results from a completed batch job.
 
@@ -235,51 +299,6 @@ class BatchManager:
 
         return results
 
-    def run_batch_and_job(
-        self,
-        items: List[Dict[str, str]],
-        system_prompt: str,
-        schema: type[BaseModel],
-        model: str = "gpt-4o-mini",
-        temperature: float = 0.2,
-        max_tokens: int = 300,
-    ) -> Dict[str, Any]:
-        """
-        Run a batch process without waiting for completion.
-
-        Args:
-            items: List of dictionaries with 'id' and 'prompt' properties to process
-            model: OpenAI model to use
-            temperature: Temperature parameter for generation
-            schema: Schema for the response
-            system_prompt: System prompt for the batch
-            max_tokens: Maximum tokens to generate
-
-        Returns:
-            Dictionary with batch job information for later status checking
-        """
-        # Create tasks and batchfile
-        self.create_batch_tasks(
-            items=items,
-            system_prompt=system_prompt,
-            schema=schema,
-            model=model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-
-        # Create batch job
-        batch_job = self.create_batch_job()
-
-        # Return batch job information
-        return {
-            "status": batch_job.status,
-            "batch_id": batch_job.id,
-            "message": "Batch job created. Use check_batch_and_get_results method later to check status and retrieve results.",
-            "created_at": batch_job.created_at,
-            "expected_completion": "within 24 hours",
-        }
-
     def get_batchfile(self) -> tuple[list[dict], list[list[dict]]]:
         # Check if batch file exists
         if not self.file_name.exists():
@@ -302,14 +321,12 @@ class BatchManager:
             for call in tasks
         ]
 
-        return (tasks, messages)
+        return tasks, messages
 
-    def test_batchfile(self, limit: int = 2) -> Dict[str, Any]:
+    def test_batchfile(self, limit: int = 1) -> dict[str, Any]:
         """
         Test the first n tasks in the batch file against the regular API endpoint.
-
-        This method is useful for verifying that your batch configuration works correctly
-        before submitting the full batch job.
+        Verify that your batch configuration works correctly before starting the job.
 
         Args:
             limit: Number of tasks from the batch file to test (default: 2)
@@ -345,7 +362,7 @@ class BatchManager:
             for task in tasks:
                 body = task.get("body", {})
                 messages = body.get("messages", [])
-                model = body.get("model", "gpt-4o-mini")
+                model = body.get("model", "gpt-4.1-nano")
                 temperature = body.get("temperature", 0.2)
                 max_tokens = body.get("max_tokens", 300)
 
