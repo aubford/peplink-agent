@@ -4,7 +4,6 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from config import global_config
 from langchain import hub
-from pinecone import Pinecone
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
@@ -25,17 +24,15 @@ class RagInference:
         llm_model: str = "gpt-4.1-mini",
         temperature: float = 0.2,
         streaming: bool = False,
-        pinecone_index: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
+        pinecone_index_name: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
         eval_llm: BaseChatModel | None = None,
     ):
-        # Initialize Pinecone
-        pinecone = Pinecone(api_key=global_config.get("PINECONE_API_KEY"))
-        self.index = pinecone.Index(pinecone_index)
-
-        # Initialize components
         self.embeddings = OpenAIEmbeddings(model=embedding_model)
         self.vector_store = PineconeVectorStore(
-            index=self.index, embedding=self.embeddings, text_key="page_content"
+            index_name=pinecone_index_name,
+            embedding=self.embeddings,
+            text_key="page_content",
+            pinecone_api_key=global_config.get("PINECONE_API_KEY"),
         )
 
         # Create a rate limiter for the model to avoid API throttling
@@ -63,7 +60,7 @@ class RagInference:
         # Setup regular chain with chat history
         self.retrieval_chain = (
             RunnablePassthrough.assign(
-                retrieval_query=get_history_aware_retrieval_query_chain()
+                retrieval_query=get_history_aware_retrieval_query_chain(llm=self.llm)
             )
             .assign(
                 context=self.retriever.with_config(run_name="retrieve_documents"),
@@ -125,7 +122,9 @@ class RagInference:
         keys = list(queries.keys())
 
         # Use native batch processing with proper rate limiting
-        results = await self.retrieval_chain.abatch(batch_inputs)
+        results = await self.retrieval_chain.abatch(
+            batch_inputs, config={"max_concurrency": 20}
+        )
 
         # Recombine results with their keys
         return {key: result for key, result in zip(keys, results)}

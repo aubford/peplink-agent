@@ -30,14 +30,14 @@ class RagasEval:
         self,
         evals_dir: Path,
         testset_name: str,
-        inference_llm_model: str = "gpt-4.1-nano",
+        inference_llm_model: str = "gpt-4.1-mini",
         eval_llm_model: str = "gpt-4.1-nano",
         eval_boost_llm_model: str = "gpt-4.1",
         run_name: str | None = None,
     ):
         generated_testset_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "generated_testset.parquet"
-        )[:2]
+        )
         nodes_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
         )
@@ -56,11 +56,12 @@ class RagasEval:
         )
 
         self.rag_inference = RagInference(
+            llm_model=inference_llm_model,
             eval_llm=BatchChatOpenAI(
                 model=inference_llm_model,
                 temperature=0,
                 batch_manager=self.batch_manager,
-            )
+            ),
         )
 
         self.eval_llm = LangchainLLMWrapper(
