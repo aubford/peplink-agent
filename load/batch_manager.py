@@ -31,6 +31,7 @@ class BatchManager:
         base_path: Path,
         endpoint: ValidEndpoints = "/v1/chat/completions",
         batch_name: str = "batch",
+        schema: type[BaseModel] | None = None,
     ):
         """
         Initialize the BatchManager with OpenAI client and a base path for file operations.
@@ -54,6 +55,7 @@ class BatchManager:
         self.output_file_name = batch_path / "batch_results.json"
         self.status_file_name = batch_path / "batch_status.json"
         self.endpoint: ValidEndpoints = endpoint
+        self.schema = schema
 
         # Load batch_id from status file if it exists
         if self.status_file_name.exists():
@@ -122,8 +124,9 @@ class BatchManager:
                 **kwargs,
             },
         }
+        schema = schema or self.schema
         if schema:
-            task["response_format"] = type_to_response_format_param(schema)
+            task["body"]["response_format"] = type_to_response_format_param(schema)  # type: ignore
         return task
 
     def create_batch_tasks_to_batchfile(
@@ -146,7 +149,7 @@ class BatchManager:
                 custom_id=item["id"],
                 messages=[{"role": "user", "content": item["prompt"]}],
                 system_prompt=system_prompt,
-                schema=schema,
+                schema=schema or self.schema,
                 model=model,
                 temperature=temperature,
                 max_tokens=max_tokens,

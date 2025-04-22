@@ -11,13 +11,14 @@ from ragas.metrics import (
     Faithfulness,
     ResponseRelevancy,
     ResponseRelevancyDiverse,
-    LLMContextPrecisionWithReference,
+    # LLMContextPrecisionWithReference,
     FactualCorrectness,
     AnswerAccuracy,
     ContextRelevance,
     ResponseGroundedness,
 )
 from inference.rag_inference import RagInference
+from evals.take_mock_exam import MockExam
 import pandas as pd
 import os
 import json
@@ -36,7 +37,7 @@ class RagasEval:
         run_name: str | None = None,
         sample: bool | int = False,
         test_run: bool = False,
-        create_batch_job: bool = True,
+        should_create_batch_job: bool = True,
     ):
         generated_testset_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "generated_testset.parquet"
@@ -57,7 +58,7 @@ class RagasEval:
         self.test_set: Testset = self.init_testset(generated_testset_df, nodes_df)
 
         self.test_run = test_run
-        self.should_create_batch_job = create_batch_job
+        self.should_create_batch_job = should_create_batch_job
         self.output_dir = evals_dir / "runs"
         self.batch_manager = BatchManager(
             base_path=evals_dir / "batches",
@@ -75,6 +76,14 @@ class RagasEval:
                 temperature=0,
                 batch_manager=self.batch_manager,
             ),
+        )
+
+        self.mock_exam = MockExam(
+            evals_dir=evals_dir,
+            testset_name=testset_name,
+            run_name=run_name,
+            llm_model=inference_llm_model,
+            should_create_batch_job=should_create_batch_job,
         )
 
         self.eval_llm = LangchainLLMWrapper(
@@ -147,7 +156,7 @@ class RagasEval:
                 print(f"Error processing result for query {i}: {e}")
                 raise
 
-    async def generate_batchfile(self):
+    async def generate_batchfiles(self):
         """Generate a batchfile.jsonl to be uploaded to OpenAI's Batch API."""
         assert self.test_set is not None, "Test set is not set"
 
@@ -160,6 +169,8 @@ class RagasEval:
             self.batch_manager.clear_batch_files()
         results = await self.rag_inference.batch_query_for_eval(async_tasks)
         self.create_batch_contexts_file(results)
+
+        await self.mock_exam.generate_batchfile()
 
         # create a new batch job if not testing
         if self.should_create_batch_job:
@@ -183,8 +194,12 @@ class RagasEval:
         for col in float_cols:
             metrics_summary[col] = eval_result_df[col].mean()
 
+        score, missed_questions = self.mock_exam.get_results()
+        metrics_summary["mock_exam_score"] = score
+        metrics_summary["mock_exam_missed_questions"] = missed_questions
+
         # Add testset name
-        metrics_summary['testset_name'] = self.test_run_name
+        metrics_summary["testset_name"] = self.test_run_name
 
         # Create a DataFrame with the summary
         summary_df = pd.DataFrame([metrics_summary])

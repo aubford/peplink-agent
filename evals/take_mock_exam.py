@@ -3,92 +3,105 @@ from pathlib import Path
 import json
 import re
 import dotenv
+from datetime import datetime
+from pathlib import Path
+from pydantic import BaseModel
+from ragas.llms import LangchainLLMWrapper
+from langchain_openai import ChatOpenAI
+from ragas import evaluate
+from ragas.testset.synthesizers.testset_schema import Testset
+from load.batch_manager import BatchManager
+from batch_llm import BatchChatOpenAI
 from inference.rag_inference import RagInference
+import pandas as pd
+import os
+import json
+from typing import cast
+from numpy import array
 
 
-dotenv.load_dotenv()
+class MockExamOutput(BaseModel):
+    correct_choice_numbers: list[int]
 
 
 class MockExam:
-    def __init__(self):
-        self.rag_inference = RagInference()
-        mock_exam_path = Path(__file__).parent / "certified_engineer_mock_exam.json"
-        with open(mock_exam_path, 'r') as f:
+    def __init__(
+        self,
+        evals_dir: Path,
+        testset_name: str,
+        llm_model: str,
+        run_name: str | None = None,
+        should_create_batch_job: bool = True,
+    ):
+        self.should_create_batch_job = should_create_batch_job
+        self.batch_manager = BatchManager(
+            base_path=evals_dir / "batches",
+            endpoint="/v1/chat/completions",
+            batch_name=f"{testset_name}__mock_exam__{run_name or 'default_batch'}",
+            schema=MockExamOutput,
+        )
+        self.rag_inference = RagInference(
+            llm_model=llm_model,
+            eval_llm=BatchChatOpenAI(
+                model=llm_model,
+                temperature=0,
+                batch_manager=self.batch_manager,
+            ),
+        )
+        self.mock_exam_path = (
+            Path(__file__).parent / "certified_engineer_mock_exam.json"
+        )
+        with open(self.mock_exam_path, "r") as f:
             self.mock_exam_questions = json.load(f)
 
-    async def take_mock_exam(self) -> pd.DataFrame:
+    async def generate_batchfile(self) -> None:
         """
         Run PCE mock exam questions through the RAG system and evaluate results.
-
-        Args:
-            questions: List of question dictionaries with fields:
-                - question: The question text
-                - choices: List of choice texts
-                - correct_answers: List of indices of correct choices
 
         Returns:
             DataFrame with columns: question, answer, correct?, retrieved_contexts
         """
-        # Create questions
+        # Prepare queries (duplicate each question)
         queries = {}
-        for i, q in enumerate(self.mock_exam_questions):
+        for q in self.mock_exam_questions:
             choices_text = "\n".join(
-                [f"{i+1}. {choice}" for i, choice in enumerate(q["choices"])]
+                [f"{j+1}. {choice}" for j, choice in enumerate(q["choices"])]
             )
             query = f"{q['question']}\n\nHere are your choices, respond with the number(s) of the correct choice(s):\n{choices_text}"
-            queries[i] = query
+            queries[q["question_id"]] = query
 
+        if self.should_create_batch_job:
+            self.batch_manager.clear_batch_files()
         results = await self.rag_inference.batch_query_for_eval(queries)
+        for q in self.mock_exam_questions:
+            q["custom_id"] = results[q["question_id"]]["answer"]
 
-        # Process results
-        processed_results = []
-        for i, (query, result) in enumerate(zip(queries, results)):
-            # Extract answer numbers from the response
-            answer_text = result.get("answer", "")
-            # Look for numbers in the answer that match choices
-            selected_choices = set()
-            for match in re.finditer(r'\b([1-9])\b', answer_text):
-                try:
-                    selected = int(match.group(1))
-                    if 1 <= selected <= len(q["choices"]):
-                        selected_choices.add(selected)
-                except ValueError:
-                    continue
+        with open(self.mock_exam_path, "w") as f:
+            json.dump(self.mock_exam_questions, f)
 
-            # Check if answers are correct
-            correct_answers = set(q["correct_answers"])
-            is_correct = selected_choices == correct_answers
+        if self.should_create_batch_job:
+            self.batch_manager.create_batch_job()
 
-            processed_results.append(
-                {
-                    "question": q["question"],
-                    "answer": answer_text,
-                    "correct?": is_correct,
-                    "retrieved_contexts": result.get("source_documents", []),
-                }
+    def get_results(self) -> tuple[str, list[str]]:
+        batch_results = self.batch_manager.get_content_if_ready()
+
+        for q in self.mock_exam_questions:
+            custom_id = q["custom_id"]
+            q["given_answer"] = (
+                array(json.loads(batch_results[custom_id])["correct_choice_numbers"])
+                - 1  # subtract 1 to match the 1-indexed format
             )
 
-        return pd.DataFrame(processed_results)
-
-
-def main():
-    # Create exam taker
-    exam_taker = MockExam()
-    results_df = exam_taker.take_mock_exam()
-
-    # Save results
-    output_path = Path(__file__).parent / "pce_mock_exam_results.csv"
-    results_df.to_csv(output_path, index=False)
-
-    # Print summary
-    correct_count = results_df["correct?"].sum()
-    total_count = len(results_df)
-    print(f"Exam Results: {correct_count}/{total_count} correct answers")
-    print(f"Score: {(correct_count/total_count)*100:.2f}%")
-    print(f"Detailed results saved to: {output_path}")
-
-    return results_df
-
-
-if __name__ == "__main__":
-    main()
+        correct_count = 0.0
+        missed_questions = []
+        for q in self.mock_exam_questions:
+            given = set(q["given_answer"])
+            correct = set(q["correct_answers"])
+            if given == correct:
+                correct_count += 1
+            else:
+                if given.issubset(correct) and len(given) > len(correct) / 2:
+                    correct_count += 0.5
+                else:
+                    missed_questions.append(q["question_id"])
+        return f"{correct_count}/{len(self.mock_exam_questions)}", missed_questions

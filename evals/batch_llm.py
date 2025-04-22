@@ -25,15 +25,11 @@ class BatchChatOpenAI(BaseChatModel):
     """Default system prompt to use if none is provided in messages."""
     batch_manager: BatchManager
 
-    def _hash_messages(self, messages: list[BaseMessage]) -> str:
+    @staticmethod
+    def _hash_messages(messages: str) -> str:
         """Create a deterministic hash of the message content for tracking."""
         # Serialize messages to a canonical string
-        msg_data = [
-            {"type": message.type, "content": str(message.content)}
-            for message in messages
-        ]
-        msg_json = json.dumps(msg_data, sort_keys=True, separators=(",", ":"))
-        return hashlib.md5(msg_json.encode("utf-8")).hexdigest()
+        return hashlib.md5(messages.encode("utf-8")).hexdigest()
 
     def _generate(
         self,
@@ -44,11 +40,13 @@ class BatchChatOpenAI(BaseChatModel):
     ) -> ChatResult:
         """Write the request to a batch file instead of calling the API."""
         system_prompt = self.system_prompt
+        human_messages_for_hash = ""
         formatted_messages = []
         for message in messages:
             if message.type == "system":
                 system_prompt = str(message.content)
             elif message.type == "human":
+                human_messages_for_hash += str(message.content)
                 formatted_messages.append(
                     {"role": "user", "content": str(message.content)}
                 )
@@ -61,7 +59,7 @@ class BatchChatOpenAI(BaseChatModel):
                     {"role": message.type, "content": str(message.content)}
                 )
         # Use a hash of the messages as the item_id for tracking
-        messages_hash = self._hash_messages(messages)
+        messages_hash = self._hash_messages(human_messages_for_hash)
         all_kwargs = {
             **self.model_kwargs,
             **({"stop": stop} if stop else {}),

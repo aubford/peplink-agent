@@ -1,6 +1,6 @@
 [
     {
-        "question_id": "mock_question_1",
+        "question_id": "Q1",
         "question": "What are the routing protocols supported by Balance/ MAX family?",
         "choices": [
             "OSPF",
@@ -17,7 +17,7 @@
         "custom_id": "5dec27ffb3e92b5831a949c14c790f79"
     },
     {
-        "question_id": "mock_question_2",
+        "question_id": "Q2",
         "question": "The customer is interested in deploying FusionHub into the HQ of the enterprise network. What is the sizing criteria to choose for the right FusionHub SKU?",
         "choices": [
             "Based on the number of peers supported.",
@@ -31,7 +31,7 @@
         "custom_id": "8357bee3625e6b18351732af38e6aad7"
     },
     {
-        "question_id": "mock_question_3",
+        "question_id": "Q3",
         "question": "Choose the statement(s) that correctly describe how the Outbound Policy rules are executed (choose two).",
         "choices": [
             "Order of processing from Top to Bottom",
@@ -46,7 +46,7 @@
         "custom_id": "23dec0b6284a3234cd979a749ac768a5"
     },
     {
-        "question_id": "mock_question_4",
+        "question_id": "Q4",
         "question": "Please select the correct statement that explains the SD-WAN feature: WAN Virtualization.",
         "choices": [
             "Peplink routers enable you to build one logical WAN connection using multiple technologies (e.g. xDSL, MPLS, cellular, fiber)",
@@ -60,7 +60,7 @@
         "custom_id": "457230eeb331c8510cffadb7dc399821"
     },
     {
-        "question_id": "mock_question_5",
+        "question_id": "Q5",
         "question": "When using PepVPN behind a firewall, one needs to open the incoming ports of:",
         "choices": [
             "TCP 32015",
@@ -75,7 +75,7 @@
         "custom_id": "6bc0c263adb468f1acea4454052a5f9c"
     },
     {
-        "question_id": "mock_question_6",
+        "question_id": "Q6",
         "question": "In a 3-site fully-meshed VPN deployment scenario, how many Internet lines at minimum are required in total to support SpeedFusion Hot Failover and Bonding at all locations?",
         "choices": [
             "3",
@@ -89,7 +89,7 @@
         "custom_id": "afacb3c172f5351337c1355d7273b0e2"
     },
     {
-        "question_id": "mock_question_7",
+        "question_id": "Q7",
         "question": "Which is a possible misstep/problem that prevents SpeedFusion from establishing?",
         "choices": [
             "Not having the same amount of WAN connections on either end of SpeedFusion.",
@@ -104,7 +104,7 @@
         "custom_id": "603392f3ad3b2cbd002208eaee477255"
     },
     {
-        "question_id": "mock_question_8",
+        "question_id": "Q8",
         "question": "For branches having the same LAN network, we should allow them to configure a \"virtual\" network range, which then maps this virtual network to the local network that is having conflict. So the HQ site will only see the virtual network, and the conflict network will be hidden from HQ. Which of the features best described above statement? (Choose One)",
         "choices": [
             "Virtual Network Mapping",
@@ -119,7 +119,7 @@
         "custom_id": "ed71448a546666272a2ea3187b5788a4"
     },
     {
-        "question_id": "mock_question_9",
+        "question_id": "Q9",
         "question": "When would you need to enable WAN Smoothing? (Choose two)",
         "choices": [
             "WAN Smoothing should be enabled when you establish SpeedFusion tunnel.",
@@ -136,7 +136,7 @@
         "custom_id": "9d41abee275ae34376b0184c8aa50c23"
     },
     {
-        "question_id": "mock_question_10",
+        "question_id": "Q10",
         "question": "Which of the following are officially supported hypervisors for FusionHub? (You may choose more than one.)",
         "choices": [
             "Amazon Web Service",
@@ -154,7 +154,7 @@
         "custom_id": "e3f162665a07aca4490468aa8374b49f"
     },
     {
-        "question_id": "mock_question_11",
+        "question_id": "Q11",
         "question": "How do you implement WAN Bandwidth Bonding for internet traffic?",
         "choices": [
             "SpeedFusion Cloud",
@@ -169,7 +169,7 @@
         "custom_id": "a0110e2dd84fc5f949d8dff4527a44e3"
     },
     {
-        "question_id": "mock_question_12",
+        "question_id": "Q12",
         "question": "Which statement(s) is/are true regarding the AP Controller on a Peplink router? (You may select more than one answer.)",
         "choices": [
             "Manages 3rd party AP devices",
@@ -185,7 +185,7 @@
         "custom_id": "7a6fdeb4b28ee07a2ede4be610604546"
     },
     {
-        "question_id": "mock_question_13",
+        "question_id": "Q13",
         "question": "Which statements are true about MAX Adapter 5G? (Choose two)",
         "choices": [
             "Provides a portable 6 connection for Windows and Linux devices",
@@ -200,7 +200,7 @@
         "custom_id": "5f41ff417fb39bb20e69ad86d841fdae"
     },
     {
-        "question_id": "mock_question_14",
+        "question_id": "Q14",
         "question": "What is the InControl2 API Request Rate Limit?",
         "choices": [
             "20 requests per hour per organization",
