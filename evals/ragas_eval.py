@@ -34,18 +34,31 @@ class RagasEval:
         eval_llm_model: str = "gpt-4.1-nano",
         eval_boost_llm_model: str = "gpt-4.1",
         run_name: str | None = None,
+        sample: bool | int = False,
+        test_run: bool = False,
+        create_batch_job: bool = True,
     ):
         generated_testset_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "generated_testset.parquet"
         )
+        if sample and isinstance(sample, int):
+            generated_testset_df = generated_testset_df[:sample]
         nodes_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
         )
         self.test_run_name = (
             f"{testset_name}__{run_name or datetime.now().strftime("%Y-%m-%d_%H_%M")}"
         )
+
+        if test_run:
+            self.test_run_name = f"{self.test_run_name}__TESTRUN"
+            generated_testset_df = generated_testset_df[:8]
+
         self.test_set: Testset = self.init_testset(generated_testset_df, nodes_df)
 
+        self.test_run = test_run
+        self.should_create_batch_job = create_batch_job
+        self.output_dir = evals_dir / "runs"
         self.batch_manager = BatchManager(
             base_path=evals_dir / "batches",
             endpoint="/v1/chat/completions",
@@ -76,7 +89,6 @@ class RagasEval:
                 temperature=0,
             )
         )
-        self.output_dir = evals_dir / "runs"
 
     def init_testset(
         self, generated_testset_df: pd.DataFrame, nodes_df: pd.DataFrame
@@ -143,11 +155,15 @@ class RagasEval:
         for i, test_row in enumerate(self.test_set):
             async_tasks[f"query_{i}"] = test_row.eval_sample.user_input
 
-        self.batch_manager.clear_batch_files()
+        # dont clear existing batch files when testing
+        if self.should_create_batch_job:
+            self.batch_manager.clear_batch_files()
         results = await self.rag_inference.batch_query_for_eval(async_tasks)
         self.create_batch_contexts_file(results)
 
-        self.batch_manager.create_batch_job()
+        # create a new batch job if not testing
+        if self.should_create_batch_job:
+            self.batch_manager.create_batch_job()
 
     def save_metrics_summary(self, eval_result_df: pd.DataFrame) -> None:
         """
@@ -156,6 +172,9 @@ class RagasEval:
         Args:
             eval_result_df: DataFrame containing the evaluation results
         """
+        if self.test_run:
+            return
+
         # Extract only float columns (metrics)
         float_cols = eval_result_df.select_dtypes(include=['float64']).columns
 
@@ -193,7 +212,7 @@ class RagasEval:
                 ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
                 ResponseRelevancyDiverse(llm=self.boost_llm),
                 ResponseRelevancy(llm=self.eval_llm),
-                LLMContextPrecisionWithReference(),
+                # LLMContextPrecisionWithReference(),
                 NonLLMContextRecall(),
                 ContextRelevance(llm=self.boost_llm),  # NVIDIA
                 FactualCorrectness(llm=self.eval_llm),
@@ -209,5 +228,4 @@ class RagasEval:
             self.output_dir / f"result__{self.test_run_name}.parquet"
         )
 
-        # Save metrics summary
         self.save_metrics_summary(eval_result_df)

@@ -10,6 +10,7 @@ from inference.history_aware_retrieval_query import (
 )
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.language_models.chat_models import BaseChatModel
+from util.root_only_tracer import RootOnlyTracer
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
@@ -50,6 +51,8 @@ class RagInference:
 
         self.prompt = prompt
 
+        self.minimal_tracer = RootOnlyTracer(project_name="langchain-pepwave")
+
         # Setup retriever
         self.retriever = (
             lambda x: x["retrieval_query"]
@@ -63,7 +66,7 @@ class RagInference:
                 retrieval_query=get_history_aware_retrieval_query_chain(llm=self.llm)
             )
             .assign(
-                context=self.retriever.with_config(run_name="retrieve_documents"),
+                context=self.retriever,
             )
             .assign(
                 answer=create_stuff_documents_chain(
@@ -72,7 +75,7 @@ class RagInference:
                     document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
                 )
             )
-        ).with_config(run_name="rag_inference")
+        ).with_config({"run_name": "rag_inference", "callbacks": [self.minimal_tracer]})
 
         # Initialize chat history
         self.chat_history: list[tuple[str, str]] = []
