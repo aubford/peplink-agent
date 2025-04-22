@@ -17,6 +17,19 @@
         "custom_id": "5dec27ffb3e92b5831a949c14c790f79"
     },
     {
+        "question_id": "Q15",
+        "question": "In which situation is a Captive Portal applied to an SSID instead of a VLAN?",
+        "choices": [
+            "Always",
+            "When deploying a Captive Portal to Pepwave MAX cellular routers",
+            "When deploying a Captive Portal to Pepwave Access Points only",
+            "Never"
+        ],
+        "correct_answers": [
+            3
+        ]
+    },
+    {
         "question_id": "Q2",
         "question": "The customer is interested in deploying FusionHub into the HQ of the enterprise network. What is the sizing criteria to choose for the right FusionHub SKU?",
         "choices": [
