@@ -3,12 +3,12 @@ from pathlib import Path
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai import ChatOpenAI
 from ragas import evaluate
-from ragas.metrics._context_precision import NonLLMContextPrecisionWithReference
 from ragas.testset.synthesizers.testset_schema import Testset
 from load.batch_manager import BatchManager
 from batch_llm import BatchChatOpenAI
 from ragas.metrics import (
     NonLLMContextRecall,
+    NonLLMContextPrecisionWithReference,
     Faithfulness,
     ResponseRelevancy,
     ResponseRelevancyDiverse,
@@ -24,9 +24,6 @@ import os
 import json
 from typing import cast
 
-GPT_4_1_MINI = "gpt-4.1-mini"
-GPT_4_1_NANO = "gpt-4.1-nano"
-
 
 class RagasEval:
 
@@ -34,13 +31,13 @@ class RagasEval:
         self,
         evals_dir: Path,
         testset_name: str,
-        inference_llm_model: str = GPT_4_1_MINI,
-        eval_llm_model: str = GPT_4_1_NANO,
-        eval_boost_llm_model: str = GPT_4_1_MINI,
-        run_name: str | None = None,
+        inference_llm_model: str,
+        eval_llm_model: str,
+        eval_boost_llm_model: str,
         sample: bool | int = False,
         test_run: bool = False,
         should_create_batch_job: bool = True,
+        run_name: str | None = None,
     ):
         generated_testset_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "generated_testset.parquet"
@@ -85,7 +82,7 @@ class RagasEval:
             evals_dir=evals_dir,
             testset_name=testset_name,
             run_name=run_name,
-            llm_model=GPT_4_1_MINI,
+            llm_model=inference_llm_model,
             should_create_batch_job=should_create_batch_job,
         )
 
@@ -226,15 +223,16 @@ class RagasEval:
         eval_result = evaluate(
             dataset=evaluation_dataset,
             metrics=[
-                Faithfulness(),
+                Faithfulness(llm=self.eval_llm),
                 ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
                 ResponseRelevancyDiverse(llm=self.boost_llm),
-                ResponseRelevancy(llm=self.eval_llm),
+                # turn this off once we have confirmed ResponseRelevancyDiverse works better
+                ResponseRelevancy(llm=self.boost_llm), 
                 NonLLMContextPrecisionWithReference(),
                 NonLLMContextRecall(),
                 ContextRelevance(llm=self.boost_llm),  # NVIDIA
                 FactualCorrectness(llm=self.eval_llm),
-                AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
+                AnswerAccuracy(llm=self.eval_llm),  # NVIDIA
             ],
             llm=self.eval_llm,
         )

@@ -39,29 +39,27 @@ class RagInference:
 
         # Create a rate limiter for the model to avoid API throttling
         rate_limiter = InMemoryRateLimiter(
-            requests_per_second=3.0,  # 3 requests per second should be conservative
-            max_bucket_size=10,  # Allow bursts of up to 10 requests
+            requests_per_second=3.0,
+            max_bucket_size=10,
         )
 
         self.llm = ChatOpenAI(
             model=llm_model,
             temperature=temperature,
             streaming=streaming,
-            rate_limiter=rate_limiter,  # Apply rate limiting to the model
+            rate_limiter=rate_limiter,
         )
 
         self.prompt = prompt
 
         self.minimal_tracer = RootOnlyTracer(project_name="langchain-pepwave")
 
-        # Setup retriever
         self.retriever = (
             lambda x: x["retrieval_query"]
         ) | self.vector_store.as_retriever(
             search_type="mmr", search_kwargs={"k": 20, "fetch_k": 50}
         )
 
-        # Setup regular chain with chat history
         self.retrieval_chain = (
             RunnablePassthrough.assign(
                 retrieval_query=get_history_aware_retrieval_query_chain(llm=self.llm)
@@ -78,7 +76,6 @@ class RagInference:
             )
         ).with_config({"run_name": "rag_inference", "callbacks": [self.minimal_tracer]})
 
-        # Initialize chat history
         self.chat_history: list[tuple[str, str]] = []
 
     def query(self, query: str) -> dict:
@@ -130,7 +127,7 @@ class RagInference:
         )
 
         key_to_hash_map = {
-            key: BatchChatOpenAI._hash_messages(query) for key, query in queries.items()
+            key: BatchChatOpenAI.hash_messages(query) for key, query in queries.items()
         }
         # Recombine results with their keys
         recombined = {

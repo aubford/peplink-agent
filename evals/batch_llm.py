@@ -26,7 +26,7 @@ class BatchChatOpenAI(BaseChatModel):
     batch_manager: BatchManager
 
     @staticmethod
-    def _hash_messages(messages: str) -> str:
+    def hash_messages(messages: str) -> str:
         """Create a deterministic hash of the message content for tracking."""
         # Serialize messages to a canonical string
         return hashlib.md5(messages.encode("utf-8")).hexdigest()
@@ -59,7 +59,7 @@ class BatchChatOpenAI(BaseChatModel):
                     {"role": message.type, "content": str(message.content)}
                 )
         # Use a hash of the messages as the item_id for tracking
-        messages_hash = self._hash_messages(human_messages_for_hash)
+        messages_hash = self.hash_messages(human_messages_for_hash)
         all_kwargs = {
             **self.model_kwargs,
             **({"stop": stop} if stop else {}),
