@@ -3,6 +3,7 @@ from pathlib import Path
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai import ChatOpenAI
 from ragas import evaluate
+from ragas.metrics._context_precision import NonLLMContextPrecisionWithReference
 from ragas.testset.synthesizers.testset_schema import Testset
 from load.batch_manager import BatchManager
 from batch_llm import BatchChatOpenAI
@@ -11,7 +12,6 @@ from ragas.metrics import (
     Faithfulness,
     ResponseRelevancy,
     ResponseRelevancyDiverse,
-    # LLMContextPrecisionWithReference,
     FactualCorrectness,
     AnswerAccuracy,
     ContextRelevance,
@@ -24,6 +24,9 @@ import os
 import json
 from typing import cast
 
+GPT_4_1_MINI = "gpt-4.1-mini"
+GPT_4_1_NANO = "gpt-4.1-nano"
+
 
 class RagasEval:
 
@@ -31,9 +34,9 @@ class RagasEval:
         self,
         evals_dir: Path,
         testset_name: str,
-        inference_llm_model: str = "gpt-4.1-mini",
-        eval_llm_model: str = "gpt-4.1-nano",
-        eval_boost_llm_model: str = "gpt-4.1",
+        inference_llm_model: str = GPT_4_1_MINI,
+        eval_llm_model: str = GPT_4_1_NANO,
+        eval_boost_llm_model: str = GPT_4_1_MINI,
         run_name: str | None = None,
         sample: bool | int = False,
         test_run: bool = False,
@@ -82,7 +85,7 @@ class RagasEval:
             evals_dir=evals_dir,
             testset_name=testset_name,
             run_name=run_name,
-            llm_model=inference_llm_model,
+            llm_model=GPT_4_1_MINI,
             should_create_batch_job=should_create_batch_job,
         )
 
@@ -227,7 +230,7 @@ class RagasEval:
                 ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
                 ResponseRelevancyDiverse(llm=self.boost_llm),
                 ResponseRelevancy(llm=self.eval_llm),
-                # LLMContextPrecisionWithReference(),
+                NonLLMContextPrecisionWithReference(),
                 NonLLMContextRecall(),
                 ContextRelevance(llm=self.boost_llm),  # NVIDIA
                 FactualCorrectness(llm=self.eval_llm),
