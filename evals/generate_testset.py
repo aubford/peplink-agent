@@ -2,9 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import dotenv
 import pandas as pd
-import random
-import numpy as np
-from typing import Optional, FrozenSet
+from typing import FrozenSet
 from langchain_openai import ChatOpenAI
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -53,7 +51,6 @@ class GenerateTestSet:
         min_cluster_size: int = 3,
         max_context_token_count: int = 30_000,
         temperature: float = 0.5,
-        random_seed: Optional[int] = None,
         doc_text_column: str = "page_content",
     ):
         # Initialize LLM and output directory
@@ -74,7 +71,6 @@ class GenerateTestSet:
         self.testset_size = testset_size
         self.cluster_size = non_sibling_target_cluster_size
         self.min_cluster_size = min_cluster_size
-        self.random_seed = random_seed
         self.doc_text_column = doc_text_column
 
         # Load data
@@ -145,12 +141,8 @@ class GenerateTestSet:
         Returns:
             Set of frozensets, where each frozenset contains the IDs of nodes in a cluster/path
         """
-        if self.random_seed is not None:
-            random.seed(self.random_seed)
-            np.random.seed(self.random_seed)
-
         # Create a shuffled copy of the non-sibling relationships dataframe
-        graph_df = self.main_df.sample(frac=1.0, random_state=self.random_seed)
+        graph_df = self.main_df.sample(frac=1.0)
         # create simplified graph df
         graph_df = graph_df.drop(columns=["bidirectional", "num_noisy_items"])
         graph_df = graph_df.drop_duplicates(
@@ -307,6 +299,7 @@ class GenerateTestSet:
         for cluster in self.found_relationship_clusters:
             nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)].copy()
             non_sibling_cluster_size = len(nodes_df)
+            print(f"Non-sibling cluster size: {non_sibling_cluster_size}")
 
             sibling_relationships = self.sibling_df[
                 (self.sibling_df["source_id"].isin(cluster))
@@ -328,7 +321,7 @@ class GenerateTestSet:
             while (
                 self._tokens_under_threshold(nodes_df)
                 and not sibling_nodes.empty
-                and len(nodes_df) < non_sibling_cluster_size * 2
+                and len(nodes_df) < non_sibling_cluster_size * 1.5
             ):
                 # Pop a sibling node and add it to nodes_df
                 sibling_node = sibling_nodes.iloc[0]
@@ -431,11 +424,11 @@ class GenerateTestSet:
 if __name__ == "__main__":
     generate_testset = GenerateTestSet(
         testset_name="main_testset",
-        testset_size=2,
-        max_context_token_count=8_000,
+        testset_size=200,
+        max_context_token_count=9_000,
         temperature=0.6,
-        non_sibling_target_cluster_size=25,
-        min_cluster_size=5,
+        non_sibling_target_cluster_size=27,
+        min_cluster_size=8,
         llm_model=GPT_4_1_MODEL,
         doc_text_column="technical_summary",
     )
