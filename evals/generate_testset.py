@@ -4,156 +4,78 @@ import dotenv
 import pandas as pd
 import random
 import numpy as np
-from typing import Optional, Set, List, FrozenSet
+from typing import Optional, FrozenSet
 from langchain_openai import ChatOpenAI
 from langchain.prompts import (
     ChatPromptTemplate,
     FewShotChatMessagePromptTemplate,
 )
-from langchain.output_parsers import ResponseSchema, StructuredOutputParser
+from pydantic import BaseModel, Field
+
 from evals.evals_utils import output_nodes_path, output_relationships_path
+from util.util_main import count_tokens
 import shutil
+from evals.prompts.prompts import load_prompts
 
 dotenv.load_dotenv()
+this_dir = Path(__file__).parent
+GPT_4_1_MODEL = "gpt-4.1"
 
-"""
-TODO:
-- Add sibling relationships to the clusters
-    - 1. Ask LLM if it's a good cluster
-    - 2. If so, find the most common node
-    - 3. Append all the siblings of that node to the cluster
-"""
+PROMPTS = load_prompts()
+
+
+class FactCitation(BaseModel):
+    claim: str = Field(description="An atomic claim from your answer")
+    document_names: list[str] = Field(
+        description="The names of the documents that you used as the basis for the claim"
+    )
+
+
+class ResponseModel(BaseModel):
+    query: str = Field(
+        description="A multifaceted multi-hop query based on the provided documents"
+    )
+    answer: str = Field(
+        description="A detailed answer to the query using only information from the documents"
+    )
+    citations: list[FactCitation] = Field(
+        description="A list of atomic claims from your answer along with supporting document names"
+    )
 
 
 class GenerateTestSet:
-
-    main_prompt = "# Documents:\n\n{documents}\n\n# Instructions:\nGenerate a query and answer based on the documents provided above according to the provided instructions"
-
-    system_prompt = """
-You are a technical content analyst specializing in IT networking and Pepwave products.
-Your task is to analyze a set of documents and generate a multifaceted multi-hop query that a technician might ask based solely on the information in those documents.
-Each set of documents contains related information. Identify a topic, product, technology, or concept that exists in many of the documents. There should be a diversity of useful technical information about that topic in multiple documents.
-Create a query from the technical facts that can be gleaned from the documents that incorporates different information from as many documents as possible and connects them meaningfully.
-Some of the documents are forum posts and contain various sections like ## Content, and ## Comments. The ### Content section is the original post and usually contains a question. Information presented as part of a question is not factual information and should not used to create the query. The ### Comments section contains responses to the original post and should be used as a source of technical information.
-Once you have created the query, write a detailed answer to the query using only the information in the documents.
-The query and answer should be based solely on the documents provided.
-"""
-
-    examples = [
-        {
-            "documents": '''
-<DOCUMENT 1>
-"""
-## Post
-
-### Title: My connection IS SLOW
-
-### Content:
-
-I connected a 50mps fibre optic internet connection to port 1 and a 10mbps phone internet service to port two.
-Then cabled from Lan 1 to a wi fi router and I connect my devices via wi fi to that router.
-However this is slower and more unstable than if I just connect my 50mps straight to my wifi router, overriding the Peplink.
-I can see this when I test on Speedtest.net.
-
-## Comments:
-
-<comment>
-Speedtest.net does not give an accurate reading when using multiple WANs because it doesn't take the Pepwave's load balancing into account. You must configure outbound policy rules in order to implement your scenario. Set your outbound policy to use the low-latency option and it will use the fastest connection.
-  <reply>
-  Hi Ron!
-Does this mean that if I am using Strong DNS, this might be slowing it down?
-    <reply>
-    No, you just need to configure outbound policy rules.
-  </reply>
-</comment>
-"""
-
-<DOCUMENT 2>
-"""
-hi this is Dan and in this video I want to explain how to configure the outbound policy rules there are several options available and they all have different use cases when in doubt the best option is the power-fusion option that will use the fastest connection based on the FQDN protocol it is the best option to use for most simple use cases or if you are unsure I would recommend taking a look at the manual to learn about the other options available to you
-"""
-
-<DOCUMENT 3>
-"""
-You know about classes, but you may be thinking which traffic goes into each class? And how many classes should I configure? Well, let me help you simplify this You don't need to use every combination of class and drop probability. There is a real time class for voice and interactive video. This is a high priority class next, a class for critical data. This is for your business applications, databases, website, traffic. We could split this into two classes. If you do end up splitting your high priority class into two classes, make sure you set the outbound policy to use low-latency otherwise your equipment will not be able to handle the load and you may encounter a "unable to handle load" error. I would recommend starting with the default settings and then adding classes as needed. In all classes are not as complex as they may seem.
-"""
-''',
-            "output": """
-{
-    "query": "What outbound policy settings should be attempted to circumvent a slow connection when using multiple wired connections or when encountering an 'unable to handle load' error? Can you rely on Speedtest.net to accurately measure performance in this scenario when using multiple wired connections?",
-    "answer": "First, try the low-latency option. This is the best option when using multiple wired connections and is a solution to the 'unable to handle load' error. If that doesn't work, try the power-fusion option. Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account."
-}
-""",
-        },
-        {
-            "documents": '''
-<DOCUMENT 1>
-"""
-## Post
-
-### Title: How to optimize for MLRPV protocol?
-
-### Content:
-
-Our setup is using MLRPV protocol with 3 patchworked units in a BAFTA cluster.  The BAFTA cluster tends to be the best performing cluster for our use case with a class 5 ensemble transportation layer.  How do I optimize for this protocol?
-
-## Comments:
-
-<comment>
-To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
-</comment>
-"""
-
-<DOCUMENT 2>
-"""
-## Post
-
-### Title: What does the MLRPV-ensemble mode do?
-
-### Content:
-
-MLRPV protocol is a protocol that is typically used for section 9434 robotics implementations. It is an expert-only feature.  If you're not working in distributed robotics, you probably don't need to worry about it and can just leave it off. You would turn it on if you have a robot farm and want to make sure that all the robots are working together correctly. It does this by synchronizing the clocks of the robots day-night entrainment cycles.
-
-## Comments:
-
-<comment>
-To optimize for MLRPV protocol, first make sure that the patchwork is grounded into at least 3 different antenna pods. Then, configure the system controller to use MLRPV-ensemble mode.
-</comment>
-"""
-
-<DOCUMENT 3>
-"""
-one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for section 9434 robotics situations it was added to the system controller in version 6.1 and can be used with any type of robot cluster you might come across and what have you I would recommend also taking a look at the ensemble controller section because that also has some features that are relevant to that protocol at the end of the day it just makes it really easy to get your robots synchronized well
-"""
-''',
-            "output": """
-{
-    "query": "What is MLRPV-ensemble mode, how does it work, and how should you set up your BAFTA cluster patchwork when using it?",
-    "answer": "MLRPV-ensemble mode is a new mode for section 9434 robotics situations that was added to the system controller in version 6.1 and can be used with any type of robot cluster when working with the MLRPV protocol. Enable it if you have a robot farm and want to make sure that all the robots are working together correctly. It works by synchronizing the clocks of the robots day-night entrainment cycles. To use MLRPV-ensmble mode with a patchworked BAFTA cluster, you need to make sure the patchwork is grounded into at least 3 different antenna pods before you turn it on in the system controller."
-}
-""",
-        },
-    ]
-
     def __init__(
         self,
-        output_dir: Path,
-        llm_model: str = "gpt-4o",
-        testset_size: int = 50,
-        cluster_size: int = 7,
+        testset_name: str,
+        llm_model: str = GPT_4_1_MODEL,
+        testset_size: int = 100,
+        non_sibling_target_cluster_size: int = 7,
         min_cluster_size: int = 3,
+        max_context_token_count: int = 30_000,
+        temperature: float = 0.5,
         random_seed: Optional[int] = None,
+        doc_text_column: str = "page_content",
     ):
-        self.llm = ChatOpenAI(model="gpt-4o", temperature=0.4)
+        # Initialize LLM and output directory
+        self.llm = ChatOpenAI(
+            model=llm_model,
+            temperature=temperature,
+            logprobs=True,
+        )
 
-        self.output_dir = output_dir
-        self.output_dir.mkdir(parents=True, exist_ok=False)
+        self.testset_name = testset_name
+        testset_file_name = f"testset-{testset_size}_{testset_name}_{datetime.now().strftime('%y-%m-%d')}"
+
+        self.output_dir = this_dir / "testsets" / testset_file_name
+        self.output_dir.mkdir(parents=True, exist_ok=True)  # todo: change back
 
         self.llm_model = llm_model
+        self.max_context_token_count = max_context_token_count
         self.testset_size = testset_size
-        self.cluster_size = cluster_size
+        self.cluster_size = non_sibling_target_cluster_size
         self.min_cluster_size = min_cluster_size
         self.random_seed = random_seed
+        self.doc_text_column = doc_text_column
 
         # Load data
         self.nodes_df = pd.read_parquet(output_nodes_path)
@@ -170,7 +92,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         # Thresholds for non-multi relationships
         self.single_rel_thresholds = {
             "summary_similarity": 0.815,
-            "title_similarity": 0.805,
+            "title_similarity": 0.81,
             "themes_overlap_score": 0.24,
             "entities_overlap_score": 0.24,
         }
@@ -180,16 +102,36 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         )
 
         # Initialize storage for clusters
-        self.found_relationship_clusters: Set[FrozenSet[str]] = set()
-        self.relationship_cluster_info_dfs: List[pd.DataFrame] = []
-        self.node_clusters: List[pd.DataFrame] = []
+        self.found_relationship_clusters: set[FrozenSet[str]] = set()
+        self.relationship_cluster_info_dfs: list[pd.DataFrame] = []
+        self.node_clusters: list[pd.DataFrame] = []
+
+    main_prompt = PROMPTS["generate_testset/main_prompt"]
+
+    system_prompt = PROMPTS["generate_testset/system_prompt"]
+
+    examples = [
+        {
+            "documents": PROMPTS["generate_testset/exampleA_documents"],
+            "output": PROMPTS["generate_testset/exampleA_output"],
+        },
+        {
+            "documents": PROMPTS["generate_testset/exampleB_documents"],
+            "output": PROMPTS["generate_testset/exampleB_output"],
+        },
+    ]
 
     def create_main_df(self):
+        """
+        Create a DataFrame of non-sibling relationships.
+        Add a flag to indicate whether source/target nodes are of the same data type so we can require
+        higher threshold later.
+        """
         main_df = self.relationships_df[
             ~self.relationships_df["relationship_type"].str.contains("sibling")
         ]
 
-        # Add data type relationship flag
+        # Add same data type relationship flag for `find_relationship_clusters`
         return main_df.assign(
             is_same_data_type=lambda df: df["source_id"].map(
                 self.nodes_df.set_index("node_id")["type"]
@@ -197,7 +139,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             == df["target_id"].map(self.nodes_df.set_index("node_id")["type"])
         )
 
-    def find_relationship_clusters(self) -> Set[FrozenSet[str]]:
+    def find_relationship_clusters(self) -> set[FrozenSet[str]]:
         """
         Find n clusters of relationships by traversing the knowledge graph using dataframe operations.
         Returns:
@@ -207,14 +149,14 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             random.seed(self.random_seed)
             np.random.seed(self.random_seed)
 
-        # Create a shuffled copy of the dataframe
+        # Create a shuffled copy of the non-sibling relationships dataframe
         graph_df = self.main_df.sample(frac=1.0, random_state=self.random_seed)
         # create simplified graph df
         graph_df = graph_df.drop(columns=["bidirectional", "num_noisy_items"])
         graph_df = graph_df.drop_duplicates(
             subset=["source_id", "target_id", "relationship_type"]
         )
-        # create separate df for merged relationships
+        # create separate df for multi-relationships (merged multiple relationships into one)
         multi_df = graph_df[graph_df["relationship_type"] == "multi"]
         non_multi_df = graph_df[~graph_df.index.isin(multi_df.index)]
 
@@ -243,12 +185,16 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         )
 
         clusters: set = set()
+        # Main loop: build clusters until testset size or graph is exhausted
         while len(clusters) <= self.testset_size and len(graph_df) > 1:
 
+            # pop first row from graph_df and init the cluster_df
             cluster_df = graph_df.iloc[[0]]
             graph_df = graph_df.iloc[1:]
 
+            # expand the cluster using breadth-first until it reaches the cluster_size
             while len(cluster_df) < self.cluster_size:
+                # Try to expand the cluster by adding neighbors from multi relationships first
                 neighbors = multi_df[
                     ~multi_df.index.isin(cluster_df.index)
                     & (
@@ -257,12 +203,14 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                     )
                 ]
                 if neighbors.empty:
+                    # If no multi neighbors, try any remaining edges in the graph
                     neighbors = graph_df[
                         graph_df["source_id"].isin(cluster_df["target_id"])
                         | graph_df["target_id"].isin(cluster_df["source_id"])
                     ]
                 if neighbors.empty:
                     break
+                # Remove duplicate neighbors to avoid cycles and redundant expansion
                 filtered_neighbors = neighbors.drop_duplicates(subset="target_id")
                 filtered_neighbors = filtered_neighbors.drop_duplicates(
                     subset="source_id"
@@ -283,6 +231,9 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         return clusters
 
     def tack_on_node_col(self, clusters_df: pd.DataFrame, col: str) -> None:
+        """
+        Add a column to the clusters DataFrame with node attributes (e.g., title, content) for both source and target nodes.
+        """
         clusters_df[f"source_{col}"] = clusters_df["source_id"].map(
             self.nodes_df.set_index("node_id")[col]
         )
@@ -290,7 +241,7 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             self.nodes_df.set_index("node_id")[col]
         )
 
-    def _generate_cluster_info_parquet(self, dfs: List[pd.DataFrame], filename: str):
+    def _generate_cluster_info_parquet(self, dfs: list[pd.DataFrame], filename: str):
         """
         Generate a parquet file with the cluster information for inspection.
         This may have duplicate clusters that don't exist in the found_clusters set.
@@ -304,9 +255,13 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             self.tack_on_node_col(sample_df, "page_content")
             self.tack_on_node_col(sample_df, "title")
             self.tack_on_node_col(sample_df, "technical_summary")
+            self.tack_on_node_col(sample_df, "primary_content")
         sample_df.to_parquet(self.output_dir / f"{filename}.parquet")
 
     def _cluster_reporting(self):
+        """
+        Print summary statistics about the clusters found.
+        """
         print("\n" + "-" * 50 + "\n")
         print(f"Clusters count: {len(self.found_relationship_clusters)}")
         print(
@@ -336,16 +291,23 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         Returns:
             Boolean indicating whether token count exceeds the threshold.
         """
-        max_token_count = 30_000
-        token_count = nodes_df["page_content"].apply(len).sum()
-        return token_count < max_token_count
+        token_count = nodes_df[self.doc_text_column].apply(count_tokens).sum()
+        is_under_threshold = token_count < self.max_context_token_count
+        if not is_under_threshold:
+            print(
+                f"FYI: A token count of {token_count} exceeded threshold {self.max_context_token_count}"
+            )
+        return is_under_threshold
 
     def get_node_clusters(self):
         """
         For each cluster, get the corresponding nodes and append siblings up to a max token count.
+        Nodes are considered siblings if they share the same 'parent_doc_id' or 'post_id'.
         """
         for cluster in self.found_relationship_clusters:
             nodes_df = self.nodes_df[self.nodes_df["node_id"].isin(cluster)].copy()
+            non_sibling_cluster_size = len(nodes_df)
+
             sibling_relationships = self.sibling_df[
                 (self.sibling_df["source_id"].isin(cluster))
                 | (self.sibling_df["target_id"].isin(cluster))
@@ -360,27 +322,27 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                     ).unique()
                 )
             ]
-            while self._tokens_under_threshold(nodes_df) and not sibling_nodes.empty:
+            print(f"Found {len(sibling_nodes)} sibling nodes.")
+            # add siblings until the token count exceeds the threshold or number of siblings added is
+            # greater than half the initial cluster size.
+            while (
+                self._tokens_under_threshold(nodes_df)
+                and not sibling_nodes.empty
+                and len(nodes_df) < non_sibling_cluster_size * 2
+            ):
                 # Pop a sibling node and add it to nodes_df
                 sibling_node = sibling_nodes.iloc[0]
                 sibling_nodes = sibling_nodes.iloc[1:]
                 # Only add if not already in nodes_df
                 if sibling_node["node_id"] not in nodes_df["node_id"].values:
                     nodes_df.loc[len(nodes_df)] = sibling_node
+            print(f"Added {len(nodes_df) - non_sibling_cluster_size} sibling nodes")
             self.node_clusters.append(nodes_df)
 
     def llm_generate_testset(self):
-        query_schema = ResponseSchema(
-            name="query",
-            description="A multifaceted multi-hop query based on the provided documents",
-        )
-        answer_schema = ResponseSchema(
-            name="answer",
-            description="A detailed answer to the query using only information from the documents",
-        )
-        response_schemas = [query_schema, answer_schema]
-        output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
-
+        """
+        Use the LLM to generate queries and answers for each node cluster, then save the results.
+        """
         example_prompt = ChatPromptTemplate.from_messages(
             [("human", self.main_prompt), ("ai", "{output}")]
         )
@@ -398,17 +360,19 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
             ]
         )
 
-        # Chain
-        chain = final_prompt | self.llm | output_parser
+        chain = final_prompt | self.llm.with_structured_output(ResponseModel)
+        return self.invoke_chain(chain, self.doc_text_column)
 
+    def invoke_chain(self, chain, doc_text_column: str):
         results = []
         for i, node_cluster_df in enumerate(self.node_clusters):
             documents_text = ""
+            documents_text_list = []
             for idx, (_, row) in enumerate(node_cluster_df.iterrows(), 1):
-                documents_text += (
-                    f'<DOCUMENT {idx}>\n"""\n{row["page_content"]}\n"""\n\n'
-                )
-
+                row_doc_text = row[doc_text_column]
+                if row_doc_text:
+                    documents_text += f'## Document_{idx}\n\n{row_doc_text}\n\n'
+                    documents_text_list.append(row_doc_text)
             try:
                 result = chain.invoke(
                     {
@@ -420,8 +384,10 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                     {
                         "cluster_id": i,
                         "documents_text": documents_text,
-                        "query": result["query"],
-                        "answer": result["answer"],
+                        "context_docs_list": documents_text_list,
+                        "query": result.query,
+                        "answer": result.answer,
+                        "citations": [c.model_dump() for c in result.citations],
                         "document_ids": node_cluster_df["id"].tolist(),
                         "node_ids": node_cluster_df["node_id"].tolist(),
                     }
@@ -430,10 +396,11 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
                 print(f"Error processing cluster {i}: {e}")
 
         # Save results to a file
-        output_path = self.output_dir / "generated_testset.parquet"
-        pd.DataFrame(results).to_parquet(output_path)
+        output_path = self.output_dir / f"generated_testset_{self.testset_name}.json"
+        pd.DataFrame(results).to_json(output_path, orient="records", indent=2)
 
         print(f"Generated testset saved to {output_path}")
+
         return results
 
     def copy_kg_data_to_testset_dir(self):
@@ -447,6 +414,9 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         print(f"Copied knowledge graph data files to {self.output_dir}")
 
     def create_testset(self):
+        """
+        Main entry point: find clusters, generate node clusters, run LLM, and save all outputs.
+        """
         self.found_relationship_clusters = self.find_relationship_clusters()
         self._cluster_reporting()
         self._generate_cluster_info_parquet(
@@ -458,14 +428,15 @@ one new feature we just addeed is the MLRPV-ensemble mode this is a new mode for
         self.llm_generate_testset()
 
 
-this_dir = Path(__file__).parent
 if __name__ == "__main__":
-    testset_size = 1
     generate_testset = GenerateTestSet(
-        output_dir=this_dir
-        / "testsets"
-        / f"testset_{testset_size}__{datetime.now().strftime('%y-%m-%d_%H_%M')}",
-        llm_model="gpt-4o",
-        testset_size=testset_size,
+        testset_name="main_testset",
+        testset_size=2,
+        max_context_token_count=8_000,
+        temperature=0.6,
+        non_sibling_target_cluster_size=25,
+        min_cluster_size=5,
+        llm_model=GPT_4_1_MODEL,
+        doc_text_column="technical_summary",
     )
     generate_testset.create_testset()

@@ -4,6 +4,8 @@ import pandas as pd
 from pathlib import Path
 import json
 
+import tiktoken
+
 
 def serialize_document(document: Document) -> Dict[str, Any]:
     return {"page_content": document.page_content, "metadata": document.metadata}
@@ -160,3 +162,9 @@ def to_serialized_parquet(df: pd.DataFrame, path: Path) -> pd.DataFrame:
     df.to_parquet(path)
     print(f"Saved {len(df)} documents to {path}")
     return df
+
+
+def count_tokens(text: str) -> int:
+    """Count the tokens in a text."""
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+    return len(tokenizer.encode(str(text)))

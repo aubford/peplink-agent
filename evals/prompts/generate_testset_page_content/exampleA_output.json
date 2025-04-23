@@ -1,0 +1,22 @@
+{
+    "query": "What outbound policy settings should be attempted to deal with a slow connection when using multiple wired connections or when encountering an 'unable to handle load' error? Can you rely on Speedtest.net to accurately measure performance in this scenario when using multiple wired connections?",
+    "answer": "First, try the low-latency option. This is the best option when using multiple wired connections and is a solution to the 'unable to handle load' error. If that doesn't work, try the power-fusion option. Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account.",
+    "citations": [
+        {
+            "fact": "The low-latency outbound policy is the best option when using multiple wired connections",
+            "document_ids": ["Document_1"]
+        },
+        {
+            "fact": "The low-latency outbound policy solves 'unable to handle load' error.",
+            "document_ids": ["Document_3"]
+        },
+        {
+            "fact": "Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account.",
+            "document_ids": ["Document_1"]
+        },
+        {
+            "fact": "The power-fusion option is a good backup option.",
+            "document_ids": ["Document_2"]
+        }
+    ]
+}

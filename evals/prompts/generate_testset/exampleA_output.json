@@ -1,0 +1,22 @@
+{
+  "query": "What is the first troubleshooting step a technician should take when using multiple wired connections or multiple traffic classes and noticing a slower than normal connection?",
+  "answer": "First, try adjusting outbound policy. Initially, try the low-latency option. This is the best option when using multiple wired connections and is requred when using multiple traffic classes. Using a different outbound policy with multiple traffic classes will result in an 'unable to handle load' error. If that doesn't work, try the power-fusion option as that is a reliable default for most simple use cases. Note that Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account.",
+  "citations": [
+    {
+      "fact": "The low-latency outbound policy is the best option when using multiple wired connections",
+      "document_ids": ["Document_2"]
+    },
+    {
+      "fact": "The low-latency outbound policy is required when using multiple traffic classes, otherwise a 'unable to handle load' error will occur.",
+      "document_ids": ["Document_3"]
+    },
+    {
+      "fact": "Speedtest.net is not a reliable tool for measuring performance when using multiple wired connections because it does not take the Pepwave's load balancing into account.",
+      "document_ids": ["Document_2"]
+    },
+    {
+      "fact": "The power-fusion outbound policy is a reliable default for simple use cases.",
+      "document_ids": ["Document_1"]
+    }
+  ]
+}

@@ -34,7 +34,7 @@ class YoutubeLoad(BaseLoad, YouTubeSyntheticDataLoader):
             Documents after text splitting.
         """
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=10000, chunk_overlap=3000
+            chunk_size=10_000, chunk_overlap=3_000
         )
         split_docs = self._split_docs(documents, text_splitter)
         # primary content should be the split page content for YouTube

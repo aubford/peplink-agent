@@ -1,0 +1,18 @@
+{
+    "query": "What is MLRPV-ensemble mode, how does it work, and how should you set up your BAFTA cluster patchwork when using it?",
+    "answer": "MLRPV-ensemble mode is a new mode for section 9434 robotics situations that was added to the system controller in version 6.1 and can be used with any type of robot cluster when working with the MLRPV protocol. Enable it if you have a robot farm and want to make sure that all the robots are working together correctly. It works by synchronizing the clocks of the robots day-night entrainment cycles. To use MLRPV-ensmble mode with a patchworked BAFTA cluster, you need to make sure the patchwork is grounded into at least 3 different antenna pods before you turn it on in the system controller.",
+    "citations": [
+        {
+            "fact": "MLRPV-ensemble mode is for the synchronizing robots using the MLRPV protocol for robot farms/clusters for section 9434 robotics",
+            "document_ids": ["Document_2", "Document_3"]
+        },
+        {
+            "fact": "MLRPV-ensemble mode was added in version 6.1",
+            "document_ids": ["Document_3"]
+        },
+        {
+            "fact": "To use MLRPV-ensmble mode with a patchworked BAFTA cluster, make sure the patchwork is grounded into at least 3 different antenna pods before accessing the system controller.",
+            "document_ids": ["Document_1", "Document_2"]
+        }
+    ]
+}
