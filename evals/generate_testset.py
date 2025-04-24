@@ -18,6 +18,7 @@ from evals.prompts.prompts import load_prompts
 
 dotenv.load_dotenv()
 this_dir = Path(__file__).parent
+testset_dir = this_dir / "testsets"
 GPT_4_1_MODEL = "gpt-4.1"
 
 PROMPTS = load_prompts()
@@ -43,6 +44,49 @@ class ResponseModel(BaseModel):
 
 
 class GenerateTestSet:
+    """
+    GenerateTestSet constructs multi-hop RAG evaluation testsets by leveraging a knowledge graph (KG) of documents
+    and their relationships, and generating queries/answers using an LLM.
+
+    Core Workflow:
+    --------------
+    - Loads nodes and relationships from pre-built KG parquet files.
+    - Applies column-specific thresholds (`single_rel_thresholds`) to filter non-multi relationships, with adaptive
+      thresholding for same-type node pairs.
+    - Clusters are formed by traversing the KG using a modified breadth-first strategy:
+        - First pass excludes 'sibling' relationships in order to generate a diverse base set. It also favors "multi"
+          relationships or nodes connected with more than one type of relationship as these are considered more reliable.
+        - Clusters are grown up to `non_sibling_target_cluster_size` nodes, with a minimum enforced by
+          `min_cluster_size`.
+        - Only clusters meeting the minimum size are retained; process continues until `testset_size` clusters are
+          found.
+    - For each cluster, additional sibling nodes (sharing `parent_doc_id` or `post_id`) are appended, up to a token
+      budget (`max_context_token_count`) or a proportional cap (1.5x the non-sibling cluster size). Sibling nodes are
+      nodes that share a parent document or were forum comments/responses to the same original post.
+    - For each node cluster, a prompt is constructed and sent to the LLM to generate:
+        - A multi-hop query requiring synthesis of information from multiple documents.
+        - An answer grounded in the provided documents, with each atomic claim cited to supporting documents so the quality
+        of the answer can be inspected and assessed.
+        - A prompting strategy is used that uses a tiered approach to requesting the LLM meet evidence requirements.
+        - The LLM is required to return empty fields if none of the evidence requirements tiers (minimum facts + breadth of documents)
+        are not met.
+    - Results are saved as structured JSON, including queries, answers, citations, and the underlying document/node IDs as metadata.
+    - Cluster metadata and a copy of the KG data are exported for quality analysis and reproducibility.
+    - Git tags are used to track the codebase state at the time of testset generation for reproducibility.
+
+    Notable Implementation Details:
+    ------------------------------
+    - Relationship filtering uses both static and adaptive thresholds, with higher thresholds for same-type node pairs.
+    - Clustering prioritizes multi-relationship edges, and avoids cycles/redundant expansion by deduplication.
+    - Sibling node augmentation is strictly bounded by both token count and proportional size to avoid exceeding LLM
+      context limits.
+    - Prompting uses a system prompt, main prompt, and few-shot examples, enforcing strict evidence and citation
+      requirements.
+    - All configuration is parameterized via the constructor: `testset_name`, `testset_size`,
+      `non_sibling_target_cluster_size`, `min_cluster_size`, `llm_model`, `max_context_token_count`, `temperature`,
+      and `doc_text_column`.
+    """
+
     def __init__(
         self,
         testset_name: str,
@@ -61,9 +105,9 @@ class GenerateTestSet:
         )
 
         self.testset_name = testset_name
-        testset_file_name = f"testset-{testset_size}_{testset_name}_{datetime.now().strftime('%y-%m-%d')}"
+        testset_dirname = f"testset-{testset_size}_{testset_name}_{datetime.now().strftime('%y-%m-%d')}"
 
-        self.output_dir = this_dir / "testsets" / testset_file_name
+        self.output_dir = testset_dir / testset_dirname
         self.output_dir.mkdir(parents=True, exist_ok=False)
 
         self.llm_model = llm_model
@@ -421,15 +465,38 @@ class GenerateTestSet:
         self.llm_generate_testset()
 
 
-if __name__ == "__main__":
-    generate_testset = GenerateTestSet(
-        testset_name="ludicrous_context",
-        testset_size=15,
-        max_context_token_count=100_000,
-        temperature=0.6,
-        non_sibling_target_cluster_size=200,
-        min_cluster_size=75,
-        llm_model=GPT_4_1_MODEL,
-        doc_text_column="technical_summary",
-    )
-    generate_testset.create_testset()
+class TransformTestset:
+    def __init__(self, testset_dirname: str):
+        self.output_dir = testset_dir / testset_dirname
+        testset_file_path = self.output_dir / "generated_testset.json"
+        if not testset_file_path.exists():
+            raise FileNotFoundError(f"Testset file not found: {testset_file_path}")
+        with open(testset_file_path, "r", encoding="utf-8") as f:
+            self.data = json.load(f)
+
+    def create_subsample_testset(self) -> None:
+        """
+        Create a subset of the testset taking every other sample (even cluster_id only),
+        and save as {name}__100_subsample.json in the same output directory.
+        """
+        # Keep only even cluster_id
+        subsample = [item for item in self.data if item.get("cluster_id", 0) % 2 == 0]
+
+        # Save to new file
+        subsample_file = self.output_dir / f"generated_testset__100_subsample.json"
+        with open(subsample_file, "w", encoding="utf-8") as f:
+            json.dump(subsample, f, indent=2, ensure_ascii=False)
+
+        print(f"Subset testset saved to {subsample_file}")
+
+    def create_query_set(self):
+        "Get all the queries from the testset and save as a json array of strings to a file"
+        queries = [item["query"] + "\n\n" + item["answer"] for item in self.data]
+        with open(self.output_dir / "queries.json", "w", encoding="utf-8") as f:
+            json.dump(queries, f, indent=2, ensure_ascii=False)
+
+    def create_query_set_text_file(self):
+        "Get all the queries from the testset and save as a json array of strings to a file"
+        queries = [item["query"] + "\n\n" + item["answer"] for item in self.data]
+        with open(self.output_dir / "queries.txt", "w", encoding="utf-8") as f:
+            f.write("\n\n".join(queries))

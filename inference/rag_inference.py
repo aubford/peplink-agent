@@ -133,6 +133,7 @@ class RagInference:
         recombined = {
             key: result for key, result in zip(key_to_hash_map.keys(), results)
         }
+        # ensure that abatch maintained the same order for inputs/results
         for key, result in recombined.items():
             assert (
                 result["answer"] == key_to_hash_map[key]
