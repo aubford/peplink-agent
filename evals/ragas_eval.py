@@ -39,8 +39,8 @@ class RagasEval:
         should_create_batch_job: bool = True,
         run_name: str | None = None,
     ):
-        generated_testset_df = pd.read_parquet(
-            evals_dir / "testsets" / testset_name / "generated_testset.parquet"
+        generated_testset_df = pd.read_json(
+            evals_dir / "testsets" / testset_name / "generated_testset.json"
         )
         if sample and isinstance(sample, int):
             generated_testset_df = generated_testset_df[:sample]
@@ -51,6 +51,7 @@ class RagasEval:
             f"{testset_name}__{run_name or datetime.now().strftime("%Y-%m-%d_%H_%M")}"
         )
 
+        # add TESTRUN flag to filename and limit to max 8 samples
         if test_run:
             self.test_run_name = f"{self.test_run_name}__TESTRUN"
             generated_testset_df = generated_testset_df[:8]
@@ -227,7 +228,7 @@ class RagasEval:
                 ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
                 ResponseRelevancyDiverse(llm=self.boost_llm),
                 # turn this off once we have confirmed ResponseRelevancyDiverse works better
-                ResponseRelevancy(llm=self.boost_llm), 
+                ResponseRelevancy(llm=self.boost_llm),
                 NonLLMContextPrecisionWithReference(),
                 NonLLMContextRecall(),
                 ContextRelevance(llm=self.boost_llm),  # NVIDIA

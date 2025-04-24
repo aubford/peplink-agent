@@ -57,14 +57,13 @@ class GenerateTestSet:
         self.llm = ChatOpenAI(
             model=llm_model,
             temperature=temperature,
-            logprobs=True,
         )
 
         self.testset_name = testset_name
         testset_file_name = f"testset-{testset_size}_{testset_name}_{datetime.now().strftime('%y-%m-%d')}"
 
         self.output_dir = this_dir / "testsets" / testset_file_name
-        self.output_dir.mkdir(parents=True, exist_ok=True)  # todo: change back
+        self.output_dir.mkdir(parents=True, exist_ok=False)
 
         self.llm_model = llm_model
         self.max_context_token_count = max_context_token_count
@@ -87,9 +86,9 @@ class GenerateTestSet:
 
         # Thresholds for non-multi relationships
         self.single_rel_thresholds = {
-            "summary_similarity": 0.815,
-            "title_similarity": 0.81,
-            "themes_overlap_score": 0.24,
+            "summary_similarity": 0.83,
+            "title_similarity": 0.83,
+            "themes_overlap_score": 0.25,
             "entities_overlap_score": 0.24,
         }
 
@@ -317,11 +316,11 @@ class GenerateTestSet:
             ]
             print(f"Found {len(sibling_nodes)} sibling nodes.")
             # add siblings until the token count exceeds the threshold or number of siblings added is
-            # greater than half the initial cluster size.
+            # greater than 70% of the initial cluster size.
             while (
                 self._tokens_under_threshold(nodes_df)
                 and not sibling_nodes.empty
-                and len(nodes_df) < non_sibling_cluster_size * 1.5
+                and len(nodes_df) < non_sibling_cluster_size * 1.7
             ):
                 # Pop a sibling node and add it to nodes_df
                 sibling_node = sibling_nodes.iloc[0]
@@ -423,12 +422,12 @@ class GenerateTestSet:
 
 if __name__ == "__main__":
     generate_testset = GenerateTestSet(
-        testset_name="main_testset",
+        testset_name="reduced_context",
         testset_size=200,
-        max_context_token_count=9_000,
-        temperature=0.6,
-        non_sibling_target_cluster_size=27,
-        min_cluster_size=8,
+        max_context_token_count=3_000,
+        temperature=0.7,
+        non_sibling_target_cluster_size=15,
+        min_cluster_size=6,
         llm_model=GPT_4_1_MODEL,
         doc_text_column="technical_summary",
     )
