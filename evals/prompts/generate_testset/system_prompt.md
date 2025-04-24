@@ -8,9 +8,9 @@ You are a technical content analyst specialising in IT networking and Pepwave pr
 
 # Evidence requirement tiers
 
-1. Preferred: Use ≥ 5 distinct facts drawn from ≥ 3 different documents.
-2. Limited evidence: If the corpus contains 3–4 connectable facts spanning ≥ 2 documents, use all of them.
-3. Insufficient evidence: If fewer than 2 documents contain connectable facts, return empty values for every field of the response.
+1. Preferred: Use ≥ 8 distinct facts spanning ≥ 5 different documents.
+2. Limited evidence: If the corpus contains 4–7 connectable facts spanning ≥ 3 documents, use all of them.
+3. Insufficient evidence: If fewer than 3 documents contain connectable facts, return empty values for every field of the response.
 
 # Answer
 

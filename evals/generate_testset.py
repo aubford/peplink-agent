@@ -86,10 +86,10 @@ class GenerateTestSet:
 
         # Thresholds for non-multi relationships
         self.single_rel_thresholds = {
-            "summary_similarity": 0.83,
-            "title_similarity": 0.83,
-            "themes_overlap_score": 0.25,
-            "entities_overlap_score": 0.24,
+            "summary_similarity": 0.805,
+            "title_similarity": 0.79,
+            "themes_overlap_score": 0.22,
+            "entities_overlap_score": 0.22,
         }
 
         print(
@@ -320,7 +320,7 @@ class GenerateTestSet:
             while (
                 self._tokens_under_threshold(nodes_df)
                 and not sibling_nodes.empty
-                and len(nodes_df) < non_sibling_cluster_size * 1.7
+                and len(nodes_df) < non_sibling_cluster_size * 1.5
             ):
                 # Pop a sibling node and add it to nodes_df
                 sibling_node = sibling_nodes.iloc[0]
@@ -422,12 +422,12 @@ class GenerateTestSet:
 
 if __name__ == "__main__":
     generate_testset = GenerateTestSet(
-        testset_name="reduced_context",
+        testset_name="max_context",
         testset_size=200,
-        max_context_token_count=3_000,
-        temperature=0.7,
-        non_sibling_target_cluster_size=15,
-        min_cluster_size=6,
+        max_context_token_count=14_000,
+        temperature=0.6,
+        non_sibling_target_cluster_size=45,
+        min_cluster_size=15,
         llm_model=GPT_4_1_MODEL,
         doc_text_column="technical_summary",
     )
