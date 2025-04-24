@@ -9,6 +9,7 @@ from langchain.prompts import (
     FewShotChatMessagePromptTemplate,
 )
 from pydantic import BaseModel, Field
+import json
 
 from evals.evals_utils import output_nodes_path, output_relationships_path
 from util.util_main import count_tokens
@@ -422,12 +423,12 @@ class GenerateTestSet:
 
 if __name__ == "__main__":
     generate_testset = GenerateTestSet(
-        testset_name="max_context",
-        testset_size=200,
-        max_context_token_count=14_000,
+        testset_name="ludicrous_context",
+        testset_size=15,
+        max_context_token_count=100_000,
         temperature=0.6,
-        non_sibling_target_cluster_size=45,
-        min_cluster_size=15,
+        non_sibling_target_cluster_size=200,
+        min_cluster_size=75,
         llm_model=GPT_4_1_MODEL,
         doc_text_column="technical_summary",
     )
