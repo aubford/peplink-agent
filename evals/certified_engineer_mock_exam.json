@@ -3,11 +3,11 @@
     "question_id": "Q1",
     "question": "What are the routing protocols supported by Balance/ MAX family?",
     "choices": ["OSPF", "BGP", "RIPv2", "IS-IS", "EIGRP"],
-    "correct_answers": [0, 1, 2],
+    "correct_answers": ["OSPF", "BGP", "RIPv2"],
     "custom_id": "5dec27ffb3e92b5831a949c14c790f79"
   },
   {
-    "question_id": "Q15",
+    "question_id": "Q2",
     "question": "In which situation is a Captive Portal applied to an SSID instead of a VLAN?",
     "choices": [
       "Always",
@@ -15,11 +15,11 @@
       "When deploying a Captive Portal to Pepwave Access Points only",
       "Never"
     ],
-    "correct_answers": [3],
+    "correct_answers": ["Never"],
     "custom_id": "77e974f4b549594b681547ccc0ca1279"
   },
   {
-    "question_id": "Q2",
+    "question_id": "Q3",
     "question": "The customer is interested in deploying FusionHub into the HQ of the enterprise network. What is the sizing criteria to choose for the right FusionHub SKU?",
     "choices": [
       "Based on the number of peers supported.",
@@ -27,11 +27,11 @@
       "Based on the Hypervisor platform FusionHub is installed on.",
       "Based on the number of WAN of the HQ network."
     ],
-    "correct_answers": [0],
+    "correct_answers": ["Based on the number of peers supported."],
     "custom_id": "8357bee3625e6b18351732af38e6aad7"
   },
   {
-    "question_id": "Q3",
+    "question_id": "Q4",
     "question": "Choose the statement(s) that correctly describe how the Outbound Policy rules are executed (choose two).",
     "choices": [
       "Order of processing from Top to Bottom",
@@ -39,7 +39,10 @@
       "Able to control the traffic when no connections are available",
       "Order of processing is go through all the policies then chose fitting one policy"
     ],
-    "correct_answers": [0, 2],
+    "correct_answers": [
+      "Order of processing from Top to Bottom",
+      "Able to control the traffic when no connections are available"
+    ],
     "custom_id": "23dec0b6284a3234cd979a749ac768a5"
   },
   {
@@ -51,7 +54,9 @@
       "Using SpeedFusion VPN technology, branch offices gain secure, local network access to cloud resources",
       "Peplink routers actively monitor WAN quality and makes intelligent decisions to direct application traffic flow"
     ],
-    "correct_answers": [0],
+    "correct_answers": [
+      "Peplink routers enable you to build one logical WAN connection using multiple technologies (e.g. xDSL, MPLS, cellular, fiber)"
+    ],
     "custom_id": "457230eeb331c8510cffadb7dc399821"
   },
   {
@@ -64,14 +69,16 @@
       "TCP port 4500 and UDP port 32015",
       "TCP port 32015 and UDP port 4500 or according to either Data port 'default' or 'custom' settings."
     ],
-    "correct_answers": [4],
+    "correct_answers": [
+      "TCP port 32015 and UDP port 4500 or according to either Data port 'default' or 'custom' settings."
+    ],
     "custom_id": "6bc0c263adb468f1acea4454052a5f9c"
   },
   {
     "question_id": "Q6",
     "question": "In a 3-site fully-meshed VPN deployment scenario, how many Internet lines at minimum are required in total to support SpeedFusion Hot Failover and Bonding at all locations?",
     "choices": ["3", "4", "5", "6"],
-    "correct_answers": [3],
+    "correct_answers": ["6"],
     "custom_id": "afacb3c172f5351337c1355d7273b0e2"
   },
   {
@@ -84,12 +91,12 @@
       "Not having the same model of Peplink on either end of SpeedFusion.",
       "None of the above"
     ],
-    "correct_answers": [2],
+    "correct_answers": ["Same LAN subnet on either end of SpeedFusion"],
     "custom_id": "603392f3ad3b2cbd002208eaee477255"
   },
   {
     "question_id": "Q8",
-    "question": "For branches having the same LAN network, we should allow them to configure a \"virtual\" network range, which then maps this virtual network to the local network that is having conflict. So the HQ site will only see the virtual network, and the conflict network will be hidden from HQ. Which of the features best described above statement? (Choose One)",
+    "question": "For branches having the same LAN network, we should allow them to configure a 'virtual' network range, which then maps this virtual network to the local network that is having conflict. So the HQ site will only see the virtual network, and the conflict network will be hidden from HQ. Which of the features best described above statement? (Choose One)",
     "choices": [
       "Virtual Network Mapping",
       "SpeedFusion NAT Mode",
@@ -97,7 +104,7 @@
       "Port Forwarding",
       "Recommend to change the branches LAN subnet to avoid overlapping"
     ],
-    "correct_answers": [0],
+    "correct_answers": ["Virtual Network Mapping"],
     "custom_id": "ed71448a546666272a2ea3187b5788a4"
   },
   {
@@ -111,14 +118,14 @@
       "Jitter on your VOIP call",
       "Intermittently when access the e-mail server in HQ."
     ],
-    "correct_answers": [2, 4],
+    "correct_answers": ["Jitter when you do video streaming", "Jitter on your VOIP call"],
     "custom_id": "9d41abee275ae34376b0184c8aa50c23"
   },
   {
     "question_id": "Q10",
     "question": "Which of the following are officially supported hypervisors for FusionHub? (You may choose more than one.)",
     "choices": ["Amazon Web Service", "VMware", "Citrix", "Hyper-V", "KVM"],
-    "correct_answers": [0, 1, 2, 3],
+    "correct_answers": ["Amazon Web Service", "VMware", "Citrix", "Hyper-V"],
     "custom_id": "e3f162665a07aca4490468aa8374b49f"
   },
   {
@@ -131,7 +138,7 @@
       "SpeedFusion with outbound policy",
       "Outbound policy"
     ],
-    "correct_answers": [2],
+    "correct_answers": ["SpeedFusion Cloud with outbound policy"],
     "custom_id": "a0110e2dd84fc5f949d8dff4527a44e3"
   },
   {
@@ -144,7 +151,7 @@
       "Manages multiple SSIDs",
       "Manages as many as 5 APs"
     ],
-    "correct_answers": [2, 3],
+    "correct_answers": ["Manages Pepwave AP devices", "Manages multiple SSIDs"],
     "custom_id": "7a6fdeb4b28ee07a2ede4be610604546"
   },
   {
@@ -156,7 +163,10 @@
       "Provides a portable 5G and GPS connection for Windows and Linux devices",
       "Provides a GPS option for other Peplink or Pepwave products which do not support GPS"
     ],
-    "correct_answers": [0, 1],
+    "correct_answers": [
+      "Provides a portable 6 connection for Windows and Linux devices",
+      "Is a 5G WAN option for other Peplink or Pepwave products which does not support 5G"
+    ],
     "custom_id": "5f41ff417fb39bb20e69ad86d841fdae"
   },
   {
@@ -168,7 +178,568 @@
       "20 requests per second per organization",
       "Unlimited"
     ],
-    "correct_answers": [2],
+    "correct_answers": ["20 requests per second per organization"],
     "custom_id": "60a78574d7175e67c893d257957745cd"
+  },
+  {
+    "question": "When troubleshooting an LTE connection issue, Peplink Support needs more information about the cellular status, eg. Cellular Module model and firmware. Where do you find the information? (Choose 2 answers)",
+    "choices": [
+      "Web Admin > Status > Device > Modem Support Version",
+      "Web Admin > Connection Details > Cellular Status",
+      "Web Admin > Connection Details > Cellular Status > Engineering Data",
+      "Web Admin > Status > Modem Support List",
+      "Web Admin / <support.cgi> page > Cellular module firmware update"
+    ],
+    "correct_answers": [
+      "Web Admin > Connection Details > Cellular Status > Engineering Data",
+      "Web Admin / <support.cgi> page > Cellular module firmware update"
+    ]
+  },
+  {
+    "question_id": "Q17",
+    "question": "Consider this scenario: A customer has one DSL and one cellular WAN connected to a Balance router. She has configured both internet connections as \"always on.\" This customer would like to use WAN 2 (cellular) only for back-up or fail-over purposes.\n\nWhich of the following load balancing algorithms would you recommend?",
+    "choices": ["Priority", "Weighted", "Overflow", "Back Up", "Enforced"],
+    "correct_answers": ["Priority"]
+  },
+  {
+    "question_id": "Q18",
+    "question": "The owner of an oil rig platform would like to deploy a cellular router that is suitable for outdoor use with the following characteristics:\n- Water-proof\n- No ingress of dust\n- Lightning immunity\n- Shock and vibration resistance\n\nWhich MAX Cellular model(s) could meet the above requirements? (You may select more than one answer.)",
+    "choices": ["MAX HD2 IP67", "MAX BR2 IP55", "MAX BR1 IP55", "MAX HD2", "MAX HD4"],
+    "correct_answers": ["MAX HD2 IP67"]
+  },
+  {
+    "question_id": "Q19",
+    "question": "Which interface supports SpeedFusion Connect profile settings?",
+    "choices": ["Device UI", "InControl 2", "Device API", "InControl 2 API"],
+    "correct_answers": ["Device UI"]
+  },
+  {
+    "question_id": "Q20",
+    "question": "What can you perform in the support.cgi page? (You may select more than one answer.)",
+    "choices": [
+      "Change WAN speed",
+      "Change WAN priority",
+      "Reboot system",
+      "Perform sniffing",
+      "Schedule reboot day/time",
+      "All of the Above"
+    ],
+    "correct_answers": [
+      "Change WAN speed",
+      "Reboot system",
+      "Perform sniffing",
+      "Schedule reboot day/time"
+    ]
+  },
+  {
+    "question_id": "Q21",
+    "question": "When using Peplink's IPsec VPN can routing be controlled by using Outbound Policy?",
+    "choices": ["Yes", "No"],
+    "correct_answers": ["No"]
+  },
+  {
+    "question_id": "Q22",
+    "question": "In a 3-site fully-meshed VPN deployment scenario, how many Internet lines at minimum are required in total to support SpeedFusion Hot Failover and Bonding at all locations?",
+    "choices": ["3", "4", "5", "6"],
+    "correct_answers": ["6"]
+  },
+  {
+    "question_id": "Q23",
+    "question": "Which models in the MAX router family can support up to 4x cellular connections? (You may select more than one answer.)",
+    "choices": ["MAX HD4", "MAX BR1", "MAX HD4 MBX", "MAX HD2", "MAX M2M"],
+    "correct_answers": ["MAX HD4", "MAX HD4 MBX"]
+  },
+  {
+    "question_id": "Q24",
+    "question": "When a new VLAN is created in InControl2, how can one apply the VLAN to several selected Peplink devices at once in a Group?",
+    "choices": [
+      "Assign the VLAN to the InControl Organization",
+      "Assign the VLAN to the InControl Group and select \"Apply to all Devices\"",
+      "Assign the VLAN to InControl Group with a defined \"tag\"",
+      "Assign the VLAN to each device individually",
+      "There is no such option; configure the VLAN at the individual devices."
+    ],
+    "correct_answers": ["Assign the VLAN to InControl Group with a defined \"tag\""]
+  },
+  {
+    "question_id": "Q25",
+    "question": "Which of the following parameters can be configured using InControl2?",
+    "choices": [
+      "Outbound Policies, Firewall Rules, IPsec VPN tunnel configuration, SSIDs",
+      "SSIDs, port forwarding, VLANs, Firewall rules",
+      "Firmware Management, Outbound Policies, SpeedFusion VPN tunnel configuration, SSIDs",
+      "IPsec VPN tunnel configuration, DNS Settings, SpeedFusion VPN tunnel configuration, Firewall rules"
+    ],
+    "correct_answers": [
+      "Firmware Management, Outbound Policies, SpeedFusion VPN tunnel configuration, SSIDs"
+    ]
+  },
+  {
+    "question_id": "Q26",
+    "question": "How can a FusionHub image be obtained?",
+    "choices": [
+      "Contact Peplink team to send you the image.",
+      "Download the latest Humble Bundle; FusionHub is part of any Humble Bundle.",
+      "Download the FusionHub image from the Peplink Firmware & Manual page.",
+      "Contact the appropriate Peplink distributor."
+    ],
+    "correct_answers": [
+      "Download the FusionHub image from the Peplink Firmware & Manual page."
+    ]
+  },
+  {
+    "question_id": "Q27",
+    "question": "How can the existing license key be transferred from one FusionHub instance to another?",
+    "choices": [
+      "Go to InControl2; navigate to Warranty & Licenses; release the key from existing FusionHub; and import the key into the new FusionHub instance.",
+      "Contact Peplink support with the request; wait for the license to be released; then import the key into the new FusionHub instance.",
+      "Log onto the web interface of the original FusionHub Instance and release the license key; log onto the web interface of the new FusionHub instance and activate the license key.",
+      "It is not possible to transfer existing license keys."
+    ],
+    "correct_answers": [
+      "Go to InControl2; navigate to Warranty & Licenses; release the key from existing FusionHub; and import the key into the new FusionHub instance."
+    ]
+  },
+  {
+    "question_id": "Q28",
+    "question": "Which netflow protocols does Peplink support? (Choose three answers.)",
+    "choices": ["NetFlow v5", "NetFlow v9", "NetFlow v13", "IPFIX", "TCPFIX", "UDPFIX"],
+    "correct_answers": ["NetFlow v5", "NetFlow v9", "IPFIX"]
+  },
+  {
+    "question_id": "Q29",
+    "question": "The PrimeCare subscription for your customer's UBR-LTE has expired. Which of the following benefits will be lost? (Select as many answers as are appropriate.)",
+    "choices": [
+      "Firmware updates",
+      "Hardware warranty",
+      "SpeedFusion",
+      "InControl",
+      "FusionHub license"
+    ],
+    "correct_answers": [
+      "Hardware warranty",
+      "SpeedFusion",
+      "InControl",
+      "FusionHub license"
+    ]
+  },
+  {
+    "question_id": "Q30",
+    "question": "What is the purpose of a directional Wi-Fi antenna?",
+    "choices": [
+      "An antenna typically used to extend the range of a Wi-Fi network into hard-to-reach corners of buildings or in other specific situations where 360-degree coverage is not needed",
+      "An antenna which supports connections from multiple directions and is commonly used on Wi-Fi routers",
+      "All of the above"
+    ],
+    "correct_answers": [
+      "An antenna typically used to extend the range of a Wi-Fi network into hard-to-reach corners of buildings or in other specific situations where 360-degree coverage is not needed"
+    ]
+  },
+  {
+    "question_id": "Q31",
+    "question": "What is the purpose of the SIM Toolkit feature? (Choose two answers.)",
+    "choices": [
+      "Send SMS to external devices",
+      "Check SIM card's balance, process pre-paid cards, and configure carrier-specific services via USSD",
+      "Retrieve SMS from the SIM Card",
+      "Change APN Settings",
+      "Change SIM PIN"
+    ],
+    "correct_answers": [
+      "Check SIM card's balance, process pre-paid cards, and configure carrier-specific services via USSD",
+      "Retrieve SMS from the SIM Card"
+    ]
+  },
+  {
+    "question_id": "Q32",
+    "question": "Which of the following is not correct about the Router Utility App?",
+    "choices": [
+      "It is available on the iOS and Android platforms.",
+      "It can be used to remotely reboot a router.",
+      "It can be used to view the IP address of LAN Interface.",
+      "It can be used to check SpeedFusion's connectivity.",
+      "It can be used to check routers' event log."
+    ],
+    "correct_answers": ["It can be used to remotely reboot a router."]
+  },
+  {
+    "question_id": "Q33",
+    "question": "Which of the following are officially supported hypervisors for FusionHub? (You may choose more than one.)",
+    "choices": ["Amazon Web Service", "VMWare", "Citrix", "Hyper-V", "KVM"],
+    "correct_answers": ["Amazon Web Service", "VMWare", "Citrix", "Hyper-V"]
+  },
+  {
+    "question_id": "Q34",
+    "question": "Which of the following is correct about the upgraded DPI Report in InControl2?",
+    "choices": [
+      "Data retention is up to 60 Days.",
+      "It shows deeper information by breaking down categories into sub-categories.",
+      "Application's hourly data size smaller than 1 MB will be included.",
+      "Group application by user has been added."
+    ],
+    "correct_answers": [
+      "It shows deeper information by breaking down categories into sub-categories."
+    ]
+  },
+  {
+    "question_id": "Q35",
+    "question": "Which SpeedFusion Connect feature should you use if the objective is to make Office 365 traffic go through SpeedFusion Connect tunnel?",
+    "choices": [
+      "Choose Cloud Location",
+      "Connect Clients to Cloud",
+      "Link Wi-Fi to Cloud",
+      "Optimize Cloud Application"
+    ],
+    "correct_answers": ["Optimize Cloud Application"]
+  },
+  {
+    "question_id": "Q36",
+    "question": "Is this statement true? \"For the Balance 580, HA (VRRP) and LAN Bypass can simultaneously work together.\"",
+    "choices": ["True", "False"],
+    "correct_answers": ["False"]
+  },
+  {
+    "question_id": "Q37",
+    "question": "Identify the feature(s) of the Router Utility App. (You may select more than one answer.)",
+    "choices": [
+      "Modify a Balance's firewall rules",
+      "Update a Balance/MAX's firmware",
+      "Inspect event logs",
+      "To receive push notifications for SpeedFusion disconnects/reconnects",
+      "View the configuration of a SD Switch"
+    ],
+    "correct_answers": [
+      "Inspect event logs",
+      "To receive push notifications for SpeedFusion disconnects/reconnects"
+    ]
+  },
+  {
+    "question_id": "Q38",
+    "question": "In which of the following situations would the use of SpeedFusion TCP mode be advised?",
+    "choices": [
+      "The ISP is throttling port UDP 4500 traffic.",
+      "Cellular throughput limited by the ISP.",
+      "WAN suffers disconnections.",
+      "All of the above are correct."
+    ],
+    "correct_answers": ["The ISP is throttling port UDP 4500 traffic."]
+  },
+  {
+    "question_id": "Q39",
+    "question": "How can you configure your device to reach InControl 2 through a firewall?",
+    "choices": [
+      "Enable traffic for udp port 5246 and tcp port 443 on the Peplink device",
+      "Allow outbound and inbound traffic for www.peplink.com.",
+      "Allow outbound and inbound traffic for ic2.peplink.com.",
+      "Enable traffic for udp port 5246 and tcp port 443 on the firewall.",
+      "Enable PepVPN on your device."
+    ],
+    "correct_answers": [
+      "Enable traffic for udp port 5246 and tcp port 443 on the firewall."
+    ]
+  },
+  {
+    "question_id": "Q40",
+    "question": "Which statement about Forward Error Correction is incorrect?",
+    "choices": [
+      "It may be found under the WAN Smoothing feature.",
+      "It is of benefit in one-way communications.",
+      "It is a signal processing technique used to enhance data reliability.",
+      "It will duplicate packets.",
+      "It consumes less data than WAN Smoothing."
+    ],
+    "correct_answers": ["It will duplicate packets."]
+  },
+  {
+    "question_id": "Q41",
+    "question": "Which SpeedFusion feature was designed for the 5G scenario?",
+    "choices": [
+      "Hot Failover",
+      "Bandwidth Bonding",
+      "Forward Error Correction",
+      "Bandwidth Overflow",
+      "SpeedFusion Traffic Steering"
+    ],
+    "correct_answers": ["Bandwidth Overflow", "SpeedFusion Traffic Steering"]
+  },
+  {
+    "question_id": "Q42",
+    "question": "Which statement about Peplink's implementation of Virtual Router Redundancy Protocol (VRRP) is correct? (You may select more than one answer.)",
+    "choices": [
+      "A Balance router can't inter-operate via VRRP with a Cisco router.",
+      "To avoid potential firmware issues when using two HD2 routers it is recommended the master has the current firmware version and the slave be one version behind.",
+      "VRRP is a generic specification which Peplink has extended to provide additional functionality if certain criteria are met.",
+      "Peplink recommends when using VRRP the two devices be identical.",
+      "Peplink routers cannot perform configuration synchronization while operating in HA mode.",
+      "A unique feature of Peplink's implementation is HA is compatible with Drop-In mode."
+    ],
+    "correct_answers": [
+      "VRRP is a generic specification which Peplink has extended to provide additional functionality if certain criteria are met.",
+      "Peplink recommends when using VRRP the two devices be identical."
+    ]
+  },
+  {
+    "question_id": "Q43",
+    "question": "An enterprise network administrator wishes to support seamless VoIP over Wi-Fi client devices. What feature of the APs can be turned on to facilitate this and where does one find this setting?",
+    "choices": [
+      "AP > Wireless SSID > SSID Settings > Broadcast SSID",
+      "AP > Wireless SSID > Security Settings > Fast Transition",
+      "AP > Wireless SSID > SSID Settings > Click on the (?) mark to unhide the SSID advance settings > Fast Roaming",
+      "AP > AP Controller > Sync. Method > As soon as possible",
+      "AP > Profiles > AP Controller Settings > Client Load Balancing"
+    ],
+    "correct_answers": ["AP > Wireless SSID > Security Settings > Fast Transition"]
+  },
+  {
+    "question_id": "Q44",
+    "question": "How many AP One Flex devices are needed for the following situation?\n- Area: 150 meter square (1615 sq ft) outdoor environment\n- Number of clients: 20\n- Devices are installed on poles, 5m (16') from the ground",
+    "choices": ["3", "4", "5", "6", "7", "Not sure; need to do a site survey."],
+    "correct_answers": ["Not sure; need to do a site survey."]
+  },
+  {
+    "question_id": "Q45",
+    "question": "Which protocol should be used to communicate with InControl 2 API?",
+    "choices": [
+      "SSO(Single Sign-On) 10.0",
+      "OAuth 2.0",
+      "SAML(Security Assertion Markup Language)",
+      "LDAP(Lightweight Directory Access Protocol)"
+    ],
+    "correct_answers": ["OAuth 2.0"]
+  },
+  {
+    "question_id": "Q46",
+    "question": "In which of the following two circumstances would the enabling of WAN Smoothing be advised?",
+    "choices": [
+      "WAN Smoothing should be enabled when you establish a SpeedFusion tunnel.",
+      "Users complain the speed is slow.",
+      "The users see glitches over video streaming sessions.",
+      "One way audio is in use for VOIP and no packet loss found.",
+      "Connections in accessing the e-mail server in HQ are intermittent."
+    ],
+    "correct_answers": [
+      "The users see glitches over video streaming sessions.",
+      "Connections in accessing the e-mail server in HQ are intermittent."
+    ]
+  },
+  {
+    "question_id": "Q47",
+    "question": "In InControl, how can you assign different users to manage individual Groups within an Organization, such that each User ID can only view and manage devices within their designated Group?",
+    "choices": [
+      "Assign user Role as Organization Administrator",
+      "Assign user Role as Organization Viewer",
+      "Assign user Role as Dashboard Viewer",
+      "Assign user Role as Group Administrator",
+      "Assign user Role as Group Viewer"
+    ],
+    "correct_answers": ["Assign user Role as Group Administrator"]
+  },
+  {
+    "question_id": "Q48",
+    "question": "A device which is not managed under the same organization or not managed by InControl can be added to a star and point-to-point topology profile by its site ID. Is this true or false?",
+    "choices": ["True", "False"],
+    "correct_answers": ["True"]
+  },
+  {
+    "question_id": "Q49",
+    "question": "When do you want to enable the Cellular Settings > Optimal Network Discovery feature?",
+    "choices": [
+      "To have the cellular module check for the best connection when it first tries to establish a cellular connection after the module is reset",
+      "To have the cellular module check for a better connection after having failed to 3G for a defined time even though this will interupt connectivity for a short time",
+      "To have the cellular module check for the best connection after the router is rebooted",
+      "To have the cellular module check for a better connection after having failed to 3G only once there is no active data traffic",
+      "To have the cellular module check for an LTEA connection after having been connected to LTE for a defined time"
+    ],
+    "correct_answers": [
+      "To have the cellular module check for a better connection after having failed to 3G for a defined time even though this will interupt connectivity for a short time"
+    ]
+  },
+  {
+    "question_id": "Q50",
+    "question": "Which statement best describes private IP?",
+    "choices": [
+      "A private IP can be routed across the Internet.",
+      "Users need to contact the ISP to obtain a private IP for their internal usage.",
+      "A private IP supports duplicate IP addresses in same network.",
+      "A network with private IPs requires an NAT gateway for Internet access.",
+      "None of the above."
+    ],
+    "correct_answers": [
+      "A network with private IPs requires an NAT gateway for Internet access."
+    ]
+  },
+  {
+    "question_id": "Q51",
+    "question": "What power option is required in order to enable PoE output on a MAX HD4? (Select two answers)",
+    "choices": [
+      "Use the accessory ACW-618",
+      "Input 56V via Terminal Block",
+      "Use the shipping 12V DC adapter",
+      "Use a 56V power supply and change the DIP switch settings on the router to enable POE.",
+      "HD4 does not support PoE"
+    ],
+    "correct_answers": ["Use the accessory ACW-618", "Input 56V via Terminal Block"]
+  },
+  {
+    "question_id": "Q52",
+    "question": "Your customer explains while her organization would like to use SpeedFusion but they are prohibited by regulation and policy from using third party services such as InControl. Are there any alternatives which could be presented to this customer?",
+    "choices": [
+      "No. InControl is required.",
+      "Yes. FusionHub could be used with AWS or Azure.",
+      "Yes. FusionHub cold be used with AWS or Azure.",
+      "Yes. FusionHub with Microsoft Dynamics would meet the customer's requirement.",
+      "Yes. The customer can host it's own SpeedFusion-capable router within its own data center."
+    ],
+    "correct_answers": [
+      "Yes. The customer can host it's own SpeedFusion-capable router within its own data center."
+    ]
+  },
+  {
+    "question_id": "Q53",
+    "question": "Which is the best statement as to how routers in High Availability mode communicate with each other?",
+    "choices": [
+      "The routers communicate with VRRP via the WAN ports",
+      "The routers use RSRP to communicate via the LAN ports",
+      "The routers use VRRP to communicate either via LAN or WAN ports",
+      "The routers communicate with VRRP via the LAN ports",
+      "The routers use RSRP to communicate via the LAN ports"
+    ],
+    "correct_answers": ["The routers communicate with VRRP via the LAN ports"]
+  },
+  {
+    "question_id": "Q54",
+    "question": "When should you use the Phase 2 PFS Group option on the IPsec profile configuration page?",
+    "choices": [
+      "Use this option when better compatibility is needed.",
+      "This option can be safely ignored.",
+      "There is no specific use of PFS.",
+      "Use this option when you need a more secure VPN.",
+      "None of the above."
+    ],
+    "correct_answers": ["Use this option when you need a more secure VPN."]
+  },
+  {
+    "question_id": "Q55",
+    "question": "When you install a MAX BR1-LTE-US with a provisioned Verizon SIM Card, you notice in the Web Admin Dashboard the cellular is stuck in \"Obtaining IP Address...\" What is the most likely cause of the problem? Note: The same setup is working fine with other Verizon SIM Cards.",
+    "choices": [
+      "SIM Card inserted incorrectly",
+      "Cellular Signal very weak",
+      "The MAX BR1-LTE-US IMEI has not been registered to Verizon",
+      "Cellular antenna not attached",
+      "Cellular state set to Standby Mode"
+    ],
+    "correct_answers": ["The MAX BR1-LTE-US IMEI has not been registered to Verizon"]
+  },
+  {
+    "question_id": "Q56",
+    "question": "A customer complains \"when trying to configure Wi-Fi > Security Settings, I could not see the Fast Transition option with my Security Policy = WPA/WPA2 - Personal.\" Why would this be the situation?",
+    "choices": [
+      "Fast Transition is only available with Security Policy = Open (No Encryption).",
+      "Fast Transition is only available with Security Policy = WPA3 - Personal.",
+      "Fast Transition is only available with Security Policy = WPA2/WPA3 - Personal.",
+      "Fast Transition is only available with Security Policy = WPA2 or WPA/WPA2 - Enterprise.",
+      "Fast Transition is only available with Security Policy = WPA2 or WPA3 equivalent (Personal or Enterprise)."
+    ],
+    "correct_answers": [
+      "Fast Transition is only available with Security Policy = WPA2 or WPA3 equivalent (Personal or Enterprise)."
+    ]
+  },
+  {
+    "question_id": "Q57",
+    "question": "SpeedFusion can run at which layer of the OSI Model? (You may select more than one answer.)",
+    "choices": ["1", "2", "3", "4", "5", "7"],
+    "correct_answers": ["2", "3"]
+  },
+  {
+    "question_id": "Q58",
+    "question": "Consider this scenario: A customer has one DSL and one 3G WAN connected to a Balance router.\nThey have configured both Internet connections as \"always on\". This customer would like to use WAN 1 (DSL) to send traffic, reserving the 3G for failover purposes.\n\nWhich of the following load balancing algorithms would you recommend?",
+    "choices": ["Priority", "Weighted", "Overflow", "Back Up", "Enforced"],
+    "correct_answers": ["Priority"]
+  },
+  {
+    "question_id": "Q59",
+    "question": "In subnetting, what is the equivalence of \"172.16.0.0/18\"?",
+    "choices": [
+      "Network address: 172.16.0.0 / Netmask: 255.255.18.0",
+      "Network address: 172.16.0.0 / Netmask: 255.255.192.0",
+      "Network address: 172.16.0.0 / Netmask: 255.255.255.0",
+      "Network address: 172.16.0.0 / Netmask: 255.0.0.0",
+      "None of the above."
+    ],
+    "correct_answers": ["Network address: 172.16.0.0 / Netmask: 255.255.192.0"]
+  },
+  {
+    "question_id": "Q60",
+    "question": "What is the InControl2 Captive Portal?",
+    "choices": [
+      "The InControl2 captive portal is a web page which is displayed to newly connected users before they are granted access to the internet.",
+      "The InControl2 Captive Portal allows the network admin to block certain sites from being reached by any network users",
+      "The InControl2 captive portal is a web page that allows you to configure Peplink devices.",
+      "The InControl2 captive portal is the web page that allows you to register Peplink devices for warranty purposes."
+    ],
+    "correct_answers": [
+      "The InControl2 captive portal is a web page which is displayed to newly connected users before they are granted access to the internet."
+    ]
+  },
+  {
+    "question_id": "Q61",
+    "question": "Starting from firmware 8.0, you can configure concurrent Layer 2 and Layer 3 PepVPN tunnels between the same pair of PepVPN peers. Which configuration tasks are wrong when doing this? (Select two answers.)",
+    "choices": [
+      "Create maximum 5 tunnels in total (default + sub tunnels)",
+      "Create maximum 6 tunnels in total (default + sub tunnels)",
+      "The layer 2 sub-tunnel bridge to the untagged LAN",
+      "The layer 2 sub-tunnel bridge to a single VLAN",
+      "The subnet(s) for layer 3 (Routable) should be different from subnet(s) for layer 2 (Bridged) tunnels."
+    ],
+    "correct_answers": [
+      "Create maximum 6 tunnels in total (default + sub tunnels)",
+      "The layer 2 sub-tunnel bridge to the untagged LAN"
+    ]
+  },
+  {
+    "question_id": "Q62",
+    "question": "In Outbound Policy, which algorithm can be applied to a SpeedFusion profile?",
+    "choices": [
+      "Weighted Balance",
+      "Persistence",
+      "Overflow",
+      "Least Used",
+      "None of the above"
+    ],
+    "correct_answers": ["None of the above"]
+  },
+  {
+    "question_id": "Q63",
+    "question": "SpeedFusion can have which of the following feature(s)? (You may select more than one answer.)",
+    "choices": [
+      "Inbound load balancing algorithms",
+      "Unbreakable session Hot Failover",
+      "Real-time layer7 traffic prioritization",
+      "Packet-level Bandwidth Bonding",
+      "256-bit AES encryption"
+    ],
+    "correct_answers": [
+      "Unbreakable session Hot Failover",
+      "Packet-level Bandwidth Bonding",
+      "256-bit AES encryption"
+    ]
+  },
+  {
+    "question_id": "Q64",
+    "question": "Which settings will be discarded when applying the configuration file to the devices via IC2 > Bulk Configurator? (Select two answers)",
+    "choices": [
+      "Dynamic DNS settings",
+      "VLAN Networks",
+      "PPPoE credentials",
+      "Wi-Fi AP SSID",
+      "Web Admin Settings"
+    ],
+    "correct_answers": ["Dynamic DNS settings", "PPPoE credentials"]
+  },
+  {
+    "question_id": "Q65",
+    "question": "How many SSIDs can AP One AX support?",
+    "choices": ["1", "2", "4", "8", "16", "Unlimited"],
+    "correct_answers": ["16"]
   }
 ]

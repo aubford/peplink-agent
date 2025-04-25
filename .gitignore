@@ -1,16 +1,14 @@
 logs
 data/*
-!data/**/*.py
 backup_data
-!backup_data/**/*.py
 *.parquet
+*.jsonl
 langchain_pepwave_env*/*
-evals/output
 tutorial/
-load/**/*.jsonl
-load/**/batch/**/*
-evals/batches/**/*
-!evals/testsets/***/*
+**/batch/**/*
+evals/output
+evals/batches
+!evals/testsets/**/*
 
 ### VisualStudioCode template
 !.vscode/settings.json

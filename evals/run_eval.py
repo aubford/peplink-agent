@@ -26,5 +26,5 @@ if __name__ == "__main__":
         should_create_batch_job=True,
         run_name=f"init_base_run__4-24",
     )
-    asyncio.run(ragas_eval.generate_batchfiles())
+    # asyncio.run(ragas_eval.generate_batchfiles())
     # asyncio.run(ragas_eval.evaluate_rag())
