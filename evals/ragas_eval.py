@@ -197,7 +197,9 @@ class RagasEval:
 
         score, missed_questions = self.mock_exam.get_results()
         metrics_summary["mock_exam_score"] = score
-        metrics_summary["mock_exam_missed_questions"] = missed_questions
+        metrics_summary["mock_exam_missed_questions"] = [
+            q["question_id"] for q in missed_questions
+        ]
 
         # Add testset name
         metrics_summary["testset_name"] = self.test_run_name

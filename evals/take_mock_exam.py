@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from load.batch_manager import BatchManager
 from batch_llm import BatchChatOpenAI
 from inference.rag_inference import RagInference
@@ -8,7 +8,7 @@ from numpy import array
 
 
 class MockExamOutput(BaseModel):
-    correct_choice_numbers: list[int]
+    correct_choice_numbers: list[str] = Field(description="The correct answers")
 
 
 class MockExam:
@@ -35,9 +35,7 @@ class MockExam:
                 batch_manager=self.batch_manager,
             ),
         )
-        self.mock_exam_path = (
-            Path(__file__).parent / "certified_engineer_mock_exam.json"
-        )
+        self.mock_exam_path = evals_dir / "testsets" / "certified_engineer_exam.json"
         with open(self.mock_exam_path, "r") as f:
             self.mock_exam_questions = json.load(f)
 
@@ -54,7 +52,7 @@ class MockExam:
             choices_text = "\n".join(
                 [f"{j+1}. {choice}" for j, choice in enumerate(q["choices"])]
             )
-            query = f"{q['question']}\n\nHere are your choices, respond with the number(s) of the correct choice(s):\n{choices_text}"
+            query = f"{q['question']}\n\nHere are your choices, respond with the correct choice(s):\n{choices_text}"
             queries[q["question_id"]] = query
 
         if self.should_create_batch_job:
@@ -69,7 +67,7 @@ class MockExam:
         if self.should_create_batch_job:
             self.batch_manager.create_batch_job()
 
-    def get_results(self) -> tuple[str, list[str]]:
+    def get_results(self) -> tuple[str, list[dict[str, str]]]:
         batch_results = self.batch_manager.get_content_if_ready()
 
         for q in self.mock_exam_questions:
@@ -90,5 +88,8 @@ class MockExam:
                 if given.issubset(correct) and len(given) > len(correct) / 2:
                     correct_count += 0.5
                 else:
-                    missed_questions.append(q["question_id"])
+                    missed_questions.append(q)
+        # save missed questions
+        with open(self.mock_exam_path.with_suffix("_missed.json"), "w") as f:
+            json.dump(missed_questions, f)
         return f"{correct_count}/{len(self.mock_exam_questions)}", missed_questions
