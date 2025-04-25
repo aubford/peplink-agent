@@ -14,7 +14,7 @@ date = datetime.now().strftime("%m-%d")
 
 if __name__ == "__main__":
     evals_dir = Path(__file__).parent
-    testset_name = "testset_100__april"
+    testset_name = ""
     ragas_eval = RagasEval(
         evals_dir,
         testset_name,
@@ -26,5 +26,5 @@ if __name__ == "__main__":
         should_create_batch_job=True,
         run_name=f"init_base_run__4-21",
     )
-    # asyncio.run(ragas_eval.generate_batchfiles())
-    asyncio.run(ragas_eval.evaluate_rag())
+    asyncio.run(ragas_eval.generate_batchfiles())
+    # asyncio.run(ragas_eval.evaluate_rag())
