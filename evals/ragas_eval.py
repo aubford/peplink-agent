@@ -85,6 +85,7 @@ class RagasEval:
             run_name=run_name,
             llm_model=inference_llm_model,
             should_create_batch_job=should_create_batch_job,
+            sample=sample,
         )
 
         self.eval_llm = LangchainLLMWrapper(
@@ -107,22 +108,28 @@ class RagasEval:
         df = generated_testset_df.copy()
         df.rename(columns={"query": "user_input"}, inplace=True)
         df.rename(columns={"answer": "reference"}, inplace=True)
+        df.rename(columns={"cluster_id": "id"}, inplace=True)
         df["reference_contexts"] = df["node_ids"].apply(
             lambda x: nodes_df[nodes_df["node_id"].isin(x)]["page_content"].tolist()
         )
-        df.drop(columns=["document_ids", "documents_text", "cluster_id"], inplace=True)
+        df.drop(columns=["document_ids", "documents_text"], inplace=True)
         df["synthesizer_name"] = "custom"
 
         return Testset.from_list(df.to_dict(orient="records"))
 
     def create_batch_contexts_file(self, results: dict[str, dict[str, str]]) -> None:
-        contexts_data = {
-            # result["answer"] contains the custom_id when using the eval LLM
-            result["answer"]: [result["context"], query_idx]
-            for query_idx, result in results.items()
-        }
         df = pd.DataFrame.from_dict(
-            contexts_data, orient="index", columns=["context", "query_idx"]
+            {
+                result["custom_id"]: [
+                    cluster_id,
+                    result["context"],
+                    result["input"],
+                    result["retrieval_query"],
+                ]
+                for cluster_id, result in results.items()
+            },
+            orient="index",
+            columns=["cluster_id", "context", "query", "retrieval_query"],
         )
         # Convert 'context' column from list to JSON string for storage
         df["context"] = df["context"].apply(
@@ -133,28 +140,30 @@ class RagasEval:
 
     def get_batch_results(self) -> None:
         batch_results = self.batch_manager.get_content_if_ready()
+        batch_contexts = pd.read_parquet(self.batch_contexts_path)
+        batch_contexts["context"] = batch_contexts["context"].apply(json.loads)
+
         batch_results_df = pd.DataFrame.from_dict(
             batch_results, orient="index", columns=["result"]
         )
-        batch_contexts = pd.read_parquet(self.batch_contexts_path)
-        batch_contexts["context"] = batch_contexts["context"].apply(json.loads)
         merged_df = batch_contexts.merge(
             batch_results_df, left_index=True, right_index=True
         )
-        self.apply_results_to_testset(merged_df.set_index("query_idx"))
+
+        self.apply_results_to_testset(merged_df.set_index("cluster_id"))
 
     def apply_results_to_testset(self, results: pd.DataFrame):
         # Process results and update testset w/ the answer and contexts
-        for i, test_row in enumerate(self.test_set):
+        for test_row in self.test_set:
             try:
-                # Get the row where 'query_idx' equals f"query_{i}"
-                result_row = results.loc[f"query_{i}"]
                 eval_sample = test_row.eval_sample
+                # testset cluster_id is now the index of results
+                result_row = results.loc[eval_sample.id]
 
                 eval_sample.response = cast(str, result_row["result"])
                 eval_sample.retrieved_contexts = cast(list[str], result_row["context"])
             except Exception as e:
-                print(f"Error processing result for query {i}: {e}")
+                print(f"Error processing result for query {eval_sample.id}: {e}")
                 raise
 
     async def generate_batchfiles(self):
@@ -162,8 +171,8 @@ class RagasEval:
         assert self.test_set is not None, "Test set is not set"
 
         async_tasks = {}
-        for i, test_row in enumerate(self.test_set):
-            async_tasks[f"query_{i}"] = test_row.eval_sample.user_input
+        for test_row in self.test_set:
+            async_tasks[test_row.eval_sample.id] = test_row.eval_sample.user_input
 
         # dont clear existing batch files when testing
         if self.should_create_batch_job:
@@ -192,17 +201,19 @@ class RagasEval:
 
         # Calculate mean for each metric
         metrics_summary = {}
+        # Add testset name
+        metrics_summary["testset_name"] = self.test_run_name
+
+        # Add metrics averages
         for col in float_cols:
             metrics_summary[col] = eval_result_df[col].mean()
 
+        # Add mock exam score and missed questions
         score, missed_questions = self.mock_exam.get_results()
         metrics_summary["mock_exam_score"] = score
         metrics_summary["mock_exam_missed_questions"] = [
             q["question_id"] for q in missed_questions
         ]
-
-        # Add testset name
-        metrics_summary["testset_name"] = self.test_run_name
 
         # Create a DataFrame with the summary
         summary_df = pd.DataFrame([metrics_summary])
@@ -230,7 +241,7 @@ class RagasEval:
                 Faithfulness(llm=self.eval_llm),
                 ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
                 # response -> question (does the answer address the entire question)
-                # turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
+                # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
                 ResponseRelevancy(llm=self.boost_llm),
                 ResponseRelevancyDiverse(llm=self.boost_llm),
                 # context -> question (are the contexts relevant to the question)

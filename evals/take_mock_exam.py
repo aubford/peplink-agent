@@ -4,11 +4,16 @@ from pydantic import BaseModel, Field
 from load.batch_manager import BatchManager
 from batch_llm import BatchChatOpenAI
 from inference.rag_inference import RagInference
-from numpy import array
+from evals.prompts.prompts import load_prompts
 
 
 class MockExamOutput(BaseModel):
-    correct_choice_numbers: list[str] = Field(description="The correct answers")
+    correct_choices: list[str] = Field(
+        description="An array containing the exact text for each correct choice"
+    )
+
+
+PROMPTS = load_prompts()
 
 
 class MockExam:
@@ -19,6 +24,7 @@ class MockExam:
         llm_model: str,
         run_name: str | None = None,
         should_create_batch_job: bool = True,
+        sample: bool | int = False,
     ):
         self.should_create_batch_job = should_create_batch_job
         self.batch_manager = BatchManager(
@@ -35,7 +41,12 @@ class MockExam:
                 batch_manager=self.batch_manager,
             ),
         )
-        self.mock_exam_path = evals_dir / "testsets" / "certified_engineer_exam.json"
+        filename = (
+            "certified_engineer_exam_sample.json"
+            if sample
+            else "certified_engineer_exam.json"
+        )
+        self.mock_exam_path = evals_dir / "testsets" / filename
         with open(self.mock_exam_path, "r") as f:
             self.mock_exam_questions = json.load(f)
 
@@ -52,7 +63,9 @@ class MockExam:
             choices_text = "\n".join(
                 [f"{j+1}. {choice}" for j, choice in enumerate(q["choices"])]
             )
-            query = f"{q['question']}\n\nHere are your choices, respond with the correct choice(s):\n{choices_text}"
+            query = PROMPTS["ragas_eval/mock_exam_query"].format(
+                question=q["question"], choices=choices_text
+            )
             queries[q["question_id"]] = query
 
         if self.should_create_batch_job:
@@ -72,10 +85,7 @@ class MockExam:
 
         for q in self.mock_exam_questions:
             custom_id = q["custom_id"]
-            q["given_answer"] = (
-                array(json.loads(batch_results[custom_id])["correct_choice_numbers"])
-                - 1  # subtract 1 to match the 1-indexed format
-            )
+            q["given_answer"] = json.loads(batch_results[custom_id])["correct_choices"]
 
         correct_count = 0.0
         missed_questions = []
@@ -87,9 +97,11 @@ class MockExam:
             else:
                 if given.issubset(correct) and len(given) > len(correct) / 2:
                     correct_count += 0.5
-                else:
-                    missed_questions.append(q)
+                missed_questions.append(q)
         # save missed questions
-        with open(self.mock_exam_path.with_suffix("_missed.json"), "w") as f:
+        missed_path = (
+            self.mock_exam_path.parent / f"{self.mock_exam_path.stem}_missed.json"
+        )
+        with open(missed_path, "w") as f:
             json.dump(missed_questions, f)
         return f"{correct_count}/{len(self.mock_exam_questions)}", missed_questions

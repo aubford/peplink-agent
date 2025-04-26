@@ -8,7 +8,6 @@ from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
 )
-from evals.batch_llm import BatchChatOpenAI
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.language_models.chat_models import BaseChatModel
 from util.root_only_tracer import RootOnlyTracer
@@ -118,7 +117,8 @@ class RagInference:
 
         # Get just the inputs for processing
         batch_inputs = [
-            {"input": query, "chat_history": []} for query in queries.values()
+            {"query_id": query_id, "input": query, "chat_history": []}
+            for query_id, query in queries.items()
         ]
 
         # Use native batch processing with proper rate limiting
@@ -126,19 +126,9 @@ class RagInference:
             batch_inputs, config={"max_concurrency": 20}
         )
 
-        key_to_hash_map = {
-            key: BatchChatOpenAI.hash_messages(query) for key, query in queries.items()
-        }
-        # Recombine results with their keys
-        recombined = {
-            key: result for key, result in zip(key_to_hash_map.keys(), results)
-        }
-        # ensure that abatch maintained the same order for inputs/results
-        for key, result in recombined.items():
-            assert (
-                result["answer"] == key_to_hash_map[key]
-            ), "custom_id does not match key to hash map"
-        return recombined
+        for result in results:
+            result["custom_id"] = result["answer"]
+        return {result["query_id"]: result for result in results}
 
 
 if __name__ == "__main__":

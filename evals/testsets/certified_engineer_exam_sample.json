@@ -1,0 +1,21 @@
+[
+  {
+    "question_id": "q1",
+    "question": "what are the routing protocols supported by the balance/max family?",
+    "choices": ["ospf", "bgp", "ripv2", "is-is", "eigrp"],
+    "correct_answers": ["ospf", "bgp", "ripv2"],
+    "custom_id": "80fb3643af3794fc4504f75a3a41ba7a"
+  },
+  {
+    "question_id": "q2",
+    "question": "in which situation is a captive portal applied to an ssid instead of a vlan?",
+    "choices": [
+      "always",
+      "when deploying a captive portal to pepwave max cellular routers",
+      "when deploying a captive portal to pepwave access points only",
+      "never"
+    ],
+    "correct_answers": ["never"],
+    "custom_id": "9bcdcafdef65f8c95604df63e3405e27"
+  }
+]

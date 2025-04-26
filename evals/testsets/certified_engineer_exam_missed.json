@@ -1,0 +1,15 @@
+[
+  {
+    "question_id": "q2",
+    "question": "in which situation is a captive portal applied to an ssid instead of a vlan?",
+    "choices": [
+      "always",
+      "when deploying a captive portal to pepwave max cellular routers",
+      "when deploying a captive portal to pepwave access points only",
+      "never"
+    ],
+    "correct_answers": ["never"],
+    "custom_id": "9bcdcafdef65f8c95604df63e3405e27",
+    "given_answer": ["when deploying a captive portal to pepwave access points only"]
+  }
+]
