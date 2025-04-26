@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+GPT_4_1 = "gpt-4.1"
 GPT_4_1_MINI = "gpt-4.1-mini"
 GPT_4_1_NANO = "gpt-4.1-nano"
 
@@ -21,10 +22,10 @@ if __name__ == "__main__":
         inference_llm_model=GPT_4_1_MINI,
         eval_llm_model=GPT_4_1_NANO,
         eval_boost_llm_model=GPT_4_1_MINI,
-        sample=2,
-        test_run=False,
-        should_create_batch_job=True,
+        # sample=2,
+        # test_run=False,
+        # should_create_batch_job=True,
         run_name=f"init_base_run__4-24",
     )
-    # asyncio.run(ragas_eval.generate_batchfiles())
-    asyncio.run(ragas_eval.evaluate_rag())
+    asyncio.run(ragas_eval.generate_batchfiles())
+    # asyncio.run(ragas_eval.evaluate_rag())
