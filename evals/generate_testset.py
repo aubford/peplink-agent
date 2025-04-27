@@ -10,11 +10,12 @@ from langchain.prompts import (
 )
 from pydantic import BaseModel, Field
 import json
-
+import torch
 from evals.evals_utils import output_nodes_path, output_relationships_path
 from util.util_main import count_tokens
 import shutil
 from evals.prompts.prompts import load_prompts
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 dotenv.load_dotenv()
 this_dir = Path(__file__).parent
@@ -500,3 +501,58 @@ class TransformTestset:
         queries = [item["query"] + "\n\n" + item["answer"] for item in self.data]
         with open(self.output_dir / "queries.txt", "w", encoding="utf-8") as f:
             f.write("\n\n".join(queries))
+
+    def paraphrase_questions(
+        self,
+        questions: list[str],
+        model_name: str = "kalpeshk2011/dipper-paraphraser-xxl",
+        lexical_diversity: float = 0.5,
+        order_diversity: float = 0.3,
+        max_length: int = 512,
+        num_return_sequences: int = 1,
+        device: str = "cuda" if torch.cuda.is_available() else "cpu",
+    ) -> list[str]:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
+
+        wrapped_questions = [f"<sent>{q}</sent>" for q in questions]
+
+        inputs = tokenizer(
+            wrapped_questions,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        ).to(device)
+
+        outputs = model.generate(
+            **inputs,
+            max_length=max_length,
+            num_return_sequences=num_return_sequences,
+            do_sample=True,
+            top_k=50,
+            top_p=0.95,
+            temperature=0.7,
+            diversity_penalty=lexical_diversity,  # Controls lexical diversity
+            repetition_penalty=1.2
+            + order_diversity,  # Indirectly controls order diversity
+        )
+
+        paraphrased_questions = tokenizer.batch_decode(
+            outputs, skip_special_tokens=True
+        )
+        return paraphrased_questions
+
+    if __name__ == "__main__":
+        input_questions = [
+            "How do the technical specifications, WAN connectivity options, and throughput limitations compare between the Peplink Balance 20, Balance 30, and Balance 50 models, and what are the implications for users considering an upgrade to support higher-speed connections like Starlink?",
+            "How can a network administrator centrally manage firewall rules across multiple Peplink routers using InControl2, including country-based blocking, and what are key operational requirements and verification steps?",
+            "How can a technician monitor and interpret the power supply input voltage and GPIO status on a Peplink router, and what steps should they take if voltage-related instability or restarts occur?",
+        ]
+
+        paraphrased = paraphrase_questions(input_questions)
+
+        for idx, q in enumerate(paraphrased):
+            print(f"Original:\n{input_questions[idx]}\n")
+            print(f"Paraphrased:\n{q}\n")
+            print("-" * 100)

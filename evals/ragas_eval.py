@@ -50,17 +50,29 @@ class RagasEval:
         self.test_run_name = (
             f"{testset_name}__{run_name or datetime.now().strftime("%Y-%m-%d_%H_%M")}"
         )
+        self.output_dir = evals_dir / "runs"
 
         # add TESTRUN flag to filename
         if test_run:
             self.test_run_name = f"{self.test_run_name}__TESTRUN"
             generated_testset_df = generated_testset_df
 
+        self.output_file_path = (
+            self.output_dir / f"result__{self.test_run_name}.parquet"
+        )
+
+        # Check if output file already exists and raise error if it does
+        if os.path.exists(self.output_file_path):
+            raise FileExistsError(
+                f"Output file already exists: {self.output_file_path}. "
+                "Please use a different run_name or remove the existing file."
+            )
+
         self.test_set: Testset = self.init_testset(generated_testset_df, nodes_df)
 
         self.test_run = test_run
         self.should_create_batch_job = should_create_batch_job
-        self.output_dir = evals_dir / "runs"
+
         self.batch_manager = BatchManager(
             base_path=evals_dir / "batches",
             endpoint="/v1/chat/completions",
@@ -250,7 +262,7 @@ class RagasEval:
                 NonLLMContextPrecisionWithReference(),
                 NonLLMContextRecall(),
                 # response -> reference answer (ground truth)
-                FactualCorrectness(),
+                FactualCorrectness(mode="recall"),
                 AnswerAccuracy(),  # NVIDIA
             ],
             llm=self.eval_llm,
@@ -259,8 +271,6 @@ class RagasEval:
         eval_result_df = eval_result.to_pandas()
 
         # Save the full results
-        eval_result_df.to_parquet(
-            self.output_dir / f"result__{self.test_run_name}.parquet"
-        )
+        eval_result_df.to_parquet(self.output_file_path)
 
         self.save_metrics_summary(eval_result_df)

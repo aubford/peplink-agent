@@ -32,7 +32,10 @@
     ],
     "correct_answers": ["speedfusion cloud with outbound policy"],
     "custom_id": "9068bb5daca82d135f9233fc346ed319",
-    "given_answer": ["speedfusion cloud with outbound policy", "speedfusion with outbound policy"]
+    "given_answer": [
+      "speedfusion cloud with outbound policy",
+      "speedfusion with outbound policy"
+    ]
   },
   {
     "question_id": "q13",
@@ -75,7 +78,7 @@
   },
   {
     "question_id": "e5",
-    "question": "what can you perform in the support.cgi page? (you may select more than one answer.)",
+    "question": "what can you perform in the support.cgi page? (you may select more than one answer)",
     "choices": [
       "change wan speed",
       "change wan priority",
@@ -84,7 +87,12 @@
       "schedule reboot day/time",
       "all of the above"
     ],
-    "correct_answers": ["change wan speed", "reboot system", "perform sniffing", "schedule reboot day/time"],
+    "correct_answers": [
+      "change wan speed",
+      "reboot system",
+      "perform sniffing",
+      "schedule reboot day/time"
+    ],
     "custom_id": "5047e513efb940202b0c6f2b789d227e",
     "given_answer": ["reboot system", "perform sniffing", "schedule reboot day/time"]
   },
@@ -98,7 +106,7 @@
   },
   {
     "question_id": "e8",
-    "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer.)",
+    "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer)",
     "choices": ["max hd4", "max br1", "max hd4 mbx", "max hd2", "max m2m"],
     "correct_answers": ["max hd4", "max hd4 mbx"],
     "custom_id": "7343690efa0aa95890efe2f42c051c08",
@@ -113,7 +121,9 @@
       "download the fusionhub image from the peplink firmware & manual page.",
       "contact the appropriate peplink distributor."
     ],
-    "correct_answers": ["download the fusionhub image from the peplink firmware & manual page."],
+    "correct_answers": [
+      "download the fusionhub image from the peplink firmware & manual page."
+    ],
     "custom_id": "fdb6b8debf97268b10da664c4f5e9f03",
     "given_answer": [
       "download the fusionhub image from the peplink firmware & manual page.",
@@ -122,7 +132,7 @@
   },
   {
     "question_id": "e13",
-    "question": "which netflow protocols does peplink support? (choose three answers.)",
+    "question": "which netflow protocols does peplink support? (choose three answers)",
     "choices": ["netflow v5", "netflow v9", "netflow v13", "ipfix", "tcpfix", "udpfix"],
     "correct_answers": ["netflow v5", "netflow v9", "ipfix"],
     "custom_id": "f9e4461e1c717cb89dea76edc0292746",
@@ -130,9 +140,20 @@
   },
   {
     "question_id": "e14",
-    "question": "the primecare subscription for your customer's ubr-lte has expired. which of the following benefits will be lost? (select as many answers as are appropriate.)",
-    "choices": ["firmware updates", "hardware warranty", "speedfusion", "incontrol", "fusionhub license"],
-    "correct_answers": ["hardware warranty", "speedfusion", "incontrol", "fusionhub license"],
+    "question": "the primecare subscription for your customer's ubr-lte has expired. which of the following benefits will be lost? (select as many answers as are appropriate)",
+    "choices": [
+      "firmware updates",
+      "hardware warranty",
+      "speedfusion",
+      "incontrol",
+      "fusionhub license"
+    ],
+    "correct_answers": [
+      "hardware warranty",
+      "speedfusion",
+      "incontrol",
+      "fusionhub license"
+    ],
     "custom_id": "a10f39f0caea79403a2aec8a5220790e",
     "given_answer": ["hardware warranty", "incontrol"]
   },
@@ -152,7 +173,7 @@
   },
   {
     "question_id": "e18",
-    "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one.)",
+    "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one)",
     "choices": ["amazon web service", "vmware", "citrix", "hyper-v", "kvm"],
     "correct_answers": ["amazon web service", "vmware", "citrix", "hyper-v"],
     "custom_id": "665581f9b12f0b51a4daf3cb2d239fe5",
@@ -182,7 +203,7 @@
   },
   {
     "question_id": "e27",
-    "question": "which statement about peplink's implementation of virtual router redundancy protocol (vrrp) is correct? (you may select more than one answer.)",
+    "question": "which statement about peplink's implementation of virtual router redundancy protocol (vrrp) is correct? (you may select more than one answer)",
     "choices": [
       "a balance router can't inter-operate via vrrp with a cisco router.",
       "to avoid potential firmware issues when using two hd2 routers it is recommended the master has the current firmware version and the slave be one version behind.",
@@ -246,7 +267,9 @@
       "yes. fusionhub with microsoft dynamics would meet the customer's requirement.",
       "yes. the customer can host it's own speedfusion-capable router within its own data center."
     ],
-    "correct_answers": ["yes. the customer can host it's own speedfusion-capable router within its own data center."],
+    "correct_answers": [
+      "yes. the customer can host it's own speedfusion-capable router within its own data center."
+    ],
     "custom_id": "a375eb17f0a56831c6f251335599df72",
     "given_answer": [
       "yes. fusionhub could be used with aws or azure.",
@@ -283,7 +306,7 @@
   },
   {
     "question_id": "e42",
-    "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer.)",
+    "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer)",
     "choices": ["1", "2", "3", "4", "5", "7"],
     "correct_answers": ["2", "3"],
     "custom_id": "d37abcc88b6633a9bbf1c6ec49067456",
@@ -292,7 +315,13 @@
   {
     "question_id": "e47",
     "question": "in outbound policy, which algorithm can be applied to a speedfusion profile?",
-    "choices": ["weighted balance", "persistence", "overflow", "least used", "none of the above"],
+    "choices": [
+      "weighted balance",
+      "persistence",
+      "overflow",
+      "least used",
+      "none of the above"
+    ],
     "correct_answers": ["none of the above"],
     "custom_id": "4d13bb63819c8d2d551da50e2e33939a",
     "given_answer": ["persistence", "overflow"]
@@ -300,7 +329,13 @@
   {
     "question_id": "e49",
     "question": "which settings will be discarded when applying the configuration file to the devices via ic2 > bulk configurator? (select two answers)",
-    "choices": ["dynamic dns settings", "vlan networks", "pppoe credentials", "wi-fi ap ssid", "web admin settings"],
+    "choices": [
+      "dynamic dns settings",
+      "vlan networks",
+      "pppoe credentials",
+      "wi-fi ap ssid",
+      "web admin settings"
+    ],
     "correct_answers": ["dynamic dns settings", "pppoe credentials"],
     "custom_id": "807393d7d42c79ab89bb0b38969e29f6",
     "given_answer": ["dynamic dns settings", "web admin settings"]

@@ -21,10 +21,10 @@ if __name__ == "__main__":
         testset_name,
         inference_llm_model=GPT_4_1_MINI,
         eval_llm_model=GPT_4_1_MINI,
-        eval_boost_llm_model=GPT_4_1,
-        sample=4,
-        test_run=True,
-        should_create_batch_job=False,
+        eval_boost_llm_model=GPT_4_1_MINI,
+        # sample=4,
+        # test_run=True,
+        # should_create_batch_job=False,
         run_name=f"init_base_run__4-24",
     )
     # asyncio.run(ragas_eval.generate_batchfiles())
