@@ -238,7 +238,7 @@ class RagasEval:
             dataset=evaluation_dataset,
             metrics=[
                 # response -> context (do the claims in answer come from context)
-                Faithfulness(llm=self.eval_llm),
+                Faithfulness(),
                 ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
                 # response -> question (does the answer address the entire question)
                 # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
@@ -250,8 +250,8 @@ class RagasEval:
                 NonLLMContextPrecisionWithReference(),
                 NonLLMContextRecall(),
                 # response -> reference answer (ground truth)
-                FactualCorrectness(llm=self.eval_llm),
-                AnswerAccuracy(llm=self.eval_llm),  # NVIDIA
+                FactualCorrectness(),
+                AnswerAccuracy(),  # NVIDIA
             ],
             llm=self.eval_llm,
         )

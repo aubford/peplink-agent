@@ -129,7 +129,7 @@
   },
   {
     "question_id": "q12",
-    "question": "which statement(s) is/are true regarding the ap controller on a peplink router? (you may select more than one answer.)",
+    "question": "which statement(s) is/are true regarding the ap controller on a peplink router? (you may select more than one answer)",
     "choices": [
       "manages 3rd party ap devices",
       "manages surf on-the-go",
@@ -192,7 +192,7 @@
   },
   {
     "question_id": "e3",
-    "question": "the owner of an oil rig platform would like to deploy a cellular router that is suitable for outdoor use with the following characteristics:\n- water-proof\n- no ingress of dust\n- lightning immunity\n- shock and vibration resistance\n\nwhich max cellular model(s) could meet the above requirements? (you may select more than one answer.)",
+    "question": "the owner of an oil rig platform would like to deploy a cellular router that is suitable for outdoor use with the following characteristics:\n- water-proof\n- no ingress of dust\n- lightning immunity\n- shock and vibration resistance\n\nwhich max cellular model(s) could meet the above requirements? (you may select more than one answer)",
     "choices": ["max hd2 ip67", "max br2 ip55", "max br1 ip55", "max hd2", "max hd4"],
     "correct_answers": ["max hd2 ip67"],
     "custom_id": "891a7842d991de71166f6f8353e99123"
@@ -206,7 +206,7 @@
   },
   {
     "question_id": "e5",
-    "question": "what can you perform in the support.cgi page? (you may select more than one answer.)",
+    "question": "what can you perform in the support.cgi page? (you may select more than one answer)",
     "choices": [
       "change wan speed",
       "change wan priority",
@@ -239,7 +239,7 @@
   },
   {
     "question_id": "e8",
-    "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer.)",
+    "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer)",
     "choices": ["max hd4", "max br1", "max hd4 mbx", "max hd2", "max m2m"],
     "correct_answers": ["max hd4", "max hd4 mbx"],
     "custom_id": "7343690efa0aa95890efe2f42c051c08"
@@ -301,14 +301,14 @@
   },
   {
     "question_id": "e13",
-    "question": "which netflow protocols does peplink support? (choose three answers.)",
+    "question": "which netflow protocols does peplink support? (choose three answers)",
     "choices": ["netflow v5", "netflow v9", "netflow v13", "ipfix", "tcpfix", "udpfix"],
     "correct_answers": ["netflow v5", "netflow v9", "ipfix"],
     "custom_id": "f9e4461e1c717cb89dea76edc0292746"
   },
   {
     "question_id": "e14",
-    "question": "the primecare subscription for your customer's ubr-lte has expired. which of the following benefits will be lost? (select as many answers as are appropriate.)",
+    "question": "the primecare subscription for your customer's ubr-lte has expired. which of the following benefits will be lost? (select as many answers as are appropriate)",
     "choices": [
       "firmware updates",
       "hardware warranty",
@@ -339,7 +339,7 @@
   },
   {
     "question_id": "e16",
-    "question": "what is the purpose of the sim toolkit feature? (choose two answers.)",
+    "question": "what is the purpose of the sim toolkit feature? (choose two answers)",
     "choices": [
       "send sms to external devices",
       "check sim card's balance, process pre-paid cards, and configure carrier-specific services via ussd",
@@ -368,7 +368,7 @@
   },
   {
     "question_id": "e18",
-    "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one.)",
+    "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one)",
     "choices": ["amazon web service", "vmware", "citrix", "hyper-v", "kvm"],
     "correct_answers": ["amazon web service", "vmware", "citrix", "hyper-v"],
     "custom_id": "665581f9b12f0b51a4daf3cb2d239fe5"
@@ -408,7 +408,7 @@
   },
   {
     "question_id": "e22",
-    "question": "identify the feature(s) of the router utility app. (you may select more than one answer.)",
+    "question": "identify the feature(s) of the router utility app. (you may select more than one answer)",
     "choices": [
       "modify a balance's firewall rules",
       "update a balance/max's firmware",
@@ -477,7 +477,7 @@
   },
   {
     "question_id": "e27",
-    "question": "which statement about peplink's implementation of virtual router redundancy protocol (vrrp) is correct? (you may select more than one answer.)",
+    "question": "which statement about peplink's implementation of virtual router redundancy protocol (vrrp) is correct? (you may select more than one answer)",
     "choices": [
       "a balance router can't inter-operate via vrrp with a cisco router.",
       "to avoid potential firmware issues when using two hd2 routers it is recommended the master has the current firmware version and the slave be one version behind.",
@@ -674,7 +674,7 @@
   },
   {
     "question_id": "e42",
-    "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer.)",
+    "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer)",
     "choices": ["1", "2", "3", "4", "5", "7"],
     "correct_answers": ["2", "3"],
     "custom_id": "d37abcc88b6633a9bbf1c6ec49067456"
@@ -715,7 +715,7 @@
   },
   {
     "question_id": "e46",
-    "question": "starting from firmware 8.0, you can configure concurrent layer 2 and layer 3 pepvpn tunnels between the same pair of pepvpn peers. which configuration tasks are wrong when doing this? (select two answers.)",
+    "question": "starting from firmware 8.0, you can configure concurrent layer 2 and layer 3 pepvpn tunnels between the same pair of pepvpn peers. which configuration tasks are wrong when doing this? (select two answers)",
     "choices": [
       "create maximum 5 tunnels in total (default + sub tunnels)",
       "create maximum 6 tunnels in total (default + sub tunnels)",
@@ -744,7 +744,7 @@
   },
   {
     "question_id": "e48",
-    "question": "speedfusion can have which of the following feature(s)? (you may select more than one answer.)",
+    "question": "speedfusion can have which of the following feature(s)? (you may select more than one answer)",
     "choices": [
       "inbound load balancing algorithms",
       "unbreakable session hot failover",

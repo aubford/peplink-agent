@@ -1,5 +1,13 @@
 [
   {
+    "question_id": "q1",
+    "question": "what are the routing protocols supported by the balance/max family?",
+    "choices": ["ospf", "bgp", "ripv2", "is-is", "eigrp"],
+    "correct_answers": ["ospf", "bgp", "ripv2"],
+    "custom_id": "80fb3643af3794fc4504f75a3a41ba7a",
+    "given_answer": ["ospf", "ripv2"]
+  },
+  {
     "question_id": "q2",
     "question": "in which situation is a captive portal applied to an ssid instead of a vlan?",
     "choices": [
@@ -11,5 +19,290 @@
     "correct_answers": ["never"],
     "custom_id": "9bcdcafdef65f8c95604df63e3405e27",
     "given_answer": ["when deploying a captive portal to pepwave access points only"]
+  },
+  {
+    "question_id": "q11",
+    "question": "how do you implement wan bandwidth bonding for internet traffic?",
+    "choices": [
+      "speedfusion cloud",
+      "speedfusion",
+      "speedfusion cloud with outbound policy",
+      "speedfusion with outbound policy",
+      "outbound policy"
+    ],
+    "correct_answers": ["speedfusion cloud with outbound policy"],
+    "custom_id": "9068bb5daca82d135f9233fc346ed319",
+    "given_answer": ["speedfusion cloud with outbound policy", "speedfusion with outbound policy"]
+  },
+  {
+    "question_id": "q13",
+    "question": "which statements are true about max adapter 5g? (choose two)",
+    "choices": [
+      "provides a portable 6 connection for windows and linux devices",
+      "is a 5g wan option for other peplink or pepwave products which does not support 5g",
+      "provides a portable 5g and gps connection for windows and linux devices",
+      "provides a gps option for other peplink or pepwave products which do not support gps"
+    ],
+    "correct_answers": [
+      "provides a portable 6 connection for windows and linux devices",
+      "is a 5g wan option for other peplink or pepwave products which does not support 5g"
+    ],
+    "custom_id": "de99a41d0f4bd08c993248c1a7453440",
+    "given_answer": [
+      "is a 5g wan option for other peplink or pepwave products which does not support 5g",
+      "provides a portable 5g and gps connection for windows and linux devices"
+    ]
+  },
+  {
+    "question_id": "e1",
+    "question": "when troubleshooting an lte connection issue, peplink support needs more information about the cellular status, eg. cellular module model and firmware. where do you find the information? (choose 2 answers)",
+    "choices": [
+      "web admin > status > device > modem support version",
+      "web admin > connection details > cellular status",
+      "web admin > connection details > cellular status > engineering data",
+      "web admin > status > modem support list",
+      "web admin / <support.cgi> page > cellular module firmware update"
+    ],
+    "correct_answers": [
+      "web admin > connection details > cellular status > engineering data",
+      "web admin / <support.cgi> page > cellular module firmware update"
+    ],
+    "custom_id": "3f576d280eac94dd4271cb01e6e5e121",
+    "given_answer": [
+      "web admin > status > device > modem support version",
+      "web admin / <support.cgi> page > cellular module firmware update"
+    ]
+  },
+  {
+    "question_id": "e5",
+    "question": "what can you perform in the support.cgi page? (you may select more than one answer.)",
+    "choices": [
+      "change wan speed",
+      "change wan priority",
+      "reboot system",
+      "perform sniffing",
+      "schedule reboot day/time",
+      "all of the above"
+    ],
+    "correct_answers": ["change wan speed", "reboot system", "perform sniffing", "schedule reboot day/time"],
+    "custom_id": "5047e513efb940202b0c6f2b789d227e",
+    "given_answer": ["reboot system", "perform sniffing", "schedule reboot day/time"]
+  },
+  {
+    "question_id": "e6",
+    "question": "when using peplink's ipsec vpn can routing be controlled by using outbound policy?",
+    "choices": ["yes", "no"],
+    "correct_answers": ["no"],
+    "custom_id": "033f71596c2c9be7cf743cd570b3f784",
+    "given_answer": ["yes"]
+  },
+  {
+    "question_id": "e8",
+    "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer.)",
+    "choices": ["max hd4", "max br1", "max hd4 mbx", "max hd2", "max m2m"],
+    "correct_answers": ["max hd4", "max hd4 mbx"],
+    "custom_id": "7343690efa0aa95890efe2f42c051c08",
+    "given_answer": ["max hd4", "max hd4 mbx", "max hd2"]
+  },
+  {
+    "question_id": "e11",
+    "question": "how can a fusionhub image be obtained?",
+    "choices": [
+      "contact peplink team to send you the image.",
+      "download the latest humble bundle; fusionhub is part of any humble bundle.",
+      "download the fusionhub image from the peplink firmware & manual page.",
+      "contact the appropriate peplink distributor."
+    ],
+    "correct_answers": ["download the fusionhub image from the peplink firmware & manual page."],
+    "custom_id": "fdb6b8debf97268b10da664c4f5e9f03",
+    "given_answer": [
+      "download the fusionhub image from the peplink firmware & manual page.",
+      "contact the appropriate peplink distributor."
+    ]
+  },
+  {
+    "question_id": "e13",
+    "question": "which netflow protocols does peplink support? (choose three answers.)",
+    "choices": ["netflow v5", "netflow v9", "netflow v13", "ipfix", "tcpfix", "udpfix"],
+    "correct_answers": ["netflow v5", "netflow v9", "ipfix"],
+    "custom_id": "f9e4461e1c717cb89dea76edc0292746",
+    "given_answer": ["ipfix"]
+  },
+  {
+    "question_id": "e14",
+    "question": "the primecare subscription for your customer's ubr-lte has expired. which of the following benefits will be lost? (select as many answers as are appropriate.)",
+    "choices": ["firmware updates", "hardware warranty", "speedfusion", "incontrol", "fusionhub license"],
+    "correct_answers": ["hardware warranty", "speedfusion", "incontrol", "fusionhub license"],
+    "custom_id": "a10f39f0caea79403a2aec8a5220790e",
+    "given_answer": ["hardware warranty", "incontrol"]
+  },
+  {
+    "question_id": "e17",
+    "question": "which of the following is not correct about the router utility app?",
+    "choices": [
+      "it is available on the ios and android platforms.",
+      "it can be used to remotely reboot a router.",
+      "it can be used to view the ip address of lan interface.",
+      "it can be used to check speedfusion's connectivity.",
+      "it can be used to check routers' event log."
+    ],
+    "correct_answers": ["it can be used to remotely reboot a router."],
+    "custom_id": "1d6e2359173928c3cfc12231c34b5f92",
+    "given_answer": ["it can be used to check routers' event log."]
+  },
+  {
+    "question_id": "e18",
+    "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one.)",
+    "choices": ["amazon web service", "vmware", "citrix", "hyper-v", "kvm"],
+    "correct_answers": ["amazon web service", "vmware", "citrix", "hyper-v"],
+    "custom_id": "665581f9b12f0b51a4daf3cb2d239fe5",
+    "given_answer": ["vmware", "citrix"]
+  },
+  {
+    "question_id": "e21",
+    "question": "is this statement true? \"for the balance 580, ha (vrrp) and lan bypass can simultaneously work together.\"",
+    "choices": ["true", "false"],
+    "correct_answers": ["false"],
+    "custom_id": "96aaa7c402f6513d536479b9595230fb",
+    "given_answer": ["true"]
+  },
+  {
+    "question_id": "e26",
+    "question": "which speedfusion feature was designed for the 5g scenario?",
+    "choices": [
+      "hot failover",
+      "bandwidth bonding",
+      "forward error correction",
+      "bandwidth overflow",
+      "speedfusion traffic steering"
+    ],
+    "correct_answers": ["bandwidth overflow", "speedfusion traffic steering"],
+    "custom_id": "864d5c003a43753d45bf0bf7bf50d91d",
+    "given_answer": ["hot failover"]
+  },
+  {
+    "question_id": "e27",
+    "question": "which statement about peplink's implementation of virtual router redundancy protocol (vrrp) is correct? (you may select more than one answer.)",
+    "choices": [
+      "a balance router can't inter-operate via vrrp with a cisco router.",
+      "to avoid potential firmware issues when using two hd2 routers it is recommended the master has the current firmware version and the slave be one version behind.",
+      "vrrp is a generic specification which peplink has extended to provide additional functionality if certain criteria are met.",
+      "peplink recommends when using vrrp the two devices be identical.",
+      "peplink routers cannot perform configuration synchronization while operating in ha mode.",
+      "a unique feature of peplink's implementation is ha is compatible with drop-in mode."
+    ],
+    "correct_answers": [
+      "vrrp is a generic specification which peplink has extended to provide additional functionality if certain criteria are met.",
+      "peplink recommends when using vrrp the two devices be identical."
+    ],
+    "custom_id": "cbd2b4ae3cce0656c04fa1631e4f3ea5",
+    "given_answer": [
+      "vrrp is a generic specification which peplink has extended to provide additional functionality if certain criteria are met.",
+      "peplink recommends when using vrrp the two devices be identical.",
+      "a unique feature of peplink's implementation is ha is compatible with drop-in mode."
+    ]
+  },
+  {
+    "question_id": "e31",
+    "question": "in which of the following two circumstances would the enabling of wan smoothing be advised?",
+    "choices": [
+      "wan smoothing should be enabled when you establish a speedfusion tunnel.",
+      "users complain the speed is slow.",
+      "the users see glitches over video streaming sessions.",
+      "one way audio is in use for voip and no packet loss found.",
+      "connections in accessing the e-mail server in hq are intermittent."
+    ],
+    "correct_answers": [
+      "the users see glitches over video streaming sessions.",
+      "connections in accessing the e-mail server in hq are intermittent."
+    ],
+    "custom_id": "f13851c7fdcf8d79873d8be2eba031b3",
+    "given_answer": ["the users see glitches over video streaming sessions."]
+  },
+  {
+    "question_id": "e36",
+    "question": "what power option is required in order to enable poe output on a max hd4? (select two answers)",
+    "choices": [
+      "use the accessory acw-618",
+      "input 56v via terminal block",
+      "use the shipping 12v dc adapter",
+      "use a 56v power supply and change the dip switch settings on the router to enable poe.",
+      "hd4 does not support poe"
+    ],
+    "correct_answers": ["use the accessory acw-618", "input 56v via terminal block"],
+    "custom_id": "911f69e0ef48246939ef5ad0deaf2d04",
+    "given_answer": [
+      "use a 56v power supply and change the dip switch settings on the router to enable poe.",
+      "input 56v via terminal block"
+    ]
+  },
+  {
+    "question_id": "e37",
+    "question": "your customer explains while her organization would like to use speedfusion but they are prohibited by regulation and policy from using third party services such as incontrol. are there any alternatives which could be presented to this customer?",
+    "choices": [
+      "no. incontrol is required.",
+      "yes. fusionhub could be used with aws or azure.",
+      "yes. fusionhub cold be used with aws or azure.",
+      "yes. fusionhub with microsoft dynamics would meet the customer's requirement.",
+      "yes. the customer can host it's own speedfusion-capable router within its own data center."
+    ],
+    "correct_answers": ["yes. the customer can host it's own speedfusion-capable router within its own data center."],
+    "custom_id": "a375eb17f0a56831c6f251335599df72",
+    "given_answer": [
+      "yes. fusionhub could be used with aws or azure.",
+      "yes. the customer can host it's own speedfusion-capable router within its own data center."
+    ]
+  },
+  {
+    "question_id": "e39",
+    "question": "when should you use the phase 2 pfs group option on the ipsec profile configuration page?",
+    "choices": [
+      "use this option when better compatibility is needed.",
+      "this option can be safely ignored.",
+      "there is no specific use of pfs.",
+      "use this option when you need a more secure vpn.",
+      "none of the above."
+    ],
+    "correct_answers": ["use this option when you need a more secure vpn."],
+    "custom_id": "ce442b8e8cd5b046a99eb1c7fb43baa3",
+    "given_answer": ["4. use this option when you need a more secure vpn."]
+  },
+  {
+    "question_id": "e40",
+    "question": "when you install a max br1-lte-us with a provisioned verizon sim card, you notice in the web admin dashboard the cellular is stuck in \"obtaining ip address...\" what is the most likely cause of the problem? note: the same setup is working fine with other verizon sim cards.",
+    "choices": [
+      "sim card inserted incorrectly",
+      "cellular signal very weak",
+      "the max br1-lte-us imei has not been registered to verizon",
+      "cellular antenna not attached",
+      "cellular state set to standby mode"
+    ],
+    "correct_answers": ["the max br1-lte-us imei has not been registered to verizon"],
+    "custom_id": "8d2b1b4b8ebbd5b5cf029f355e0b4ebc",
+    "given_answer": ["sim card inserted incorrectly"]
+  },
+  {
+    "question_id": "e42",
+    "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer.)",
+    "choices": ["1", "2", "3", "4", "5", "7"],
+    "correct_answers": ["2", "3"],
+    "custom_id": "d37abcc88b6633a9bbf1c6ec49067456",
+    "given_answer": ["1", "2", "3"]
+  },
+  {
+    "question_id": "e47",
+    "question": "in outbound policy, which algorithm can be applied to a speedfusion profile?",
+    "choices": ["weighted balance", "persistence", "overflow", "least used", "none of the above"],
+    "correct_answers": ["none of the above"],
+    "custom_id": "4d13bb63819c8d2d551da50e2e33939a",
+    "given_answer": ["persistence", "overflow"]
+  },
+  {
+    "question_id": "e49",
+    "question": "which settings will be discarded when applying the configuration file to the devices via ic2 > bulk configurator? (select two answers)",
+    "choices": ["dynamic dns settings", "vlan networks", "pppoe credentials", "wi-fi ap ssid", "web admin settings"],
+    "correct_answers": ["dynamic dns settings", "pppoe credentials"],
+    "custom_id": "807393d7d42c79ab89bb0b38969e29f6",
+    "given_answer": ["dynamic dns settings", "web admin settings"]
   }
 ]
