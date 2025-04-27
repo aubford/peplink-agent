@@ -1,0 +1,1 @@
+Paraphrase the provided question to separate its semantics from the source document while preserving the exact meaning. Do not answer the question, only respond with the paraphrased question. Retain all named entities precisely as they appear.

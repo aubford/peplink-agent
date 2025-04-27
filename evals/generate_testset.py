@@ -10,17 +10,11 @@ from langchain.prompts import (
 )
 from pydantic import BaseModel, Field
 import json
-import torch
 from evals.evals_utils import output_nodes_path, output_relationships_path
 from util.util_main import count_tokens
 import shutil
 from evals.prompts.prompts import load_prompts
-from transformers.models.pegasus import (
-    PegasusForConditionalGeneration,
-    PegasusTokenizer,
-)
-from sentence_transformers import SentenceTransformer, util
-import numpy as np
+from langchain_core.rate_limiters import InMemoryRateLimiter
 
 dotenv.load_dotenv()
 this_dir = Path(__file__).parent
@@ -471,12 +465,23 @@ class GenerateTestSet:
         self.llm_generate_testset()
 
 
+class ParaphraseResponse(BaseModel):
+    paraphrased_query: str = Field(description="The paraphrased query")
+
+
 class TransformTestset:
     def __init__(self, testset_dirname: str):
+        rate_limiter = InMemoryRateLimiter(
+            requests_per_second=3.0,
+            max_bucket_size=10,
+        )
+        self.llm = ChatOpenAI(model="gpt-4.1", rate_limiter=rate_limiter)
         self.output_dir = testset_dir / testset_dirname
         testset_file_path = self.output_dir / "generated_testset.json"
+        self.testset_file_path = testset_file_path
         if not testset_file_path.exists():
             raise FileNotFoundError(f"Testset file not found: {testset_file_path}")
+        self.data: list[dict] = []
         with open(testset_file_path, "r", encoding="utf-8") as f:
             self.data = json.load(f)
 
@@ -507,96 +512,28 @@ class TransformTestset:
         with open(self.output_dir / "queries.txt", "w", encoding="utf-8") as f:
             f.write("\n\n".join(queries))
 
-    def paraphrase_and_select_best(
-        self,
-        questions: list[str],
-        num_candidates: int = 3,  # Now matches num_return_sequences
-        similarity_threshold: float = 0.85,
-    ) -> list[tuple[str, str, float]]:
-        MODEL_NAME = "tuner007/pegasus_paraphrase"
-        # Force CPU for Pegasus inference due to MPS instability with large models on Mac.
-        DEVICE = torch.device("cpu")
-        MAX_LENGTH = 512
-
-        tokenizer = PegasusTokenizer.from_pretrained(MODEL_NAME)
-        model = PegasusForConditionalGeneration.from_pretrained(MODEL_NAME)
-
-        inputs = tokenizer(
-            questions,
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=MAX_LENGTH,
-        )
-        inputs = {k: v.to(DEVICE) for k, v in inputs.items()}
-
-        try:
-            with torch.no_grad():
-                outputs = model.generate(
-                    input_ids=inputs["input_ids"],
-                    attention_mask=inputs["attention_mask"],
-                    max_length=MAX_LENGTH,
-                    num_beams=10,
-                    num_return_sequences=3,  # Fewer candidates to reduce low-quality outputs
-                    do_sample=False,  # Deterministic decoding for higher quality
-                    # temperature omitted: only used if do_sample=True
-                )
-        except Exception as e:
-            print(f"Error during Pegasus model inference: {e}")
-            return [(q, "", 0.0) for q in questions]
-
-        decoded_outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-
-        best_paraphrases = []
-        for i in range(len(questions)):
-            candidate_set = decoded_outputs[
-                i * 3 : (i + 1) * 3  # Use all generated candidates
+    def paraphrase_query(self) -> None:
+        system_prompt = PROMPTS["generate_testset/paraphrase_query_sys"]
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt),
+                ("human", 'Question:\n\n"""{query}"""'),
             ]
-            best_para, best_score = self.select_best_paraphrase(
-                questions[i], candidate_set, similarity_threshold
-            )
-            best_paraphrases.append((questions[i], best_para, best_score))
+        )
+        chain = prompt | self.llm.with_structured_output(ParaphraseResponse)
+        for sample in self.data:
+            query = sample["query"]
+            sample["query_original"] = query
+            response: ParaphraseResponse = chain.invoke({"query": query})  # type: ignore
+            sample["query"] = response.paraphrased_query
 
-        return best_paraphrases
+        with open(self.testset_file_path, "w", encoding="utf-8") as f:
+            json.dump(self.data, f, indent=2, ensure_ascii=False)
 
-    @staticmethod
-    def select_best_paraphrase(
-        original: str, candidates: list[str], similarity_threshold: float
-    ) -> tuple[str, float]:
-        EMBEDDER_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-        # Force CPU for embedding as well for maximum compatibility.
-        device = "cpu"
-        embedder = SentenceTransformer(EMBEDDER_NAME, device=device)
-        embeddings = embedder.encode([original] + candidates, convert_to_tensor=True)
-        original_embedding = embeddings[0]
-        candidate_embeddings = embeddings[1:]
-        similarities = util.cos_sim(original_embedding, candidate_embeddings)[0]
-
-        # Select the least similar paraphrase above the threshold
-        valid_idxs = np.where(similarities >= similarity_threshold)[0]
-        if len(valid_idxs) > 0:
-            best_idx = valid_idxs[np.argmin(similarities[valid_idxs])]
-            best_score = similarities[best_idx].item()
-            best_candidate = candidates[best_idx]
-            return best_candidate, best_score
-        else:
-            return "", 0.0
+        print(f"Paraphrased testset saved to {self.testset_file_path}")
 
 
 if __name__ == "__main__":
-    input_questions = [
-        "How do the technical specifications, WAN connectivity options, and throughput limitations compare between the Peplink Balance 20, Balance 30, and Balance 50 models, and what are the implications for users considering an upgrade to support higher-speed connections like Starlink?",
-        "How can a network administrator centrally manage firewall rules across multiple Peplink routers using InControl2, including country-based blocking, and what are key operational requirements and verification steps?",
-        "How can a technician monitor and interpret the power supply input voltage and GPIO status on a Peplink router, and what steps should they take if voltage-related instability or restarts occur?",
-    ]
-    transform_testset = TransformTestset("testset-200_main_testset_25-04-23")
-
-    paraphrased = transform_testset.paraphrase_and_select_best(input_questions)
-
-    for orig, para, score in paraphrased:
-        print(f"\n\nOriginal:\n{orig}\n")
-        if para:
-            print(f"Paraphrased:\n{para}\nSimilarity Score: {score:.4f}\n")
-        else:
-            print("No acceptable paraphrase found.\n")
-        print("-" * 100)
+    testset_name = "testset-200_main_testset_25-04-23"
+    transform_testset = TransformTestset(testset_name)
+    transform_testset.paraphrase_query()
