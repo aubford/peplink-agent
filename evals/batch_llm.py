@@ -71,7 +71,7 @@ class BatchChatOpenAI(BaseChatModel):
             messages=formatted_messages,
             system_prompt=system_prompt,
             model=self.model_name,
-            temperature=self.temperature if self.temperature is not None else 0.7,
+            temperature=self.temperature,
             max_tokens=self.model_kwargs.get("max_tokens", 5000),
             **all_kwargs,
         )

@@ -7,8 +7,6 @@ import time
 
 
 class RotatingFileLogger(logging.Logger):
-    """Logger with rotating file handling configured by default."""
-
     def __init__(
         self,
         name: str,
@@ -60,8 +58,6 @@ class RotatingFileLogger(logging.Logger):
 
 
 class RotatingFileLogWriter(logging.Logger):
-    """Logger with rotating file handling configured by default."""
-
     def __init__(
         self,
         name: str,
@@ -83,7 +79,7 @@ class RotatingFileLogWriter(logging.Logger):
             self.file_handler = RotatingFileHandler(
                 os.path.join(
                     "logs",
-                    f"{name}_{time.strftime('%m-%d_%H_%M')}.log",
+                    f"{name}.log",
                 ),
                 maxBytes=max_bytes,
                 backupCount=backup_count,

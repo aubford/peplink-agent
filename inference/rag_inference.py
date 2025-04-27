@@ -23,7 +23,7 @@ class RagInference:
         self,
         embedding_model: str = "text-embedding-3-large",
         llm_model: str = "gpt-4.1-mini",
-        temperature: float = 0.2,
+        temperature: float = 1,  # openai default temp
         streaming: bool = False,
         pinecone_index_name: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
         eval_llm: BaseChatModel | None = None,

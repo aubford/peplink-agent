@@ -51,10 +51,10 @@ class RagasEval:
             f"{testset_name}__{run_name or datetime.now().strftime("%Y-%m-%d_%H_%M")}"
         )
 
-        # add TESTRUN flag to filename and limit to max 8 samples
+        # add TESTRUN flag to filename
         if test_run:
             self.test_run_name = f"{self.test_run_name}__TESTRUN"
-            generated_testset_df = generated_testset_df[:8]
+            generated_testset_df = generated_testset_df
 
         self.test_set: Testset = self.init_testset(generated_testset_df, nodes_df)
 
