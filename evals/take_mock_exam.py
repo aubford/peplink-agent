@@ -5,6 +5,7 @@ from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
 from inference.rag_inference import RagInference
 from prompts import load_prompts
+from langchain_core.prompts import ChatPromptTemplate
 
 
 class MockExamOutput(BaseModel):
@@ -14,6 +15,18 @@ class MockExamOutput(BaseModel):
 
 
 PROMPTS = load_prompts()
+system_prompt = PROMPTS['ragas_eval/mock_exam_system'].format(
+    system_prompt=PROMPTS['inference/system']
+)
+
+messages_prompt = ChatPromptTemplate(
+    [
+        ("system", system_prompt),
+        ("human", PROMPTS['ragas_eval/mock_exam_example_query']),
+        ("ai", PROMPTS['ragas_eval/mock_exam_example_answer']),
+        ("human", "{input}"),
+    ]
+)
 
 
 class MockExam:
@@ -35,6 +48,7 @@ class MockExam:
         )
         self.rag_inference = RagInference(
             llm_model=llm_model,
+            messages=messages_prompt,
             eval_llm=BatchChatOpenAI(
                 model=llm_model,
                 temperature=0,

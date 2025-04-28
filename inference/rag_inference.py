@@ -12,11 +12,21 @@ from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.language_models.chat_models import BaseChatModel
 from util.root_only_tracer import RootOnlyTracer
 from prompts import load_prompts
+from langchain import hub
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
 
+old_prompt = hub.pull("aubford/retrieval-qa-chat")
 PROMPTS = load_prompts()
+
+messages_prompt = ChatPromptTemplate(
+    [
+        ("system", PROMPTS['inference/system']),
+        ("placeholder", "{chat_history}"),
+        ("human", "{input}"),
+    ]
+)
 
 
 class RagInference:
@@ -28,7 +38,7 @@ class RagInference:
         streaming: bool = False,
         pinecone_index_name: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
         eval_llm: BaseChatModel | None = None,
-        system_prompt: str = PROMPTS['inference/system'],
+        messages: ChatPromptTemplate = messages_prompt,
     ):
         self.embeddings = OpenAIEmbeddings(model=embedding_model)
         self.vector_store = PineconeVectorStore(
@@ -51,14 +61,6 @@ class RagInference:
             rate_limiter=rate_limiter,
         )
 
-        prompt = ChatPromptTemplate(
-            [
-                ("system", system_prompt),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}"),
-            ]
-        )
-
         self.minimal_tracer = RootOnlyTracer(project_name="langchain-pepwave")
 
         self.retriever = (
@@ -77,7 +79,7 @@ class RagInference:
             .assign(
                 answer=create_stuff_documents_chain(
                     eval_llm or self.llm,
-                    prompt,
+                    messages,
                     document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
                 )
             )
