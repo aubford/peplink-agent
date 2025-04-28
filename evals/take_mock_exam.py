@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
 from inference.rag_inference import RagInference
-from evals.prompts.prompts import load_prompts
+from prompts import load_prompts
 
 
 class MockExamOutput(BaseModel):

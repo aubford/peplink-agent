@@ -3,7 +3,7 @@ from ragas.metrics.base import MetricWithLLM, SingleTurnMetric
 from pydantic import BaseModel, Field
 from ragas.dataset_schema import SingleTurnSample
 from openai import AsyncOpenAI
-from evals.prompts.prompts import load_prompts
+from prompts import load_prompts
 from config.logger import RotatingFileLogWriter
 from typing import Any
 

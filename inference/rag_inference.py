@@ -1,9 +1,9 @@
 from typing import Any
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from config import global_config
-from langchain import hub
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
@@ -11,11 +11,12 @@ from inference.history_aware_retrieval_query import (
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.language_models.chat_models import BaseChatModel
 from util.root_only_tracer import RootOnlyTracer
+from prompts import load_prompts
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
 
-prompt = hub.pull("aubford/retrieval-qa-chat")
+PROMPTS = load_prompts()
 
 
 class RagInference:
@@ -27,6 +28,7 @@ class RagInference:
         streaming: bool = False,
         pinecone_index_name: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
         eval_llm: BaseChatModel | None = None,
+        system_prompt: str = PROMPTS['inference/system'],
     ):
         self.embeddings = OpenAIEmbeddings(model=embedding_model)
         self.vector_store = PineconeVectorStore(
@@ -49,7 +51,13 @@ class RagInference:
             rate_limiter=rate_limiter,
         )
 
-        self.prompt = prompt
+        prompt = ChatPromptTemplate(
+            [
+                ("system", system_prompt),
+                ("placeholder", "{chat_history}"),
+                ("human", "{input}"),
+            ]
+        )
 
         self.minimal_tracer = RootOnlyTracer(project_name="langchain-pepwave")
 
@@ -69,7 +77,7 @@ class RagInference:
             .assign(
                 answer=create_stuff_documents_chain(
                     eval_llm or self.llm,
-                    self.prompt,
+                    prompt,
                     document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
                 )
             )

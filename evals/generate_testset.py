@@ -13,7 +13,7 @@ import json
 from evals.evals_utils import output_nodes_path, output_relationships_path
 from util.util_main import count_tokens
 import shutil
-from evals.prompts.prompts import load_prompts
+from prompts import load_prompts
 from langchain_core.rate_limiters import InMemoryRateLimiter
 
 dotenv.load_dotenv()
