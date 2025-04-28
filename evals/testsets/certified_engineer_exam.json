@@ -138,7 +138,7 @@
       "manages as many as 5 aps"
     ],
     "correct_answers": ["manages pepwave ap devices", "manages multiple ssids"],
-    "custom_id": "6db7ae3d95740e66cbff6eea49608e56"
+    "custom_id": "30e60040a01ee0fc9d4d23144e85c734"
   },
   {
     "question_id": "q13",
@@ -195,7 +195,7 @@
     "question": "the owner of an oil rig platform would like to deploy a cellular router that is suitable for outdoor use with the following characteristics:\n- water-proof\n- no ingress of dust\n- lightning immunity\n- shock and vibration resistance\n\nwhich max cellular model(s) could meet the above requirements? (you may select more than one answer)",
     "choices": ["max hd2 ip67", "max br2 ip55", "max br1 ip55", "max hd2", "max hd4"],
     "correct_answers": ["max hd2 ip67"],
-    "custom_id": "891a7842d991de71166f6f8353e99123"
+    "custom_id": "03aac31761248062ade9a53449c6fe7c"
   },
   {
     "question_id": "e4",
@@ -221,7 +221,7 @@
       "perform sniffing",
       "schedule reboot day/time"
     ],
-    "custom_id": "5047e513efb940202b0c6f2b789d227e"
+    "custom_id": "5d0519f6e57c30d4b3c6f843b073710d"
   },
   {
     "question_id": "e6",
@@ -242,7 +242,7 @@
     "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer)",
     "choices": ["max hd4", "max br1", "max hd4 mbx", "max hd2", "max m2m"],
     "correct_answers": ["max hd4", "max hd4 mbx"],
-    "custom_id": "7343690efa0aa95890efe2f42c051c08"
+    "custom_id": "02a7a57879543c3e6d8b304a4352fe45"
   },
   {
     "question_id": "e9",
@@ -304,7 +304,7 @@
     "question": "which netflow protocols does peplink support? (choose three answers)",
     "choices": ["netflow v5", "netflow v9", "netflow v13", "ipfix", "tcpfix", "udpfix"],
     "correct_answers": ["netflow v5", "netflow v9", "ipfix"],
-    "custom_id": "f9e4461e1c717cb89dea76edc0292746"
+    "custom_id": "ec9c2ccdc83d6a23a6452b732b2d92da"
   },
   {
     "question_id": "e14",
@@ -322,7 +322,7 @@
       "incontrol",
       "fusionhub license"
     ],
-    "custom_id": "a10f39f0caea79403a2aec8a5220790e"
+    "custom_id": "faed1f6a797f01956e12930284f8c36b"
   },
   {
     "question_id": "e15",
@@ -351,7 +351,7 @@
       "check sim card's balance, process pre-paid cards, and configure carrier-specific services via ussd",
       "retrieve sms from the sim card"
     ],
-    "custom_id": "4d1e72d995722dca23b0b99f34df3683"
+    "custom_id": "f6f9bb4cad3dd2095b01d0b99493be7c"
   },
   {
     "question_id": "e17",
@@ -371,7 +371,7 @@
     "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one)",
     "choices": ["amazon web service", "vmware", "citrix", "hyper-v", "kvm"],
     "correct_answers": ["amazon web service", "vmware", "citrix", "hyper-v"],
-    "custom_id": "665581f9b12f0b51a4daf3cb2d239fe5"
+    "custom_id": "156fa2084d4ca76b61113d0563d3e1f1"
   },
   {
     "question_id": "e19",
@@ -420,7 +420,7 @@
       "inspect event logs",
       "to receive push notifications for speedfusion disconnects/reconnects"
     ],
-    "custom_id": "593d96e198b8bc4d47d7abce989908ae"
+    "custom_id": "1d6a58f16095edf87aed234e40ca284a"
   },
   {
     "question_id": "e23",
@@ -490,7 +490,7 @@
       "vrrp is a generic specification which peplink has extended to provide additional functionality if certain criteria are met.",
       "peplink recommends when using vrrp the two devices be identical."
     ],
-    "custom_id": "cbd2b4ae3cce0656c04fa1631e4f3ea5"
+    "custom_id": "743f2d152f356a8746912fdadb611e13"
   },
   {
     "question_id": "e28",
@@ -677,7 +677,7 @@
     "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer)",
     "choices": ["1", "2", "3", "4", "5", "7"],
     "correct_answers": ["2", "3"],
-    "custom_id": "d37abcc88b6633a9bbf1c6ec49067456"
+    "custom_id": "ed96eeaa9731a8f4df4b0c4ef197cee7"
   },
   {
     "question_id": "e43",
@@ -727,7 +727,7 @@
       "create maximum 6 tunnels in total (default + sub tunnels)",
       "the layer 2 sub-tunnel bridge to the untagged lan"
     ],
-    "custom_id": "c793158b20e6fbd4eea31729c71516d1"
+    "custom_id": "982827a8d4f23c788256659758ec1250"
   },
   {
     "question_id": "e47",
@@ -757,7 +757,7 @@
       "packet-level bandwidth bonding",
       "256-bit aes encryption"
     ],
-    "custom_id": "be2bedf12039bd12ce4af81d1d8c11ec"
+    "custom_id": "c7b816af2b98ab6ff35e1724fb923558"
   },
   {
     "question_id": "e49",

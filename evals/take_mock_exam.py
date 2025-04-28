@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from pydantic import BaseModel, Field
 from load.batch_manager import BatchManager
-from batch_llm import BatchChatOpenAI
+from evals.batch_llm import BatchChatOpenAI
 from inference.rag_inference import RagInference
 from evals.prompts.prompts import load_prompts
 
@@ -20,17 +20,17 @@ class MockExam:
     def __init__(
         self,
         evals_dir: Path,
-        testset_name: str,
+        run_name: str,
         llm_model: str,
-        run_name: str | None = None,
         should_create_batch_job: bool = True,
         sample: bool | int = False,
     ):
+        runs_dir = evals_dir / "runs"
         self.should_create_batch_job = should_create_batch_job
         self.batch_manager = BatchManager(
-            base_path=evals_dir / "batches",
+            base_path=runs_dir / run_name / "batches",
             endpoint="/v1/chat/completions",
-            batch_name=f"{testset_name}__mock_exam__{run_name or 'default_batch'}",
+            batch_name="mock_exam_batch",
             schema=MockExamOutput,
         )
         self.rag_inference = RagInference(
@@ -75,7 +75,7 @@ class MockExam:
             q["custom_id"] = results[q["question_id"]]["answer"]
 
         with open(self.mock_exam_path, "w") as f:
-            json.dump(self.mock_exam_questions, f)
+            json.dump(self.mock_exam_questions, f, indent=2)
 
         if self.should_create_batch_job:
             self.batch_manager.create_batch_job()

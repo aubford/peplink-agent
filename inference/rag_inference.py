@@ -39,7 +39,7 @@ class RagInference:
         # Create a rate limiter for the model to avoid API throttling
         rate_limiter = InMemoryRateLimiter(
             requests_per_second=3.0,
-            max_bucket_size=10,
+            max_bucket_size=20,
         )
 
         self.llm = ChatOpenAI(

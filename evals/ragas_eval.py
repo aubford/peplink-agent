@@ -1,11 +1,11 @@
-from datetime import datetime
 from pathlib import Path
+from textwrap import dedent
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai import ChatOpenAI
 from ragas import evaluate
 from ragas.testset.synthesizers.testset_schema import Testset
 from load.batch_manager import BatchManager
-from batch_llm import BatchChatOpenAI
+from evals.batch_llm import BatchChatOpenAI
 from ragas.metrics import (
     NonLLMContextRecall,
     NonLLMContextPrecisionWithReference,
@@ -22,23 +22,36 @@ from evals.take_mock_exam import MockExam
 import pandas as pd
 import os
 import json
-from typing import cast
+from typing import cast, Any
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+models = {"full": "gpt-4.1", "mini": "gpt-4.1-mini", "nano": "gpt-4.1-nano"}
+MAIN_TESTSET_NAME = "testset-200_main_testset_25-04-23"
+evals_dir = Path(__file__).parent
 
 
 class RagasEval:
-
     def __init__(
         self,
-        evals_dir: Path,
-        testset_name: str,
-        inference_llm_model: str,
-        eval_llm_model: str,
-        eval_boost_llm_model: str,
+        run_name: str,
+        inference_llm: str,
+        eval_llm: str,
+        eval_boost_llm: str,
+        query_column: str = "query",
+        testset_name: str = MAIN_TESTSET_NAME,
         sample: bool | int = False,
         test_run: bool = False,
         should_create_batch_job: bool = True,
-        run_name: str | None = None,
     ):
+        self.query_column = query_column
+        inference_llm_model = models[inference_llm]
+        eval_llm_model = models[eval_llm]
+        eval_boost_llm_model = models[eval_boost_llm]
+
         generated_testset_df = pd.read_json(
             evals_dir / "testsets" / testset_name / "generated_testset.json"
         )
@@ -47,19 +60,14 @@ class RagasEval:
         nodes_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
         )
-        self.test_run_name = (
-            f"{testset_name}__{run_name or datetime.now().strftime("%Y-%m-%d_%H_%M")}"
-        )
-        self.output_dir = evals_dir / "runs"
+        self.runs_dir = evals_dir / "runs"
+        self.output_dir = self.runs_dir / run_name
 
         # add TESTRUN flag to filename
         if test_run:
-            self.test_run_name = f"{self.test_run_name}__TESTRUN"
-            generated_testset_df = generated_testset_df
+            run_name = f"{run_name}__TESTRUN"
 
-        self.output_file_path = (
-            self.output_dir / f"result__{self.test_run_name}.parquet"
-        )
+        self.output_file_path = self.output_dir / f"{run_name}.parquet"
 
         # Check if output file already exists and raise error if it does
         if os.path.exists(self.output_file_path):
@@ -74,9 +82,9 @@ class RagasEval:
         self.should_create_batch_job = should_create_batch_job
 
         self.batch_manager = BatchManager(
-            base_path=evals_dir / "batches",
+            base_path=self.output_dir / "batches",
             endpoint="/v1/chat/completions",
-            batch_name=f"{testset_name}__{run_name or 'default_batch'}",
+            batch_name=f"{testset_name}_batch",
         )
         self.batch_contexts_path = (
             self.batch_manager.batch_path / "batch_contexts.parquet"
@@ -93,7 +101,6 @@ class RagasEval:
 
         self.mock_exam = MockExam(
             evals_dir=evals_dir,
-            testset_name=testset_name,
             run_name=run_name,
             llm_model=inference_llm_model,
             should_create_batch_job=should_create_batch_job,
@@ -113,12 +120,25 @@ class RagasEval:
             )
         )
 
+        self.metrics_summary: dict[str, Any] = {
+            "run_name": run_name,
+            "metadata": dedent(
+                f"""
+                Testset name: {testset_name}
+                Inference LLM: {inference_llm}
+                Eval LLM: {eval_llm}
+                Eval boost LLM: {eval_boost_llm}
+                Sample size: {sample}
+                """
+            ).strip(),
+        }
+
     def init_testset(
         self, generated_testset_df: pd.DataFrame, nodes_df: pd.DataFrame
     ) -> Testset:
         # Rename columns to match the expected schema
         df = generated_testset_df.copy()
-        df.rename(columns={"query": "user_input"}, inplace=True)
+        df.rename(columns={self.query_column: "user_input"}, inplace=True)
         df.rename(columns={"answer": "reference"}, inplace=True)
         df.rename(columns={"cluster_id": "id"}, inplace=True)
         df["reference_contexts"] = df["node_ids"].apply(
@@ -209,29 +229,24 @@ class RagasEval:
             return
 
         # Extract only float columns (metrics)
-        float_cols = eval_result_df.select_dtypes(include=['float64']).columns
-
-        # Calculate mean for each metric
-        metrics_summary = {}
-        # Add testset name
-        metrics_summary["testset_name"] = self.test_run_name
+        float_cols = eval_result_df.select_dtypes(include=["float64"]).columns
 
         # Add metrics averages
         for col in float_cols:
-            metrics_summary[col] = eval_result_df[col].mean()
+            self.metrics_summary[col] = eval_result_df[col].mean()
 
         # Add mock exam score and missed questions
         score, missed_questions = self.mock_exam.get_results()
-        metrics_summary["mock_exam_score"] = score
-        metrics_summary["mock_exam_missed_questions"] = [
+        self.metrics_summary["mock_exam_score"] = score
+        self.metrics_summary["mock_exam_missed_questions"] = [
             q["question_id"] for q in missed_questions
         ]
 
         # Create a DataFrame with the summary
-        summary_df = pd.DataFrame([metrics_summary])
+        summary_df = pd.DataFrame([self.metrics_summary])
 
         # Check if file exists
-        test_runs_summary_path = self.output_dir / "test_runs_summary.parquet"
+        test_runs_summary_path = self.runs_dir / "test_runs_summary.parquet"
         if os.path.exists(test_runs_summary_path):
             # Read existing file and append
             existing_df = pd.read_parquet(test_runs_summary_path)
@@ -239,6 +254,9 @@ class RagasEval:
         else:
             updated_df = summary_df
 
+        # Move metadata to the end
+        cols = [col for col in updated_df.columns if col != "metadata"] + ["metadata"]
+        updated_df = updated_df[cols]
         # Save to parquet
         updated_df.to_parquet(test_runs_summary_path, index=False)
 

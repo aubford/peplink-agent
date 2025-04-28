@@ -1,14 +1,24 @@
-logs
-data/*
-backup_data
 *.parquet
 *.jsonl
-langchain_pepwave_env*/*
-tutorial/
-**/batch/**/*
-evals/output
-evals/batches
-!evals/testsets/**/*
+/evals/output/**
+/evals/runs/**
+
+# open all dirs for traversal
+!/**/
+# unignore specifics
+!/evals/runs/**/run_eval.py
+!/evals/output/__nodes.parquet
+!/evals/output/__relationships.parquet
+!/evals/testsets/**/*.json
+
+# completely ignore
+**/batch/
+**/batches/
+/tutorial/
+/data/
+/logs/
+/backup_data/
+/langchain_pepwave_env*/
 
 ### VisualStudioCode template
 !.vscode/settings.json
