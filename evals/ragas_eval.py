@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from ragas.llms import LangchainLLMWrapper
@@ -14,9 +15,6 @@ from ragas.metrics import (
     ResponseRelevancyDiverse,
     FactualCorrectness,
     AnswerAccuracy,
-    ContextRelevance,
-    ResponseGroundedness,
-    ContextRelevance,
 )
 from inference.rag_inference import RagInference
 from evals.take_mock_exam import MockExam
@@ -107,6 +105,7 @@ class RagasEval:
             llm_model=inference_llm_model,
             should_create_batch_job=should_create_batch_job,
             sample=sample,
+            output_dir=self.output_dir,
         )
 
         self.eval_llm = LangchainLLMWrapper(
@@ -130,7 +129,8 @@ class RagasEval:
                 Inference LLM: {inference_llm}
                 Eval LLM: {eval_llm}
                 Eval boost LLM: {eval_boost_llm}
-                Sample size: {sample}
+                Sample size: {sample or "full"}
+                Datetime: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 """
             ).strip(),
         }
