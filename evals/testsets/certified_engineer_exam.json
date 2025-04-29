@@ -2,9 +2,19 @@
   {
     "question_id": "q1",
     "question": "what are the routing protocols supported by the balance/max family?",
-    "choices": ["ospf", "bgp", "ripv2", "is-is", "eigrp"],
-    "correct_answers": ["ospf", "bgp", "ripv2"],
-    "custom_id": "80fb3643af3794fc4504f75a3a41ba7a"
+    "choices": [
+      "ospf",
+      "bgp",
+      "ripv2",
+      "is-is",
+      "eigrp"
+    ],
+    "correct_answers": [
+      "ospf",
+      "bgp",
+      "ripv2"
+    ],
+    "custom_id": "41fe2107eada0505f3cb43884706e3f2"
   },
   {
     "question_id": "q2",
@@ -15,8 +25,10 @@
       "when deploying a captive portal to pepwave access points only",
       "never"
     ],
-    "correct_answers": ["never"],
-    "custom_id": "9bcdcafdef65f8c95604df63e3405e27"
+    "correct_answers": [
+      "never"
+    ],
+    "custom_id": "f8f00e60b71e7a4a8d4b3b136843db88"
   },
   {
     "question_id": "q3",
@@ -27,8 +39,10 @@
       "based on the hypervisor platform fusionhub is installed on.",
       "based on the number of wan of the hq network."
     ],
-    "correct_answers": ["based on the number of peers supported."],
-    "custom_id": "94fc53b6c7c4fa11622f658b6a04b75a"
+    "correct_answers": [
+      "based on the number of peers supported."
+    ],
+    "custom_id": "ec8acfc000484296ff54619b7d9a54fb"
   },
   {
     "question_id": "q4",
@@ -43,7 +57,7 @@
       "order of processing from top to bottom",
       "able to control the traffic when no connections are available"
     ],
-    "custom_id": "6cda305c935244fff28e8b0a52fce02f"
+    "custom_id": "70313f9b956fe3ecb5c5b5dec95bb2e5"
   },
   {
     "question_id": "q5",
@@ -57,7 +71,7 @@
     "correct_answers": [
       "peplink routers enable you to build one logical wan connection using multiple technologies (e.g. xdsl, mpls, cellular, fiber)"
     ],
-    "custom_id": "f8b6428192dc95af9e00963487140fbf"
+    "custom_id": "e5d9959d8c6e99eee6b9d4a3d4d4fe43"
   },
   {
     "question_id": "q6",
@@ -72,7 +86,7 @@
     "correct_answers": [
       "tcp port 32015 and udp port 4500 or according to either data port 'default' or 'custom' settings."
     ],
-    "custom_id": "5a884cb7d2c9ede2ab161514d3ef54ac"
+    "custom_id": "ce592e3191e188b50e05405680c8097f"
   },
   {
     "question_id": "q7",
@@ -84,8 +98,10 @@
       "not having the same model of peplink on either end of speedfusion.",
       "none of the above"
     ],
-    "correct_answers": ["same lan subnet on either end of speedfusion"],
-    "custom_id": "05897f7b0d52a8f0cd6c7f77ba2f2aaf"
+    "correct_answers": [
+      "same lan subnet on either end of speedfusion"
+    ],
+    "custom_id": "8e4319a038f8ed07fd2f3a0ffc42abfc"
   },
   {
     "question_id": "q8",
@@ -97,8 +113,10 @@
       "port forwarding",
       "recommend to change the branches lan subnet to avoid overlapping"
     ],
-    "correct_answers": ["virtual network mapping"],
-    "custom_id": "3aa2cb2bec63d07103f34736b280236f"
+    "correct_answers": [
+      "virtual network mapping"
+    ],
+    "custom_id": "448be75d99c6c73f3d81e2f38790c3a9"
   },
   {
     "question_id": "q9",
@@ -111,8 +129,11 @@
       "jitter on your voip call",
       "intermittently when access the e-mail server in hq."
     ],
-    "correct_answers": ["jitter when you do video streaming", "jitter on your voip call"],
-    "custom_id": "dcbdc86e556004d2c68ca94131742e6b"
+    "correct_answers": [
+      "jitter when you do video streaming",
+      "jitter on your voip call"
+    ],
+    "custom_id": "fa65f919ae2814ddfa279b70858208c9"
   },
   {
     "question_id": "q11",
@@ -124,8 +145,10 @@
       "speedfusion with outbound policy",
       "outbound policy"
     ],
-    "correct_answers": ["speedfusion cloud with outbound policy"],
-    "custom_id": "9068bb5daca82d135f9233fc346ed319"
+    "correct_answers": [
+      "speedfusion cloud with outbound policy"
+    ],
+    "custom_id": "4b0193ea9327d05e4e4914e720fdfe4f"
   },
   {
     "question_id": "q12",
@@ -137,8 +160,11 @@
       "manages multiple ssids",
       "manages as many as 5 aps"
     ],
-    "correct_answers": ["manages pepwave ap devices", "manages multiple ssids"],
-    "custom_id": "30e60040a01ee0fc9d4d23144e85c734"
+    "correct_answers": [
+      "manages pepwave ap devices",
+      "manages multiple ssids"
+    ],
+    "custom_id": "00d75b35cae4e8558b5c0467347eb817"
   },
   {
     "question_id": "q13",
@@ -153,7 +179,7 @@
       "provides a portable 6 connection for windows and linux devices",
       "is a 5g wan option for other peplink or pepwave products which does not support 5g"
     ],
-    "custom_id": "de99a41d0f4bd08c993248c1a7453440"
+    "custom_id": "4a2703318493488a2d1489eb2b3a34aa"
   },
   {
     "question_id": "q14",
@@ -164,8 +190,10 @@
       "20 requests per second per organization",
       "unlimited"
     ],
-    "correct_answers": ["20 requests per second per organization"],
-    "custom_id": "058a8855e8582bdcdb2192d6bbb9ae82"
+    "correct_answers": [
+      "20 requests per second per organization"
+    ],
+    "custom_id": "cb72b5e58c2eeab1d3d916325036fe74"
   },
   {
     "question_id": "e1",
@@ -181,28 +209,51 @@
       "web admin > connection details > cellular status > engineering data",
       "web admin / <support.cgi> page > cellular module firmware update"
     ],
-    "custom_id": "3f576d280eac94dd4271cb01e6e5e121"
+    "custom_id": "6ade534c9df88bd3f304d5e2efb90482"
   },
   {
     "question_id": "e2",
     "question": "consider this scenario: a customer has one dsl and one cellular wan connected to a balance router. she has configured both internet connections as \"always on.\" this customer would like to use wan 2 (cellular) only for back-up or fail-over purposes.\n\nwhich of the following load balancing algorithms would you recommend?",
-    "choices": ["priority", "weighted", "overflow", "back up", "enforced"],
-    "correct_answers": ["priority"],
-    "custom_id": "9b9311deae250da6575fd256dbb70b37"
+    "choices": [
+      "priority",
+      "weighted",
+      "overflow",
+      "back up",
+      "enforced"
+    ],
+    "correct_answers": [
+      "priority"
+    ],
+    "custom_id": "9f8a65a656aef60262fdc783b032b45a"
   },
   {
     "question_id": "e3",
     "question": "the owner of an oil rig platform would like to deploy a cellular router that is suitable for outdoor use with the following characteristics:\n- water-proof\n- no ingress of dust\n- lightning immunity\n- shock and vibration resistance\n\nwhich max cellular model(s) could meet the above requirements? (you may select more than one answer)",
-    "choices": ["max hd2 ip67", "max br2 ip55", "max br1 ip55", "max hd2", "max hd4"],
-    "correct_answers": ["max hd2 ip67"],
-    "custom_id": "03aac31761248062ade9a53449c6fe7c"
+    "choices": [
+      "max hd2 ip67",
+      "max br2 ip55",
+      "max br1 ip55",
+      "max hd2",
+      "max hd4"
+    ],
+    "correct_answers": [
+      "max hd2 ip67"
+    ],
+    "custom_id": "b658dd4b4af819b7cfeb4910d9232ad0"
   },
   {
     "question_id": "e4",
     "question": "which interface supports speedfusion connect profile settings?",
-    "choices": ["device ui", "incontrol 2", "device api", "incontrol 2 api"],
-    "correct_answers": ["device ui"],
-    "custom_id": "a691b99266ec61355c809beafd82cb51"
+    "choices": [
+      "device ui",
+      "incontrol 2",
+      "device api",
+      "incontrol 2 api"
+    ],
+    "correct_answers": [
+      "device ui"
+    ],
+    "custom_id": "a7192fc6df7df0e1c4c13f0f1129e307"
   },
   {
     "question_id": "e5",
@@ -221,28 +272,49 @@
       "perform sniffing",
       "schedule reboot day/time"
     ],
-    "custom_id": "5d0519f6e57c30d4b3c6f843b073710d"
+    "custom_id": "6e6a79a98b678f14ae937cf5d20bd4e7"
   },
   {
     "question_id": "e6",
     "question": "when using peplink's ipsec vpn can routing be controlled by using outbound policy?",
-    "choices": ["yes", "no"],
-    "correct_answers": ["no"],
-    "custom_id": "033f71596c2c9be7cf743cd570b3f784"
+    "choices": [
+      "yes",
+      "no"
+    ],
+    "correct_answers": [
+      "no"
+    ],
+    "custom_id": "589c5a68b559e34dd5d7cb3fd15df810"
   },
   {
     "question_id": "e7",
     "question": "in a 3-site fully-meshed vpn deployment scenario, how many internet lines at minimum are required in total to support speedfusion hot failover and bonding at all locations?",
-    "choices": ["3", "4", "5", "6"],
-    "correct_answers": ["6"],
-    "custom_id": "83b97ed813e77204c06cc28fcd80a78b"
+    "choices": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answers": [
+      "6"
+    ],
+    "custom_id": "3847a16941f320855d61ee55149caa38"
   },
   {
     "question_id": "e8",
     "question": "which models in the max router family can support up to 4x cellular connections? (you may select more than one answer)",
-    "choices": ["max hd4", "max br1", "max hd4 mbx", "max hd2", "max m2m"],
-    "correct_answers": ["max hd4", "max hd4 mbx"],
-    "custom_id": "02a7a57879543c3e6d8b304a4352fe45"
+    "choices": [
+      "max hd4",
+      "max br1",
+      "max hd4 mbx",
+      "max hd2",
+      "max m2m"
+    ],
+    "correct_answers": [
+      "max hd4",
+      "max hd4 mbx"
+    ],
+    "custom_id": "562914a4613afba6d6f5e76d11db64e0"
   },
   {
     "question_id": "e9",
@@ -254,8 +326,10 @@
       "assign the vlan to each device individually",
       "there is no such option; configure the vlan at the individual devices."
     ],
-    "correct_answers": ["assign the vlan to incontrol group with a defined \"tag\""],
-    "custom_id": "800dacb731de342ee2e206025a9df340"
+    "correct_answers": [
+      "assign the vlan to incontrol group with a defined \"tag\""
+    ],
+    "custom_id": "5e8150c9590d5e090257f8295a1393de"
   },
   {
     "question_id": "e10",
@@ -269,7 +343,7 @@
     "correct_answers": [
       "firmware management, outbound policies, speedfusion vpn tunnel configuration, ssids"
     ],
-    "custom_id": "f9497abafd70e0cb1e12ec1ef4971e47"
+    "custom_id": "24765440fd13fbab04bfde5c79aaa314"
   },
   {
     "question_id": "e11",
@@ -283,7 +357,7 @@
     "correct_answers": [
       "download the fusionhub image from the peplink firmware & manual page."
     ],
-    "custom_id": "fdb6b8debf97268b10da664c4f5e9f03"
+    "custom_id": "895bf994cead701b741716a84dde2830"
   },
   {
     "question_id": "e12",
@@ -297,14 +371,25 @@
     "correct_answers": [
       "go to incontrol2; navigate to warranty & licenses; release the key from existing fusionhub; and import the key into the new fusionhub instance."
     ],
-    "custom_id": "9d8952ab88ef0cc0d3c3689a880d8939"
+    "custom_id": "08b181dce268e2c0946e7e56b7ba95f5"
   },
   {
     "question_id": "e13",
     "question": "which netflow protocols does peplink support? (choose three answers)",
-    "choices": ["netflow v5", "netflow v9", "netflow v13", "ipfix", "tcpfix", "udpfix"],
-    "correct_answers": ["netflow v5", "netflow v9", "ipfix"],
-    "custom_id": "ec9c2ccdc83d6a23a6452b732b2d92da"
+    "choices": [
+      "netflow v5",
+      "netflow v9",
+      "netflow v13",
+      "ipfix",
+      "tcpfix",
+      "udpfix"
+    ],
+    "correct_answers": [
+      "netflow v5",
+      "netflow v9",
+      "ipfix"
+    ],
+    "custom_id": "cb4d9fce6007cefbf0881ca1f1921f19"
   },
   {
     "question_id": "e14",
@@ -322,7 +407,7 @@
       "incontrol",
       "fusionhub license"
     ],
-    "custom_id": "faed1f6a797f01956e12930284f8c36b"
+    "custom_id": "56601ac5ca7daf95b90fa4a9cec4783d"
   },
   {
     "question_id": "e15",
@@ -335,7 +420,7 @@
     "correct_answers": [
       "an antenna typically used to extend the range of a wi-fi network into hard-to-reach corners of buildings or in other specific situations where 360-degree coverage is not needed"
     ],
-    "custom_id": "6ba28dd18f1dc5aa683d6074a26ca42e"
+    "custom_id": "9c7ad6427f6e2223659b6dce65d0cb12"
   },
   {
     "question_id": "e16",
@@ -351,7 +436,7 @@
       "check sim card's balance, process pre-paid cards, and configure carrier-specific services via ussd",
       "retrieve sms from the sim card"
     ],
-    "custom_id": "f6f9bb4cad3dd2095b01d0b99493be7c"
+    "custom_id": "e1ef8fc680211cb769ef8924d45e727f"
   },
   {
     "question_id": "e17",
@@ -363,15 +448,28 @@
       "it can be used to check speedfusion's connectivity.",
       "it can be used to check routers' event log."
     ],
-    "correct_answers": ["it can be used to remotely reboot a router."],
-    "custom_id": "1d6e2359173928c3cfc12231c34b5f92"
+    "correct_answers": [
+      "it can be used to remotely reboot a router."
+    ],
+    "custom_id": "408985fa5a46a05c8b73c4c80948eab4"
   },
   {
     "question_id": "e18",
     "question": "which of the following are officially supported hypervisors for fusionhub? (you may choose more than one)",
-    "choices": ["amazon web service", "vmware", "citrix", "hyper-v", "kvm"],
-    "correct_answers": ["amazon web service", "vmware", "citrix", "hyper-v"],
-    "custom_id": "156fa2084d4ca76b61113d0563d3e1f1"
+    "choices": [
+      "amazon web service",
+      "vmware",
+      "citrix",
+      "hyper-v",
+      "kvm"
+    ],
+    "correct_answers": [
+      "amazon web service",
+      "vmware",
+      "citrix",
+      "hyper-v"
+    ],
+    "custom_id": "855ae889d4db203abb6a5c5a5de861b6"
   },
   {
     "question_id": "e19",
@@ -385,7 +483,7 @@
     "correct_answers": [
       "it shows deeper information by breaking down categories into sub-categories."
     ],
-    "custom_id": "3bc84bf34db004b37e788a6d62d39c3d"
+    "custom_id": "ae1afa906ee084d21c225720fc8db3c7"
   },
   {
     "question_id": "e20",
@@ -396,15 +494,22 @@
       "link wi-fi to cloud",
       "optimize cloud application"
     ],
-    "correct_answers": ["optimize cloud application"],
-    "custom_id": "97219850cdf833fa93a96698de39ea4a"
+    "correct_answers": [
+      "optimize cloud application"
+    ],
+    "custom_id": "97ea0e855c9c11f7d3ba26efa3b011ba"
   },
   {
     "question_id": "e21",
     "question": "is this statement true? \"for the balance 580, ha (vrrp) and lan bypass can simultaneously work together.\"",
-    "choices": ["true", "false"],
-    "correct_answers": ["false"],
-    "custom_id": "96aaa7c402f6513d536479b9595230fb"
+    "choices": [
+      "true",
+      "false"
+    ],
+    "correct_answers": [
+      "false"
+    ],
+    "custom_id": "9cc42590196aec78e7d721e124635299"
   },
   {
     "question_id": "e22",
@@ -420,7 +525,7 @@
       "inspect event logs",
       "to receive push notifications for speedfusion disconnects/reconnects"
     ],
-    "custom_id": "1d6a58f16095edf87aed234e40ca284a"
+    "custom_id": "63088fb1b4419c586d8a7db25e9c52e7"
   },
   {
     "question_id": "e23",
@@ -431,8 +536,10 @@
       "wan suffers disconnections.",
       "all of the above are correct."
     ],
-    "correct_answers": ["the isp is throttling port udp 4500 traffic."],
-    "custom_id": "f0963f6cb26566cbf59e339a1aaddd38"
+    "correct_answers": [
+      "the isp is throttling port udp 4500 traffic."
+    ],
+    "custom_id": "be0757fa0dc5a16e80195d625e8e9f0b"
   },
   {
     "question_id": "e24",
@@ -447,7 +554,7 @@
     "correct_answers": [
       "enable traffic for udp port 5246 and tcp port 443 on the firewall."
     ],
-    "custom_id": "f83fc6ee268e3b08a26ca3258171d4a8"
+    "custom_id": "35946609aa88345c0b4cc566663d75b8"
   },
   {
     "question_id": "e25",
@@ -459,8 +566,10 @@
       "it will duplicate packets.",
       "it consumes less data than wan smoothing."
     ],
-    "correct_answers": ["it will duplicate packets."],
-    "custom_id": "703d77281a12e56552bf7cd8d55f270a"
+    "correct_answers": [
+      "it will duplicate packets."
+    ],
+    "custom_id": "30e1e9a4f819766314530b7407a77988"
   },
   {
     "question_id": "e26",
@@ -472,8 +581,11 @@
       "bandwidth overflow",
       "speedfusion traffic steering"
     ],
-    "correct_answers": ["bandwidth overflow", "speedfusion traffic steering"],
-    "custom_id": "864d5c003a43753d45bf0bf7bf50d91d"
+    "correct_answers": [
+      "bandwidth overflow",
+      "speedfusion traffic steering"
+    ],
+    "custom_id": "a218e8c3b5be5e8e2a3fa7b2747d047c"
   },
   {
     "question_id": "e27",
@@ -490,7 +602,7 @@
       "vrrp is a generic specification which peplink has extended to provide additional functionality if certain criteria are met.",
       "peplink recommends when using vrrp the two devices be identical."
     ],
-    "custom_id": "743f2d152f356a8746912fdadb611e13"
+    "custom_id": "7f02bbdf86131334f413bf6eb5a7f1ed"
   },
   {
     "question_id": "e28",
@@ -502,15 +614,26 @@
       "ap > ap controller > sync. method > as soon as possible",
       "ap > profiles > ap controller settings > client load balancing"
     ],
-    "correct_answers": ["ap > wireless ssid > security settings > fast transition"],
-    "custom_id": "18550950bd62edf7a3f119c2f9be3215"
+    "correct_answers": [
+      "ap > wireless ssid > security settings > fast transition"
+    ],
+    "custom_id": "5f018324a03051e05c9a5e2ea1713859"
   },
   {
     "question_id": "e29",
     "question": "how many ap one flex devices are needed for the following situation?\n- area: 150 meter square (1615 sq ft) outdoor environment\n- number of clients: 20\n- devices are installed on poles, 5m (16') from the ground",
-    "choices": ["3", "4", "5", "6", "7", "not sure; need to do a site survey."],
-    "correct_answers": ["not sure; need to do a site survey."],
-    "custom_id": "5d9c6a956d6ed5befa22818be4598907"
+    "choices": [
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "not sure; need to do a site survey."
+    ],
+    "correct_answers": [
+      "not sure; need to do a site survey."
+    ],
+    "custom_id": "ed631cebc94aae80cf9a84975f6c6035"
   },
   {
     "question_id": "e30",
@@ -521,8 +644,10 @@
       "saml(security assertion markup language)",
       "ldap(lightweight directory access protocol)"
     ],
-    "correct_answers": ["oauth 2.0"],
-    "custom_id": "45cba74cac8dd975f5c269b06901c567"
+    "correct_answers": [
+      "oauth 2.0"
+    ],
+    "custom_id": "c496013383488ff2b99cb53fc94ef1c7"
   },
   {
     "question_id": "e31",
@@ -538,7 +663,7 @@
       "the users see glitches over video streaming sessions.",
       "connections in accessing the e-mail server in hq are intermittent."
     ],
-    "custom_id": "f13851c7fdcf8d79873d8be2eba031b3"
+    "custom_id": "e685c8ccae55a5451c316333b754cac2"
   },
   {
     "question_id": "e32",
@@ -550,15 +675,22 @@
       "assign user role as group administrator",
       "assign user role as group viewer"
     ],
-    "correct_answers": ["assign user role as group administrator"],
-    "custom_id": "16157d92daa6c465ee9b5e7c6cfdb46b"
+    "correct_answers": [
+      "assign user role as group administrator"
+    ],
+    "custom_id": "3e63ba41ca633ed96a04622a3e1267b3"
   },
   {
     "question_id": "e33",
     "question": "a device which is not managed under the same organization or not managed by incontrol can be added to a star and point-to-point topology profile by its site id. is this true or false?",
-    "choices": ["true", "false"],
-    "correct_answers": ["true"],
-    "custom_id": "6f534785182517178397182fcc24c2a5"
+    "choices": [
+      "true",
+      "false"
+    ],
+    "correct_answers": [
+      "true"
+    ],
+    "custom_id": "da9d8f576aca4a96462a31fc86e25aca"
   },
   {
     "question_id": "e34",
@@ -573,7 +705,7 @@
     "correct_answers": [
       "to have the cellular module check for a better connection after having failed to 3g for a defined time even though this will interupt connectivity for a short time"
     ],
-    "custom_id": "9810bc8a23230bb1b8fadc60257c3228"
+    "custom_id": "1733f7f4c1f50a7d429ff02224ee0e5c"
   },
   {
     "question_id": "e35",
@@ -588,7 +720,7 @@
     "correct_answers": [
       "a network with private ips requires an nat gateway for internet access."
     ],
-    "custom_id": "95e80169298092e59c90f687ece3e58a"
+    "custom_id": "6a0132194865559ed04f41dedf951725"
   },
   {
     "question_id": "e36",
@@ -600,8 +732,11 @@
       "use a 56v power supply and change the dip switch settings on the router to enable poe.",
       "hd4 does not support poe"
     ],
-    "correct_answers": ["use the accessory acw-618", "input 56v via terminal block"],
-    "custom_id": "911f69e0ef48246939ef5ad0deaf2d04"
+    "correct_answers": [
+      "use the accessory acw-618",
+      "input 56v via terminal block"
+    ],
+    "custom_id": "ac0731ae7bcb7d10b8967985a16ae01e"
   },
   {
     "question_id": "e37",
@@ -616,7 +751,7 @@
     "correct_answers": [
       "yes. the customer can host it's own speedfusion-capable router within its own data center."
     ],
-    "custom_id": "a375eb17f0a56831c6f251335599df72"
+    "custom_id": "34c0697bcec748f7137db4e551261133"
   },
   {
     "question_id": "e38",
@@ -628,8 +763,10 @@
       "the routers communicate with vrrp via the lan ports",
       "the routers use rsrp to communicate via the lan ports"
     ],
-    "correct_answers": ["the routers communicate with vrrp via the lan ports"],
-    "custom_id": "77d8be778937f5e2221266fecbdf8d0f"
+    "correct_answers": [
+      "the routers communicate with vrrp via the lan ports"
+    ],
+    "custom_id": "2beabe48d8b21402fd044085ef18dda3"
   },
   {
     "question_id": "e39",
@@ -641,8 +778,10 @@
       "use this option when you need a more secure vpn.",
       "none of the above."
     ],
-    "correct_answers": ["use this option when you need a more secure vpn."],
-    "custom_id": "ce442b8e8cd5b046a99eb1c7fb43baa3"
+    "correct_answers": [
+      "use this option when you need a more secure vpn."
+    ],
+    "custom_id": "42a62364d9fd747b1602b20e4216ad4c"
   },
   {
     "question_id": "e40",
@@ -654,8 +793,10 @@
       "cellular antenna not attached",
       "cellular state set to standby mode"
     ],
-    "correct_answers": ["the max br1-lte-us imei has not been registered to verizon"],
-    "custom_id": "8d2b1b4b8ebbd5b5cf029f355e0b4ebc"
+    "correct_answers": [
+      "the max br1-lte-us imei has not been registered to verizon"
+    ],
+    "custom_id": "7e36068377d11667c7b7dccd5e440aef"
   },
   {
     "question_id": "e41",
@@ -670,21 +811,39 @@
     "correct_answers": [
       "fast transition is only available with security policy = wpa2 or wpa3 equivalent (personal or enterprise)."
     ],
-    "custom_id": "b710436f732f6e4b21daed0bcf70a976"
+    "custom_id": "ff1ee9cc1f088f9464725e68513ffd04"
   },
   {
     "question_id": "e42",
     "question": "speedfusion can run at which layer of the osi model? (you may select more than one answer)",
-    "choices": ["1", "2", "3", "4", "5", "7"],
-    "correct_answers": ["2", "3"],
-    "custom_id": "ed96eeaa9731a8f4df4b0c4ef197cee7"
+    "choices": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "7"
+    ],
+    "correct_answers": [
+      "2",
+      "3"
+    ],
+    "custom_id": "e1878ad2aa1e2ea6d3c789e5d8331353"
   },
   {
     "question_id": "e43",
     "question": "consider this scenario: a customer has one dsl and one 3g wan connected to a balance router.\nthey have configured both internet connections as \"always on\". this customer would like to use wan 1 (dsl) to send traffic, reserving the 3g for failover purposes.\n\nwhich of the following load balancing algorithms would you recommend?",
-    "choices": ["priority", "weighted", "overflow", "back up", "enforced"],
-    "correct_answers": ["priority"],
-    "custom_id": "c3e8980b156df85f1d3c500b8733dca6"
+    "choices": [
+      "priority",
+      "weighted",
+      "overflow",
+      "back up",
+      "enforced"
+    ],
+    "correct_answers": [
+      "priority"
+    ],
+    "custom_id": "e7374a72fb11ca6263f322881cc1b215"
   },
   {
     "question_id": "e44",
@@ -696,8 +855,10 @@
       "network address: 172.16.0.0 / netmask: 255.0.0.0",
       "none of the above."
     ],
-    "correct_answers": ["network address: 172.16.0.0 / netmask: 255.255.192.0"],
-    "custom_id": "943afa186535294e8a54ad1364777598"
+    "correct_answers": [
+      "network address: 172.16.0.0 / netmask: 255.255.192.0"
+    ],
+    "custom_id": "e9502cc808d4d899123ba7c35a51b371"
   },
   {
     "question_id": "e45",
@@ -711,7 +872,7 @@
     "correct_answers": [
       "the incontrol2 captive portal is a web page which is displayed to newly connected users before they are granted access to the internet."
     ],
-    "custom_id": "95c8b61024db529f04109274936de801"
+    "custom_id": "6d7ce8f96615e463ed677e61b1f37506"
   },
   {
     "question_id": "e46",
@@ -727,7 +888,7 @@
       "create maximum 6 tunnels in total (default + sub tunnels)",
       "the layer 2 sub-tunnel bridge to the untagged lan"
     ],
-    "custom_id": "982827a8d4f23c788256659758ec1250"
+    "custom_id": "871f097655a3bfe3aaa75e4c7b5aa169"
   },
   {
     "question_id": "e47",
@@ -739,8 +900,10 @@
       "least used",
       "none of the above"
     ],
-    "correct_answers": ["none of the above"],
-    "custom_id": "4d13bb63819c8d2d551da50e2e33939a"
+    "correct_answers": [
+      "none of the above"
+    ],
+    "custom_id": "f190773b5de7e7311bed70eca367b576"
   },
   {
     "question_id": "e48",
@@ -757,7 +920,7 @@
       "packet-level bandwidth bonding",
       "256-bit aes encryption"
     ],
-    "custom_id": "c7b816af2b98ab6ff35e1724fb923558"
+    "custom_id": "64506003dd82672f3c9577e9436fded5"
   },
   {
     "question_id": "e49",
@@ -769,14 +932,26 @@
       "wi-fi ap ssid",
       "web admin settings"
     ],
-    "correct_answers": ["dynamic dns settings", "pppoe credentials"],
-    "custom_id": "807393d7d42c79ab89bb0b38969e29f6"
+    "correct_answers": [
+      "dynamic dns settings",
+      "pppoe credentials"
+    ],
+    "custom_id": "35feeda616ceb18b4eb316681331c1b3"
   },
   {
     "question_id": "e50",
     "question": "how many ssids can ap one ax support?",
-    "choices": ["1", "2", "4", "8", "16", "unlimited"],
-    "correct_answers": ["16"],
-    "custom_id": "8e2d5776deeb7db9f3a4e037549b3db0"
+    "choices": [
+      "1",
+      "2",
+      "4",
+      "8",
+      "16",
+      "unlimited"
+    ],
+    "correct_answers": [
+      "16"
+    ],
+    "custom_id": "a05ba4ec1fa60dc5d2b46116063752ae"
   }
 ]

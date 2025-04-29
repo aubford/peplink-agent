@@ -16,6 +16,7 @@ from ragas.metrics import (
     AnswerAccuracy,
     ContextRelevance,
     ResponseGroundedness,
+    ContextRelevance,
 )
 from inference.rag_inference import RagInference
 from evals.take_mock_exam import MockExam
@@ -46,7 +47,13 @@ class RagasEval:
         sample: bool | int = False,
         test_run: bool = False,
         should_create_batch_job: bool = True,
+        # Faithfulness: response -> context (do the claims in answer come from context)
+        # This metric is expensive and w/ modern LLMs faithfulness is almost always near 100%
+        # unless there is a major prompting issue.  Turn this on occasionally to check, but
+        # otherwise leave it off.
+        with_faithfulness: bool = False,
     ):
+        self.with_faithfulness = with_faithfulness
         self.query_column = query_column
         inference_llm_model = models[inference_llm]
         eval_llm_model = models[eval_llm]
@@ -62,11 +69,6 @@ class RagasEval:
         )
         self.runs_dir = evals_dir / "runs"
         self.output_dir = self.runs_dir / run_name
-
-        # add TESTRUN flag to filename
-        if test_run:
-            run_name = f"{run_name}__TESTRUN"
-
         self.output_file_path = self.output_dir / f"{run_name}.parquet"
 
         # Check if output file already exists and raise error if it does
@@ -264,25 +266,29 @@ class RagasEval:
         """Run the evaluation on the test set."""
         self.get_batch_results()
         evaluation_dataset = self.test_set.to_evaluation_dataset()
+        metrics = [
+            # response -> question (does the answer address the entire question)
+            # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
+            ResponseRelevancy(),
+            ResponseRelevancyDiverse(llm=self.boost_llm),
+            # context -> reference contexts (do the contexts match the reference contexts)
+            # note that you can't compare this across context types! (e.g. summaries vs. full docs)
+            # we care much more about recall since there are plenty of relevant docs that may not have been
+            # part of the KG cluster used to create this sample.
+            NonLLMContextPrecisionWithReference(),
+            NonLLMContextRecall(),
+            # response -> reference answer (ground truth)
+            FactualCorrectness(mode="recall"),
+            AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
+        ]
+
+        if self.with_faithfulness:
+            # response -> context (do the claims in answer come from context)
+            metrics.append(Faithfulness())
+
         eval_result = evaluate(
             dataset=evaluation_dataset,
-            metrics=[
-                # response -> context (do the claims in answer come from context)
-                Faithfulness(),
-                ResponseGroundedness(llm=self.boost_llm),  # NVIDIA
-                # response -> question (does the answer address the entire question)
-                # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
-                ResponseRelevancy(llm=self.boost_llm),
-                ResponseRelevancyDiverse(llm=self.boost_llm),
-                # context -> question (are the contexts relevant to the question)
-                ContextRelevance(llm=self.boost_llm),  # NVIDIA
-                # context -> reference contexts (do the contexts match the reference contexts)
-                NonLLMContextPrecisionWithReference(),
-                NonLLMContextRecall(),
-                # response -> reference answer (ground truth)
-                FactualCorrectness(mode="recall"),
-                AnswerAccuracy(),  # NVIDIA
-            ],
+            metrics=metrics,
             llm=self.eval_llm,
         )
 
