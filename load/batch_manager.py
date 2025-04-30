@@ -264,17 +264,29 @@ class BatchManager:
             }
 
     def get_content_if_ready(self) -> dict[str, str]:
+        # If results file exists, load and return its contents
+        if self.output_file_name.exists():
+            with open(self.output_file_name, "r") as f:
+                results = json.load(f)
+            return self._map_custom_id_to_content(results)
+        # Otherwise, check status and fetch from API if completed
         batch_job = self._get_batch_status()
         if batch_job.status == "completed":
             results = self._get_results(batch_job)
-            return {
-                item["custom_id"]: item["response"]["body"]["choices"][0]["message"][
-                    "content"
-                ]
-                for item in results
-            }
+            return self._map_custom_id_to_content(results)
         print(f"**Batch job status: {batch_job.status}")
         raise ValueError("Batch job is not completed")
+
+    def _map_custom_id_to_content(self, results: list[dict]) -> dict[str, str]:
+        """
+        Map a list of result dicts to a {custom_id: content} dictionary.
+        """
+        return {
+            item["custom_id"]: item["response"]["body"]["choices"][0]["message"][
+                "content"
+            ]
+            for item in results
+        }
 
     def _get_results(self, batch_job: Any) -> list[dict[str, Any]]:
         """

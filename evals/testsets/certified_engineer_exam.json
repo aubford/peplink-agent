@@ -14,7 +14,7 @@
       "bgp",
       "ripv2"
     ],
-    "custom_id": "41fe2107eada0505f3cb43884706e3f2"
+    "custom_id": "57de169c24bfa9da5a7c905627f44cb1"
   },
   {
     "question_id": "q2",
@@ -28,7 +28,7 @@
     "correct_answers": [
       "never"
     ],
-    "custom_id": "f8f00e60b71e7a4a8d4b3b136843db88"
+    "custom_id": "52f7365328bdc8548944728b94c7d824"
   },
   {
     "question_id": "q3",
@@ -42,7 +42,7 @@
     "correct_answers": [
       "based on the number of peers supported."
     ],
-    "custom_id": "ec8acfc000484296ff54619b7d9a54fb"
+    "custom_id": "a456834f8557f6d147565f9bf50493ca"
   },
   {
     "question_id": "q4",
@@ -57,7 +57,7 @@
       "order of processing from top to bottom",
       "able to control the traffic when no connections are available"
     ],
-    "custom_id": "70313f9b956fe3ecb5c5b5dec95bb2e5"
+    "custom_id": "bfdcafa2fa9a66ed24d5a8e9d004620c"
   },
   {
     "question_id": "q5",
@@ -71,7 +71,7 @@
     "correct_answers": [
       "peplink routers enable you to build one logical wan connection using multiple technologies (e.g. xdsl, mpls, cellular, fiber)"
     ],
-    "custom_id": "e5d9959d8c6e99eee6b9d4a3d4d4fe43"
+    "custom_id": "fe52f0dfbf487e70decdcc649a97156f"
   },
   {
     "question_id": "q6",
@@ -86,7 +86,7 @@
     "correct_answers": [
       "tcp port 32015 and udp port 4500 or according to either data port 'default' or 'custom' settings."
     ],
-    "custom_id": "ce592e3191e188b50e05405680c8097f"
+    "custom_id": "e5be98dcfdece5c3bf06d4be44168731"
   },
   {
     "question_id": "q7",
@@ -101,7 +101,7 @@
     "correct_answers": [
       "same lan subnet on either end of speedfusion"
     ],
-    "custom_id": "8e4319a038f8ed07fd2f3a0ffc42abfc"
+    "custom_id": "dee65bcdcf645b514b537f77e1dbdac6"
   },
   {
     "question_id": "q8",
@@ -116,7 +116,7 @@
     "correct_answers": [
       "virtual network mapping"
     ],
-    "custom_id": "448be75d99c6c73f3d81e2f38790c3a9"
+    "custom_id": "17b42c6801a28bf54a790b8b330d909f"
   },
   {
     "question_id": "q9",
@@ -133,7 +133,7 @@
       "jitter when you do video streaming",
       "jitter on your voip call"
     ],
-    "custom_id": "fa65f919ae2814ddfa279b70858208c9"
+    "custom_id": "a2af93fffbaee920bc338bb1d54fee47"
   },
   {
     "question_id": "q11",
@@ -148,7 +148,7 @@
     "correct_answers": [
       "speedfusion cloud with outbound policy"
     ],
-    "custom_id": "4b0193ea9327d05e4e4914e720fdfe4f"
+    "custom_id": "55c4ea02059c4c8bd8f1ec92c662b138"
   },
   {
     "question_id": "q12",
@@ -164,7 +164,7 @@
       "manages pepwave ap devices",
       "manages multiple ssids"
     ],
-    "custom_id": "00d75b35cae4e8558b5c0467347eb817"
+    "custom_id": "bd85746de3769fa17f14b330d08b6469"
   },
   {
     "question_id": "q13",
@@ -179,7 +179,7 @@
       "provides a portable 6 connection for windows and linux devices",
       "is a 5g wan option for other peplink or pepwave products which does not support 5g"
     ],
-    "custom_id": "4a2703318493488a2d1489eb2b3a34aa"
+    "custom_id": "fff73260488b6c5b4515c73e70b1aebb"
   },
   {
     "question_id": "q14",
@@ -193,7 +193,7 @@
     "correct_answers": [
       "20 requests per second per organization"
     ],
-    "custom_id": "cb72b5e58c2eeab1d3d916325036fe74"
+    "custom_id": "bbb2cc98047924acd1e3246e0e1c5ba0"
   },
   {
     "question_id": "e1",
@@ -209,7 +209,7 @@
       "web admin > connection details > cellular status > engineering data",
       "web admin / <support.cgi> page > cellular module firmware update"
     ],
-    "custom_id": "6ade534c9df88bd3f304d5e2efb90482"
+    "custom_id": "21fbcb4965a31024fe37e91617aefd3c"
   },
   {
     "question_id": "e2",
@@ -224,7 +224,7 @@
     "correct_answers": [
       "priority"
     ],
-    "custom_id": "9f8a65a656aef60262fdc783b032b45a"
+    "custom_id": "bfe96f8735f841dd76cd1b3ea354bbd4"
   },
   {
     "question_id": "e3",
@@ -239,7 +239,7 @@
     "correct_answers": [
       "max hd2 ip67"
     ],
-    "custom_id": "b658dd4b4af819b7cfeb4910d9232ad0"
+    "custom_id": "8dd0524e8e1321ebc6453bf49c50af0b"
   },
   {
     "question_id": "e4",
@@ -253,7 +253,7 @@
     "correct_answers": [
       "device ui"
     ],
-    "custom_id": "a7192fc6df7df0e1c4c13f0f1129e307"
+    "custom_id": "0bf0b59a8082d96cc0cb281202187370"
   },
   {
     "question_id": "e5",
@@ -272,7 +272,7 @@
       "perform sniffing",
       "schedule reboot day/time"
     ],
-    "custom_id": "6e6a79a98b678f14ae937cf5d20bd4e7"
+    "custom_id": "0bbf1f94e80c3f11a0a1791d1cdbb74c"
   },
   {
     "question_id": "e6",
@@ -284,7 +284,7 @@
     "correct_answers": [
       "no"
     ],
-    "custom_id": "589c5a68b559e34dd5d7cb3fd15df810"
+    "custom_id": "98375b4794b6b8f58083dab3a6d97789"
   },
   {
     "question_id": "e7",
@@ -298,7 +298,7 @@
     "correct_answers": [
       "6"
     ],
-    "custom_id": "3847a16941f320855d61ee55149caa38"
+    "custom_id": "7a6c4d9c678353e3f2d3abfa36ce0263"
   },
   {
     "question_id": "e8",
@@ -314,7 +314,7 @@
       "max hd4",
       "max hd4 mbx"
     ],
-    "custom_id": "562914a4613afba6d6f5e76d11db64e0"
+    "custom_id": "69ca6a30db2cba19b6324cab9543dc1f"
   },
   {
     "question_id": "e9",
@@ -329,7 +329,7 @@
     "correct_answers": [
       "assign the vlan to incontrol group with a defined \"tag\""
     ],
-    "custom_id": "5e8150c9590d5e090257f8295a1393de"
+    "custom_id": "63609a2392b343d9f112a8254cc51c9d"
   },
   {
     "question_id": "e10",
@@ -343,7 +343,7 @@
     "correct_answers": [
       "firmware management, outbound policies, speedfusion vpn tunnel configuration, ssids"
     ],
-    "custom_id": "24765440fd13fbab04bfde5c79aaa314"
+    "custom_id": "14e24e87b000f321115cab051e89fc9e"
   },
   {
     "question_id": "e11",
@@ -357,7 +357,7 @@
     "correct_answers": [
       "download the fusionhub image from the peplink firmware & manual page."
     ],
-    "custom_id": "895bf994cead701b741716a84dde2830"
+    "custom_id": "2ea416b6eeb96e48510248dcecee0899"
   },
   {
     "question_id": "e12",
@@ -371,7 +371,7 @@
     "correct_answers": [
       "go to incontrol2; navigate to warranty & licenses; release the key from existing fusionhub; and import the key into the new fusionhub instance."
     ],
-    "custom_id": "08b181dce268e2c0946e7e56b7ba95f5"
+    "custom_id": "e69c15d4aea1661f62be9ce724e319bb"
   },
   {
     "question_id": "e13",
@@ -389,7 +389,7 @@
       "netflow v9",
       "ipfix"
     ],
-    "custom_id": "cb4d9fce6007cefbf0881ca1f1921f19"
+    "custom_id": "b861cf6dcadcfa61d3f609685cf67f95"
   },
   {
     "question_id": "e14",
@@ -407,7 +407,7 @@
       "incontrol",
       "fusionhub license"
     ],
-    "custom_id": "56601ac5ca7daf95b90fa4a9cec4783d"
+    "custom_id": "589839a2dc69cbe9af20c0a3c9a817cb"
   },
   {
     "question_id": "e15",
@@ -420,7 +420,7 @@
     "correct_answers": [
       "an antenna typically used to extend the range of a wi-fi network into hard-to-reach corners of buildings or in other specific situations where 360-degree coverage is not needed"
     ],
-    "custom_id": "9c7ad6427f6e2223659b6dce65d0cb12"
+    "custom_id": "6c4899be32d9eea0e5d72f8798c66a3d"
   },
   {
     "question_id": "e16",
@@ -436,7 +436,7 @@
       "check sim card's balance, process pre-paid cards, and configure carrier-specific services via ussd",
       "retrieve sms from the sim card"
     ],
-    "custom_id": "e1ef8fc680211cb769ef8924d45e727f"
+    "custom_id": "218e9f88f21a6ca731094635cbb78807"
   },
   {
     "question_id": "e17",
@@ -451,7 +451,7 @@
     "correct_answers": [
       "it can be used to remotely reboot a router."
     ],
-    "custom_id": "408985fa5a46a05c8b73c4c80948eab4"
+    "custom_id": "f1427f00c4826ce204259d25afd56c76"
   },
   {
     "question_id": "e18",
@@ -469,7 +469,7 @@
       "citrix",
       "hyper-v"
     ],
-    "custom_id": "855ae889d4db203abb6a5c5a5de861b6"
+    "custom_id": "708081b403b816d66968fe94fc428039"
   },
   {
     "question_id": "e19",
@@ -483,7 +483,7 @@
     "correct_answers": [
       "it shows deeper information by breaking down categories into sub-categories."
     ],
-    "custom_id": "ae1afa906ee084d21c225720fc8db3c7"
+    "custom_id": "7924d61352f1c36d0d462fc3dfe95c73"
   },
   {
     "question_id": "e20",
@@ -497,7 +497,7 @@
     "correct_answers": [
       "optimize cloud application"
     ],
-    "custom_id": "97ea0e855c9c11f7d3ba26efa3b011ba"
+    "custom_id": "f885d2ec46e98c4a5d0deae43b3598e2"
   },
   {
     "question_id": "e21",
@@ -509,7 +509,7 @@
     "correct_answers": [
       "false"
     ],
-    "custom_id": "9cc42590196aec78e7d721e124635299"
+    "custom_id": "0866629afdf04e2e42536c69072d2170"
   },
   {
     "question_id": "e22",
@@ -525,7 +525,7 @@
       "inspect event logs",
       "to receive push notifications for speedfusion disconnects/reconnects"
     ],
-    "custom_id": "63088fb1b4419c586d8a7db25e9c52e7"
+    "custom_id": "15a514b55e55806d76317ba2b8a264da"
   },
   {
     "question_id": "e23",
@@ -539,7 +539,7 @@
     "correct_answers": [
       "the isp is throttling port udp 4500 traffic."
     ],
-    "custom_id": "be0757fa0dc5a16e80195d625e8e9f0b"
+    "custom_id": "edfe275708cbf3e90ef9e0d6e5171df5"
   },
   {
     "question_id": "e24",
@@ -554,7 +554,7 @@
     "correct_answers": [
       "enable traffic for udp port 5246 and tcp port 443 on the firewall."
     ],
-    "custom_id": "35946609aa88345c0b4cc566663d75b8"
+    "custom_id": "ec7ff5e6a6a342b0ebdd3ed94c596057"
   },
   {
     "question_id": "e25",
@@ -569,7 +569,7 @@
     "correct_answers": [
       "it will duplicate packets."
     ],
-    "custom_id": "30e1e9a4f819766314530b7407a77988"
+    "custom_id": "8a12d3cd3139f460097f243884fbd856"
   },
   {
     "question_id": "e26",
@@ -585,7 +585,7 @@
       "bandwidth overflow",
       "speedfusion traffic steering"
     ],
-    "custom_id": "a218e8c3b5be5e8e2a3fa7b2747d047c"
+    "custom_id": "958e377e08286155455e70e937d8e5c6"
   },
   {
     "question_id": "e27",
@@ -602,7 +602,7 @@
       "vrrp is a generic specification which peplink has extended to provide additional functionality if certain criteria are met.",
       "peplink recommends when using vrrp the two devices be identical."
     ],
-    "custom_id": "7f02bbdf86131334f413bf6eb5a7f1ed"
+    "custom_id": "13539aa2aa8d7f713e684e47d2d33eca"
   },
   {
     "question_id": "e28",
@@ -617,7 +617,7 @@
     "correct_answers": [
       "ap > wireless ssid > security settings > fast transition"
     ],
-    "custom_id": "5f018324a03051e05c9a5e2ea1713859"
+    "custom_id": "43942825f386ffa6cf730d6d163073b5"
   },
   {
     "question_id": "e29",
@@ -633,7 +633,7 @@
     "correct_answers": [
       "not sure; need to do a site survey."
     ],
-    "custom_id": "ed631cebc94aae80cf9a84975f6c6035"
+    "custom_id": "cddc5b967b8921ed9c4c4eb2533fb0d0"
   },
   {
     "question_id": "e30",
@@ -647,7 +647,7 @@
     "correct_answers": [
       "oauth 2.0"
     ],
-    "custom_id": "c496013383488ff2b99cb53fc94ef1c7"
+    "custom_id": "830de078fe2f48fe06069e3c55ee4134"
   },
   {
     "question_id": "e31",
@@ -663,7 +663,7 @@
       "the users see glitches over video streaming sessions.",
       "connections in accessing the e-mail server in hq are intermittent."
     ],
-    "custom_id": "e685c8ccae55a5451c316333b754cac2"
+    "custom_id": "717a712f07a7a5510f66c544d1ac1b9b"
   },
   {
     "question_id": "e32",
@@ -678,7 +678,7 @@
     "correct_answers": [
       "assign user role as group administrator"
     ],
-    "custom_id": "3e63ba41ca633ed96a04622a3e1267b3"
+    "custom_id": "2db074f06c24b1753c247048b1edc077"
   },
   {
     "question_id": "e33",
@@ -690,7 +690,7 @@
     "correct_answers": [
       "true"
     ],
-    "custom_id": "da9d8f576aca4a96462a31fc86e25aca"
+    "custom_id": "07affcc7e9e53e1b8c94317e11e4d600"
   },
   {
     "question_id": "e34",
@@ -705,7 +705,7 @@
     "correct_answers": [
       "to have the cellular module check for a better connection after having failed to 3g for a defined time even though this will interupt connectivity for a short time"
     ],
-    "custom_id": "1733f7f4c1f50a7d429ff02224ee0e5c"
+    "custom_id": "1cc9868d19f7db943b85d9f42ce6a1e2"
   },
   {
     "question_id": "e35",
@@ -720,7 +720,7 @@
     "correct_answers": [
       "a network with private ips requires an nat gateway for internet access."
     ],
-    "custom_id": "6a0132194865559ed04f41dedf951725"
+    "custom_id": "c0c1ecba52c10d65ac5b1feb87cf0e5a"
   },
   {
     "question_id": "e36",
@@ -736,7 +736,7 @@
       "use the accessory acw-618",
       "input 56v via terminal block"
     ],
-    "custom_id": "ac0731ae7bcb7d10b8967985a16ae01e"
+    "custom_id": "2136e45509e78de9e21f4112267dc320"
   },
   {
     "question_id": "e37",
@@ -751,7 +751,7 @@
     "correct_answers": [
       "yes. the customer can host it's own speedfusion-capable router within its own data center."
     ],
-    "custom_id": "34c0697bcec748f7137db4e551261133"
+    "custom_id": "f25a2eede225dd1e71954c373eace619"
   },
   {
     "question_id": "e38",
@@ -766,7 +766,7 @@
     "correct_answers": [
       "the routers communicate with vrrp via the lan ports"
     ],
-    "custom_id": "2beabe48d8b21402fd044085ef18dda3"
+    "custom_id": "401708e7751dcada8ad414b6e972a827"
   },
   {
     "question_id": "e39",
@@ -781,7 +781,7 @@
     "correct_answers": [
       "use this option when you need a more secure vpn."
     ],
-    "custom_id": "42a62364d9fd747b1602b20e4216ad4c"
+    "custom_id": "7efa9670e6f82b4d04839e0bb4c0c910"
   },
   {
     "question_id": "e40",
@@ -796,7 +796,7 @@
     "correct_answers": [
       "the max br1-lte-us imei has not been registered to verizon"
     ],
-    "custom_id": "7e36068377d11667c7b7dccd5e440aef"
+    "custom_id": "4f1c7455ed11cb2cc37fe820bef30b07"
   },
   {
     "question_id": "e41",
@@ -811,7 +811,7 @@
     "correct_answers": [
       "fast transition is only available with security policy = wpa2 or wpa3 equivalent (personal or enterprise)."
     ],
-    "custom_id": "ff1ee9cc1f088f9464725e68513ffd04"
+    "custom_id": "69305e464338b0c5f52b7fad50f6d081"
   },
   {
     "question_id": "e42",
@@ -828,7 +828,7 @@
       "2",
       "3"
     ],
-    "custom_id": "e1878ad2aa1e2ea6d3c789e5d8331353"
+    "custom_id": "ee59196d31f8eecf706cf7b7ff07ee83"
   },
   {
     "question_id": "e43",
@@ -843,7 +843,7 @@
     "correct_answers": [
       "priority"
     ],
-    "custom_id": "e7374a72fb11ca6263f322881cc1b215"
+    "custom_id": "3f1945a2e555535778bc723442b97a56"
   },
   {
     "question_id": "e44",
@@ -858,7 +858,7 @@
     "correct_answers": [
       "network address: 172.16.0.0 / netmask: 255.255.192.0"
     ],
-    "custom_id": "e9502cc808d4d899123ba7c35a51b371"
+    "custom_id": "95c6a68d2cf73bbf75878e9f6694e4f9"
   },
   {
     "question_id": "e45",
@@ -872,7 +872,7 @@
     "correct_answers": [
       "the incontrol2 captive portal is a web page which is displayed to newly connected users before they are granted access to the internet."
     ],
-    "custom_id": "6d7ce8f96615e463ed677e61b1f37506"
+    "custom_id": "9e9b6192e4f9cf4d648247d283033b98"
   },
   {
     "question_id": "e46",
@@ -888,7 +888,7 @@
       "create maximum 6 tunnels in total (default + sub tunnels)",
       "the layer 2 sub-tunnel bridge to the untagged lan"
     ],
-    "custom_id": "871f097655a3bfe3aaa75e4c7b5aa169"
+    "custom_id": "ec2e95e0dc893e05ebf67c83e82b4261"
   },
   {
     "question_id": "e47",
@@ -903,7 +903,7 @@
     "correct_answers": [
       "none of the above"
     ],
-    "custom_id": "f190773b5de7e7311bed70eca367b576"
+    "custom_id": "eac4a6d673b196b059e1e3215a09da91"
   },
   {
     "question_id": "e48",
@@ -920,7 +920,7 @@
       "packet-level bandwidth bonding",
       "256-bit aes encryption"
     ],
-    "custom_id": "64506003dd82672f3c9577e9436fded5"
+    "custom_id": "ceada770d6c8e2517ad06ecacc6bf53f"
   },
   {
     "question_id": "e49",
@@ -936,7 +936,7 @@
       "dynamic dns settings",
       "pppoe credentials"
     ],
-    "custom_id": "35feeda616ceb18b4eb316681331c1b3"
+    "custom_id": "268064afe2fdfd03c80cb2e2fde007c1"
   },
   {
     "question_id": "e50",
@@ -952,6 +952,6 @@
     "correct_answers": [
       "16"
     ],
-    "custom_id": "a05ba4ec1fa60dc5d2b46116063752ae"
+    "custom_id": "21ce3a0ba4105682d415a8df4d6542a4"
   }
 ]

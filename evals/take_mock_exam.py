@@ -35,9 +35,9 @@ class MockExam:
         evals_dir: Path,
         run_name: str,
         llm_model: str,
+        output_dir: Path,
         should_create_batch_job: bool = True,
         sample: bool | int = False,
-        output_dir: Path = None,
     ):
         self.output_dir = output_dir
         runs_dir = evals_dir / "runs"
@@ -115,9 +115,7 @@ class MockExam:
                     correct_count += 0.5
                 missed_questions.append(q)
         # save missed questions
-        missed_path = (
-            self.output_dir / f"{self.mock_exam_path.stem}_missed.json"
-        )
+        missed_path = self.output_dir / f"{self.mock_exam_path.stem}_missed.json"
         with open(missed_path, "w") as f:
             json.dump(missed_questions, f)
         return f"{correct_count}/{len(self.mock_exam_questions)}", missed_questions
