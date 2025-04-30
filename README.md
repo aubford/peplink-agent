@@ -3,7 +3,7 @@
 ## Overview
 
 This repository implements a robust Retrieval-Augmented Generation (RAG) pipeline for technical document QA
-chat on a multi-source technical corpora (e.g., forums, PDFs, web, YouTube, MongoDB dumps) related to Pepwave
+chat on a multi-source technical corpora (e.g., forums, PDFs, web, YouTube) related to Pepwave
 cellular routers. Pepwave routers are popular among digital nomads like myself but are meant for network admins
 and not laypeople.  Notably, ChatGPT is not helpful in answering most questions I have had. The goal for this
 chatbot is to create an assistant that myself and other digital nomads can use to troubleshoot issues and learn
@@ -18,7 +18,7 @@ explainable feedback on the impact of different modeling, retrieval, and data pr
 
 ### 1. Data Extraction (`extract/`)
 - **BaseExtractor**: Abstracts extraction logic for diverse sources (Reddit, YouTube, web, PDFs, Google Drive, MongoDB).
-- A separate Javascript repo performs the web scraping for the Pepwave forums using the Discourse API to extract 30k posts.
+- A separate Javascript repo performs the web scraping for the Pepwave forums using the Discourse API to extract 30k posts a dump into MongoDB.
 - Enforces a consistent folder structure and streaming interface for raw data.
 - Validates and serializes extracted data to JSONL files for reproducibility.
 
@@ -39,10 +39,10 @@ and prepares documents for vector storage.
 - **RagInference**: Implements a modular, history-aware RAG pipeline using LangChain, OpenAI LLMs, and Pinecone vector search.
 
 ### 5. Evaluation Framework (`evals/`)
-- **RAGAS**: Created a highly customized fork of the RAGAS library customized for the specific needs of this project.
+- **RAGAS**: Created a highly customized fork of the RAGAS library customized for the specific needs of this project. See repo `aubford/ragas`.
 - **Testset Generation**: Multi-hop QA testset creation using a knowledge graph strategy and LLM-driven prompt synthesis along with human refinement.
 - **RagasEval**: End-to-end RAG evaluation with metrics for context recall, precision, faithfulness, relevancy, and accuracy.
-- **MockExam**: A test module for pitting the chatbot against a combination of preparatory mock exams and the real Pepwave Certified Engineer Exam.
+- **MockExam**: A test module for pitting the chatbot against a combination of preparatory mock exam questions and the real Pepwave Certified Engineer Exam.
 
 ### 6. Utilities & Prompt Management (`util/`, `prompts/`)
 - NLP utilities for tokenization, deduplication, and similarity scoring.
@@ -59,14 +59,17 @@ and prepares documents for vector storage.
 
 ## Example Workflow
 
-1. **Extract**: Implement a new extractor in `extract/`, run to collect raw data into `data/<source>/raw/`.
-2. **Transform**: Implement a transformer in `transform/`, run to normalize and serialize documents to `data/<source>/documents/`.
-3. **Load**: Use loaders in `load/` to deduplicate, enrich, and embed documents, then upload to the vector store.
+1. **Extract**: Run extractors to collect raw data into `data/<source>/raw/`.
+2. **Transform**: Run transformers to normalize and serialize documents to `data/<source>/documents/`.
+3. **Load**: Run loaders to deduplicate, enrich, and embed documents and then upload to the vector store.
 4. **RAG Inference**: Use `RagInference` (see `inference/rag_inference.py`) for conversational or batch QA over the vector store.
 5. **Evaluation**: Generate a knowledge graph, testsets and run RAGAS-based and MockExam evaluation using scripts in `evals/`.
 
 ## Design Highlights
-- **Extensibility**: Add new data sources, transforms, or evaluation metrics by subclassing base classes.
+- **Evaluation**: The evaluation framework is the most complex part of the application. The knowledge graph and testset generation procedures are
+the product of many iterations and experiments. I was very happy with the quality of the main testset in `evals/testsets/testset-200_main_testset_25-04-23`
+so I committed it to the repo. I also did thorough testing to ensure that the metrics are consistent and meaningful at a reasonable price.
 - **Reproducibility**: All artifacts (raw, transformed, testsets, evaluation outputs) are versioned and stored for traceability.
-- **Prompt Engineering**: Prompts are managed as markdown files which can be easily viewed and edited and are versioned with the application.
+- **Prompt Engineering**: Spent a lot of time studying and experimenting with various prompt engineering techniques. Settled on a prompt management
+strategy that uses markdown files which can be easily viewed, edited and are versioned with the application instead of fancy cloud storage/versioning.
 - **Best Practices**: Type annotations, modular design, and clear separation of concerns throughout.
