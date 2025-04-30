@@ -62,7 +62,7 @@ and prepares documents for vector storage.
 1. **Extract**: Run extractors to collect raw data into `data/<source>/raw/`.
 2. **Transform**: Run transformers to normalize and serialize documents to `data/<source>/documents/`.
 3. **Load**: Run loaders to deduplicate, enrich, and embed documents and then upload to the vector store.
-4. **RAG Inference**: Use `RagInference` (see `inference/rag_inference.py`) for conversational or batch QA over the vector store.
+4. **RAG Inference**: Run `RagInference` for conversational QA (see `inference/rag_inference.py`).
 5. **Evaluation**: Generate a knowledge graph, testsets and run RAGAS-based and MockExam evaluation using scripts in `evals/`.
 
 ## Design Highlights
