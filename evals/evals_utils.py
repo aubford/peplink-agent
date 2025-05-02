@@ -10,7 +10,7 @@ output_dir = Path(__file__).parent / "output"
 kg_json_path = output_dir / "knowledge_graph.json"
 output_nodes_path = output_dir / "__nodes.parquet"
 output_relationships_path = output_dir / "__relationships.parquet"
-kg_input_data_path = output_dir / "__kg_input_data.parquet"
+kg_input_data_path = output_dir / "kg_input_data.parquet"
 
 
 def node_meta(node: Node) -> dict[str, t.Any]:

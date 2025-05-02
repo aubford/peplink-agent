@@ -15,6 +15,11 @@ from ragas.metrics import (
     ResponseRelevancyDiverse,
     FactualCorrectness,
     AnswerAccuracy,
+    BleuScore,
+    RougeScore,
+    FaithfulnesswithHHEM,
+    EmbeddingContextPrecision,
+    EmbeddingContextRecall,
 )
 from inference.rag_inference import RagInference
 from evals.take_mock_exam import MockExam
@@ -24,6 +29,8 @@ import json
 from typing import cast, Any
 
 from dotenv import load_dotenv
+from evals.evals_utils import kg_input_data_path
+from load.post_process import DataIndex
 
 load_dotenv()
 
@@ -64,6 +71,11 @@ class RagasEval:
             generated_testset_df = generated_testset_df[:sample]
         nodes_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
+        )
+        # Merge nodes_df with kg_input_data.parquet on 'id'
+        kg_input_df = pd.read_parquet(DataIndex.output_path)
+        nodes_df = pd.merge(
+            nodes_df, kg_input_df, on="id", how="left", suffixes=("", "_kg")
         )
         self.runs_dir = evals_dir / "runs"
         self.output_dir = self.runs_dir / run_name
@@ -144,7 +156,20 @@ class RagasEval:
         df.rename(columns={"answer": "reference"}, inplace=True)
         df.rename(columns={"cluster_id": "id"}, inplace=True)
         df["reference_contexts"] = df["node_ids"].apply(
-            lambda x: nodes_df[nodes_df["node_id"].isin(x)]["page_content"].tolist()
+            lambda cluster_node_ids: [
+                (row["page_content"], row["technical_summary"])
+                for _, row in nodes_df[
+                    nodes_df["node_id"].isin(cluster_node_ids)
+                ].iterrows()
+            ]
+        )
+        df["reference_contexts_embeddings"] = df["node_ids"].apply(
+            lambda cluster_node_ids: [
+                (row["page_content_embeddings"], row["technical_summary_embedding"])
+                for _, row in nodes_df[
+                    nodes_df["node_id"].isin(cluster_node_ids)
+                ].iterrows()
+            ]
         )
         df.drop(columns=["document_ids", "documents_text"], inplace=True)
         df["synthesizer_name"] = "custom"
@@ -267,6 +292,8 @@ class RagasEval:
         self.get_batch_results()
         evaluation_dataset = self.test_set.to_evaluation_dataset()
         metrics = [
+            # use HHEM-Open hallucination detection classifier model
+            FaithfulnesswithHHEM(),
             # response -> question (does the answer address the entire question)
             # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
             ResponseRelevancy(),
@@ -275,11 +302,16 @@ class RagasEval:
             # note that you can't compare this across context types! (e.g. summaries vs. full docs)
             # we care much more about recall since there are plenty of relevant docs that may not have been
             # part of the KG cluster used to create this sample.
+            EmbeddingContextPrecision(),
             NonLLMContextPrecisionWithReference(),
+            EmbeddingContextRecall(),
             NonLLMContextRecall(),
             # response -> reference answer (ground truth)
             FactualCorrectness(mode="recall"),
             AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
+            # less accurate metrics
+            BleuScore(),
+            RougeScore(),
         ]
 
         if self.with_faithfulness:

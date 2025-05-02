@@ -12,12 +12,10 @@ from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.language_models.chat_models import BaseChatModel
 from util.root_only_tracer import RootOnlyTracer
 from prompts import load_prompts
-from langchain import hub
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
 
-old_prompt = hub.pull("aubford/retrieval-qa-chat")
 PROMPTS = load_prompts()
 
 messages_prompt = ChatPromptTemplate(

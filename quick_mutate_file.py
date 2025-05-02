@@ -1,47 +1,67 @@
+import asyncio
 import json
 from pathlib import Path
 import sys
-import tempfile
-import shutil
+from typing import Any
+import pandas as pd
+from load.base_load import BaseLoad
 
 
-def mutate_data(data: list[dict]) -> list[dict]:
-    return data
+class Load(BaseLoad):
+    folder_name = "foldername"
+
+    def __init__(self):
+        super().__init__()
 
 
-def main(file_path: str) -> None:
+async def mutate_data(data: Any) -> Any:
+    df: pd.DataFrame = data
+    loader = Load()
+    df = loader._generate_embeddings(
+        df, "page_content", chunk_size=200, clean_text=True
+    )
+    return df
+
+
+async def main(file_path: Path) -> None:
     file = Path(file_path)
+    ext = file.suffix.lower()
+    data: list[dict]
+    # Load data based on file extension
     try:
-        with open(file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        if ext == ".json":
+            with open(file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                mutated_data = await mutate_data(data)
+        elif ext == ".parquet":
+            mutated_data = await mutate_data(pd.read_parquet(file))
+        else:
+            print(f"Unsupported file extension: {ext}")
+            sys.exit(1)
     except Exception as e:
         print(f"Error reading {file}: {e}")
         sys.exit(1)
 
-    mutated_data = mutate_data(data)
-
-    # Write atomically
+    # Write a copy next to the original file with '_copy' appended before the extension
     try:
-        with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tf:
-            json.dump(mutated_data, tf, indent=2, ensure_ascii=False)
-            tempname = tf.name
-        shutil.move(tempname, file)
+        copy_file = file.with_name(f"{file.stem}_copy{file.suffix}")
+        if ext == ".json":
+            with open(copy_file, "w", encoding="utf-8") as f:
+                json.dump(
+                    mutated_data.to_dict(orient="records"),
+                    f,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+        elif ext == ".parquet":
+            mutated_data.to_parquet(copy_file, index=False)
     except Exception as e:
-        print(f"Error writing {file}: {e}")
+        print(f"Error writing {copy_file}: {e}")
         sys.exit(1)
 
     print(mutated_data)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
-    else:
-        # Default path as in your original script
-        root_dir = Path(__file__).parent.parent
-        default_path = (
-            root_dir
-            / "testset-200_main_testset_25-04-23"
-            / "generated_testset__TEST.json"
-        )
-        main(str(default_path))
+    root_dir = Path(__file__).parent
+    asyncio.run(main(root_dir / "evals" / "output" / "kg_input_data.parquet"))

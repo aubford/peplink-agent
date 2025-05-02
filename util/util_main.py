@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Any, List
 from langchain_core.documents import Document
 import pandas as pd
@@ -5,6 +6,7 @@ from pathlib import Path
 import json
 
 import tiktoken
+from itertools import accumulate
 
 
 def serialize_document(document: Document) -> Dict[str, Any]:
@@ -168,3 +170,56 @@ def count_tokens(text: str) -> int:
     """Count the tokens in a text."""
     tokenizer = tiktoken.get_encoding("cl100k_base")
     return len(tokenizer.encode(str(text)))
+
+
+def collapse_blank_lines(text: str) -> str:
+    """
+    Replace runs of 3 or more consecutive blank lines (optionally with whitespace) with exactly two newlines.
+    """
+    return re.sub(r'((?:[ \t]*\n){3,})', '\n\n', text)
+
+
+def clean_text_for_embedding(text: str) -> str:
+    """
+    Remove Markdown headers, XML/HTML tags, and image insertions from the text.
+    Args:
+        text: The input text to clean.
+    Returns:
+        Cleaned text with non-semantic content removed.
+    """
+    if not text or not isinstance(text, str):
+        return ""
+
+    # Remove Markdown image insertions: ![alt](url)
+    text = re.sub(r"!\[[^\]]*\]\([^\)]*\)", "", text)
+
+    # Remove Markdown headers (lines starting with #), except those starting with '## Title: '
+    text = re.sub(r"^(?:(?!## Title: ).)#.*$", "", text, flags=re.MULTILINE)
+
+    # Remove XML/HTML tags (e.g., <tag> or </tag> or <tag attr="val">)
+    text = re.sub(r"<[^>]+>", "", text)
+
+    # Remove excessive spaces/tabs (but not newlines)
+    text = re.sub(r"[ \t]+", " ", text)
+
+    # Collapse runs of 3+ blank lines (optionally with whitespace) into exactly 2 newlines
+    text = collapse_blank_lines(text)
+
+    text = text.strip()
+    return text
+
+
+def get_chunk_size(texts: list[str], token_limit: int = 300_000) -> int:
+    """
+    Determine the optimal chunk size so that the sum of the largest chunk_size token counts is under the token_limit.
+    Returns the largest chunk size that keeps max_possible_tokens < token_limit.
+    """
+    token_counts = [count_tokens(text) for text in texts]
+    total_tokens = sum(token_counts)
+    if total_tokens < token_limit:
+        return len(texts)
+    sorted_counts = sorted(token_counts, reverse=True)
+    for i, running_sum in enumerate(accumulate(sorted_counts), 1):
+        if running_sum >= token_limit:
+            return i - 1
+    return len(texts)

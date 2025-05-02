@@ -1,11 +1,8 @@
-from typing import Optional
 import tiktoken
 from config import global_config, ConfigType
 import pandas as pd
 from pathlib import Path
 from langchain_core.documents import Document
-from pinecone import Pinecone, ServerlessSpec
-from pinecone.data.index import Index
 from langchain_openai import OpenAIEmbeddings
 from config.logger import RotatingFileLogger
 from uuid import uuid4
@@ -15,7 +12,11 @@ from langchain.text_splitter import TextSplitter, RecursiveCharacterTextSplitter
 import spacy
 from load.html.html_util import get_settings_entities
 from load.batch_manager import BatchManager
-from util.util_main import to_serialized_parquet, drop_embedding_columns
+from util.util_main import (
+    to_serialized_parquet,
+    drop_embedding_columns,
+    get_chunk_size,
+)
 import json
 
 # Split on sentences before spaces. Will false positive on initials like J. Robert Oppenheimer so room for improvement.
@@ -94,7 +95,6 @@ class BaseLoad:
         self.logger: RotatingFileLogger = RotatingFileLogger(
             name=f"load_{self.folder_name}"
         )
-        self.vector_store: Optional[Index] = None
         self.staging_folder: Path = self.this_dir / self.folder_name
         self.staging_path: Path = self.staging_folder / "staging.parquet"
         self.synth_data_path: Path = self.staging_folder / "synth_data.parquet"
@@ -175,11 +175,9 @@ class BaseLoad:
     ) -> pd.DataFrame:
         """Generate embeddings for a specific column in a dataframe."""
         texts = df[column_name].tolist()
-        self.logger.info(f"Generating embeddings for {len(texts)} {column_name}s")
-
-        max_tokens = max(self.count_tokens(text) for text in texts)
-        self.logger.info(f"Max tokens in {column_name}: {max_tokens}")
-        self.logger.info(f"Max tokens per request: {chunk_size * max_tokens}")
+        optimal_chunk_size = get_chunk_size(texts)
+        print(f"Using chunk size {optimal_chunk_size}")
+        chunk_size = min(chunk_size, optimal_chunk_size)
 
         embeddings = self.embedding_model.embed_documents(texts, chunk_size=chunk_size)
         df[f"{column_name}_embedding"] = embeddings
@@ -291,87 +289,6 @@ class BaseLoad:
     @staticmethod
     def _simple_dedupe(df: pd.DataFrame) -> None:
         df.drop_duplicates(subset=["page_content"], keep="first", inplace=True)
-
-    def _initialize_pinecone_index(self, alt_index: str | None = None) -> None:
-        """Initialize or create Pinecone index. Note: DO NOT USE NAMESPACES!"""
-        if self.vector_store is not None:
-            return
-
-        pc = Pinecone(api_key=self.config.get("PINECONE_API_KEY"))
-
-        existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
-
-        index_name = (
-            f"{self.index_name}-{alt_index.replace('_', '-')}"
-            if alt_index
-            else self.index_name
-        )
-        # Limit index name to 45 characters
-        index_name = index_name[:45]
-
-        if index_name not in existing_indexes:
-            # Create new index
-            pc.create_index(
-                name=index_name,
-                dimension=3072,  # OpenAI embeddings dimension for text-embedding-3-large
-                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
-            )
-            self.logger.info(f"Created new Pinecone index: {index_name}")
-
-        # Initialize the index
-        self.vector_store = pc.Index(index_name)
-        self.logger.info(f"Initialized Pinecone vector store for index: {index_name}")
-
-    def clean_metadata_for_vector_store(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Clean duplicate columns for vector store."""
-        df = df.drop(
-            columns=["post_title", "post_content", "comment_content"], errors="ignore"
-        )
-        # Replace all null values with empty string
-        df = df.fillna("")
-        return df
-
-    def staging_to_vector_store(
-        self, slice: int = 0, alt_column: str | None = None
-    ) -> None:
-        """Upload staged documents to a new, versioned Pinecone index. DON'T FORGET TO CHANGE VERSION IN .env!!!"""
-        self._initialize_pinecone_index(alt_column)
-        if not self.staging_path.exists():
-            raise FileNotFoundError(f"No staged documents found at {self.staging_path}")
-        if self.vector_store is None:
-            raise ValueError("Vector store initialization failed")
-
-        df = self._parquet_to_df(self.staging_path)
-        metadata_df = self._parquet_to_df(self.staging_path, drop_embeddings=True)
-        metadata_df = self.clean_metadata_for_vector_store(metadata_df)
-
-        ids = df.index.tolist()
-        column = (
-            alt_column
-            if alt_column and alt_column in df.columns
-            else "primary_content_embedding"
-        )
-        vectors = df[column].apply(json.loads).tolist()
-        metadata_dict = metadata_df.to_dict(orient="records")
-
-        docs = []
-        for id, vector, metadata in zip(ids, vectors, metadata_dict):
-            docs.append(
-                {
-                    "id": str(id),
-                    "values": vector,
-                    "metadata": metadata,
-                }
-            )
-
-        if slice > 0:
-            docs = docs[slice:]
-
-        print(f"Uploading {len(docs)}")
-        self.vector_store.upsert(docs, batch_size=50)
-        self.logger.info(
-            f"Uploaded {len(docs)} documents to Pinecone index: {self.index_name}"
-        )
 
     def _stage_documents(self, docs: list[Document]) -> None:
         self._log_documents(docs)
@@ -572,67 +489,3 @@ class BaseLoad:
         if not staging_path.exists():
             raise FileNotFoundError(f"No staging file found at {staging_path}")
         return pd.read_parquet(staging_path)
-
-    def get_all_artifacts_merged(self) -> pd.DataFrame:
-        """Get all artifacts merged into a single dataframe."""
-        load_dir = self.config.root_dir / "load"
-
-        # Find all staging.parquet files
-        staging_files = list(load_dir.glob("*/staging.parquet"))
-        if not staging_files:
-            raise FileNotFoundError("No staging.parquet files found in load directory")
-
-        dfs = []
-        for file_path in staging_files:
-            try:
-                df = self._parquet_to_df(file_path)
-                dfs.append(df)
-            except Exception as e:
-                self.logger.error(f"Error loading {file_path}: {e}")
-                continue
-
-        if not dfs:
-            raise ValueError("No valid dataframes found to merge")
-
-        return pd.concat(dfs)
-
-    def validate_pinecone_index(self) -> None:
-        """Validate that all staging IDs exist in the Pinecone index."""
-        self._initialize_pinecone_index()
-        if not self.vector_store:
-            raise ValueError("Vector store initialization failed")
-
-        vector_store: Index = self.vector_store
-
-        vector_store_staging_data = self.get_all_artifacts_merged()
-        staging_ids = vector_store_staging_data.index.tolist()
-
-        # Get all IDs from Pinecone using pagination
-        pinecone_ids = []
-
-        try:
-            for ids in vector_store.list():
-                pinecone_ids.extend(ids)
-
-            # Compare the sets
-            missing_from_pinecone = set(staging_ids) - set(pinecone_ids)
-            extra_in_pinecone = set(pinecone_ids) - set(staging_ids)
-
-            if missing_from_pinecone or extra_in_pinecone:
-                print(
-                    f"Index validation failed:\n"
-                    f"IDs missing from Pinecone: {len(missing_from_pinecone)}\n"
-                    f"Extra IDs in Pinecone: {len(extra_in_pinecone)}"
-                )
-
-            # compare lengths
-            if len(staging_ids) != len(pinecone_ids):
-                print(
-                    f"Index validation failed:\n"
-                    f"Staging IDs: {len(staging_ids)}\n"
-                    f"Pinecone IDs: {len(pinecone_ids)}"
-                )
-
-        except Exception as e:
-            self.logger.error(f"Error validating Pinecone index: {e}")
-            raise

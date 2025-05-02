@@ -96,7 +96,7 @@ class BaseTransform(ABC):
         if isinstance(file_path, Path):
             file_path = self.get_stem(file_path)
 
-        columns["id"] = str(uuid.uuid4()) if doc_id is None else doc_id
+        columns["id"] = doc_id
         columns["source_file"] = file_path
         columns["page_content"] = page_content
         columns["subject_matter"] = self.subject_matter

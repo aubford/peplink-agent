@@ -79,7 +79,7 @@ class BatchChatOpenAI(BaseChatModel):
         with open(self.batch_manager.file_name, "a") as f:
             f.write(json.dumps(task) + "\n")
         generation = ChatGeneration(
-            message=BaseMessage(type="ai", content=messages_hash)
+            message=BaseMessage(type="ai", content=task["custom_id"])
         )
         return ChatResult(generations=[generation])
 
