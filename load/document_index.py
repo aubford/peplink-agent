@@ -16,6 +16,7 @@ from util.util_main import (
 import pandas as pd
 import tiktoken
 from pathlib import Path
+import json
 
 
 def clean_text_for_inference(text: str) -> str:
@@ -42,9 +43,6 @@ def clean_text_for_inference(text: str) -> str:
     return text
 
 
-this_file = Path(__file__).parent
-
-
 class DocumentIndex:
     """
     Handle any processing that needs to be done after the original load the current
@@ -52,7 +50,8 @@ class DocumentIndex:
     going forward.
     """
 
-    document_index_path = this_file / "document_index.parquet"
+    this_dir = Path(__file__).parent
+    document_index_path = this_dir / "document_index.parquet"
 
     def __init__(self):
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -111,8 +110,24 @@ class DocumentIndex:
 
         # Save with columns in alphabetical order
         df = df[sorted(df.columns)]
+        df = df.drop(columns=["id"])
         to_serialized_parquet(df, self.document_index_path)
 
-
-if __name__ == "__main__":
-    DocumentIndex().create()
+    @classmethod
+    def get_document_index(cls) -> pd.DataFrame:
+        df = pd.read_parquet(cls.document_index_path)
+        # fill missing technical summaries embeddings in HTML elements with page_content embedding
+        # this is also reflected in the vector store
+        for col in [
+            "page_content_embedding",
+            "technical_summary_embedding",
+            "primary_content_embedding",
+            "title_embedding",
+            "entities",
+            "entities_pre_normalization",
+            "themes",
+        ]:
+            df[col] = df[col].apply(
+                lambda x: json.loads(x) if isinstance(x, str) else x
+            )
+        return df

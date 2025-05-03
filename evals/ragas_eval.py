@@ -29,8 +29,7 @@ import json
 from typing import cast, Any
 
 from dotenv import load_dotenv
-from evals.evals_utils import kg_input_data_path
-from load.post_process import DataIndex
+from load.document_index import DocumentIndex
 
 load_dotenv()
 
@@ -73,9 +72,9 @@ class RagasEval:
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
         )
         # Merge nodes_df with kg_input_data.parquet on 'id'
-        kg_input_df = pd.read_parquet(DataIndex.output_path)
+        document_index = DocumentIndex.get_document_index()
         nodes_df = pd.merge(
-            nodes_df, kg_input_df, on="id", how="left", suffixes=("", "_kg")
+            nodes_df, document_index, on="id", how="left", suffixes=("", "_di")
         )
         self.runs_dir = evals_dir / "runs"
         self.output_dir = self.runs_dir / run_name
@@ -163,9 +162,22 @@ class RagasEval:
                 ].iterrows()
             ]
         )
+
+        def build_embeddings_tuple(row: pd.Series) -> tuple:
+            if row["technical_summary_embedding"] is not None:
+                return (
+                    row["page_content_embedding"],
+                    row["technical_summary_embedding"],
+                    row["primary_content_embedding"],
+                )
+            return (
+                row["page_content_embedding"],
+                row["primary_content_embedding"],
+            )
+
         df["reference_contexts_embeddings"] = df["node_ids"].apply(
             lambda cluster_node_ids: [
-                (row["page_content_embeddings"], row["technical_summary_embedding"])
+                build_embeddings_tuple(row)
                 for _, row in nodes_df[
                     nodes_df["node_id"].isin(cluster_node_ids)
                 ].iterrows()
