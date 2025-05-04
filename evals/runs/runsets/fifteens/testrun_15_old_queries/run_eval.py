@@ -10,8 +10,7 @@ if __name__ == "__main__":
         eval_llm="mini",
         eval_boost_llm="mini",
         query_column="query_original",
-        sample=15,
-        should_create_batch_job=False
+        sample=(16, 18),
     )
     # asyncio.run(ragas_eval.generate_batchfiles())
     asyncio.run(ragas_eval.evaluate_rag())

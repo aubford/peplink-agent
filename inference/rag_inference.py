@@ -81,7 +81,7 @@ class RagInference:
                     document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
                 )
             )
-        ).with_config({"run_name": "rag_inference", "callbacks": [self.minimal_tracer]})
+        ).with_config({"run_name": "rag_inference"})
 
         self.chat_history: list[tuple[str, str]] = []
 

@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+from typing import Any
+
 from pydantic import BaseModel, Field
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
@@ -37,7 +39,7 @@ class MockExam:
         llm_model: str,
         output_dir: Path,
         should_create_batch_job: bool = True,
-        sample: bool | int = False,
+        sample: Any = False,
     ):
         self.output_dir = output_dir
         runs_dir = evals_dir / "runs"

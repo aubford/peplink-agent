@@ -26,10 +26,13 @@ from evals.take_mock_exam import MockExam
 import pandas as pd
 import os
 import json
-from typing import cast, Any
+from datetime import datetime
+import shutil
+from typing import cast, Any, Literal
 
 from dotenv import load_dotenv
 from load.document_index import DocumentIndex
+from util.util_main import handle_file_exists
 
 load_dotenv()
 
@@ -40,6 +43,7 @@ evals_dir = Path(__file__).parent
 
 
 class RagasEval:
+
     def __init__(
         self,
         run_name: str,
@@ -48,14 +52,14 @@ class RagasEval:
         eval_boost_llm: str,
         query_column: str = "query",
         testset_name: str = MAIN_TESTSET_NAME,
-        sample: bool | int = False,
+        sample: tuple | Literal[False] = False,
         test_run: bool = False,
         should_create_batch_job: bool = True,
         # Faithfulness: response -> context (do the claims in answer come from context)
         # This metric is expensive and w/ modern LLMs faithfulness is almost always near 100%
         # unless there is a major prompting issue.  Turn this on occasionally to check, but
         # otherwise leave it off.
-        with_faithfulness: bool = False,
+        with_faithfulness: bool = True,
     ):
         self.with_faithfulness = with_faithfulness
         self.query_column = query_column
@@ -66,8 +70,8 @@ class RagasEval:
         generated_testset_df = pd.read_json(
             evals_dir / "testsets" / testset_name / "generated_testset.json"
         )
-        if sample and isinstance(sample, int):
-            generated_testset_df = generated_testset_df[:sample]
+        if sample:
+            generated_testset_df = generated_testset_df[sample[0] : sample[1]]
         nodes_df = pd.read_parquet(
             evals_dir / "testsets" / testset_name / "__nodes.parquet"
         )
@@ -79,13 +83,8 @@ class RagasEval:
         self.runs_dir = evals_dir / "runs"
         self.output_dir = self.runs_dir / run_name
         self.output_file_path = self.output_dir / f"{run_name}.parquet"
-
-        # Check if output file already exists and raise error if it does
-        if os.path.exists(self.output_file_path):
-            raise FileExistsError(
-                f"Output file already exists: {self.output_file_path}. "
-                "Please use a different run_name or remove the existing file."
-            )
+        # If output file already exists, rename it with a timestamp
+        handle_file_exists(self.output_file_path, should_raise=False)
 
         self.test_set: Testset = self.init_testset(generated_testset_df, nodes_df)
 
@@ -140,7 +139,7 @@ class RagasEval:
                 Inference LLM: {inference_llm}
                 Eval LLM: {eval_llm}
                 Eval boost LLM: {eval_boost_llm}
-                Sample size: {sample or "full"}
+                Sample: {str(sample[0]) + ", " + str(sample[1]) if sample else "full"}
                 Datetime: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 """
             ).strip(),
@@ -305,30 +304,30 @@ class RagasEval:
         evaluation_dataset = self.test_set.to_evaluation_dataset()
         metrics = [
             # use HHEM-Open hallucination detection classifier model
-            FaithfulnesswithHHEM(),
+            # FaithfulnesswithHHEM(batch_size=2),
             # response -> question (does the answer address the entire question)
             # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
-            ResponseRelevancy(),
-            ResponseRelevancyDiverse(llm=self.boost_llm),
+            # ResponseRelevancy(),
+            # ResponseRelevancyDiverse(llm=self.boost_llm),
             # context -> reference contexts (do the contexts match the reference contexts)
             # note that you can't compare this across context types! (e.g. summaries vs. full docs)
             # we care much more about recall since there are plenty of relevant docs that may not have been
             # part of the KG cluster used to create this sample.
-            EmbeddingContextPrecision(),
-            NonLLMContextPrecisionWithReference(),
-            EmbeddingContextRecall(),
-            NonLLMContextRecall(),
+            # EmbeddingContextPrecision(),
+            # NonLLMContextPrecisionWithReference(),
+            # EmbeddingContextRecall(),
+            # NonLLMContextRecall(),
             # response -> reference answer (ground truth)
             FactualCorrectness(mode="recall"),
-            AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
+            # AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
             # less accurate metrics
-            BleuScore(),
-            RougeScore(),
+            # BleuScore(),
+            # RougeScore(),
         ]
 
-        if self.with_faithfulness:
-            # response -> context (do the claims in answer come from context)
-            metrics.append(Faithfulness())
+        # if self.with_faithfulness:
+        #     # response -> context (do the claims in answer come from context)
+        #     metrics.append(Faithfulness())
 
         eval_result = evaluate(
             dataset=evaluation_dataset,
@@ -337,6 +336,13 @@ class RagasEval:
         )
 
         eval_result_df = eval_result.to_pandas()
+        eval_result_df["reference_contexts"] = eval_result_df[
+            "reference_contexts"
+        ].apply(lambda x: json.dumps([doc[0] for doc in x]))
+        eval_result_df["retrieved_contexts"] = eval_result_df[
+            "retrieved_contexts"
+        ].apply(lambda x: json.dumps(x))
+        eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
 
         # Save the full results
         eval_result_df.to_parquet(self.output_file_path)

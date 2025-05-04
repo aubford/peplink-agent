@@ -4,6 +4,7 @@ from langchain_core.documents import Document
 import pandas as pd
 from pathlib import Path
 import json
+from datetime import datetime
 
 import tiktoken
 from itertools import accumulate
@@ -223,3 +224,17 @@ def get_chunk_size(texts: list[str], token_limit: int = 300_000) -> int:
         if running_sum >= token_limit:
             return i - 1
     return len(texts)
+
+
+def handle_file_exists(path: Path, should_raise: bool = False) -> Path | None:
+    """
+    If the given file exists, rename it by appending the current time (HH_MM) to its stem.
+    Returns the new backup path if the file was renamed, otherwise None.
+    """
+    if path.exists():
+        if should_raise:
+            raise FileExistsError(f"File already exists: {path}")
+        backup_path = path.with_stem(f"{path.stem}__{datetime.now().strftime('%H_%M')}")
+        path.rename(backup_path)
+        return backup_path
+    return None
