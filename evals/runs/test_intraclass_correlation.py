@@ -24,6 +24,33 @@ for run_dir in TEST_RUN_DIRS:
     test_run_parquet_files[run_dir] = parquet_files
 
 
+def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
+    """
+    Computes the ratio of the std dev of per-sample volatility to inter-sample score variation.
+    This is a measure of how much the instability of the judge varies across samples.
+    It is measured relative to the variation in samples similarly to ICC.
+
+    Parameters
+    ----------
+    df_runs : pd.DataFrame
+        Rows = samples, columns = repeated scores from the judge
+
+    Returns
+    -------
+    float
+        Volatility dispersion ratio (VDR)
+    """
+    sample_sds = df_runs.std(axis=1)
+    dispersion_of_volatility = sample_sds.std()
+    inter_sample_sd = df_runs.mean(axis=1).std()
+
+    return (
+        dispersion_of_volatility / inter_sample_sd
+        if inter_sample_sd > 0
+        else float("inf")
+    )
+
+
 def calculate_icc_for_column(dfs: List[pd.DataFrame], column: str) -> float:
     """
     Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge runs
@@ -66,29 +93,19 @@ def calculate_icc_for_column(dfs: List[pd.DataFrame], column: str) -> float:
         raise ValueError("ICC2 value not found in the result.")
 
 
-def get_metric_columns(dfs: list[pd.DataFrame]) -> set[str]:
-    """
-    Identify metric columns as all columns of float dtype present in all DataFrames.
-    Returns the intersection of float columns across all DataFrames.
-    """
-    float_cols_sets = [set(df.select_dtypes(include=["float"]).columns) for df in dfs]
-    if not float_cols_sets:
-        return set()
-    return set.intersection(*float_cols_sets)
-
-
 def missing_values_report(
     dfs: list[pd.DataFrame], parquet_files: list[Path], run_dir: str
 ) -> None:
     """
-    Print a detailed report of missing values for all float columns in the provided DataFrames.
+    Print a detailed report of missing values for all columns in the provided DataFrames.
     Warn if missing values are found, but do not raise an error.
     """
-    float_cols_sets = [set(df.select_dtypes(include=["float"]).columns) for df in dfs]
-    float_cols = set.intersection(*float_cols_sets) if float_cols_sets else set()
+    if not dfs:
+        return
+    metric_cols = dfs[0].columns
     missing_values = []
     for rater_idx, df in enumerate(dfs):
-        for col in float_cols:
+        for col in metric_cols:
             missing = df[col].isna()
             if missing.any():
                 for row_idx in df.index[missing]:
@@ -118,12 +135,13 @@ def missing_values_report(
 
 def calculate_icc_for_all_metrics(dfs: list[pd.DataFrame]) -> dict[str, float]:
     """
-    Calculate ICC for each metric column (float columns) across the provided DataFrames.
+    Calculate ICC for each metric column (all columns) across the provided DataFrames.
     Returns a dictionary mapping metric column names to their ICC values.
     """
-    metric_columns = get_metric_columns(dfs)
+    if not dfs:
+        return {}
     icc_results: dict[str, float] = {}
-    for col in metric_columns:
+    for col in dfs[0].columns:
         try:
             icc = calculate_icc_for_column(dfs, col)
             icc_results[col] = round(icc, 4)
@@ -134,19 +152,43 @@ def calculate_icc_for_all_metrics(dfs: list[pd.DataFrame]) -> dict[str, float]:
 
 if __name__ == "__main__":
     results = []
+    vdr_results = []
     for run_dir, parquet_files in test_run_parquet_files.items():
         print(f"\n=== ICC Results for Test Run: {run_dir} ===")
-        dfs = load_parquet_files(parquet_files)
-        missing_values_report(dfs, parquet_files, run_dir)
+        raw_dfs = [
+            df.select_dtypes(include=["float"])
+            for df in load_parquet_files(parquet_files)
+        ]
+        missing_values_report(raw_dfs, parquet_files, run_dir)
+        # Impute missing values: fill NA in each row with the mean of that row
+        dfs = [df.fillna(df.mean(axis=1), axis=0) for df in raw_dfs]
         icc_results = calculate_icc_for_all_metrics(dfs)
         icc_results = {"run_dir": run_dir, **icc_results}
         results.append(icc_results)
 
-    results_df = pd.DataFrame(results)
+        # Volatility Dispersion Ratio calculation
+        vdr_row: dict[str, float | str] = {"run_dir": run_dir}
+        for col in dfs[0].columns:
+            # Build a DataFrame where rows are samples, columns are raters (runs)
+            col_matrix = pd.DataFrame({i: df[col] for i, df in enumerate(dfs)})
+            vdr_row[col] = round(volatility_dispersion_ratio(col_matrix), 4)
+        vdr_results.append(vdr_row)
 
-    # Add a row with the mean of each column
+    results_df = pd.DataFrame(results)
+    vdr_results_df = pd.DataFrame(vdr_results)
+
+    # Add a row with the mean of each column for ICC
     mean_row = results_df.drop(columns=["run_dir"]).mean(numeric_only=True)
     mean_row["run_dir"] = "mean"
     results_df = pd.concat([results_df, pd.DataFrame([mean_row])], ignore_index=True)
 
+    # Add a row with the mean of each column for VDR
+    vdr_mean_row = vdr_results_df.drop(columns=["run_dir"]).mean(numeric_only=True)
+    vdr_mean_row_dict = vdr_mean_row.to_dict()
+    vdr_mean_row_dict["run_dir"] = "mean"
+    vdr_results_df = pd.concat(
+        [vdr_results_df, pd.DataFrame([vdr_mean_row_dict])], ignore_index=True
+    )
+
     results_df.to_parquet("icc_results.parquet")
+    vdr_results_df.to_parquet("vdr_results.parquet")
