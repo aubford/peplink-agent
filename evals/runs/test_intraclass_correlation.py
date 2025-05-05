@@ -1,7 +1,6 @@
 from util.document_utils import get_all_parquet_in_dir, load_parquet_files
 import pandas as pd
 from pathlib import Path
-from typing import List, cast
 import pingouin as pg
 
 # List of test run directories
@@ -51,7 +50,7 @@ def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
     )
 
 
-def calculate_icc_for_column(dfs: List[pd.DataFrame], column: str) -> float:
+def calculate_icc_for_column(dfs: list[pd.DataFrame], column: str) -> float:
     """
     Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge runs
     using the same testset/testrun (including the same inference response/context results). This measures how
@@ -70,21 +69,20 @@ def calculate_icc_for_column(dfs: List[pd.DataFrame], column: str) -> float:
     long_data = []
     for rater_idx, df in enumerate(dfs):
         for subject_idx, value in enumerate(df[column].values):
-            if pd.notna(value):
-                long_data.append(
-                    {
-                        "targets": subject_idx,
-                        "raters": rater_idx,
-                        "scores": value,
-                    }
-                )
+            assert pd.notna(value)
+            long_data.append(
+                {
+                    "targets": subject_idx,
+                    "raters": rater_idx,
+                    "scores": value,
+                }
+            )
     long_df = pd.DataFrame(long_data)
     icc_result = pg.intraclass_corr(
         data=long_df,
         targets="targets",
         raters="raters",
         ratings="scores",
-        nan_policy="omit",
     )
     icc2_row = icc_result[icc_result["Type"] == "ICC2"]
     if not icc2_row.empty:
@@ -160,8 +158,8 @@ if __name__ == "__main__":
             for df in load_parquet_files(parquet_files)
         ]
         missing_values_report(raw_dfs, parquet_files, run_dir)
-        # Impute missing values: fill NA in each row with the mean of that row
-        dfs = [df.fillna(df.mean(axis=1), axis=0) for df in raw_dfs]
+        # Impute missing values: fill NA in each column with the mean of that column
+        dfs = [df.fillna(df.mean(axis=0), axis=0) for df in raw_dfs]
         icc_results = calculate_icc_for_all_metrics(dfs)
         icc_results = {"run_dir": run_dir, **icc_results}
         results.append(icc_results)
