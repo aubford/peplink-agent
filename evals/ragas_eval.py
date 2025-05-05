@@ -233,7 +233,7 @@ class RagasEval:
                 eval_sample.response = cast(str, result_row["result"])
                 eval_sample.retrieved_contexts = cast(list[str], result_row["context"])
             except Exception as e:
-                print(f"Error processing result for query {eval_sample.id}: {e}")
+                print(f"Error processing result for query {eval_sample.id}: {e} ")
                 raise
 
     async def generate_batchfiles(self):
@@ -307,22 +307,22 @@ class RagasEval:
             # FaithfulnesswithHHEM(batch_size=2),
             # response -> question (does the answer address the entire question)
             # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
-            # ResponseRelevancy(),
-            # ResponseRelevancyDiverse(llm=self.boost_llm),
+            ResponseRelevancy(),
+            ResponseRelevancyDiverse(llm=self.boost_llm),
             # context -> reference contexts (do the contexts match the reference contexts)
             # note that you can't compare this across context types! (e.g. summaries vs. full docs)
             # we care much more about recall since there are plenty of relevant docs that may not have been
             # part of the KG cluster used to create this sample.
-            # EmbeddingContextPrecision(),
-            # NonLLMContextPrecisionWithReference(),
-            # EmbeddingContextRecall(),
-            # NonLLMContextRecall(),
+            EmbeddingContextPrecision(),
+            NonLLMContextPrecisionWithReference(),
+            EmbeddingContextRecall(),
+            NonLLMContextRecall(),
             # response -> reference answer (ground truth)
             FactualCorrectness(mode="recall"),
-            # AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
+            AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
             # less accurate metrics
-            # BleuScore(),
-            # RougeScore(),
+            BleuScore(),
+            RougeScore(),
         ]
 
         # if self.with_faithfulness:
@@ -335,13 +335,24 @@ class RagasEval:
             llm=self.eval_llm,
         )
 
+        doc_separator = "\n\n" + "-" * 20 + "\n\n"
         eval_result_df = eval_result.to_pandas()
         eval_result_df["reference_contexts"] = eval_result_df[
             "reference_contexts"
-        ].apply(lambda x: json.dumps([doc[0] for doc in x]))
+        ].apply(lambda x: doc_separator.join([doc[0] for doc in x]))
         eval_result_df["retrieved_contexts"] = eval_result_df[
             "retrieved_contexts"
-        ].apply(lambda x: json.dumps(x))
+        ].apply(lambda x: doc_separator.join(x))
+        eval_result_df["reference_answer_statements_recall"] = eval_result_df[
+            "reference_answer_statements_recall"
+        ].apply(
+            lambda x: doc_separator.join(
+                [
+                    f"Statement: {doc["statement"]} - {"✅" if doc["verdict"] else "❌"}\n\nReason: {doc["reason"]}"
+                    for doc in x
+                ]
+            )
+        )
         eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
 
         # Save the full results
