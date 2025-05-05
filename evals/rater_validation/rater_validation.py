@@ -2,6 +2,9 @@ from util.document_utils import get_all_parquet_in_dir, load_parquet_files
 import pandas as pd
 from pathlib import Path
 import pingouin as pg
+import numpy as np
+from scipy.stats import pearsonr
+from itertools import combinations
 
 # List of test run directories
 TEST_RUN_DIRS: list[str] = [
@@ -198,6 +201,48 @@ def create_faithfulness_parquet(all_dfs_by_run: dict[str, list[pd.DataFrame]]) -
     df.to_parquet("faithfulness.parquet")
 
 
+def get_column_run_means(
+    all_dfs_by_run: dict[str, list[pd.DataFrame]], column: str
+) -> pd.DataFrame:
+    """
+    Calculate the per-sample mean for a given column across all runs per run_dir.
+    """
+    response_relevancy_means = {}
+    for run_dir, df_list in all_dfs_by_run.items():
+        series = [df[column] for df in df_list]
+        means = pd.concat(series, axis=1).mean(axis=1)
+        response_relevancy_means[run_dir.replace("test_eval_consistency_", "")] = means
+    df_response_relevancy = pd.DataFrame(response_relevancy_means)
+    return df_response_relevancy
+
+
+def column_correlation(
+    all_dfs_by_run: dict[str, list[pd.DataFrame]], column_a: str, column_b: str
+) -> None:
+    """
+    Calculate the Pearson correlation and p-value between all pairwise per-sample deltas of two columns
+    across run_dir runs. This is order-invariant and correct for unordered runs.
+    Returns (correlation, p-value).
+    """
+    a_means_df = get_column_run_means(all_dfs_by_run, column_a)
+    b_means_df = get_column_run_means(all_dfs_by_run, column_b)
+
+    a_means = a_means_df.values  # shape: (n_samples, n_runs)
+    b_means = b_means_df.values
+
+    n_samples, n_runs = a_means.shape
+    a_deltas = []
+    b_deltas = []
+
+    for i in range(n_samples):
+        for j, k in combinations(range(n_runs), 2):
+            a_deltas.append(a_means[i, k] - a_means[i, j])
+            b_deltas.append(b_means[i, k] - b_means[i, j])
+
+    corr, p = pearsonr(a_deltas, b_deltas)
+    print(f"Correlation between {column_a} and {column_b}: {corr:.4f} (p={p:.4g})")
+
+
 if __name__ == "__main__":
     results = []
     vdr_results = []
@@ -207,6 +252,10 @@ if __name__ == "__main__":
         run_dir: load_parquet_files(parquet_files)
         for run_dir, parquet_files in test_run_parquet_files.items()
     }
+    column_correlation(all_dfs_by_run, "answer_relevancy", "answer_relevancy_diverse")
+    column_correlation(
+        all_dfs_by_run, "factual_correctness(mode=recall)", "nv_accuracy"
+    )
     for run_dir, parquet_files in test_run_parquet_files.items():
         print(f"\n=== Results for Test Run: {run_dir} ===")
         dfs = all_dfs_by_run[run_dir]
