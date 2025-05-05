@@ -154,7 +154,17 @@ if __name__ == "__main__":
     for run_dir, parquet_files in test_run_parquet_files.items():
         print(f"\n=== ICC Results for Test Run: {run_dir} ===")
         raw_dfs = [
-            df.select_dtypes(include=["float"])
+            df[
+                [
+                    col
+                    for col in df.columns
+                    if (
+                        "relevancy" in col
+                        or "factual_correctness" in col
+                        or "accuracy" in col
+                    )
+                ]
+            ]
             for df in load_parquet_files(parquet_files)
         ]
         missing_values_report(raw_dfs, parquet_files, run_dir)
