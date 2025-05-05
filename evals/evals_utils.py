@@ -140,9 +140,6 @@ def extract_relationships_to_file(input_path: Path, output_path: Path) -> None:
             or dict_meta_prop(target_node, "parent_doc_id"),
             "source_title": dict_meta_prop(source_node, "title"),
             "target_title": dict_meta_prop(target_node, "title"),
-            # "id": rel["id"],
-            # "source_id": rel["source"],
-            # "target_id": rel["target"],
         }
 
         if display_type == "ENTITIES OVERLAP SCORE":
