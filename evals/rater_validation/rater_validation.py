@@ -231,7 +231,7 @@ def print_regression_summary(
     slope = to_scalar(reg.coef_)
     intercept = to_scalar(reg.intercept_)
     print(
-        f"\nRegression summary: Δ{column_a} = {slope:.4f} * Δ{column_b} + {intercept:.4f} (R²={r2:.4f})\n"
+        f"\nRegression summary: Δ{column_a} = {slope:.4f} * Δ{column_b} + {intercept:.4f} (R²={r2:.6f})\n"
     )
 
 
