@@ -183,21 +183,33 @@ def write_results_parquet(results: list[dict[str, float | str]], filename: str) 
     df_with_mean.to_parquet(filename)
 
 
-def create_faithfulness_parquet(dfs: list[pd.DataFrame]) -> None:
+def create_faithfulness_parquet(all_dfs_by_run: dict[str, list[pd.DataFrame]]) -> None:
     """
-    Simply concat the faithfulness columns across all runs. It's impractical to run
-    metrics on these.
+    Simply concat the faithfulness columns across all runs for inspection. It's impractical
+    to run metrics on these.
     """
-    ...
+    columns = {}
+    for run_dir, df_list in all_dfs_by_run.items():
+        for i, df in enumerate(df_list):
+            col_label = f"{run_dir.replace("test_eval_consistency_", "")}_{i}"
+            columns[col_label] = df["faithfulness"].reset_index(drop=True)
+
+    df = pd.DataFrame(columns)
+    df.to_parquet("faithfulness.parquet")
 
 
 if __name__ == "__main__":
     results = []
     vdr_results = []
     faithfulness_cols = []
+    # Load all dfs for all run_dirs before the loop
+    all_dfs_by_run: dict[str, list[pd.DataFrame]] = {
+        run_dir: load_parquet_files(parquet_files)
+        for run_dir, parquet_files in test_run_parquet_files.items()
+    }
     for run_dir, parquet_files in test_run_parquet_files.items():
         print(f"\n=== Results for Test Run: {run_dir} ===")
-        dfs = load_parquet_files(parquet_files)
+        dfs = all_dfs_by_run[run_dir]
         metric_dfs = get_metric_dfs(dfs, parquet_files, run_dir)
         icc_results = calculate_icc_for_all_metrics(metric_dfs, run_dir)
         results.append(icc_results)
@@ -210,6 +222,6 @@ if __name__ == "__main__":
             vdr_row[col] = round(volatility_dispersion_ratio(col_matrix), 4)
         vdr_results.append(vdr_row)
 
-        create_faithfulness_parquet(dfs)
+    create_faithfulness_parquet(all_dfs_by_run)
     write_results_parquet(results, "icc_results.parquet")
     write_results_parquet(vdr_results, "vdr_results.parquet")
