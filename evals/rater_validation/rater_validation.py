@@ -150,7 +150,9 @@ def calculate_icc_for_all_metrics(
     return {"run_dir": run_dir, **icc_results}
 
 
-def get_metric_dfs(parquet_files: list[Path], run_dir: str) -> list[pd.DataFrame]:
+def get_metric_dfs(
+    dfs: list[pd.DataFrame], parquet_files: list[Path], run_dir: str
+) -> list[pd.DataFrame]:
     raw_dfs = [
         df[
             [
@@ -163,7 +165,7 @@ def get_metric_dfs(parquet_files: list[Path], run_dir: str) -> list[pd.DataFrame
                 )
             ]
         ]
-        for df in load_parquet_files(parquet_files)
+        for df in dfs
     ]
     missing_values_report(raw_dfs, parquet_files, run_dir)
     # Impute missing values: fill NA in each column with the mean of that column
@@ -195,18 +197,19 @@ if __name__ == "__main__":
     faithfulness_cols = []
     for run_dir, parquet_files in test_run_parquet_files.items():
         print(f"\n=== Results for Test Run: {run_dir} ===")
-        dfs = get_metric_dfs(parquet_files, run_dir)
-        icc_results = calculate_icc_for_all_metrics(dfs, run_dir)
+        dfs = load_parquet_files(parquet_files)
+        metric_dfs = get_metric_dfs(dfs, parquet_files, run_dir)
+        icc_results = calculate_icc_for_all_metrics(metric_dfs, run_dir)
         results.append(icc_results)
 
         # Volatility Dispersion Ratio calculation
         vdr_row: dict[str, float | str] = {"run_dir": run_dir}
-        for col in dfs[0].columns:
+        for col in metric_dfs[0].columns:
             # Build a DataFrame where rows are samples, columns are raters (runs)
-            col_matrix = pd.concat([df[col] for df in dfs], axis=1)
+            col_matrix = pd.concat([df[col] for df in metric_dfs], axis=1)
             vdr_row[col] = round(volatility_dispersion_ratio(col_matrix), 4)
         vdr_results.append(vdr_row)
 
-    create_faithfulness_parquet(dfs)
+        create_faithfulness_parquet(dfs)
     write_results_parquet(results, "icc_results.parquet")
     write_results_parquet(vdr_results, "vdr_results.parquet")
