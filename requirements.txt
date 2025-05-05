@@ -56,3 +56,4 @@ instructor~=1.7.2
 matplotlib
 flashtext~=2.7
 pyvis
+pingouin
