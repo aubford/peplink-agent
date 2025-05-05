@@ -5,6 +5,7 @@ import pingouin as pg
 import numpy as np
 from scipy.stats import pearsonr
 from itertools import combinations
+from sklearn.linear_model import LinearRegression
 
 # List of test run directories
 TEST_RUN_DIRS: list[str] = [
@@ -216,13 +217,31 @@ def get_column_run_means(
     return df_response_relevancy
 
 
+def print_regression_summary(
+    a_deltas: np.ndarray, b_deltas: np.ndarray, column_a: str, column_b: str
+) -> None:
+    """
+    Print a regression summary for the deltas between two columns: slope, intercept, and R^2.
+    """
+    a_deltas = a_deltas.reshape(-1, 1)
+    b_deltas = b_deltas.reshape(-1, 1)
+
+    reg = LinearRegression().fit(b_deltas, a_deltas)
+    r2 = reg.score(b_deltas, a_deltas)
+    slope = to_scalar(reg.coef_)
+    intercept = to_scalar(reg.intercept_)
+    print(
+        f"\nRegression summary: Δ{column_a} = {slope:.4f} * Δ{column_b} + {intercept:.4f} (R²={r2:.4f})\n"
+    )
+
+
 def column_correlation(
     all_dfs_by_run: dict[str, list[pd.DataFrame]], column_a: str, column_b: str
 ) -> None:
     """
     Calculate the Pearson correlation and p-value between all pairwise per-sample deltas of two columns
     across run_dir runs. This is order-invariant and correct for unordered runs.
-    Returns (correlation, p-value).
+    Also prints a regression summary for the deltas.
     """
     a_means_df = get_column_run_means(all_dfs_by_run, column_a)
     b_means_df = get_column_run_means(all_dfs_by_run, column_b)
@@ -239,8 +258,15 @@ def column_correlation(
             a_deltas.append(a_means[i, k] - a_means[i, j])
             b_deltas.append(b_means[i, k] - b_means[i, j])
 
+    a_deltas = np.array(a_deltas)
+    b_deltas = np.array(b_deltas)
     corr, p = pearsonr(a_deltas, b_deltas)
-    print(f"Correlation between {column_a} and {column_b}: {corr:.4f} (p={p:.4g})")
+    print(f"\nCorrelation between {column_a} and {column_b}: {corr:.4f} (p={p:.4g})\n")
+    print_regression_summary(a_deltas, b_deltas, column_a, column_b)
+
+
+def to_scalar(x):
+    return x.item() if hasattr(x, "item") else x
 
 
 if __name__ == "__main__":
@@ -252,12 +278,13 @@ if __name__ == "__main__":
         run_dir: load_parquet_files(parquet_files)
         for run_dir, parquet_files in test_run_parquet_files.items()
     }
+    # check that metrics that are measuring the same thing actually move together
+    # when run against different inference runs.
     column_correlation(all_dfs_by_run, "answer_relevancy", "answer_relevancy_diverse")
     column_correlation(
         all_dfs_by_run, "factual_correctness(mode=recall)", "nv_accuracy"
     )
     for run_dir, parquet_files in test_run_parquet_files.items():
-        print(f"\n=== Results for Test Run: {run_dir} ===")
         dfs = all_dfs_by_run[run_dir]
         metric_dfs = get_metric_dfs(dfs, parquet_files, run_dir)
         icc_results = calculate_icc_for_all_metrics(metric_dfs, run_dir)
