@@ -27,7 +27,6 @@ import pandas as pd
 import os
 import json
 from datetime import datetime
-import shutil
 from typing import cast, Any, Literal
 
 from dotenv import load_dotenv
@@ -325,9 +324,9 @@ class RagasEval:
             RougeScore(),
         ]
 
-        # if self.with_faithfulness:
-        #     # response -> context (do the claims in answer come from context)
-        #     metrics.append(Faithfulness())
+        if self.with_faithfulness:
+            # response -> context (do the claims in answer come from context)
+            metrics.append(Faithfulness())
 
         eval_result = evaluate(
             dataset=evaluation_dataset,
