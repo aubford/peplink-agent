@@ -25,9 +25,13 @@ for run_dir in TEST_RUN_DIRS:
 
 def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
     """
-    Computes the ratio of the std dev of per-sample volatility to inter-sample score variation.
-    This is a measure of how much the instability of the judge varies across samples.
-    It is measured relative to the variation in samples similarly to ICC.
+    Computes the ratio of the std dev of per-sample volatility (std dev of std dev) to
+    inter-sample score variation. This is a measure of how much the instability of the
+    judge varies across samples. It is measured relative to the variation in samples
+    similarly to ICC. Informs whether the judge is especially inconsistent on some queries
+    while being stable on others.
+
+    Apparently this isn't a standard metric but it produced interesting results...
 
     Parameters
     ----------
@@ -43,11 +47,7 @@ def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
     dispersion_of_volatility = sample_sds.std()
     inter_sample_sd = df_runs.mean(axis=1).std()
 
-    return (
-        dispersion_of_volatility / inter_sample_sd
-        if inter_sample_sd > 0
-        else float("inf")
-    )
+    return dispersion_of_volatility / inter_sample_sd
 
 
 def calculate_icc_for_column(dfs: list[pd.DataFrame], column: str) -> float:
@@ -131,7 +131,9 @@ def missing_values_report(
         )
 
 
-def calculate_icc_for_all_metrics(dfs: list[pd.DataFrame]) -> dict[str, float]:
+def calculate_icc_for_all_metrics(
+    dfs: list[pd.DataFrame], run_dir: str
+) -> dict[str, float | str]:
     """
     Calculate ICC for each metric column (all columns) across the provided DataFrames.
     Returns a dictionary mapping metric column names to their ICC values.
@@ -145,58 +147,66 @@ def calculate_icc_for_all_metrics(dfs: list[pd.DataFrame]) -> dict[str, float]:
             icc_results[col] = round(icc, 4)
         except Exception as e:
             print(f"Failed to calculate ICC for column '{col}': {e}")
-    return icc_results
+    return {"run_dir": run_dir, **icc_results}
+
+
+def get_metric_dfs(parquet_files: list[Path], run_dir: str) -> list[pd.DataFrame]:
+    raw_dfs = [
+        df[
+            [
+                col
+                for col in df.columns
+                if (
+                    "relevancy" in col
+                    or "factual_correctness" in col
+                    or "accuracy" in col
+                )
+            ]
+        ]
+        for df in load_parquet_files(parquet_files)
+    ]
+    missing_values_report(raw_dfs, parquet_files, run_dir)
+    # Impute missing values: fill NA in each column with the mean of that column
+    return [df.fillna(df.mean(axis=0), axis=0) for df in raw_dfs]
+
+
+def write_results_parquet(results: list[dict[str, float | str]], filename: str) -> None:
+    """
+    Appends a row to the DataFrame containing the mean of each column (excluding the index).
+    The mean row will have the index 'mean'.
+    """
+    df = pd.DataFrame(results).set_index("run_dir")
+    mean_row = df.mean()
+    df_with_mean = pd.concat([df, pd.DataFrame([mean_row], index=["mean"])])
+    df_with_mean.to_parquet(filename)
+
+
+def create_faithfulness_parquet(dfs: list[pd.DataFrame]) -> None:
+    """
+    Simply concat the faithfulness columns across all runs. It's impractical to run
+    metrics on these.
+    """
+    ...
 
 
 if __name__ == "__main__":
     results = []
     vdr_results = []
+    faithfulness_cols = []
     for run_dir, parquet_files in test_run_parquet_files.items():
-        print(f"\n=== ICC Results for Test Run: {run_dir} ===")
-        raw_dfs = [
-            df[
-                [
-                    col
-                    for col in df.columns
-                    if (
-                        "relevancy" in col
-                        or "factual_correctness" in col
-                        or "accuracy" in col
-                    )
-                ]
-            ]
-            for df in load_parquet_files(parquet_files)
-        ]
-        missing_values_report(raw_dfs, parquet_files, run_dir)
-        # Impute missing values: fill NA in each column with the mean of that column
-        dfs = [df.fillna(df.mean(axis=0), axis=0) for df in raw_dfs]
-        icc_results = calculate_icc_for_all_metrics(dfs)
-        icc_results = {"run_dir": run_dir, **icc_results}
+        print(f"\n=== Results for Test Run: {run_dir} ===")
+        dfs = get_metric_dfs(parquet_files, run_dir)
+        icc_results = calculate_icc_for_all_metrics(dfs, run_dir)
         results.append(icc_results)
 
         # Volatility Dispersion Ratio calculation
         vdr_row: dict[str, float | str] = {"run_dir": run_dir}
         for col in dfs[0].columns:
             # Build a DataFrame where rows are samples, columns are raters (runs)
-            col_matrix = pd.DataFrame({i: df[col] for i, df in enumerate(dfs)})
+            col_matrix = pd.concat([df[col] for df in dfs], axis=1)
             vdr_row[col] = round(volatility_dispersion_ratio(col_matrix), 4)
         vdr_results.append(vdr_row)
 
-    results_df = pd.DataFrame(results)
-    vdr_results_df = pd.DataFrame(vdr_results)
-
-    # Add a row with the mean of each column for ICC
-    mean_row = results_df.drop(columns=["run_dir"]).mean(numeric_only=True)
-    mean_row["run_dir"] = "mean"
-    results_df = pd.concat([results_df, pd.DataFrame([mean_row])], ignore_index=True)
-
-    # Add a row with the mean of each column for VDR
-    vdr_mean_row = vdr_results_df.drop(columns=["run_dir"]).mean(numeric_only=True)
-    vdr_mean_row_dict = vdr_mean_row.to_dict()
-    vdr_mean_row_dict["run_dir"] = "mean"
-    vdr_results_df = pd.concat(
-        [vdr_results_df, pd.DataFrame([vdr_mean_row_dict])], ignore_index=True
-    )
-
-    results_df.to_parquet("icc_results.parquet")
-    vdr_results_df.to_parquet("vdr_results.parquet")
+    create_faithfulness_parquet(dfs)
+    write_results_parquet(results, "icc_results.parquet")
+    write_results_parquet(vdr_results, "vdr_results.parquet")
