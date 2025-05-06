@@ -279,6 +279,18 @@ class RagasEval:
             q["question_id"] for q in missed_questions
         ]
 
+        # Calculate correlation between nv_accuracy and factual_correctness
+        corr = eval_result_df["nv_accuracy"].corr(
+            eval_result_df["factual_correctness(mode=recall)"]
+        )
+        self.metrics_summary["nv_fc_corr"] = corr
+
+        # Calculate correlation between answer_relevancy and answer_relevancy_diverse
+        corr = eval_result_df["answer_relevancy"].corr(
+            eval_result_df["answer_relevancy_diverse"]
+        )
+        self.metrics_summary["ar_ar_diverse_corr"] = corr
+
         # Create a DataFrame with the summary
         summary_df = pd.DataFrame([self.metrics_summary])
 
