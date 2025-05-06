@@ -232,7 +232,7 @@ def print_regression_summary(
     slope = to_scalar(reg.coef_)
     intercept = to_scalar(reg.intercept_)
     print(
-        f"\nRegression summary: Δ{column_a} = {slope:.4f} * Δ{column_b} + {intercept:.4f} (R²={r2:.6f})\n"
+        f"Across-run regression summary: Δ{column_a} = {slope:.5f} * Δ{column_b} + {intercept:.5f} (R²={r2:.6f})\n"
     )
 
 
@@ -241,9 +241,24 @@ def column_correlation(
 ) -> None:
     """
     Calculate the Pearson correlation and p-value between all pairwise per-sample deltas of two columns
-    across run_dir runs. This is order-invariant and correct for unordered runs.
-    Also prints a regression summary for the deltas.
+    across and within runs. Also prints a regression summary for the across-run deltas.
     """
+    # Within-run correlation
+    run_dir_corrs = {}
+    for run_dir, df_list in all_dfs_by_run.items():
+        corrs = []
+        ps = []
+        for df in df_list:
+            corr, p = pearsonr(df[column_a], df[column_b])
+            corrs.append(corr)
+            ps.append(p)
+        run_dir_corrs[run_dir] = (np.mean(corrs), np.mean(ps))
+    print(
+        f"\nWithin-run correlation between {column_a} and {column_b} (mean across raters):"
+    )
+    for run_dir, (mean_corr, mean_p) in run_dir_corrs.items():
+        print(f"  {run_dir}: mean r={mean_corr:.6f}, mean p={mean_p:.6f}")
+    # Across-run delta correlation
     a_means_df = get_column_run_means(all_dfs_by_run, column_a)
     b_means_df = get_column_run_means(all_dfs_by_run, column_b)
 
@@ -262,7 +277,9 @@ def column_correlation(
     a_deltas = np.array(a_deltas)
     b_deltas = np.array(b_deltas)
     corr, p = pearsonr(a_deltas, b_deltas)
-    print(f"\nCorrelation between {column_a} and {column_b}: {corr:.4f} (p={p:.4g})\n")
+    print(
+        f"\nAcross-run delta correlation between {column_a} and {column_b}: {corr:.5f} (p={p:.5f})"
+    )
     print_regression_summary(a_deltas, b_deltas, column_a, column_b)
 
 

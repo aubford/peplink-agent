@@ -306,6 +306,9 @@ class RagasEval:
         # Move metadata to the end
         cols = [col for col in updated_df.columns if col != "metadata"] + ["metadata"]
         updated_df = updated_df[cols]
+        # Round all float columns before saving
+        float_cols = updated_df.select_dtypes(include=["float64"]).columns
+        updated_df[float_cols] = updated_df[float_cols].round(5)
         # Save to parquet
         updated_df.to_parquet(test_runs_summary_path, index=False)
 
@@ -385,5 +388,8 @@ class RagasEval:
         eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
 
         # Save the full results
+        # Round all float columns before saving
+        float_cols = eval_result_df.select_dtypes(include=["float64"]).columns
+        eval_result_df[float_cols] = eval_result_df[float_cols].round(5)
         eval_result_df.to_parquet(self.output_file_path)
         self.save_metrics_summary(eval_result_df)

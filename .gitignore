@@ -8,6 +8,7 @@
 # unignore specifics
 !/evals/runs/**/run_eval.py
 !/evals/runs/*.py
+!/evals/runs/test_runs_summary.parquet
 !/evals/output/__nodes.parquet
 !/evals/output/__relationships.parquet
 !/evals/testsets/**/*.json
