@@ -31,7 +31,7 @@ def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
     """
     Computes the ratio of the std dev of per-sample volatility (std dev of std dev) to
     inter-sample score variation. This is a measure of how much the instability of the
-    judge varies across samples. It is measured relative to the variation in samples
+    judge varies across samples. It is measured relative to the variation between samples
     similarly to ICC. Informs whether the judge is especially inconsistent on some queries
     while being stable on others.
 
@@ -58,13 +58,14 @@ def calculate_icc_for_column(dfs: list[pd.DataFrame], column: str) -> float:
     """
     Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge runs
     using the same testset/testrun (including the same inference response/context results). This measures how
-    consistent our RAGAS LLM-as-a-judge metric is across different runs. This measures stuff that happens after the
-    we have the batch results from the initial OpenAI API inference call.
-
-    Each DataFrame represents ratings from a single rater (ragas evaluation run), with rows as the subjects (samples).
+    consistent our RAGAS LLM-as-a-judge metric is across different evaluation runs performed on the same inference result.
+    i.e. It measures stuff that happens after the we have the batch results from the first pass of RagasEval when we
+    run RagInference on the testset.
 
     Args:
-        dfs: List of DataFrames, each representing a rater. All must have the same number/order of rows (subjects).
+        dfs: List of DataFrames, each representing a single rater (ragas evaluation run), with rows as the subjects (samples).
+            All must have the same number/order of rows (subjects).
+
         column: Name of the column to compute ICC for.
 
     Returns:

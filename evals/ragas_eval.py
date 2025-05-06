@@ -17,7 +17,7 @@ from ragas.metrics import (
     AnswerAccuracy,
     BleuScore,
     RougeScore,
-    FaithfulnesswithHHEM,
+    # FaithfulnesswithHHEM,
     EmbeddingContextPrecision,
     EmbeddingContextRecall,
 )
@@ -77,7 +77,7 @@ class RagasEval:
         # Merge nodes_df with kg_input_data.parquet on 'id'
         document_index = DocumentIndex.get_document_index()
         nodes_df = pd.merge(
-            nodes_df, document_index, on="id", how="left", suffixes=("", "_di")
+            nodes_df, document_index, on="id", how="inner", suffixes=("", "_di")
         )
         self.runs_dir = evals_dir / "runs"
         self.output_dir = self.runs_dir / run_name
@@ -336,25 +336,42 @@ class RagasEval:
 
         doc_separator = "\n\n" + "-" * 20 + "\n\n"
         eval_result_df = eval_result.to_pandas()
-        eval_result_df["reference_contexts"] = eval_result_df[
-            "reference_contexts"
-        ].apply(lambda x: doc_separator.join([doc[0] for doc in x]))
-        eval_result_df["retrieved_contexts"] = eval_result_df[
-            "retrieved_contexts"
-        ].apply(lambda x: doc_separator.join(x))
-        eval_result_df["reference_answer_statements_recall"] = eval_result_df[
-            "reference_answer_statements_recall"
-        ].apply(
-            lambda x: doc_separator.join(
-                [
-                    f"Statement: {doc["statement"]} - {"✅" if doc["verdict"] else "❌"}\n\nReason: {doc["reason"]}"
-                    for doc in x
-                ]
+        try:
+            eval_result_df["reference_contexts"] = eval_result_df[
+                "reference_contexts"
+            ].apply(lambda x: doc_separator.join([doc[0] for doc in x]))
+        except Exception as e:
+            print(f"Error processing 'reference_contexts': {e}")
+            eval_result_df["reference_contexts"] = ""
+
+        try:
+            eval_result_df["retrieved_contexts"] = eval_result_df[
+                "retrieved_contexts"
+            ].apply(lambda x: doc_separator.join(x if isinstance(x, list) else []))
+        except Exception as e:
+            print(f"Error processing 'retrieved_contexts': {e}")
+            eval_result_df["retrieved_contexts"] = ""
+
+        try:
+            eval_result_df["reference_answer_statements_recall"] = eval_result_df[
+                "reference_answer_statements_recall"
+            ].apply(
+                lambda x: (
+                    doc_separator.join(
+                        [
+                            f"Statement: {doc['statement']} - {'✅' if doc['verdict'] else '❌'}\n\nReason: {doc['reason']}"
+                            for doc in x
+                        ]
+                    )
+                    if isinstance(x, list)
+                    else ""
+                )
             )
-        )
+        except Exception as e:
+            print(f"Error processing 'reference_answer_statements_recall': {e}")
+            eval_result_df["reference_answer_statements_recall"] = ""
         eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
 
         # Save the full results
         eval_result_df.to_parquet(self.output_file_path)
-
         self.save_metrics_summary(eval_result_df)

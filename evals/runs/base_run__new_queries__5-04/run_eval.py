@@ -10,5 +10,5 @@ if __name__ == "__main__":
         eval_llm="mini",
         eval_boost_llm="mini",
     )
-    asyncio.run(ragas_eval.generate_batchfiles())
-    # asyncio.run(ragas_eval.evaluate_rag())
+    # asyncio.run(ragas_eval.generate_batchfiles())
+    asyncio.run(ragas_eval.evaluate_rag())
