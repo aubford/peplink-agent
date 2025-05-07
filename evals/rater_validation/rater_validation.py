@@ -27,34 +27,34 @@ for inference_run_name in TEST_RUN_DIRS:
     test_run_parquet_files[inference_run_name] = parquet_files
 
 
-def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
+def inf_run_volatility_dispersion_ratio(
+    inference_run_eval_runs: list[pd.DataFrame], inference_run_name: str
+) -> dict[str, float | str]:
     """
-    Computes the ratio of the std dev of per-sample volatility (std dev of std dev) to
-    inter-sample score variation. This is a measure of how much the instability of the
-    judge varies across samples. It is measured relative to the variation between samples
-    similarly to ICC. Informs whether the judge is especially inconsistent on some queries
-    while being stable on others.
-
-    Apparently this isn't a standard metric but it produced interesting results...
-
-    Parameters
-    ----------
-    df_runs : pd.DataFrame
-        Rows = samples, columns = repeated scores from the judge
-
-    Returns
-    -------
-    float
-        Volatility dispersion ratio (VDR)
+    Computes the volatility dispersion ratio (VDR) for each column across multiple evaluation runs.
+    Returns a dictionary mapping each metric column to its VDR, along with the run_dir.
+    Each VDR is the ratio of the std dev of per-sample volatility (std dev of std dev) to
+    inter-sample score variation for that metric.
     """
-    sample_sds = df_runs.std(axis=1)
-    dispersion_of_volatility = sample_sds.std()
-    inter_sample_sd = df_runs.mean(axis=1).std()
+    vdr_report_inference_run_row: dict[str, float | str] = {
+        "inference_run": inference_run_name
+    }
+    for col in inference_run_eval_runs[0].columns:
+        # Build a DataFrame where rows are samples, columns are eval runs
+        col_matrix = pd.concat([df[col] for df in inference_run_eval_runs], axis=1)
+        sample_sds = col_matrix.std(axis=1)
+        dispersion_of_volatility = sample_sds.std()
+        inter_sample_sd = col_matrix.mean(axis=1).std()
+        vdr = (
+            dispersion_of_volatility / inter_sample_sd
+            if inter_sample_sd != 0
+            else float('nan')
+        )
+        vdr_report_inference_run_row[col] = round(vdr, 4)
+    return vdr_report_inference_run_row
 
-    return dispersion_of_volatility / inter_sample_sd
 
-
-def calculate_icc_for_column(
+def calculate_icc_for_metric(
     cleaned_inference_run_eval_runs: list[pd.DataFrame], metric_name: str
 ) -> float:
     """
@@ -145,11 +145,11 @@ def calculate_icc_for_all_metrics(
     icc_results: dict[str, float] = {}
     for col in cleaned_inference_run_eval_runs[0].columns:
         try:
-            icc = calculate_icc_for_column(cleaned_inference_run_eval_runs, col)
+            icc = calculate_icc_for_metric(cleaned_inference_run_eval_runs, col)
             icc_results[col] = round(icc, 4)
         except Exception as e:
             print(f"Failed to calculate ICC for column '{col}': {e}")
-    return {"run_dir": inference_run_name, **icc_results}
+    return {"inference_run": inference_run_name, **icc_results}
 
 
 def clean_inference_run_eval_runs(
@@ -179,7 +179,7 @@ def write_results_parquet(results: list[dict[str, float | str]], filename: str) 
     Appends a row to the DataFrame containing the mean of each column (excluding the index).
     The mean row will have the index 'mean'.
     """
-    df = pd.DataFrame(results).set_index("run_dir")
+    df = pd.DataFrame(results).set_index("inference_run")
     mean_row = df.mean()
     df_with_mean = pd.concat([df, pd.DataFrame([mean_row], index=["mean"])])
     df_with_mean.to_parquet(filename)
@@ -328,15 +328,10 @@ if __name__ == "__main__":
         )
         results.append(icc_results)
 
-        # Volatility Dispersion Ratio calculation
-        vdr_row: dict[str, float | str] = {"run_dir": inference_run_name}
-        for col in cleaned_inference_run_eval_runs[0].columns:
-            # Build a DataFrame where rows are samples, columns are eval runs
-            col_matrix = pd.concat(
-                [df[col] for df in cleaned_inference_run_eval_runs], axis=1
-            )
-            vdr_row[col] = round(volatility_dispersion_ratio(col_matrix), 4)
-        vdr_results.append(vdr_row)
+        vdr_report_inference_run_row = inf_run_volatility_dispersion_ratio(
+            cleaned_inference_run_eval_runs, inference_run_name
+        )
+        vdr_results.append(vdr_report_inference_run_row)
 
     create_faithfulness_parquet(all_eval_runs_by_inference_run)
     write_results_parquet(results, "icc_results.parquet")
