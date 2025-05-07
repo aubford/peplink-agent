@@ -382,14 +382,14 @@ class RagasEval:
                     else ""
                 )
             )
+            # Round all float columns before saving
+            float_cols = eval_result_df.select_dtypes(include=["float64"]).columns
+            eval_result_df[float_cols] = eval_result_df[float_cols].round(5)
+            eval_result_df.to_parquet(self.output_file_path)
         except Exception as e:
             print(f"Error processing 'reference_answer_statements_recall': {e}")
             eval_result_df["reference_answer_statements_recall"] = ""
-        eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
 
         # Save the full results
-        # Round all float columns before saving
-        float_cols = eval_result_df.select_dtypes(include=["float64"]).columns
-        eval_result_df[float_cols] = eval_result_df[float_cols].round(5)
-        eval_result_df.to_parquet(self.output_file_path)
+        eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
         self.save_metrics_summary(eval_result_df)

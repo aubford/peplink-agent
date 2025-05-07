@@ -21,10 +21,10 @@ RUNS_BASE_PATH = Path(__file__).parent
 # Dictionary to store parquet file paths for each test run
 test_run_parquet_files: dict[str, list[Path]] = {}
 
-for run_dir in TEST_RUN_DIRS:
-    dir_path = RUNS_BASE_PATH / run_dir
+for inference_run_name in TEST_RUN_DIRS:
+    dir_path = RUNS_BASE_PATH / inference_run_name
     parquet_files = get_all_parquet_in_dir(dir_path)
-    test_run_parquet_files[run_dir] = parquet_files
+    test_run_parquet_files[inference_run_name] = parquet_files
 
 
 def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
@@ -54,32 +54,34 @@ def volatility_dispersion_ratio(df_runs: pd.DataFrame) -> float:
     return dispersion_of_volatility / inter_sample_sd
 
 
-def calculate_icc_for_column(dfs: list[pd.DataFrame], column: str) -> float:
+def calculate_icc_for_column(
+    cleaned_inference_run_eval_runs: list[pd.DataFrame], metric_name: str
+) -> float:
     """
     Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge runs
     using the same testset/testrun (including the same inference response/context results). This measures how
     consistent our RAGAS LLM-as-a-judge metric is across different evaluation runs performed on the same inference result.
-    i.e. It measures stuff that happens after the we have the batch results from the first pass of RagasEval when we
+    i.e. It measures stuff that happens after we have the batch results from the first pass of RagasEval when we
     run RagInference on the testset.
 
     Args:
-        dfs: List of DataFrames, each representing a single rater (ragas evaluation run), with rows as the subjects (samples).
+        dfs: List of DataFrames, each representing a single eval_run (ragas evaluation run), with rows as the subjects (samples).
             All must have the same number/order of rows (subjects).
 
         column: Name of the column to compute ICC for.
 
     Returns:
-        ICC value (float) for the given column across raters.
+        ICC value (float) for the given column across eval_runs.
     """
     long_data = []
-    for rater_idx, df in enumerate(dfs):
-        for subject_idx, value in enumerate(df[column].values):
-            assert pd.notna(value)
+    for eval_run_idx, df in enumerate(cleaned_inference_run_eval_runs):
+        for sample_idx, sample_value in enumerate(df[metric_name].values):
+            assert pd.notna(sample_value)
             long_data.append(
                 {
-                    "targets": subject_idx,
-                    "raters": rater_idx,
-                    "scores": value,
+                    "targets": sample_idx,
+                    "raters": eval_run_idx,
+                    "scores": sample_value,
                 }
             )
     long_df = pd.DataFrame(long_data)
@@ -97,29 +99,24 @@ def calculate_icc_for_column(dfs: list[pd.DataFrame], column: str) -> float:
 
 
 def missing_values_report(
-    dfs: list[pd.DataFrame], parquet_files: list[Path], run_dir: str
+    inference_run_eval_runs: list[pd.DataFrame], inference_run_name: str
 ) -> None:
     """
     Print a detailed report of missing values for all columns in the provided DataFrames.
     Warn if missing values are found, but do not raise an error.
     """
-    if not dfs:
+    if not inference_run_eval_runs:
         return
-    metric_cols = dfs[0].columns
+    metric_cols = inference_run_eval_runs[0].columns
     missing_values = []
-    for rater_idx, df in enumerate(dfs):
+    for rater_idx, df in enumerate(inference_run_eval_runs):
         for col in metric_cols:
             missing = df[col].isna()
             if missing.any():
                 for row_idx in df.index[missing]:
                     missing_values.append(
                         {
-                            "run_dir": run_dir,
-                            "file": (
-                                parquet_files[rater_idx].name
-                                if rater_idx < len(parquet_files)
-                                else f"rater_{rater_idx}"
-                            ),
+                            "run_dir": inference_run_name,
                             "rater_idx": rater_idx,
                             "row_idx": row_idx,
                             "column": col,
@@ -137,28 +134,28 @@ def missing_values_report(
 
 
 def calculate_icc_for_all_metrics(
-    dfs: list[pd.DataFrame], run_dir: str
+    cleaned_inference_run_eval_runs: list[pd.DataFrame], inference_run_name: str
 ) -> dict[str, float | str]:
     """
     Calculate ICC for each metric column (all columns) across the provided DataFrames.
     Returns a dictionary mapping metric column names to their ICC values.
     """
-    if not dfs:
+    if not cleaned_inference_run_eval_runs:
         return {}
     icc_results: dict[str, float] = {}
-    for col in dfs[0].columns:
+    for col in cleaned_inference_run_eval_runs[0].columns:
         try:
-            icc = calculate_icc_for_column(dfs, col)
+            icc = calculate_icc_for_column(cleaned_inference_run_eval_runs, col)
             icc_results[col] = round(icc, 4)
         except Exception as e:
             print(f"Failed to calculate ICC for column '{col}': {e}")
-    return {"run_dir": run_dir, **icc_results}
+    return {"run_dir": inference_run_name, **icc_results}
 
 
-def get_metric_dfs(
-    dfs: list[pd.DataFrame], parquet_files: list[Path], run_dir: str
+def clean_inference_run_eval_runs(
+    inference_run_eval_runs: list[pd.DataFrame], inference_run_name: str
 ) -> list[pd.DataFrame]:
-    raw_dfs = [
+    filtered_columns_runs = [
         df[
             [
                 col
@@ -170,11 +167,11 @@ def get_metric_dfs(
                 )
             ]
         ]
-        for df in dfs
+        for df in inference_run_eval_runs
     ]
-    missing_values_report(raw_dfs, parquet_files, run_dir)
+    missing_values_report(filtered_columns_runs, inference_run_name)
     # Impute missing values: fill NA in each column with the mean of that column
-    return [df.fillna(df.mean(axis=0), axis=0) for df in raw_dfs]
+    return [df.fillna(df.mean(axis=0), axis=0) for df in filtered_columns_runs]
 
 
 def write_results_parquet(results: list[dict[str, float | str]], filename: str) -> None:
@@ -188,34 +185,21 @@ def write_results_parquet(results: list[dict[str, float | str]], filename: str) 
     df_with_mean.to_parquet(filename)
 
 
-def create_faithfulness_parquet(all_dfs_by_run: dict[str, list[pd.DataFrame]]) -> None:
+def create_faithfulness_parquet(
+    all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]],
+) -> None:
     """
     Simply concat the faithfulness columns across all runs for inspection. It's impractical
     to run metrics on these.
     """
     columns = {}
-    for run_dir, df_list in all_dfs_by_run.items():
+    for run_dir, df_list in all_eval_runs_by_inference_run.items():
         for i, df in enumerate(df_list):
             col_label = f"{run_dir.replace("test_eval_consistency_", "")}_{i}"
             columns[col_label] = df["faithfulness"].reset_index(drop=True)
 
     df = pd.DataFrame(columns)
     df.to_parquet("faithfulness.parquet")
-
-
-def get_column_run_means(
-    all_dfs_by_run: dict[str, list[pd.DataFrame]], column: str
-) -> pd.DataFrame:
-    """
-    Calculate the per-sample mean for a given column across all runs per run_dir.
-    """
-    response_relevancy_means = {}
-    for run_dir, df_list in all_dfs_by_run.items():
-        series = [df[column] for df in df_list]
-        means = pd.concat(series, axis=1).mean(axis=1)
-        response_relevancy_means[run_dir.replace("test_eval_consistency_", "")] = means
-    df_response_relevancy = pd.DataFrame(response_relevancy_means)
-    return df_response_relevancy
 
 
 def print_regression_summary(
@@ -236,31 +220,59 @@ def print_regression_summary(
     )
 
 
+def get_column_run_means(
+    all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]], metric_name: str
+) -> pd.DataFrame:
+    """
+    Calculate the per-sample mean for a given column across all runs per run_dir.
+    """
+    inf_run_means = {}
+    for inf_run_name, eval_runs_dfs in all_eval_runs_by_inference_run.items():
+        series = [df[metric_name] for df in eval_runs_dfs]
+        means = pd.concat(series, axis=1).mean(axis=1)
+        inf_run_means[inf_run_name] = means
+    df_metric_means = pd.DataFrame(inf_run_means)
+    return df_metric_means
+
+
 def column_correlation(
-    all_dfs_by_run: dict[str, list[pd.DataFrame]], column_a: str, column_b: str
+    all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]],
+    metric_a_name: str,
+    metric_b_name: str,
 ) -> None:
     """
-    Calculate the Pearson correlation and p-value between all pairwise per-sample deltas of two columns
-    across and within runs. Also prints a regression summary for the across-run deltas.
+    Computes the relationship between two evaluation metrics by analyzing their correlation both within and across multiple evaluation runs.
+
+    This function performs two main analyses:
+    1. Within-run correlation: For each evaluation run (and each rater), it calculates the Pearson correlation coefficient and p-value between the two specified columns (metrics) across all samples. The mean correlation and p-value are reported for each run, indicating how closely the two metrics move together within the same run.
+    2. Across-run delta correlation: For each sample, it computes the mean score for each metric across all raters in each run. It then calculates all pairwise differences (deltas) between runs for each sample and computes the Pearson correlation and p-value between the deltas of the two metrics. This reveals whether changes in one metric across runs are associated with changes in the other metric, i.e., whether the metrics are sensitive to the same sources of variation across runs. A regression summary is also printed to quantify the linear relationship between the deltas.
+
+    This technique helps assess whether two metrics are measuring similar underlying phenomena, both in terms of their agreement within a single evaluation and their sensitivity to changes across different runs. High correlation suggests the metrics are redundant or closely related, while low correlation indicates they capture different aspects of the evaluation.
+
+    Args:
+        all_dfs_by_run: Dictionary mapping run directory names to lists of DataFrames, each DataFrame representing a rater's scores for that run.
+        column_a: Name of the first metric column to compare.
+        column_b: Name of the second metric column to compare.
     """
     # Within-run correlation
-    run_dir_corrs = {}
-    for run_dir, df_list in all_dfs_by_run.items():
+    inf_run_corrs = {}
+    for inf_run_name, eval_runs_dfs in all_eval_runs_by_inference_run.items():
         corrs = []
         ps = []
-        for df in df_list:
-            corr, p = pearsonr(df[column_a], df[column_b])
+        for df in eval_runs_dfs:
+            corr, p = pearsonr(df[metric_a_name], df[metric_b_name])
             corrs.append(corr)
             ps.append(p)
-        run_dir_corrs[run_dir] = (np.mean(corrs), np.mean(ps))
+        inf_run_corrs[inf_run_name] = (np.mean(corrs), np.mean(ps))
     print(
-        f"\nWithin-run correlation between {column_a} and {column_b} (mean across raters):"
+        f"\nWithin-run correlation between {metric_a_name} and {metric_b_name} (mean across raters):"
     )
-    for run_dir, (mean_corr, mean_p) in run_dir_corrs.items():
-        print(f"  {run_dir}: mean r={mean_corr:.6f}, mean p={mean_p:.6f}")
+    for inf_run_name, (mean_corr, mean_p) in inf_run_corrs.items():
+        print(f"  {inf_run_name}: mean r={mean_corr:.6f}, mean p={mean_p:.6f}")
+
     # Across-run delta correlation
-    a_means_df = get_column_run_means(all_dfs_by_run, column_a)
-    b_means_df = get_column_run_means(all_dfs_by_run, column_b)
+    a_means_df = get_column_run_means(all_eval_runs_by_inference_run, metric_a_name)
+    b_means_df = get_column_run_means(all_eval_runs_by_inference_run, metric_b_name)
 
     a_means = a_means_df.values  # shape: (n_samples, n_runs)
     b_means = b_means_df.values
@@ -278,9 +290,9 @@ def column_correlation(
     b_deltas = np.array(b_deltas)
     corr, p = pearsonr(a_deltas, b_deltas)
     print(
-        f"\nAcross-run delta correlation between {column_a} and {column_b}: {corr:.5f} (p={p:.5f})"
+        f"\nAcross-run delta correlation between {metric_a_name} and {metric_b_name}: {corr:.5f} (p={p:.5f})"
     )
-    print_regression_summary(a_deltas, b_deltas, column_a, column_b)
+    print_regression_summary(a_deltas, b_deltas, metric_a_name, metric_b_name)
 
 
 def to_scalar(x):
@@ -292,30 +304,40 @@ if __name__ == "__main__":
     vdr_results = []
     faithfulness_cols = []
     # Load all dfs for all run_dirs before the loop
-    all_dfs_by_run: dict[str, list[pd.DataFrame]] = {
+    all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]] = {
         run_dir: load_parquet_files(parquet_files)
         for run_dir, parquet_files in test_run_parquet_files.items()
     }
     # check that metrics that are measuring the same thing actually move together
     # when run against different inference runs.
-    column_correlation(all_dfs_by_run, "answer_relevancy", "answer_relevancy_diverse")
     column_correlation(
-        all_dfs_by_run, "factual_correctness(mode=recall)", "nv_accuracy"
+        all_eval_runs_by_inference_run, "answer_relevancy", "answer_relevancy_diverse"
     )
-    for run_dir, parquet_files in test_run_parquet_files.items():
-        dfs = all_dfs_by_run[run_dir]
-        metric_dfs = get_metric_dfs(dfs, parquet_files, run_dir)
-        icc_results = calculate_icc_for_all_metrics(metric_dfs, run_dir)
+    column_correlation(
+        all_eval_runs_by_inference_run,
+        "factual_correctness(mode=recall)",
+        "nv_accuracy",
+    )
+    for inference_run_name, parquet_files in test_run_parquet_files.items():
+        inference_run_eval_runs = all_eval_runs_by_inference_run[inference_run_name]
+        cleaned_inference_run_eval_runs = clean_inference_run_eval_runs(
+            inference_run_eval_runs, inference_run_name
+        )
+        icc_results = calculate_icc_for_all_metrics(
+            cleaned_inference_run_eval_runs, inference_run_name
+        )
         results.append(icc_results)
 
         # Volatility Dispersion Ratio calculation
-        vdr_row: dict[str, float | str] = {"run_dir": run_dir}
-        for col in metric_dfs[0].columns:
-            # Build a DataFrame where rows are samples, columns are raters (runs)
-            col_matrix = pd.concat([df[col] for df in metric_dfs], axis=1)
+        vdr_row: dict[str, float | str] = {"run_dir": inference_run_name}
+        for col in cleaned_inference_run_eval_runs[0].columns:
+            # Build a DataFrame where rows are samples, columns are eval runs
+            col_matrix = pd.concat(
+                [df[col] for df in cleaned_inference_run_eval_runs], axis=1
+            )
             vdr_row[col] = round(volatility_dispersion_ratio(col_matrix), 4)
         vdr_results.append(vdr_row)
 
-    create_faithfulness_parquet(all_dfs_by_run)
+    create_faithfulness_parquet(all_eval_runs_by_inference_run)
     write_results_parquet(results, "icc_results.parquet")
     write_results_parquet(vdr_results, "vdr_results.parquet")
