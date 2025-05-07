@@ -98,7 +98,6 @@ class GenerateTestSet:
         temperature: float = 0.5,
         doc_text_column: str = "page_content",
     ):
-        # Initialize LLM and output directory
         self.llm = ChatOpenAI(
             model=llm_model,
             temperature=temperature,
@@ -110,7 +109,6 @@ class GenerateTestSet:
         self.output_dir = testset_dir / testset_dirname
         self.output_dir.mkdir(parents=True, exist_ok=False)
 
-        self.llm_model = llm_model
         self.max_context_token_count = max_context_token_count
         self.testset_size = testset_size
         self.cluster_size = non_sibling_target_cluster_size
@@ -389,7 +387,7 @@ class GenerateTestSet:
             examples=self.examples,
         )
 
-        final_prompt = ChatPromptTemplate.from_messages(
+        prompt_messages = ChatPromptTemplate.from_messages(
             [
                 ("system", self.system_prompt),
                 few_shot_prompt,
@@ -397,7 +395,7 @@ class GenerateTestSet:
             ]
         )
 
-        chain = final_prompt | self.llm.with_structured_output(ResponseModel)
+        chain = prompt_messages | self.llm.with_structured_output(ResponseModel)
         return self.invoke_chain(chain, self.doc_text_column)
 
     def invoke_chain(self, chain, doc_text_column: str):

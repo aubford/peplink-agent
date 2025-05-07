@@ -1,6 +1,6 @@
+from pathlib import Path
 from util.document_utils import get_all_parquet_in_dir, load_parquet_files
 import pandas as pd
-from pathlib import Path
 import pingouin as pg
 import numpy as np
 from scipy.stats import pearsonr
@@ -203,7 +203,7 @@ def create_faithfulness_parquet(
 
 
 def print_regression_summary(
-    a_deltas: np.ndarray, b_deltas: np.ndarray, column_a: str, column_b: str
+    a_deltas: np.ndarray, b_deltas: np.ndarray, metric_a_name: str, metric_b_name: str
 ) -> None:
     """
     Print a regression summary for the deltas between two columns: slope, intercept, and R^2.
@@ -216,16 +216,14 @@ def print_regression_summary(
     slope = to_scalar(reg.coef_)
     intercept = to_scalar(reg.intercept_)
     print(
-        f"Across-run regression summary: Δ{column_a} = {slope:.5f} * Δ{column_b} + {intercept:.5f} (R²={r2:.6f})\n"
+        f"Across-run delta regression summary: Δ{metric_a_name} = {slope:.5f} * Δ{metric_b_name} + {intercept:.5f} (R²={r2:.6f})\n"
     )
 
 
-def get_column_run_means(
+def eval_run_means_by_inf_run(
     all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]], metric_name: str
 ) -> pd.DataFrame:
-    """
-    Calculate the per-sample mean for a given column across all runs per run_dir.
-    """
+    """Calculate the per-sample mean for a given metric across all runs for each inference run."""
     inf_run_means = {}
     for inf_run_name, eval_runs_dfs in all_eval_runs_by_inference_run.items():
         series = [df[metric_name] for df in eval_runs_dfs]
@@ -235,7 +233,7 @@ def get_column_run_means(
     return df_metric_means
 
 
-def column_correlation(
+def metrics_correlation(
     all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]],
     metric_a_name: str,
     metric_b_name: str,
@@ -270,9 +268,13 @@ def column_correlation(
     for inf_run_name, (mean_corr, mean_p) in inf_run_corrs.items():
         print(f"  {inf_run_name}: mean r={mean_corr:.6f}, mean p={mean_p:.6f}")
 
-    # Across-run delta correlation
-    a_means_df = get_column_run_means(all_eval_runs_by_inference_run, metric_a_name)
-    b_means_df = get_column_run_means(all_eval_runs_by_inference_run, metric_b_name)
+    # Across-inferrence-run delta correlation
+    a_means_df = eval_run_means_by_inf_run(
+        all_eval_runs_by_inference_run, metric_a_name
+    )
+    b_means_df = eval_run_means_by_inf_run(
+        all_eval_runs_by_inference_run, metric_b_name
+    )
 
     a_means = a_means_df.values  # shape: (n_samples, n_runs)
     b_means = b_means_df.values
@@ -310,10 +312,10 @@ if __name__ == "__main__":
     }
     # check that metrics that are measuring the same thing actually move together
     # when run against different inference runs.
-    column_correlation(
+    metrics_correlation(
         all_eval_runs_by_inference_run, "answer_relevancy", "answer_relevancy_diverse"
     )
-    column_correlation(
+    metrics_correlation(
         all_eval_runs_by_inference_run,
         "factual_correctness(mode=recall)",
         "nv_accuracy",
