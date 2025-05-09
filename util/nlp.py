@@ -260,7 +260,7 @@ class TokenizedDoc:
         self.original_text = df_row["page_content"]
         self.df_row = df_row
         self.tokens = nltk_get_lemmatized_tokens(self.original_text)
-
+        
     def get_chunked_tokens(self, ngram: int = 1, shift: int | None = None) -> list[str]:
         if ngram == 1:
             return self.tokens
