@@ -74,7 +74,7 @@ class VectorStore:
                 "post_title",
                 "post_content",
                 "comment_content",
-                "page_content_embedding_clean",
+                "page_content_embedding_clean",  # should be page_content_clean_for_embedding
                 "page_content_dirty",
                 "token_count",
                 "entities_pre_normalization",

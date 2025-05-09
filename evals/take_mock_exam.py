@@ -37,6 +37,7 @@ class MockExam:
         evals_dir: Path,
         run_name: str,
         llm_model: str,
+        pinecone_index_name: str,
         output_dir: Path,
         should_create_batch_job: bool = True,
         sample: Any = False,
@@ -52,6 +53,7 @@ class MockExam:
         )
         self.rag_inference = RagInference(
             llm_model=llm_model,
+            pinecone_index_name=pinecone_index_name,
             messages=messages_prompt,
             eval_llm=BatchChatOpenAI(
                 model=llm_model,

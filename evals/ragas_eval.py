@@ -17,7 +17,7 @@ from ragas.metrics import (
     AnswerAccuracy,
     BleuScore,
     RougeScore,
-    # FaithfulnesswithHHEM,
+    FaithfulnesswithHHEM,
     EmbeddingContextPrecision,
     EmbeddingContextRecall,
 )
@@ -48,7 +48,7 @@ class RagasEval:
         run_name: str,
         inference_llm: str,
         eval_llm: str,
-        eval_boost_llm: str,
+        pinecone_index_name: str,
         query_column: str = "query",
         testset_name: str = MAIN_TESTSET_NAME,
         sample: tuple | Literal[False] = False,
@@ -64,7 +64,6 @@ class RagasEval:
         self.query_column = query_column
         inference_llm_model = models[inference_llm]
         eval_llm_model = models[eval_llm]
-        eval_boost_llm_model = models[eval_boost_llm]
 
         generated_testset_df = pd.read_json(
             evals_dir / "testsets" / testset_name / "generated_testset.json"
@@ -100,6 +99,7 @@ class RagasEval:
         )
 
         self.rag_inference = RagInference(
+            pinecone_index_name=pinecone_index_name,
             llm_model=inference_llm_model,
             eval_llm=BatchChatOpenAI(
                 model=inference_llm_model,
@@ -112,6 +112,7 @@ class RagasEval:
             evals_dir=evals_dir,
             run_name=run_name,
             llm_model=inference_llm_model,
+            pinecone_index_name=pinecone_index_name,
             should_create_batch_job=should_create_batch_job,
             sample=sample,
             output_dir=self.output_dir,
@@ -123,12 +124,6 @@ class RagasEval:
                 temperature=0,
             )
         )
-        self.boost_llm = LangchainLLMWrapper(
-            ChatOpenAI(
-                model=eval_boost_llm_model,
-                temperature=0,
-            )
-        )
 
         self.metrics_summary: dict[str, Any] = {
             "run_name": run_name,
@@ -137,7 +132,7 @@ class RagasEval:
                 Testset name: {testset_name}
                 Inference LLM: {inference_llm}
                 Eval LLM: {eval_llm}
-                Eval boost LLM: {eval_boost_llm}
+                Pinecone index: {pinecone_index_name}
                 Sample: {str(sample[0]) + ", " + str(sample[1]) if sample else "full"}
                 Datetime: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 """
@@ -318,11 +313,11 @@ class RagasEval:
         evaluation_dataset = self.test_set.to_evaluation_dataset()
         metrics = [
             # use HHEM-Open hallucination detection classifier model
-            # FaithfulnesswithHHEM(batch_size=2),
+            FaithfulnesswithHHEM(batch_size=2),
             # response -> question (does the answer address the entire question)
             # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
             ResponseRelevancy(),
-            ResponseRelevancyDiverse(llm=self.boost_llm),
+            ResponseRelevancyDiverse(),
             # context -> reference contexts (do the contexts match the reference contexts)
             # note that you can't compare this across context types! (e.g. summaries vs. full docs)
             # we care much more about recall since there are plenty of relevant docs that may not have been
@@ -333,7 +328,7 @@ class RagasEval:
             NonLLMContextRecall(),
             # response -> reference answer (ground truth)
             FactualCorrectness(mode="recall"),
-            AnswerAccuracy(llm=self.boost_llm),  # NVIDIA
+            AnswerAccuracy(),  # NVIDIA
             # less accurate metrics
             BleuScore(),
             RougeScore(),
@@ -382,14 +377,13 @@ class RagasEval:
                     else ""
                 )
             )
-            # Round all float columns before saving
-            float_cols = eval_result_df.select_dtypes(include=["float64"]).columns
-            eval_result_df[float_cols] = eval_result_df[float_cols].round(5)
-            eval_result_df.to_parquet(self.output_file_path)
         except Exception as e:
             print(f"Error processing 'reference_answer_statements_recall': {e}")
             eval_result_df["reference_answer_statements_recall"] = ""
 
+        float_cols = eval_result_df.select_dtypes(include=["float64"]).columns
+        eval_result_df[float_cols] = eval_result_df[float_cols].round(5)
+        eval_result_df.to_parquet(self.output_file_path)
         # Save the full results
         eval_result_df.drop(columns=["reference_contexts_embeddings"], inplace=True)
         self.save_metrics_summary(eval_result_df)

@@ -91,7 +91,6 @@ class BaseLoad:
             raise TypeError(
                 f"folder_name must be defined as a string in the subclass, got {type(self.folder_name)}"
             )
-        self.index_name = self.config.get("VERSIONED_PINECONE_INDEX_NAME")
         self.logger: RotatingFileLogger = RotatingFileLogger(
             name=f"load_{self.folder_name}"
         )

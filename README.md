@@ -13,6 +13,7 @@ This project is also meant to be a platform for experimenting with various AI En
 I developed a rigorous, modular evaluation system that enables controlled experimentation and provides quantitative,
 explainable feedback on the impact of different modeling, retrieval, and data processing strategies.
 
+This is the also first iteration of a larger project to create an OSS solution for quickly deploying a RAG chatbot for any given Discourse forum.
 
 ## Architecture & Core Functionality
 

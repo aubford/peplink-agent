@@ -30,11 +30,11 @@ messages_prompt = ChatPromptTemplate(
 class RagInference:
     def __init__(
         self,
+        llm_model: str,
+        pinecone_index_name: str,
         embedding_model: str = "text-embedding-3-large",
-        llm_model: str = "gpt-4.1-mini",
         temperature: float = 1,  # openai default temp
         streaming: bool = False,
-        pinecone_index_name: str = global_config.get("VERSIONED_PINECONE_INDEX_NAME"),
         eval_llm: BaseChatModel | None = None,
         messages: ChatPromptTemplate = messages_prompt,
     ):
@@ -140,7 +140,11 @@ class RagInference:
 
 
 if __name__ == "__main__":
-    rag_inference = RagInference(streaming=True)
+    rag_inference = RagInference(
+        streaming=True,
+        llm_model="gpt-4o-mini",
+        pinecone_index_name="pepwave-early-april-page-content-embeddi",
+    )
 
     while True:
         # Get user input
