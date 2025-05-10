@@ -11,5 +11,5 @@ if __name__ == "__main__":
         query_column="query_original",
         pinecone_index_name="pepwave-early-april-page-content-embedding"
     )
-    asyncio.run(ragas_eval.generate_batchfiles())
-    # asyncio.run(ragas_eval.evaluate_rag())
+    # asyncio.run(ragas_eval.generate_batchfiles())
+    asyncio.run(ragas_eval.evaluate_rag())

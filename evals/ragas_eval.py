@@ -17,7 +17,7 @@ from ragas.metrics import (
     AnswerAccuracy,
     BleuScore,
     RougeScore,
-    FaithfulnesswithHHEM,
+    # FaithfulnesswithHHEM,
     EmbeddingContextPrecision,
     EmbeddingContextRecall,
 )
@@ -58,7 +58,7 @@ class RagasEval:
         # This metric is expensive and w/ modern LLMs faithfulness is almost always near 100%
         # unless there is a major prompting issue.  Turn this on occasionally to check, but
         # otherwise leave it off.
-        with_faithfulness: bool = True,
+        with_faithfulness: bool = False,
     ):
         self.with_faithfulness = with_faithfulness
         self.query_column = query_column
@@ -313,7 +313,7 @@ class RagasEval:
         evaluation_dataset = self.test_set.to_evaluation_dataset()
         metrics = [
             # use HHEM-Open hallucination detection classifier model
-            FaithfulnesswithHHEM(batch_size=2),
+            # FaithfulnesswithHHEM(batch_size=2),
             # response -> question (does the answer address the entire question)
             # todo: turn ResponseRelevancy off once we have confirmed ResponseRelevancyDiverse works better
             ResponseRelevancy(),
