@@ -232,6 +232,7 @@ class RagasEval:
 
     async def generate_batchfiles(self):
         """Generate a batchfile.jsonl to be uploaded to OpenAI's Batch API."""
+        # to trace inference, just run the app
         with tracing_context(enabled=False):
             assert self.test_set is not None, "Test set is not set"
             async_tasks = {}
