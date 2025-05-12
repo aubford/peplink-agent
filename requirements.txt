@@ -9,6 +9,7 @@ langchain-community
 langchain-google-community
 langchain-pinecone
 langchain-qdrant
+langchain-cohere~=0.4.4
 pinecone
 debugpy
 torch

@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from ragas.llms import LangchainLLMWrapper
@@ -15,8 +14,8 @@ from ragas.metrics import (
     ResponseRelevancyDiverse,
     FactualCorrectness,
     AnswerAccuracy,
-    BleuScore,
-    RougeScore,
+    # BleuScore,
+    # RougeScore,
     # FaithfulnesswithHHEM,
     EmbeddingContextPrecision,
     EmbeddingContextRecall,
@@ -32,6 +31,7 @@ from typing import cast, Any, Literal
 from dotenv import load_dotenv
 from load.document_index import DocumentIndex
 from util.util_main import handle_file_exists
+from langsmith import tracing_context
 
 load_dotenv()
 
@@ -232,23 +232,23 @@ class RagasEval:
 
     async def generate_batchfiles(self):
         """Generate a batchfile.jsonl to be uploaded to OpenAI's Batch API."""
-        assert self.test_set is not None, "Test set is not set"
+        with tracing_context(enabled=False):
+            assert self.test_set is not None, "Test set is not set"
+            async_tasks = {}
+            for test_row in self.test_set:
+                async_tasks[test_row.eval_sample.id] = test_row.eval_sample.user_input
 
-        async_tasks = {}
-        for test_row in self.test_set:
-            async_tasks[test_row.eval_sample.id] = test_row.eval_sample.user_input
+            # dont clear existing batch files when testing
+            if self.should_create_batch_job:
+                self.batch_manager.clear_batch_files()
+            results = await self.rag_inference.batch_query_for_eval(async_tasks)
+            self.create_batch_contexts_file(results)
 
-        # dont clear existing batch files when testing
-        if self.should_create_batch_job:
-            self.batch_manager.clear_batch_files()
-        results = await self.rag_inference.batch_query_for_eval(async_tasks)
-        self.create_batch_contexts_file(results)
+            await self.mock_exam.generate_batchfile()
 
-        await self.mock_exam.generate_batchfile()
-
-        # create a new batch job if not testing
-        if self.should_create_batch_job:
-            self.batch_manager.create_batch_job()
+            # create a new batch job if not testing
+            if self.should_create_batch_job:
+                self.batch_manager.create_batch_job()
 
     def save_metrics_summary(self, eval_result_df: pd.DataFrame) -> None:
         """
@@ -330,8 +330,8 @@ class RagasEval:
             FactualCorrectness(mode="recall"),
             AnswerAccuracy(),  # NVIDIA
             # less accurate metrics
-            BleuScore(),
-            RougeScore(),
+            # BleuScore(),
+            # RougeScore(),
         ]
 
         if self.with_faithfulness:

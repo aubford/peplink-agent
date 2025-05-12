@@ -3,7 +3,6 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import sys
-import time
 
 
 class RotatingFileLogger(logging.Logger):
