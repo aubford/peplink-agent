@@ -4,10 +4,16 @@ import subprocess
 from pathlib import Path
 
 this_dir = Path(__file__).parent
+docs_dest = this_dir / "langchain_docs"
+langchain_dir = Path("/Users/aubrey/workspace/langchain")
+tutorials_dir = Path("/Users/aubrey/workspace/_tutorials_and_examples")
 
 print(
     "** Also consider updating langchain via `pip install --upgrade -r requirements.txt`"
 )
+
+if not os.path.exists(langchain_dir / "cookbook"):
+    raise ValueError("Cookbook folder not found")
 
 
 def copy_folders(src_dir: Path, dest_dir: Path, folders: list) -> None:
@@ -24,31 +30,23 @@ def copy_folders(src_dir: Path, dest_dir: Path, folders: list) -> None:
             print(f"Folder not found: {folder}")
 
 
-tutorial_dir = Path("/Users/aubrey/workspace/_tutorials_and_examples/langchain")
-docs_src = tutorial_dir / "docs" / "docs"
-docs_dest = this_dir / "langchain_docs"
 folders_to_copy = [
     "concepts",
-    "cookbook",
     "how_to",
     "integrations",
     "troubleshooting",
     "tutorials",
     "versions",
+    "agents",
 ]
 
-copy_folders(docs_src, docs_dest, folders_to_copy)
-
-cookbook_src = tutorial_dir / "cookbook"
-cookbook_dest = docs_dest / "cookbook"
-
-if os.path.exists(cookbook_src):
-    print("Copying cookbook folder")
-    if os.path.exists(cookbook_dest):
-        shutil.rmtree(cookbook_dest)  # Remove existing cookbook folder
-    shutil.copytree(cookbook_src, cookbook_dest)
-else:
-    print("Cookbook folder not found")
+copy_folders(langchain_dir / "docs" / "docs", docs_dest, folders_to_copy)
+copy_folders(langchain_dir, docs_dest / "cookbook", ["cookbook"])
+copy_folders(
+    tutorials_dir / "langgraph" / "docs" / "docs",
+    docs_dest / "langgraph",
+    folders_to_copy,
+)
 
 # Convert .ipynb files to .py
 print("Converting .ipynb files to .py")
