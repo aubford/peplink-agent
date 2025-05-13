@@ -120,16 +120,10 @@ class RagInferenceLangGraph:
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
         """Generate a retrieval query considering chat history."""
-        # Get the history-aware retrieval query
         query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
 
-        # Convert messages to langchain format for history-aware query generation
-        chat_history = []
-        for msg in state["messages"]:
-            if msg["role"] == "user":
-                chat_history.append(("human", msg["content"]))
-            elif msg["role"] == "assistant":
-                chat_history.append(("assistant", msg["content"]))
+        # Pass messages as-is (list of dicts)
+        chat_history = state["messages"]
 
         retrieval_query = query_chain.invoke(
             {"input": state["query"], "chat_history": chat_history}
@@ -144,13 +138,8 @@ class RagInferenceLangGraph:
 
     def _generate_answer(self, state: RagState) -> dict:
         """Generate an answer based on the context and query."""
-        # Convert messages to langchain format for stuff docs chain
-        chat_history = []
-        for msg in state["messages"]:
-            if msg["role"] == "user":
-                chat_history.append(("human", msg["content"]))
-            elif msg["role"] == "assistant":
-                chat_history.append(("assistant", msg["content"]))
+        # Pass messages as-is (list of dicts)
+        chat_history = state["messages"]
 
         chain = create_stuff_documents_chain(
             self.eval_llm,
