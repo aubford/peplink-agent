@@ -1,4 +1,4 @@
-from typing import Annotated, Any, cast
+from typing import Annotated, Any, Optional, cast
 from typing_extensions import TypedDict
 
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -7,7 +7,6 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
-from langchain_core.messages import HumanMessage, AIMessage
 
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
@@ -18,8 +17,9 @@ from util.root_only_tracer import RootOnlyTracer
 from prompts import load_prompts
 
 from langgraph.graph import StateGraph, START
-from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph.message import add_messages
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph.state import CompiledStateGraph
 
 
 # Load prompts
@@ -87,15 +87,12 @@ class RagInferenceLangGraph:
         self.minimal_tracer = minimal_tracer
 
         # Initialize memory saver for persistence
-        self.memory = MemorySaver()
-
-        # Default thread ID for maintaining compatibility with original interface
-        self.default_thread_id = "default_conversation"
+        self.memory = InMemorySaver()
 
         # Build the graph
         self.graph = self._build_graph()
 
-    def _build_graph(self) -> Any:
+    def _build_graph(self) -> CompiledStateGraph:
         """Build the RAG graph with nodes for each step in the pipeline."""
         # Create the graph
         graph_builder = StateGraph(RagState)
@@ -126,15 +123,13 @@ class RagInferenceLangGraph:
         # Get the history-aware retrieval query
         query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
 
-        # Convert messages to the format expected by history_aware_retrieval_query
+        # Convert messages to langchain format for history-aware query generation
         chat_history = []
         for msg in state["messages"]:
-            if msg.get("role") == "user" or isinstance(msg, HumanMessage):
-                content = msg.get("content") if isinstance(msg, dict) else msg.content
-                chat_history.append(("human", content))
-            elif msg.get("role") == "assistant" or isinstance(msg, AIMessage):
-                content = msg.get("content") if isinstance(msg, dict) else msg.content
-                chat_history.append(("assistant", content))
+            if msg["role"] == "user":
+                chat_history.append(("human", msg["content"]))
+            elif msg["role"] == "assistant":
+                chat_history.append(("assistant", msg["content"]))
 
         retrieval_query = query_chain.invoke(
             {"input": state["query"], "chat_history": chat_history}
@@ -149,15 +144,13 @@ class RagInferenceLangGraph:
 
     def _generate_answer(self, state: RagState) -> dict:
         """Generate an answer based on the context and query."""
-        # Convert messages to the format expected by stuff_documents_chain
+        # Convert messages to langchain format for stuff docs chain
         chat_history = []
         for msg in state["messages"]:
-            if msg.get("role") == "user" or isinstance(msg, HumanMessage):
-                content = msg.get("content") if isinstance(msg, dict) else msg.content
-                chat_history.append(("human", content))
-            elif msg.get("role") == "assistant" or isinstance(msg, AIMessage):
-                content = msg.get("content") if isinstance(msg, dict) else msg.content
-                chat_history.append(("assistant", content))
+            if msg["role"] == "user":
+                chat_history.append(("human", msg["content"]))
+            elif msg["role"] == "assistant":
+                chat_history.append(("assistant", msg["content"]))
 
         chain = create_stuff_documents_chain(
             self.eval_llm,
@@ -177,7 +170,6 @@ class RagInferenceLangGraph:
 
     def _update_messages(self, state: RagState) -> dict:
         """Update the message history with the new query and answer."""
-        # Use LangGraph's add_messages annotator to manage message state
         return {
             "messages": [
                 {"role": "user", "content": state["query"]},
@@ -185,56 +177,39 @@ class RagInferenceLangGraph:
             ]
         }
 
-    def query(self, query: str) -> dict:
+    def query(self, query: str, thread_id: Optional[str] = None) -> dict:
         """
-        Process a single query through the RAG pipeline.
-        This maintains the identical interface to the original RagInference.
+        Process a query through the RAG pipeline.
 
         Args:
             query: The user's question
+            thread_id: Optional thread identifier for conversation persistence
 
         Returns:
-            dict: Contains the answer and other chain outputs
+            dict: The final state containing the answer and other outputs
         """
-        # Use the default thread ID for maintaining conversation state
-        config = {"configurable": {"thread_id": self.default_thread_id}}
+        # Create config with thread_id if provided
+        config = {"configurable": {"thread_id": thread_id}} if thread_id else {}
 
-        # Initialize state
-        initial_state = {"query": query, "thread_id": self.default_thread_id}
-
-        # Invoke the graph
-        result = cast(Any, self.graph).invoke(initial_state, config=config)
-
-        # Update instance chat_history for compatibility with original interface
-        self.chat_history = self._convert_messages_to_tuples(result.get("messages", []))
-
-        # Return the result with answer for compatibility
-        return {
-            "answer": result.get("answer", ""),
-            "context": result.get("context", []),
-            "retrieval_query": result.get("retrieval_query", ""),
-        }
-
-    def clear_history(self) -> None:
-        """Clear the chat history."""
-        # Clear the instance variable for backward compatibility
-        self.chat_history = []
-
-        # Set empty state for the default thread
-        try:
-            cast(Any, self.memory).clear(thread_id=self.default_thread_id)
-        except:
-            # Fallback if clear method is not available
-            empty_state = {
+        # Determine initial state based on whether we have a thread_id
+        if thread_id:
+            # If we have a thread_id, we're continuing a conversation
+            # Initialize with just the new query
+            initial_state = {"query": query, "thread_id": thread_id}
+        else:
+            # Starting a new conversation
+            initial_state = {
                 "messages": [],
-                "query": "",
+                "query": query,
                 "retrieval_query": "",
                 "context": [],
                 "answer": "",
-                "thread_id": self.default_thread_id,
+                "thread_id": "",
             }
-            config = {"configurable": {"thread_id": self.default_thread_id}}
-            cast(Any, self.graph).invoke(empty_state, config=config)
+
+        # Invoke the graph
+        result = self.graph.invoke(initial_state, config=config)
+        return result
 
     async def batch_query_for_eval(
         self, queries: dict[str, str]
@@ -252,7 +227,7 @@ class RagInferenceLangGraph:
 
         # Process each query individually (no chat history)
         for query_id, query in queries.items():
-            # Create a new thread_id for each query
+            # Create a new thread_id for each query to isolate them
             thread_id = f"eval_{query_id}"
 
             # Initialize state for fresh conversation
@@ -271,35 +246,23 @@ class RagInferenceLangGraph:
             # Process query
             result = self.graph.invoke(initial_state, config=config)
 
-            # Format result to match original implementation
-            formatted_result = {
+            # Add to results with the same format as the original
+            result_with_id = {
+                **result,
                 "query_id": query_id,
-                "answer": result.get("answer", ""),
                 "custom_id": result.get("answer", ""),
-                "context": result.get("context", []),
-                "retrieval_query": result.get("retrieval_query", ""),
             }
-            results[query_id] = formatted_result
+            results[query_id] = result_with_id
 
-            # Clean up the thread to avoid memory leaks
-            try:
-                cast(Any, self.memory).clear(thread_id=thread_id)
-            except:
-                pass
+            # Clean up the thread by setting an empty state
+            empty_state = {
+                "messages": [],
+                "query": "",
+                "retrieval_query": "",
+                "context": [],
+                "answer": "",
+                "thread_id": thread_id,
+            }
+            self.graph.invoke(empty_state, config=config)
 
         return results
-
-    def _convert_messages_to_tuples(self, messages: list) -> list[tuple[str, str]]:
-        """Convert LangGraph messages to the tuple format used by the original implementation."""
-        result = []
-        for msg in messages:
-            if isinstance(msg, dict):
-                if msg.get("role") == "user":
-                    result.append(("human", msg.get("content", "")))
-                elif msg.get("role") == "assistant":
-                    result.append(("assistant", msg.get("content", "")))
-            elif isinstance(msg, HumanMessage):
-                result.append(("human", msg.content))
-            elif isinstance(msg, AIMessage):
-                result.append(("assistant", msg.content))
-        return result

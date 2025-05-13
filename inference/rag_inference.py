@@ -106,9 +106,6 @@ class RagInference:
 
         return result
 
-    def clear_history(self) -> None:
-        """Clear the chat history."""
-        self.chat_history = []
 
     async def batch_query_for_eval(
         self, queries: dict[str, str]
