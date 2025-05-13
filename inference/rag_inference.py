@@ -12,7 +12,7 @@ from util.root_only_tracer import RootOnlyTracer
 from prompts import load_prompts
 from langchain_core.runnables import RunnableConfig
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
-from inference.rate_limited_cohere_rerank import RateLimitedCohereRerank
+from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rate_limiters import openai_rate_limiter
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
