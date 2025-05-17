@@ -12,6 +12,7 @@ langchain-qdrant
 langchain-cohere~=0.4.4
 pinecone
 debugpy
+grandalf~=0.8
 torch
 transformers
 sentence-transformers
@@ -33,6 +34,7 @@ lxml
 bs4~=0.0.2
 pinecone-notebooks
 pypdf
+pyppeteer~=2.0.0
 openai
 google-api-python-client
 text-dedup

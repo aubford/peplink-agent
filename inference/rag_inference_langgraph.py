@@ -7,6 +7,8 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_core.runnables.graph import MermaidDrawMethod
+from langchain_core.runnables.config import RunnableConfig
 
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
@@ -116,17 +118,25 @@ class RagInferenceLangGraph:
         if self.minimal_tracer:
             config["callbacks"] = [RootOnlyTracer(project_name="langchain-pepwave")]
 
-        return graph_builder.compile(checkpointer=self.memory, **config)
+        compiled_graph = graph_builder.compile(checkpointer=self.memory, **config)
+        # Print ASCII visualization of the graph
+        compiled_graph.get_graph().print_ascii()
+        # Save PNG visualization using Mermaid with local rendering
+        compiled_graph.get_graph(xray=True).draw_mermaid_png(
+            output_file_path="graph_diagram.png",
+            draw_method=MermaidDrawMethod.PYPPETEER,
+            max_retries=3,
+            retry_delay=2.0,
+        )
+        return compiled_graph
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
+        print(state)
         """Generate a retrieval query considering chat history."""
         query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
 
-        # Pass messages as-is (list of dicts)
-        chat_history = state["messages"]
-
         retrieval_query = query_chain.invoke(
-            {"input": state["query"], "chat_history": chat_history}
+            {"input": state["query"], "chat_history": state["messages"]}
         )
 
         return {"retrieval_query": retrieval_query}
@@ -138,9 +148,6 @@ class RagInferenceLangGraph:
 
     def _generate_answer(self, state: RagState) -> dict:
         """Generate an answer based on the context and query."""
-        # Pass messages as-is (list of dicts)
-        chat_history = state["messages"]
-
         chain = create_stuff_documents_chain(
             self.eval_llm,
             self.messages,
@@ -150,7 +157,7 @@ class RagInferenceLangGraph:
         answer = chain.invoke(
             {
                 "input": state["query"],
-                "chat_history": chat_history,
+                "chat_history": state["messages"],
                 "context": state["context"],
             }
         )
@@ -166,92 +173,23 @@ class RagInferenceLangGraph:
             ]
         }
 
-    def query(self, query: str, thread_id: Optional[str] = None) -> dict:
+    def query(self, query: str, thread_id: str) -> dict:
         """
         Process a query through the RAG pipeline.
 
         Args:
             query: The user's question
-            thread_id: Optional thread identifier for conversation persistence
+            thread_id: Thread identifier for conversation persistence
 
         Returns:
             dict: The final state containing the answer and other outputs
         """
-        # Create config with thread_id if provided
-        config = {"configurable": {"thread_id": thread_id}} if thread_id else {}
-
-        # Determine initial state based on whether we have a thread_id
-        if thread_id:
-            # If we have a thread_id, we're continuing a conversation
-            # Initialize with just the new query
-            initial_state = {"query": query, "thread_id": thread_id}
-        else:
-            # Starting a new conversation
-            initial_state = {
-                "messages": [],
-                "query": query,
-                "retrieval_query": "",
-                "context": [],
-                "answer": "",
-                "thread_id": "",
-            }
+        # Initialize with just the new query
+        initial_state = {"query": query, "thread_id": thread_id}
 
         # Invoke the graph
-        result = self.graph.invoke(initial_state, config=config)
+        result = self.graph.invoke(
+            initial_state,
+            config={"configurable": {"thread_id": thread_id}},
+        )
         return result
-
-    async def batch_query_for_eval(
-        self, queries: dict[str, str]
-    ) -> dict[str, dict[str, Any]]:
-        """
-        Process multiple queries in parallel for evaluation purposes.
-
-        Args:
-            queries: Dictionary of query identifiers to queries
-
-        Returns:
-            dict: Mapping of query identifiers to results
-        """
-        results = {}
-
-        # Process each query individually (no chat history)
-        for query_id, query in queries.items():
-            # Create a new thread_id for each query to isolate them
-            thread_id = f"eval_{query_id}"
-
-            # Initialize state for fresh conversation
-            initial_state = {
-                "messages": [],
-                "query": query,
-                "retrieval_query": "",
-                "context": [],
-                "answer": "",
-                "thread_id": thread_id,
-            }
-
-            # Add thread_id to config
-            config = {"configurable": {"thread_id": thread_id}}
-
-            # Process query
-            result = self.graph.invoke(initial_state, config=config)
-
-            # Add to results with the same format as the original
-            result_with_id = {
-                **result,
-                "query_id": query_id,
-                "custom_id": result.get("answer", ""),
-            }
-            results[query_id] = result_with_id
-
-            # Clean up the thread by setting an empty state
-            empty_state = {
-                "messages": [],
-                "query": "",
-                "retrieval_query": "",
-                "context": [],
-                "answer": "",
-                "thread_id": thread_id,
-            }
-            self.graph.invoke(empty_state, config=config)
-
-        return results
