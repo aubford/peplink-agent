@@ -17,7 +17,7 @@ class BatchChatOpenAI(BaseChatModel):
 
     model_name: str = Field(default="gpt-4.1-nano", alias="model")
     """Model name to use."""
-    temperature: float = 0.2
+    temperature: float = 0.0
     """What sampling temperature to use."""
     model_kwargs: dict[str, Any] = Field(default_factory=dict)
     """Holds any model parameters valid for `create` call not explicitly specified."""

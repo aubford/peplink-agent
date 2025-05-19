@@ -3,9 +3,10 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
-from load.batch_manager import BatchManager
-from evals.batch_llm import BatchChatOpenAI
-from inference.rag_inference import RagInference
+
+from evals.eval_batch_inference_manager import EvalBatchInferenceManager
+from evals.evals_utils import evals_dir
+from inference.rag_inference import InferenceBase
 from prompts import load_prompts
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -21,7 +22,7 @@ system_prompt = PROMPTS['ragas_eval/mock_exam_system'].format(
     system_prompt=PROMPTS['inference/system']
 )
 
-messages_prompt = ChatPromptTemplate(
+exam_instructions_messages = ChatPromptTemplate(
     [
         ("system", system_prompt),
         ("human", PROMPTS['ragas_eval/mock_exam_example_query']),
@@ -34,33 +35,22 @@ messages_prompt = ChatPromptTemplate(
 class MockExam:
     def __init__(
         self,
-        evals_dir: Path,
         run_name: str,
-        llm_model: str,
-        pinecone_index_name: str,
+        inference: InferenceBase,
         output_dir: Path,
         should_create_batch_job: bool = True,
         sample: Any = False,
     ):
         self.output_dir = output_dir
-        runs_dir = evals_dir / "runs"
         self.should_create_batch_job = should_create_batch_job
-        self.batch_manager = BatchManager(
-            base_path=runs_dir / run_name / "batches",
-            endpoint="/v1/chat/completions",
+        self.inference_manager = EvalBatchInferenceManager(
+            run_name=run_name,
             batch_name="mock_exam_batch",
             schema=MockExamOutput,
+            conversation_template=exam_instructions_messages,
+            inference=inference,
         )
-        self.rag_inference = RagInference(
-            llm_model=llm_model,
-            pinecone_index_name=pinecone_index_name,
-            messages=messages_prompt,
-            eval_llm=BatchChatOpenAI(
-                model=llm_model,
-                temperature=0,
-                batch_manager=self.batch_manager,
-            ),
-        )
+
         filename = (
             "certified_engineer_exam_sample.json"
             if sample
@@ -89,8 +79,8 @@ class MockExam:
             queries[q["question_id"]] = query
 
         if self.should_create_batch_job:
-            self.batch_manager.clear_batch_files()
-        results = await self.rag_inference.batch_query_for_eval(queries)
+            self.inference_manager.clear_batch_files()
+        results = await self.inference_manager.run_queries(queries)
         for q in self.mock_exam_questions:
             q["custom_id"] = results[q["question_id"]]["answer"]
 
@@ -98,10 +88,10 @@ class MockExam:
             json.dump(self.mock_exam_questions, f, indent=2)
 
         if self.should_create_batch_job:
-            self.batch_manager.create_batch_job()
+            self.inference_manager.create_batch_job()
 
     def get_results(self) -> tuple[str, list[dict[str, str]]]:
-        batch_results = self.batch_manager.get_content_if_ready()
+        batch_results = self.inference_manager.get_content_if_ready()
 
         for q in self.mock_exam_questions:
             custom_id = q["custom_id"]

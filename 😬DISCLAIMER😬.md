@@ -1,6 +1,12 @@
 😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬
 
-The code in this repository desperately needs to be cleaned up and is in no way
-representative of the quality of code I would commit to a shared repository!!
+This is an exploratory prototyping project and the code is not representative
+of the quality I would commit to a collaborative repository.
+
+Demo of my progress mastering AI engineering techniques, not my production code.
+
+Cleaning it up to be more of a portfolio exhibit is on my list of priorities.
+
+Thanks for checking it out!
 
 😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬😬

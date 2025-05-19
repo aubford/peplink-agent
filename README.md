@@ -15,6 +15,8 @@ explainable feedback on the impact of different modeling, retrieval, and data pr
 
 This is the also first iteration of a larger project to create an OSS solution for quickly deploying a RAG chatbot for any given Discourse forum.
 
+Also see: `😬DISCLAIMER😬.md`.
+
 ## Architecture & Core Functionality
 
 ### 1. Data Extraction (`extract/`)

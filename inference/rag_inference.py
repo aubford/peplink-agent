@@ -1,35 +1,37 @@
-from typing import Any
+from abc import ABC, abstractmethod
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
 )
-from langchain_core.language_models.chat_models import BaseChatModel
 from util.root_only_tracer import RootOnlyTracer
+from load.batch_manager import BatchManager
+from evals.batch_llm import BatchChatOpenAI
 from prompts import load_prompts
 from langchain_core.runnables import RunnableConfig
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rate_limiters import openai_rate_limiter
+from langchain_core.runnables.base import Runnable
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
 
 PROMPTS = load_prompts()
 
-messages_prompt = ChatPromptTemplate(
+default_conversation_template = ChatPromptTemplate(
     [
-        ("system", PROMPTS['inference/system']),
+        ("system", PROMPTS["inference/system"]),
         ("placeholder", "{chat_history}"),
         ("human", "{input}"),
     ]
 )
 
 
-class RagInference:
+class InferenceBase(ABC):
     def __init__(
         self,
         llm_model: str,
@@ -37,101 +39,81 @@ class RagInference:
         embedding_model: str = "text-embedding-3-large",
         temperature: float = 1,  # openai default temp
         streaming: bool = False,
-        eval_llm: BaseChatModel | None = None,
-        messages: ChatPromptTemplate = messages_prompt,
         minimal_tracer: bool = False,
     ):
-        self.embeddings = OpenAIEmbeddings(model=embedding_model)
         self.vector_store = PineconeVectorStore(
             index_name=pinecone_index_name,
-            embedding=self.embeddings,
+            embedding=OpenAIEmbeddings(model=embedding_model),
             text_key="page_content",
         )
+        self.llm_model = llm_model
+        self.temperature = temperature
+        self.streaming = streaming
+        self.pinecone_index_name = pinecone_index_name
 
-        self.llm = ChatOpenAI(
-            model=llm_model,
-            temperature=temperature,
-            streaming=streaming,
+        self.config = RunnableConfig({"run_name": "rag_inference"})
+        if minimal_tracer:
+            self.config["callbacks"] = [
+                RootOnlyTracer(project_name="langchain-pepwave")
+            ]
+
+    @property
+    def llm(self):
+        return ChatOpenAI(
+            model=self.llm_model,
+            temperature=self.temperature,
+            streaming=self.streaming,
             rate_limiter=openai_rate_limiter,
         )
 
-        retriever = self.vector_store.as_retriever(
+    def set_temperature(self, temperature: float):
+        self.temperature = temperature
+
+    @abstractmethod
+    def compile(
+        self,
+        conversation_template: BasePromptTemplate,
+        batch_manager: BatchManager | None,
+    ) -> Runnable:
+        pass
+
+
+class RagInference(InferenceBase):
+    def compile(
+        self,
+        conversation_template: BasePromptTemplate,
+        batch_manager: BatchManager | None = None,
+    ) -> Runnable:
+        final_llm = (
+            BatchChatOpenAI(
+                model=self.llm_model,
+                batch_manager=batch_manager,
+            )
+            if batch_manager is not None
+            else self.llm
+        )
+
+        base_retriever = self.vector_store.as_retriever(
             search_type="mmr", search_kwargs={"k": 30, "fetch_k": 50}
         )
 
         compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=20)
-        self.retriever = ContextualCompressionRetriever(
-            base_compressor=compressor, base_retriever=retriever
+        retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=base_retriever
         )
 
-        config = RunnableConfig({"run_name": "rag_inference"})
-        if minimal_tracer:
-            config["callbacks"] = [RootOnlyTracer(project_name="langchain-pepwave")]
-
-        self.retrieval_chain = (
+        return (
             RunnablePassthrough.assign(
                 retrieval_query=get_history_aware_retrieval_query_chain(llm=self.llm)
             )
             .assign(
-                context=(lambda x: x["retrieval_query"]) | self.retriever,
+                context=(lambda x: x["retrieval_query"]) | retriever,
             )
             .assign(
                 answer=create_stuff_documents_chain(
-                    eval_llm or self.llm,
-                    messages,
+                    final_llm,
+                    conversation_template,
                     document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
                 )
             )
-        ).with_config(config)
-
-        self.chat_history: list[tuple[str, str]] = []
-
-    def query(self, query: str) -> dict:
-        """
-        Process a single query through the RAG pipeline.
-
-        Args:
-            query: The user's question
-
-        Returns:
-            dict: Contains the answer and other chain outputs
-        """
-        result = self.retrieval_chain.invoke(
-            {"input": query, "chat_history": self.chat_history}
-        )
-
-        # Update chat history
-        self.chat_history.append(("human", query))
-        self.chat_history.append(("assistant", result["answer"]))
-
-        return result
-
-
-    async def batch_query_for_eval(
-        self, queries: dict[str, str]
-    ) -> dict[str, dict[str, Any]]:
-        """
-        Process multiple queries in parallel for evaluation purposes using LangChain's
-        native batch processing capabilities.
-
-        Args:
-            queries: Dictionary of query identifiers to queries
-
-        Returns:
-            dict: Mapping of query identifiers to results
-        """
-
-        # Get just the inputs for processing
-        batch_inputs = [
-            {"query_id": query_id, "input": query, "chat_history": []}
-            for query_id, query in queries.items()
-        ]
-
-        # Use native batch processing with proper rate limiting
-        results = await self.retrieval_chain.abatch(
-            batch_inputs, config={"max_concurrency": 20}
-        )
-
-        for result in results:
-            result["custom_id"] = result["answer"]
-        return {result["query_id"]: result for result in results}
+        ).with_config(self.config)

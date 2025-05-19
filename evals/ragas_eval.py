@@ -4,8 +4,6 @@ from ragas.llms import LangchainLLMWrapper
 from langchain_openai import ChatOpenAI
 from ragas import evaluate
 from ragas.testset.synthesizers.testset_schema import Testset
-from load.batch_manager import BatchManager
-from evals.batch_llm import BatchChatOpenAI
 from ragas.metrics import (
     NonLLMContextRecall,
     NonLLMContextPrecisionWithReference,
@@ -20,7 +18,11 @@ from ragas.metrics import (
     EmbeddingContextPrecision,
     EmbeddingContextRecall,
 )
-from inference.rag_inference import RagInference
+
+from evals.eval_batch_inference_manager import EvalBatchInferenceManager
+from inference.rag_inference import (
+    default_conversation_template, InferenceBase,
+)
 from evals.take_mock_exam import MockExam
 import pandas as pd
 import os
@@ -30,13 +32,11 @@ from typing import cast, Any, Literal
 
 from dotenv import load_dotenv
 from load.document_index import DocumentIndex
-from util.util_main import handle_file_exists
+from util.util_main import handle_file_exists, models
 from langsmith import tracing_context
 
 load_dotenv()
 
-
-models = {"full": "gpt-4.1", "mini": "gpt-4.1-mini", "nano": "gpt-4.1-nano"}
 MAIN_TESTSET_NAME = "testset-200_main_testset_25-04-23"
 evals_dir = Path(__file__).parent
 
@@ -46,24 +46,18 @@ class RagasEval:
     def __init__(
         self,
         run_name: str,
-        inference_llm: str,
         eval_llm: str,
-        pinecone_index_name: str,
+        inference: InferenceBase,
         query_column: str = "query",
         testset_name: str = MAIN_TESTSET_NAME,
         sample: tuple | Literal[False] = False,
         test_run: bool = False,
         should_create_batch_job: bool = True,
-        # Faithfulness: response -> context (do the claims in answer come from context)
-        # This metric is expensive and w/ modern LLMs faithfulness is almost always near 100%
-        # unless there is a major prompting issue.  Turn this on occasionally to check, but
-        # otherwise leave it off.
+        # Faithfulness: response -> context (do the claims in answer come from context); this metric is expensive
         with_faithfulness: bool = False,
     ):
         self.with_faithfulness = with_faithfulness
         self.query_column = query_column
-        inference_llm_model = models[inference_llm]
-        eval_llm_model = models[eval_llm]
 
         generated_testset_df = pd.read_json(
             evals_dir / "testsets" / testset_name / "generated_testset.json"
@@ -89,38 +83,28 @@ class RagasEval:
         self.test_run = test_run
         self.should_create_batch_job = should_create_batch_job
 
-        self.batch_manager = BatchManager(
-            base_path=self.output_dir / "batches",
-            endpoint="/v1/chat/completions",
+        self.inference_manager = EvalBatchInferenceManager(
+            run_name=run_name,
             batch_name=f"{testset_name}_batch",
-        )
-        self.batch_contexts_path = (
-            self.batch_manager.batch_path / "batch_contexts.parquet"
+            conversation_template=default_conversation_template,
+            inference=inference,
         )
 
-        self.rag_inference = RagInference(
-            pinecone_index_name=pinecone_index_name,
-            llm_model=inference_llm_model,
-            eval_llm=BatchChatOpenAI(
-                model=inference_llm_model,
-                temperature=0,
-                batch_manager=self.batch_manager,
-            ),
+        self.batch_contexts_path = (
+            self.inference_manager.batch_path / "batch_contexts.parquet"
         )
 
         self.mock_exam = MockExam(
-            evals_dir=evals_dir,
             run_name=run_name,
-            llm_model=inference_llm_model,
-            pinecone_index_name=pinecone_index_name,
+            inference=inference,
+            output_dir=self.output_dir,
             should_create_batch_job=should_create_batch_job,
             sample=sample,
-            output_dir=self.output_dir,
         )
 
         self.eval_llm = LangchainLLMWrapper(
             ChatOpenAI(
-                model=eval_llm_model,
+                model=eval_llm,
                 temperature=0,
             )
         )
@@ -130,9 +114,9 @@ class RagasEval:
             "metadata": dedent(
                 f"""
                 Testset name: {testset_name}
-                Inference LLM: {inference_llm}
+                Inference LLM: {inference.llm_model}
                 Eval LLM: {eval_llm}
-                Pinecone index: {pinecone_index_name}
+                Pinecone index: {inference.pinecone_index_name}
                 Sample: {str(sample[0]) + ", " + str(sample[1]) if sample else "full"}
                 Datetime: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 """
@@ -203,7 +187,7 @@ class RagasEval:
         df.to_parquet(self.batch_contexts_path)
 
     def get_batch_results(self) -> None:
-        batch_results = self.batch_manager.get_content_if_ready()
+        batch_results = self.inference_manager.get_content_if_ready()
         batch_contexts = pd.read_parquet(self.batch_contexts_path)
         batch_contexts["context"] = batch_contexts["context"].apply(json.loads)
 
@@ -219,8 +203,8 @@ class RagasEval:
     def apply_results_to_testset(self, results: pd.DataFrame):
         # Process results and update testset w/ the answer and contexts
         for test_row in self.test_set:
+            eval_sample = test_row.eval_sample
             try:
-                eval_sample = test_row.eval_sample
                 # testset cluster_id is now the index of results
                 result_row = results.loc[eval_sample.id]
 
@@ -241,15 +225,15 @@ class RagasEval:
 
             # dont clear existing batch files when testing
             if self.should_create_batch_job:
-                self.batch_manager.clear_batch_files()
-            results = await self.rag_inference.batch_query_for_eval(async_tasks)
+                self.inference_manager.clear_batch_files()
+            results = await self.inference_manager.run_queries(async_tasks)
             self.create_batch_contexts_file(results)
 
             await self.mock_exam.generate_batchfile()
 
             # create a new batch job if not testing
             if self.should_create_batch_job:
-                self.batch_manager.create_batch_job()
+                self.inference_manager.create_batch_job()
 
     def save_metrics_summary(self, eval_result_df: pd.DataFrame) -> None:
         """

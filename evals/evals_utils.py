@@ -6,11 +6,13 @@ from ragas.testset.graph import KnowledgeGraph
 from util.util_main import to_serialized_parquet
 from ragas.testset.graph import Node
 
-output_dir = Path(__file__).parent / "output"
+evals_dir = Path(__file__).parent
+output_dir = evals_dir / "output"
 kg_json_path = output_dir / "knowledge_graph.json"
 output_nodes_path = output_dir / "__nodes.parquet"
 output_relationships_path = output_dir / "__relationships.parquet"
 kg_input_data_path = output_dir / "kg_input_data.parquet"
+runs_dir = evals_dir / "runs"
 
 
 def node_meta(node: Node) -> dict[str, t.Any]:

@@ -1,27 +1,24 @@
-from typing import Annotated, Any, Optional, cast
+from typing import Annotated
 from typing_extensions import TypedDict
 
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_pinecone import PineconeVectorStore
-from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_core.runnables.graph import MermaidDrawMethod
-from langchain_core.runnables.config import RunnableConfig
 
 from inference.history_aware_retrieval_query import (
     get_history_aware_retrieval_query_chain,
 )
 from inference.cohere_rerank import RateLimitedCohereRerank
-from inference.rate_limiters import openai_rate_limiter
-from util.root_only_tracer import RootOnlyTracer
+from inference.rag_inference import InferenceBase
 from prompts import load_prompts
 
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.state import CompiledStateGraph
+from load.batch_manager import BatchManager
+from evals.batch_llm import BatchChatOpenAI
 
 
 # Load prompts
@@ -48,7 +45,7 @@ class RagState(TypedDict):
     thread_id: str  # Thread identifier for persistence
 
 
-class RagInferenceLangGraph:
+class RagInferenceLangGraph(InferenceBase):
     def __init__(
         self,
         llm_model: str,
@@ -56,50 +53,38 @@ class RagInferenceLangGraph:
         embedding_model: str = "text-embedding-3-large",
         temperature: float = 1,
         streaming: bool = False,
-        eval_llm: BaseChatModel | None = None,
-        messages: ChatPromptTemplate = messages_prompt,
         minimal_tracer: bool = False,
     ):
-        # Initialize components
-        self.embeddings = OpenAIEmbeddings(model=embedding_model)
-        self.vector_store = PineconeVectorStore(
-            index_name=pinecone_index_name,
-            embedding=self.embeddings,
-            text_key="page_content",
-        )
-
-        self.llm = ChatOpenAI(
-            model=llm_model,
+        super().__init__(
+            llm_model=llm_model,
+            pinecone_index_name=pinecone_index_name,
+            embedding_model=embedding_model,
             temperature=temperature,
             streaming=streaming,
-            rate_limiter=openai_rate_limiter,
+            minimal_tracer=minimal_tracer
         )
 
-        retriever = self.vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 30, "fetch_k": 50}
-        )
-
-        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=20)
-        self.retriever = ContextualCompressionRetriever(
-            base_compressor=compressor, base_retriever=retriever
-        )
-
-        self.eval_llm = eval_llm or self.llm
-        self.messages = messages
-        self.minimal_tracer = minimal_tracer
+        self.output_llm = self.llm
+        self.conversation_template = None
 
         # Initialize memory saver for persistence
         self.memory = InMemorySaver()
 
-        # Build the graph
-        self.graph = self._build_graph()
+    def compile(
+        self,
+        conversation_template: BasePromptTemplate,
+        batch_manager: BatchManager | None = None,
+    ) -> CompiledStateGraph:
+        self.conversation_template = conversation_template
+        if batch_manager is not None:
+            self.output_llm = BatchChatOpenAI(
+                model=self.llm_model,
+                batch_manager=batch_manager,
+            )
 
-    def _build_graph(self) -> CompiledStateGraph:
-        """Build the RAG graph with nodes for each step in the pipeline."""
-        # Create the graph
         graph_builder = StateGraph(RagState)
 
-        # Add nodes for each step in the RAG pipeline
+        # Nodes
         graph_builder.add_node(
             "generate_retrieval_query", self._generate_retrieval_query
         )
@@ -107,28 +92,17 @@ class RagInferenceLangGraph:
         graph_builder.add_node("generate_answer", self._generate_answer)
         graph_builder.add_node("update_messages", self._update_messages)
 
-        # Define the graph flow
+        # Edges
         graph_builder.add_edge(START, "generate_retrieval_query")
         graph_builder.add_edge("generate_retrieval_query", "retrieve_context")
         graph_builder.add_edge("retrieve_context", "generate_answer")
         graph_builder.add_edge("generate_answer", "update_messages")
 
-        # Compile the graph with memory
-        config = {}
-        if self.minimal_tracer:
-            config["callbacks"] = [RootOnlyTracer(project_name="langchain-pepwave")]
-
-        compiled_graph = graph_builder.compile(checkpointer=self.memory, **config)
-        # Print ASCII visualization of the graph
-        compiled_graph.get_graph().print_ascii()
-        # Save PNG visualization using Mermaid with local rendering
-        compiled_graph.get_graph(xray=True).draw_mermaid_png(
-            output_file_path="graph_diagram.png",
-            draw_method=MermaidDrawMethod.PYPPETEER,
-            max_retries=3,
-            retry_delay=2.0,
-        )
-        return compiled_graph
+        # Compile
+        compiled_graph = graph_builder.compile(checkpointer=self.memory)
+        self._draw_graph(compiled_graph)
+        graph = compiled_graph.with_config(self.config)
+        return graph
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
         print(state)
@@ -143,14 +117,22 @@ class RagInferenceLangGraph:
 
     def _retrieve_context(self, state: RagState) -> dict:
         """Retrieve relevant documents based on the query."""
-        context = self.retriever.invoke(state["retrieval_query"])
+        retriever_base = self.vector_store.as_retriever(
+            search_type="mmr", search_kwargs={"k": 30, "fetch_k": 50}
+        )
+        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=20)
+        retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=retriever_base
+        )
+        context = retriever.invoke(state["retrieval_query"])
         return {"context": context}
 
     def _generate_answer(self, state: RagState) -> dict:
         """Generate an answer based on the context and query."""
+        assert self.conversation_template
         chain = create_stuff_documents_chain(
-            self.eval_llm,
-            self.messages,
+            self.output_llm,
+            self.conversation_template,
             document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
         )
 
@@ -173,23 +155,11 @@ class RagInferenceLangGraph:
             ]
         }
 
-    def query(self, query: str, thread_id: str) -> dict:
-        """
-        Process a query through the RAG pipeline.
-
-        Args:
-            query: The user's question
-            thread_id: Thread identifier for conversation persistence
-
-        Returns:
-            dict: The final state containing the answer and other outputs
-        """
-        # Initialize with just the new query
-        initial_state = {"query": query, "thread_id": thread_id}
-
-        # Invoke the graph
-        result = self.graph.invoke(
-            initial_state,
-            config={"configurable": {"thread_id": thread_id}},
+    def _draw_graph(self, compiled_graph: CompiledStateGraph):
+        compiled_graph.get_graph().print_ascii()
+        compiled_graph.get_graph(xray=True).draw_mermaid_png(
+            output_file_path="graph_diagram.png",
+            draw_method=MermaidDrawMethod.PYPPETEER,
+            max_retries=3,
+            retry_delay=2.0,
         )
-        return result

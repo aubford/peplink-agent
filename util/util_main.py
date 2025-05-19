@@ -238,3 +238,6 @@ def handle_file_exists(path: Path, should_raise: bool = False) -> Path | None:
         path.rename(backup_path)
         return backup_path
     return None
+
+
+models = {"full": "gpt-4.1", "mini": "gpt-4.1-mini", "nano": "gpt-4.1-nano"}
