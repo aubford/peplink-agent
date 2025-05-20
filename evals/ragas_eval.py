@@ -21,9 +21,10 @@ from ragas.metrics import (
 
 from evals.eval_batch_inference_manager import EvalBatchInferenceManager
 from inference.rag_inference import (
-    default_conversation_template, InferenceBase,
+    default_conversation_template,
+    InferenceBase,
 )
-from evals.take_mock_exam import MockExam
+from evals.mock_exam import MockExam
 import pandas as pd
 import os
 import json
@@ -32,7 +33,7 @@ from typing import cast, Any, Literal
 
 from dotenv import load_dotenv
 from load.document_index import DocumentIndex
-from util.util_main import handle_file_exists, models
+from util.util_main import handle_file_exists
 from langsmith import tracing_context
 
 load_dotenv()
@@ -56,6 +57,7 @@ class RagasEval:
         # Faithfulness: response -> context (do the claims in answer come from context); this metric is expensive
         with_faithfulness: bool = False,
     ):
+        inference.set_temperature(0)
         self.with_faithfulness = with_faithfulness
         self.query_column = query_column
 

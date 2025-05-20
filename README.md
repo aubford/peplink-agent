@@ -13,7 +13,7 @@ This project is also meant to be a platform for experimenting with various AI En
 I developed a rigorous, modular evaluation system that enables controlled experimentation and provides quantitative,
 explainable feedback on the impact of different modeling, retrieval, and data processing strategies.
 
-This is the also first iteration of a larger project to create an OSS solution for quickly deploying a RAG chatbot for any given Discourse forum.
+This is also the first iteration of a larger project to create an OSS solution for quickly deploying a RAG chatbot for any given Discourse forum.
 
 Also see: `😬DISCLAIMER😬.md`.
 
@@ -42,7 +42,7 @@ and prepares documents for vector storage.
 - **RagInference**: Implements a modular, history-aware RAG pipeline using LangChain, OpenAI LLMs, and Pinecone vector search.
 
 ### 5. Evaluation Framework (`evals/`)
-- **RAGAS**: Created a highly customized fork of the RAGAS library customized for the specific needs of this project. See repo `aubford/ragas`.
+- **RAGAS**: Created a highly customized fork of the RAGAS library customized for the specific needs of this project. See github repo `aubford/ragas`.
 - **Testset Generation**: Multi-hop QA testset creation using a knowledge graph strategy and LLM-driven prompt synthesis along with human refinement.
 - **RagasEval**: End-to-end RAG evaluation with metrics for context recall, precision, faithfulness, relevancy, and accuracy.
 - **MockExam**: A test module for pitting the chatbot against a combination of preparatory mock exam questions and the real Pepwave Certified Engineer Exam.
@@ -70,9 +70,9 @@ and prepares documents for vector storage.
 
 ## Design Highlights
 - **Evaluation**: The evaluation framework is the most complex part of the application. The knowledge graph and testset generation procedures are
-the product of many iterations and experiments. I was very happy with the quality of the main testset in `evals/testsets/testset-200_main_testset_25-04-23`
-so I committed it to the repo. I also did thorough testing to ensure that the metrics are consistent and meaningful at a reasonable price.
+the product of many iterations and experiments. I was very happy with the quality of the main testset in `evals/testsets/testset-200_main_testset_25-04-23`.
+I also did thorough testing to ensure that the metrics are consistent and meaningful at a reasonable price.
 - **Reproducibility**: All artifacts (raw, transformed, testsets, evaluation outputs) are versioned and stored for traceability.
-- **Prompt Engineering**: Spent a lot of time studying and experimenting with various prompt engineering techniques. Settled on a prompt management
-strategy that uses markdown files which can be easily viewed, edited and are versioned with the application instead of fancy cloud storage/versioning.
+- **Prompt Engineering**: Experimented with various prompt engineering techniques. Settled on a prompt management strategy that uses markdown files `/prompts`
+which can be easily comprehended, edited and are versioned with the application instead of resorting to fancy cloud storage/versioning options. I like the simplicity.
 - **Best Practices**: Type annotations, modular design, and clear separation of concerns throughout.

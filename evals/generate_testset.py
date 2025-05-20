@@ -61,7 +61,7 @@ class GenerateTestSet:
         - Only clusters meeting the minimum size are retained; process continues until `testset_size` clusters are
           found.
     - For each cluster, additional sibling nodes (sharing `parent_doc_id` or `post_id`) are appended, up to a token
-      budget (`max_context_token_count`) or a proportional cap (1.5x the non-sibling cluster size). Sibling nodes are
+      budget (`max_context_token_count`) or a proportional cap (50% the non-sibling cluster size). Sibling nodes are
       nodes that share a parent document or were forum comments/responses to the same original post.
     - For each node cluster, a prompt is constructed and sent to the LLM to generate:
         - A multi-hop query requiring synthesis of information from multiple documents.

@@ -210,6 +210,18 @@ def create_kg(df: pd.DataFrame, transforms: list[BaseGraphTransformation]) -> No
 3. Create a new KG that merges relationships with same source and target into a single relationship with a score based
 on a heuristic combining them.
 4. Filter out low scoring relationships (take the top half)?
+
+Final relationship types:
+- multi
+- technical_summary_embedding_cosine_similarity
+- title_embedding_cosine_similarity
+- entities_overlap_score
+- html_overlap_score
+- themes_overlap_score
+- sibling_technical_summary_embedding_cosine_similarity
+- sibling_title_embedding_cosine_similarity
+- sibling_themes_overlap_score
+- sibling_entities_overlap_score
 """
 
 with tracing_context(enabled=False):

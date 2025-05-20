@@ -50,18 +50,10 @@ class RagInferenceLangGraph(InferenceBase):
         self,
         llm_model: str,
         pinecone_index_name: str,
-        embedding_model: str = "text-embedding-3-large",
-        temperature: float = 1,
-        streaming: bool = False,
-        minimal_tracer: bool = False,
+        **kwargs,
     ):
         super().__init__(
-            llm_model=llm_model,
-            pinecone_index_name=pinecone_index_name,
-            embedding_model=embedding_model,
-            temperature=temperature,
-            streaming=streaming,
-            minimal_tracer=minimal_tracer
+            llm_model=llm_model, pinecone_index_name=pinecone_index_name, **kwargs
         )
 
         self.output_llm = self.llm

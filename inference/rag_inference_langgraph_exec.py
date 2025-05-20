@@ -17,12 +17,14 @@ class ChatLangGraph(RagInferenceLangGraph):
         self,
         llm_model: str,
         pinecone_index_name: str,
+        temperature: float = 1,
         minimal_tracer: bool = False,
     ):
         super().__init__(
             llm_model,
             pinecone_index_name,
             minimal_tracer=minimal_tracer,
+            temperature=temperature,
             streaming=True,
         )
         self.graph = self.compile(conversation_template=default_conversation_template)
@@ -34,6 +36,7 @@ class ChatLangGraph(RagInferenceLangGraph):
             config={"configurable": {"thread_id": thread_id}},
         )
         return result
+
 
 thread_id = "single_thread"
 if __name__ == "__main__":
