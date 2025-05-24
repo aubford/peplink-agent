@@ -2,7 +2,7 @@ from inference.rag_inference_langgraph import RagInferenceLangGraph
 from rag_inference import default_conversation_template
 
 from dotenv import load_dotenv
-from langchain.globals import set_debug, set_verbose
+from langchain.globals import set_verbose
 from langsmith import tracing_context
 
 load_dotenv()
@@ -37,6 +37,48 @@ class ChatLangGraph(RagInferenceLangGraph):
         )
         return result
 
+    def stream_query(self, query: str, thread_id: str):
+        """Stream the response token by token using LangGraph's messages streaming mode."""
+        initial_state = {"query": query, "thread_id": thread_id}
+
+        # Use stream with messages mode to get token-by-token streaming
+        for chunk in self.graph.stream(
+            initial_state,
+            config={"configurable": {"thread_id": thread_id}},
+            stream_mode="messages",
+        ):
+            # chunk is a tuple of (message_chunk, metadata)
+            if isinstance(chunk, tuple) and len(chunk) == 2:
+                message_chunk, metadata = chunk
+                # Only stream content from the generate_answer node (the LLM response)
+                if (
+                    hasattr(message_chunk, 'content')
+                    and message_chunk.content
+                    and metadata.get('langgraph_node') == 'generate_answer'
+                ):
+                    yield str(message_chunk.content)
+
+    async def astream_query(self, query: str, thread_id: str):
+        """Async version of stream_query for token-by-token streaming."""
+        initial_state = {"query": query, "thread_id": thread_id}
+
+        # Use astream with messages mode to get token-by-token streaming
+        async for chunk in self.graph.astream(
+            initial_state,
+            config={"configurable": {"thread_id": thread_id}},
+            stream_mode="messages",
+        ):
+            # chunk is a tuple of (message_chunk, metadata)
+            if isinstance(chunk, tuple) and len(chunk) == 2:
+                message_chunk, metadata = chunk
+                # Only stream content from the generate_answer node (the LLM response)
+                if (
+                    hasattr(message_chunk, 'content')
+                    and message_chunk.content
+                    and metadata.get('langgraph_node') == 'generate_answer'
+                ):
+                    yield str(message_chunk.content)
+
 
 thread_id = "single_thread"
 if __name__ == "__main__":
@@ -52,5 +94,8 @@ if __name__ == "__main__":
             if query.lower() == "exit":
                 break
 
-            result = rag_inference.query(query, thread_id)
-            print(f"\n\nAssistant: {result['answer']}\n")
+            # Demonstrate streaming
+            print("\n\nAssistant (streaming): ", end="", flush=True)
+            for token in rag_inference.stream_query(query, thread_id):
+                print(token, end="", flush=True)
+            print("\n")  # New line after streaming is complete

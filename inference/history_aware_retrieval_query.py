@@ -84,18 +84,10 @@ prompt_chain = {
     "input": lambda x: x["input"],
 } | PromptTemplate.from_template(prompt)
 
-# chat_history = [
-#     ("human", "This is the human message. \n\n It continues on another line."),
-#     ("assistant", "This is the assistant message."),
-# ]
-# output = prompt_chain.invoke({"chat_history": chat_history, "input": "user query goes here."})
-# print(output.text)
-
 
 def _has_no_chat_history(state: Dict[str, Any]) -> bool:
     """Check if chat history is empty and print the check for debugging."""
     chat_history = state.get("chat_history")
-    print(f"chat_history: {chat_history}")
     # Both empty string and empty list evaluate to False
     return not chat_history
 

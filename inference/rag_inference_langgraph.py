@@ -1,5 +1,4 @@
 from typing import Annotated
-from typing_extensions import TypedDict
 
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate
@@ -19,10 +18,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.state import CompiledStateGraph
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
-
-# Add Pydantic imports
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 # Load prompts
@@ -164,7 +160,7 @@ class RagInferenceLangGraph(InferenceBase):
         }
 
     def _draw_graph(self, compiled_graph: CompiledStateGraph):
-        compiled_graph.get_graph().print_ascii()
+        # compiled_graph.get_graph().print_ascii()
         compiled_graph.get_graph(xray=True).draw_mermaid_png(
             output_file_path="graph_diagram.png",
             draw_method=MermaidDrawMethod.PYPPETEER,
