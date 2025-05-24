@@ -15,6 +15,7 @@ from langchain_core.messages import (
     ChatMessage,
 )
 import textwrap
+from typing import Any, Dict
 
 prompt = (
     """## INSTRUCTIONS:
@@ -91,13 +92,20 @@ prompt_chain = {
 # print(output.text)
 
 
+def _has_no_chat_history(state: Dict[str, Any]) -> bool:
+    """Check if chat history is empty and print the check for debugging."""
+    chat_history = state.get("chat_history")
+    print(f"chat_history: {chat_history}")
+    # Both empty string and empty list evaluate to False
+    return not chat_history
+
+
 def get_history_aware_retrieval_query_chain(llm: BaseChatModel) -> Runnable:
     """Given a chat history, summarize it into a single question."""
 
     return RunnableBranch(
         (
-            # Both empty string and empty list evaluate to False
-            lambda x: not x.get("chat_history", False),
+            _has_no_chat_history,
             # If no chat history, then we just pass input to retriever
             (lambda x: x["input"]),
         ),

@@ -20,6 +20,10 @@ from langgraph.graph.state import CompiledStateGraph
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
 
+# Add Pydantic imports
+from pydantic import BaseModel, Field
+from typing import Optional
+
 
 # Load prompts
 PROMPTS = load_prompts()
@@ -33,16 +37,20 @@ messages_prompt = ChatPromptTemplate(
 )
 
 
-# Define the state schema
-class RagState(TypedDict):
-    """State for RAG inference system."""
+# Define the state schema using Pydantic
+class RagState(BaseModel):
+    """State for RAG inference system using Pydantic."""
 
-    messages: Annotated[list, add_messages]  # Chat history as messages
-    query: str  # Current user query
-    retrieval_query: str  # Possibly rewritten query based on chat history
-    context: list  # Retrieved documents
-    answer: str  # Generated answer
-    thread_id: str  # Thread identifier for persistence
+    messages: Annotated[list, add_messages] = Field(default_factory=list)
+    query: str = ""
+    retrieval_query: str = ""
+    context: list = Field(default_factory=list)
+    context_history: list = Field(default_factory=list)
+    cached_extra_context: list = Field(default_factory=list)
+    answer: str = ""
+    thread_id: str = "default"
+    cached_web_search: str | None = None
+    tool_call_count: int = 0
 
 
 class RagInferenceLangGraph(InferenceBase):
@@ -97,12 +105,11 @@ class RagInferenceLangGraph(InferenceBase):
         return graph
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
-        print(state)
         """Generate a retrieval query considering chat history."""
         query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
 
         retrieval_query = query_chain.invoke(
-            {"input": state["query"], "chat_history": state["messages"]}
+            {"input": state.query, "chat_history": state.messages}
         )
 
         return {"retrieval_query": retrieval_query}
@@ -110,14 +117,23 @@ class RagInferenceLangGraph(InferenceBase):
     def _retrieve_context(self, state: RagState) -> dict:
         """Retrieve relevant documents based on the query."""
         retriever_base = self.vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 30, "fetch_k": 50}
+            search_type="mmr", search_kwargs={"k": 60, "fetch_k": 100}
         )
-        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=20)
+        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=40)
         retriever = ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=retriever_base
         )
-        context = retriever.invoke(state["retrieval_query"])
-        return {"context": context}
+        retrieved_context = retriever.invoke(state.retrieval_query)
+        # todo: ensure these are ordered by rank
+        return {
+            "context": retrieved_context[0:20],
+            "cached_extra_context": retrieved_context[20:],
+            # todo: summary history in background thread
+            "context_history": [
+                *state.context_history,
+                *state.context,
+            ],
+        }
 
     def _generate_answer(self, state: RagState) -> dict:
         """Generate an answer based on the context and query."""
@@ -130,9 +146,9 @@ class RagInferenceLangGraph(InferenceBase):
 
         answer = chain.invoke(
             {
-                "input": state["query"],
-                "chat_history": state["messages"],
-                "context": state["context"],
+                "input": state.query,
+                "chat_history": state.messages,
+                "context": state.context,
             }
         )
 
@@ -142,8 +158,8 @@ class RagInferenceLangGraph(InferenceBase):
         """Update the message history with the new query and answer."""
         return {
             "messages": [
-                {"role": "user", "content": state["query"]},
-                {"role": "assistant", "content": state["answer"]},
+                {"role": "user", "content": state.query},
+                {"role": "assistant", "content": state.answer},
             ]
         }
 
