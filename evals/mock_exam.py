@@ -27,7 +27,7 @@ exam_instructions_messages = ChatPromptTemplate(
         ("system", system_prompt),
         ("human", PROMPTS['ragas_eval/mock_exam_example_query']),
         ("ai", PROMPTS['ragas_eval/mock_exam_example_answer']),
-        ("human", "{input}"),
+        ("human", "{query}"),
     ]
 )
 

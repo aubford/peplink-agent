@@ -28,7 +28,7 @@ class ChatRagInference(RagInference):
 
     def query(self, query: str) -> dict:
         result = self.retrieval_chain.invoke(
-            {"input": query, "chat_history": self.chat_history}
+            {"query": query, "chat_history": self.chat_history}
         )
 
         # Update chat history

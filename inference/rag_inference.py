@@ -26,7 +26,7 @@ default_conversation_template = ChatPromptTemplate(
     [
         ("system", PROMPTS["inference/system"]),
         ("placeholder", "{chat_history}"),
-        ("human", "{input}"),
+        ("human", "{query}"),
     ]
 )
 

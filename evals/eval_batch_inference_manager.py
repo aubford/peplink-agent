@@ -25,7 +25,7 @@ class EvalBatchInferenceManager(BatchManager):
 
         # ensure temp is 0 for eval operations
         inference.set_temperature(0)
-        self.retrieval_chain = inference.compile(
+        self.compiled_inference = inference.compile(
             conversation_template=conversation_template,
             batch_manager=self,
         )
@@ -44,15 +44,19 @@ class EvalBatchInferenceManager(BatchManager):
 
         # Get just the inputs for processing
         batch_inputs = [
-            {"query_id": query_id, "input": query, "chat_history": []}
-            for query_id, query in queries.items()
+            {"thread_id": thread_id, "query": query, "chat_history": []}
+            for thread_id, query in queries.items()
         ]
 
         # Use native batch processing with proper rate limiting
-        results = await self.retrieval_chain.abatch(
-            batch_inputs, config={"max_concurrency": 20}
+        results = await self.compiled_inference.abatch(
+            batch_inputs,
+            config=[
+                {"max_concurrency": 20, "configurable": {"thread_id": i["thread_id"]}}
+                for i in batch_inputs
+            ],
         )
 
         for result in results:
             result["custom_id"] = result["answer"]
-        return {result["query_id"]: result for result in results}
+        return {result["thread_id"]: result for result in results}

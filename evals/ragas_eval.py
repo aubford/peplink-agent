@@ -29,7 +29,7 @@ import pandas as pd
 import os
 import json
 from datetime import datetime
-from typing import cast, Any, Literal
+from typing import Callable, cast, Any, Literal
 
 from dotenv import load_dotenv
 from load.document_index import DocumentIndex
@@ -48,7 +48,7 @@ class RagasEval:
         self,
         run_name: str,
         eval_llm: str,
-        inference: InferenceBase,
+        inference_fact: Callable[..., InferenceBase],
         query_column: str = "query",
         testset_name: str = MAIN_TESTSET_NAME,
         sample: tuple | Literal[False] = False,
@@ -57,7 +57,6 @@ class RagasEval:
         # Faithfulness: response -> context (do the claims in answer come from context); this metric is expensive
         with_faithfulness: bool = False,
     ):
-        inference.set_temperature(0)
         self.with_faithfulness = with_faithfulness
         self.query_column = query_column
 
@@ -85,6 +84,7 @@ class RagasEval:
         self.test_run = test_run
         self.should_create_batch_job = should_create_batch_job
 
+        inference = inference_fact()
         self.inference_manager = EvalBatchInferenceManager(
             run_name=run_name,
             batch_name=f"{testset_name}_batch",
@@ -98,7 +98,7 @@ class RagasEval:
 
         self.mock_exam = MockExam(
             run_name=run_name,
-            inference=inference,
+            inference=inference_fact(),
             output_dir=self.output_dir,
             should_create_batch_job=should_create_batch_job,
             sample=sample,
@@ -164,6 +164,7 @@ class RagasEval:
         )
         df.drop(columns=["document_ids", "documents_text"], inplace=True)
         df["synthesizer_name"] = "custom"
+        df["id"] = df["id"].astype(str)
 
         return Testset.from_list(df.to_dict(orient="records"))
 
@@ -173,7 +174,7 @@ class RagasEval:
                 result["custom_id"]: [
                     cluster_id,
                     result["context"],
-                    result["input"],
+                    result["query"],
                     result["retrieval_query"],
                 ]
                 for cluster_id, result in results.items()

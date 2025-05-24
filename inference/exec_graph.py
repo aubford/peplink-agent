@@ -29,15 +29,7 @@ class ChatLangGraph(RagInferenceLangGraph):
         )
         self.graph = self.compile(conversation_template=default_conversation_template)
 
-    def query(self, query: str, thread_id: str) -> dict:
-        initial_state = {"query": query, "thread_id": thread_id}
-        result = self.graph.invoke(
-            initial_state,
-            config={"configurable": {"thread_id": thread_id}},
-        )
-        return result
-
-    def stream_query(self, query: str, thread_id: str):
+    def query(self, query: str, thread_id: str):
         """Stream the response token by token using LangGraph's messages streaming mode."""
         initial_state = {"query": query, "thread_id": thread_id}
 
@@ -58,7 +50,7 @@ class ChatLangGraph(RagInferenceLangGraph):
                 ):
                     yield str(message_chunk.content)
 
-    async def astream_query(self, query: str, thread_id: str):
+    async def aquery(self, query: str, thread_id: str):
         """Async version of stream_query for token-by-token streaming."""
         initial_state = {"query": query, "thread_id": thread_id}
 
@@ -96,6 +88,6 @@ if __name__ == "__main__":
 
             # Demonstrate streaming
             print("\n\nAssistant (streaming): ", end="", flush=True)
-            for token in rag_inference.stream_query(query, thread_id):
+            for token in rag_inference.query(query, thread_id):
                 print(token, end="", flush=True)
             print("\n")  # New line after streaming is complete

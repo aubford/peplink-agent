@@ -35,7 +35,7 @@ prompt = (
 
     ## User question to reformulate to include referenced context from the chat history:
 
-    {input}
+    {query}
     """
     )
 )
@@ -81,7 +81,7 @@ def format_messages(
 
 prompt_chain = {
     "chat_history": lambda x: format_messages(x["chat_history"]),
-    "input": lambda x: x["input"],
+    "query": lambda x: x["query"],
 } | PromptTemplate.from_template(prompt)
 
 
@@ -99,7 +99,7 @@ def get_history_aware_retrieval_query_chain(llm: BaseChatModel) -> Runnable:
         (
             _has_no_chat_history,
             # If no chat history, then we just pass input to retriever
-            (lambda x: x["input"]),
+            (lambda x: x["query"]),
         ),
         # If chat history, then we pass inputs to LLM chain, then to retriever
         prompt_chain | llm | StrOutputParser(),

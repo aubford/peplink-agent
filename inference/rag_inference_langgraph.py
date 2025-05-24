@@ -24,15 +24,6 @@ from pydantic import BaseModel, Field
 # Load prompts
 PROMPTS = load_prompts()
 
-messages_prompt = ChatPromptTemplate(
-    [
-        ("system", PROMPTS['inference/system']),
-        ("placeholder", "{chat_history}"),
-        ("human", "{input}"),
-    ]
-)
-
-
 # Define the state schema using Pydantic
 class RagState(BaseModel):
     """State for RAG inference system using Pydantic."""
@@ -47,6 +38,7 @@ class RagState(BaseModel):
     thread_id: str = "default"
     cached_web_search: str | None = None
     tool_call_count: int = 0
+    use_cohere: bool = False
 
 
 class RagInferenceLangGraph(InferenceBase):
@@ -102,10 +94,10 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
         """Generate a retrieval query considering chat history."""
-        query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
+        retrieval_query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
 
-        retrieval_query = query_chain.invoke(
-            {"input": state.query, "chat_history": state.messages}
+        retrieval_query = retrieval_query_chain.invoke(
+            {"query": state.query, "chat_history": state.messages}
         )
 
         return {"retrieval_query": retrieval_query}
@@ -142,7 +134,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         answer = chain.invoke(
             {
-                "input": state.query,
+                "query": state.query,
                 "chat_history": state.messages,
                 "context": state.context,
             }
