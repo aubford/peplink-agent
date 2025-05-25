@@ -60,3 +60,7 @@ matplotlib
 flashtext~=2.7
 pyvis
 pingouin
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart

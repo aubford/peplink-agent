@@ -1,4 +1,4 @@
-from rag_inference import RagInference, default_conversation_template
+from inference.rag_inference import RagInference, default_conversation_template
 from dotenv import load_dotenv
 from langchain.globals import set_debug, set_verbose
 from langsmith import tracing_context
@@ -23,7 +23,9 @@ class ChatRagInference(RagInference):
             minimal_tracer=minimal_tracer,
             streaming=True,
         )
-        self.retrieval_chain = self.compile(conversation_template=default_conversation_template)
+        self.retrieval_chain = self.compile(
+            conversation_template=default_conversation_template
+        )
         self.chat_history: list[tuple[str, str]] = []
 
     def query(self, query: str) -> dict:

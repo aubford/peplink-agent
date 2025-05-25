@@ -101,7 +101,6 @@ class RagInferenceLangGraph(InferenceBase):
 
         # Compile
         compiled_graph = graph_builder.compile(checkpointer=self.memory)
-        self._draw_graph(compiled_graph)
         graph = compiled_graph.with_config(self.config)
         return graph
 
@@ -178,7 +177,7 @@ class RagInferenceLangGraph(InferenceBase):
         }
 
     def _draw_graph(self, compiled_graph: CompiledStateGraph):
-        # compiled_graph.get_graph().print_ascii()
+        compiled_graph.get_graph().print_ascii()
         compiled_graph.get_graph(xray=True).draw_mermaid_png(
             output_file_path="graph_diagram.png",
             draw_method=MermaidDrawMethod.PYPPETEER,

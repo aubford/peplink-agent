@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pepwave ChatBot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .new-thread-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .new-thread-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .threads-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .thread-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .thread-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .thread-item.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .thread-title {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .thread-meta {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .chat-header h1 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: #f1f3f4;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message.assistant.streaming {
+            border-color: #667eea;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #5a6fd8;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #fcc;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+            }
+
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>🧵 Conversations</h2>
+        <button class="new-thread-btn" onclick="createNewThread()">+ New Conversation</button>
+        <div class="threads-list" id="threadsList">
+            <!-- Threads will be loaded here -->
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 Pepwave ChatBot</h1>
+            <div id="currentThread" style="font-size: 0.9em; color: #666; margin-top: 4px;">
+                No thread selected
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">
+                👋 Hello! I'm your Pepwave assistant. Ask me anything about Pepwave products, networking, or technical support.
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div>🤖 Thinking...</div>
+        </div>
+
+        <div class="chat-input-container">
+            <form class="chat-input-form" onsubmit="sendMessage(event)">
+                <input
+                    type="text"
+                    class="chat-input"
+                    id="messageInput"
+                    placeholder="Ask me about Pepwave products..."
+                    required
+                >
+                <button type="submit" class="send-btn" id="sendBtn">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentThreadId = null;
+        let isStreaming = false;
+
+        // Load threads on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadThreads();
+        });
+
+        async function loadThreads() {
+            try {
+                const response = await fetch('/api/threads');
+                const data = await response.json();
+
+                const threadsList = document.getElementById('threadsList');
+                threadsList.innerHTML = '';
+
+                if (data.threads.length === 0) {
+                    // Create first thread if none exist
+                    await createNewThread();
+                    return;
+                }
+
+                data.threads.forEach(thread => {
+                    const threadElement = document.createElement('div');
+                    threadElement.className = 'thread-item';
+                    threadElement.onclick = () => selectThread(thread.thread_id);
+
+                    threadElement.innerHTML = `
+                        <div class="thread-title">${thread.title}</div>
+                        <div class="thread-meta">${thread.message_count} messages</div>
+                    `;
+
+                    threadsList.appendChild(threadElement);
+                });
+
+                // Select first thread by default
+                if (!currentThreadId && data.threads.length > 0) {
+                    selectThread(data.threads[0].thread_id);
+                }
+            } catch (error) {
+                console.error('Error loading threads:', error);
+                showError('Failed to load conversations');
+            }
+        }
+
+        async function createNewThread() {
+            try {
+                const response = await fetch('/api/threads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                await loadThreads();
+                selectThread(data.thread_id);
+            } catch (error) {
+                console.error('Error creating thread:', error);
+                showError('Failed to create new conversation');
+            }
+        }
+
+        async function selectThread(threadId) {
+            currentThreadId = threadId;
+
+            // Update UI
+            document.querySelectorAll('.thread-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            event?.target?.closest('.thread-item')?.classList.add('active');
+
+            document.getElementById('currentThread').textContent = `Thread: ${threadId}`;
+
+            // Load thread history
+            await loadThreadHistory(threadId);
+        }
+
+        async function loadThreadHistory(threadId) {
+            try {
+                const response = await fetch(`/api/threads/${threadId}/history`);
+                const data = await response.json();
+
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = '';
+
+                if (data.messages.length === 0) {
+                    chatMessages.innerHTML = `
+                        <div class="message assistant">
+                            👋 Hello! I'm your Pepwave assistant. Ask me anything about Pepwave products, networking, or technical support.
+                        </div>
+                    `;
+                } else {
+                    data.messages.forEach(msg => {
+                        addMessage(msg.content, msg.type === 'human' ? 'user' : 'assistant');
+                    });
+                }
+
+                scrollToBottom();
+            } catch (error) {
+                console.error('Error loading thread history:', error);
+                showError('Failed to load conversation history');
+            }
+        }
+
+        async function sendMessage(event) {
+            event.preventDefault();
+
+            if (isStreaming || !currentThreadId) {
+                return;
+            }
+
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            // Add user message to chat
+            addMessage(message, 'user');
+            messageInput.value = '';
+
+            // Disable input and show loading
+            setStreamingState(true);
+
+            try {
+                // Create assistant message element for streaming
+                const assistantMessage = addMessage('', 'assistant', true);
+
+                // Start streaming
+                const response = await fetch('/api/chat/stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        thread_id: currentThreadId
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+
+                                if (data.type === 'token') {
+                                    assistantMessage.textContent += data.content;
+                                    scrollToBottom();
+                                } else if (data.type === 'complete') {
+                                    assistantMessage.classList.remove('streaming');
+                                } else if (data.type === 'error') {
+                                    showError(`Error: ${data.message}`);
+                                    assistantMessage.textContent = 'Sorry, I encountered an error processing your request.';
+                                    assistantMessage.classList.remove('streaming');
+                                }
+                            } catch (e) {
+                                // Ignore JSON parse errors for incomplete chunks
+                            }
+                        }
+                    }
+                }
+
+                // Reload threads to update message count
+                await loadThreads();
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showError('Failed to send message');
+            } finally {
+                setStreamingState(false);
+            }
+        }
+
+        function addMessage(content, type, streaming = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${type}`;
+
+            if (streaming) {
+                messageElement.classList.add('streaming');
+            }
+
+            messageElement.textContent = content;
+            chatMessages.appendChild(messageElement);
+            scrollToBottom();
+
+            return messageElement;
+        }
+
+        function setStreamingState(streaming) {
+            isStreaming = streaming;
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+
+            sendBtn.disabled = streaming;
+            messageInput.disabled = streaming;
+
+            if (streaming) {
+                sendBtn.textContent = 'Sending...';
+            } else {
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showError(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error';
+            errorElement.textContent = message;
+            chatMessages.appendChild(errorElement);
+            scrollToBottom();
+
+            // Remove error after 5 seconds
+            setTimeout(() => {
+                errorElement.remove();
+            }, 5000);
+        }
+
+        // Handle Enter key in input
+        document.getElementById('messageInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage(event);
+            }
+        });
+    </script>
+</body>
+</html>

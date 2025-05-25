@@ -1,5 +1,5 @@
 from inference.rag_inference_langgraph import RagInferenceLangGraph
-from rag_inference import default_conversation_template
+from inference.rag_inference import default_conversation_template
 
 from dotenv import load_dotenv
 from langchain.globals import set_verbose
@@ -105,7 +105,10 @@ class ChatLangGraph(RagInferenceLangGraph):
                 ):
                     yield str(message_chunk.content)
 
-    def print_help(self):
+
+if __name__ == "__main__":
+
+    def print_help():
         """Print available commands."""
         print("\n=== Available Commands ===")
         print("/new - Create a new conversation thread")
@@ -116,8 +119,6 @@ class ChatLangGraph(RagInferenceLangGraph):
         print("/exit - Exit the application")
         print("========================\n")
 
-
-if __name__ == "__main__":
     with tracing_context(enabled=True, project_name="langchain-pepwave"):
         rag_inference = ChatLangGraph(
             llm_model="gpt-4.1-mini",
@@ -126,7 +127,7 @@ if __name__ == "__main__":
 
         print("🤖 ChatLangGraph with Thread Management")
         print(f"Current thread: {rag_inference.current_thread_id}")
-        rag_inference.print_help()
+        print_help()
 
         while True:
             query = input(
@@ -136,7 +137,7 @@ if __name__ == "__main__":
             if query.startswith("/exit"):
                 break
             elif query.startswith("/help"):
-                rag_inference.print_help()
+                print_help()
             elif query.startswith("/new"):
                 new_thread = rag_inference.create_new_thread()
                 rag_inference.switch_to_thread(new_thread)
