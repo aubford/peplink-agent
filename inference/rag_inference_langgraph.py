@@ -1,3 +1,4 @@
+import asyncio
 from typing import Annotated
 
 from langchain_core.documents import Document
@@ -43,6 +44,7 @@ class RagState(BaseModel):
     thread_id: str = "default"
     cached_web_search: str | None = None
     tool_call_count: int = 0
+    # prefetched_web_searches: asyncio.Queue[str] = Field(default_factory=asyncio.Queue)
 
 
 class RagInferenceLangGraph(InferenceBase):
