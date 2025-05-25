@@ -13,6 +13,7 @@ if __name__ == "__main__":
         inference_fact=lambda: RagInferenceLangGraph(
             llm_model=models['mini'],
             pinecone_index_name="pepwave-early-april-technical-summary-embeddi",
+            use_cohere=True,
         ),
         run_name=Path(__file__).parent.name,
         eval_llm=models['mini'],
@@ -20,5 +21,5 @@ if __name__ == "__main__":
         should_create_batch_job=True,
         test_run=True,
     )
-    # asyncio.run(ragas_eval.generate_batchfiles())
-    asyncio.run(ragas_eval.evaluate_rag())
+    asyncio.run(ragas_eval.generate_batchfiles())
+    # asyncio.run(ragas_eval.evaluate_rag())

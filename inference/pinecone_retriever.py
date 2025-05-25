@@ -43,23 +43,24 @@ class PineconeRetriever:
         self.pinecone = Pinecone()
         self.pinecone_index = self.pinecone.Index(index_name)
 
-    def retrieve(
-        self,
-        query: str,
-        top_k: int = 80,
-        top_n: int = 40,
-        rank_field: str = "technical_summary",
-    ) -> list[Document]:
-        # Generate embedding for the query
+    def get_query_embedding(self, query: str) -> list[float]:
         vector_response = self.openai.embeddings.create(
             input=query, model=self.embedding_model
         )
-        query_embedding: list[float] = vector_response.data[0].embedding
+        return vector_response.data[0].embedding
 
+    def retrieve(
+        self,
+        query: str,
+        query_embedding: list[float],
+        top_k: int = 100,
+        rerank_top_n: int = 40,
+        rank_field: str = "technical_summary",
+    ) -> list[Document]:
         pc_query: Any = {"vector": {"values": query_embedding}, "top_k": top_k}
         rerank: Any = {
             "query": query,
-            "top_n": top_n,
+            "top_n": rerank_top_n,
             "rank_fields": [rank_field],  # only one field currently suported by pc
             "model": self.rerank_model,
         }

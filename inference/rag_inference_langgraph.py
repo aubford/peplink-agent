@@ -35,8 +35,8 @@ class RagState(BaseModel):
 
     messages: Annotated[list, add_messages] = Field(default_factory=list)
     query: str = ""
-    query_embedding: list[float] | None = None
     retrieval_query: str = ""
+    retrieval_query_embedding: list[float] = Field(default_factory=list)
     context: list = Field(default_factory=list)
     context_history: list = Field(default_factory=list)
     cached_extra_context: list = Field(default_factory=list)
@@ -63,7 +63,7 @@ class RagInferenceLangGraph(InferenceBase):
         self.use_cohere = use_cohere
 
         # Initialize the Pinecone retriever
-        self.pinecone_retriever = PineconeRetriever(
+        self.pinecone = PineconeRetriever(
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
 
@@ -121,7 +121,14 @@ class RagInferenceLangGraph(InferenceBase):
             {"query": state.query, "chat_history": state.messages}
         )
 
-        return {"retrieval_query": retrieval_query}
+        if self.use_cohere:
+            return {"retrieval_query": retrieval_query}
+
+        retrieval_query_embedding = self.pinecone.get_query_embedding(retrieval_query)
+        return {
+            "retrieval_query": retrieval_query,
+            "retrieval_query_embedding": retrieval_query_embedding,
+        }
 
     def _retrieve_context(self, state: RagState) -> dict:
         """Retrieve relevant documents based on the query."""
@@ -129,9 +136,11 @@ class RagInferenceLangGraph(InferenceBase):
             retriever = self._get_cohere_retriever()
             retrieved_context = retriever.invoke(state.retrieval_query)
         else:
-            retrieved_context = self.pinecone_retriever.retrieve(state.query)
+            assert state.retrieval_query_embedding
+            retrieved_context = self.pinecone.retrieve(
+                state.retrieval_query, state.retrieval_query_embedding
+            )
 
-        # todo: ensure these are ordered by rank
         return {
             "context": retrieved_context[0:20],
             "cached_extra_context": retrieved_context[20:],

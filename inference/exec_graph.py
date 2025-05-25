@@ -29,7 +29,7 @@ class ChatLangGraph(RagInferenceLangGraph):
         )
         self.graph = self.compile(conversation_template=default_conversation_template)
 
-    def query(self, query: str, thread_id: str):
+    def query(self, query: str, thread_id: str = "default"):
         """Stream the response token by token using LangGraph's messages streaming mode."""
         initial_state = {"query": query, "thread_id": thread_id}
 
@@ -50,29 +50,7 @@ class ChatLangGraph(RagInferenceLangGraph):
                 ):
                     yield str(message_chunk.content)
 
-    async def aquery(self, query: str, thread_id: str):
-        """Async version of stream_query for token-by-token streaming."""
-        initial_state = {"query": query, "thread_id": thread_id}
 
-        # Use astream with messages mode to get token-by-token streaming
-        async for chunk in self.graph.astream(
-            initial_state,
-            config={"configurable": {"thread_id": thread_id}},
-            stream_mode="messages",
-        ):
-            # chunk is a tuple of (message_chunk, metadata)
-            if isinstance(chunk, tuple) and len(chunk) == 2:
-                message_chunk, metadata = chunk
-                # Only stream content from the generate_answer node (the LLM response)
-                if (
-                    hasattr(message_chunk, 'content')
-                    and message_chunk.content
-                    and metadata.get('langgraph_node') == 'generate_answer'
-                ):
-                    yield str(message_chunk.content)
-
-
-thread_id = "single_thread"
 if __name__ == "__main__":
     with tracing_context(enabled=True, project_name="langchain-pepwave"):
         rag_inference = ChatLangGraph(
@@ -88,6 +66,6 @@ if __name__ == "__main__":
 
             # Demonstrate streaming
             print("\n\nAssistant (streaming): ", end="", flush=True)
-            for token in rag_inference.query(query, thread_id):
+            for token in rag_inference.query(query):
                 print(token, end="", flush=True)
             print("\n")  # New line after streaming is complete
