@@ -22,7 +22,6 @@ from langgraph.graph.state import CompiledStateGraph
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
 from pydantic import BaseModel, Field
-import os
 
 
 # Load prompts
@@ -154,21 +153,21 @@ class RagInferenceLangGraph(InferenceBase):
     def _generate_answer(self, state: RagState) -> dict:
         """Generate an answer based on the context and query."""
         assert self.conversation_template
-        chain = create_stuff_documents_chain(
-            self.output_llm,
-            self.conversation_template,
-            document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
+
+        context = "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
+            [doc.page_content for doc in state.context]
         )
 
+        chain = self.conversation_template | self.output_llm
         answer = chain.invoke(
             {
                 "query": state.query,
                 "chat_history": state.messages,
-                "context": state.context,
+                "context": context,
             }
         )
 
-        return {"answer": answer}
+        return {"answer": answer.content}
 
     def _update_messages(self, state: RagState) -> dict:
         """Update the message history with the new query and answer."""
