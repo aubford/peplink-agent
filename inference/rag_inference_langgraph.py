@@ -154,19 +154,16 @@ class RagInferenceLangGraph(InferenceBase):
         """Generate an answer based on the context and query."""
         assert self.conversation_template
 
-        context = "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
-            [doc.page_content for doc in state.context]
-        )
-
-        chain = self.conversation_template | self.output_llm
-        answer = chain.invoke(
+        messages = self.conversation_template.invoke(
             {
                 "query": state.query,
                 "chat_history": state.messages,
-                "context": context,
+                "context": "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
+                    [doc.page_content for doc in state.context]
+                ),
             }
         )
-
+        answer = self.output_llm.invoke(messages)
         return {"answer": answer.content}
 
     def _update_messages(self, state: RagState) -> dict:
