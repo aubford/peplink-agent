@@ -41,6 +41,7 @@ class InferenceBase(ABC):
         streaming: bool = False,
         minimal_tracer: bool = False,
     ):
+        self.embedding_model = embedding_model
         self.vector_store = PineconeVectorStore(
             index_name=pinecone_index_name,
             embedding=OpenAIEmbeddings(model=embedding_model),

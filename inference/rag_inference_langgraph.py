@@ -1,7 +1,9 @@
 from typing import Annotated
 
+from langchain_core.documents import Document
+
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate
+from langchain_core.prompts import BasePromptTemplate
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_core.runnables.graph import MermaidDrawMethod
 
@@ -10,6 +12,7 @@ from inference.history_aware_retrieval_query import (
 )
 from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rag_inference import InferenceBase
+from inference.pinecone_retriever import PineconeRetriever
 from prompts import load_prompts
 
 from langgraph.graph import StateGraph, START
@@ -19,10 +22,12 @@ from langgraph.graph.state import CompiledStateGraph
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
 from pydantic import BaseModel, Field
+import os
 
 
 # Load prompts
 PROMPTS = load_prompts()
+
 
 # Define the state schema using Pydantic
 class RagState(BaseModel):
@@ -30,6 +35,7 @@ class RagState(BaseModel):
 
     messages: Annotated[list, add_messages] = Field(default_factory=list)
     query: str = ""
+    query_embedding: list[float] | None = None
     retrieval_query: str = ""
     context: list = Field(default_factory=list)
     context_history: list = Field(default_factory=list)
@@ -38,7 +44,6 @@ class RagState(BaseModel):
     thread_id: str = "default"
     cached_web_search: str | None = None
     tool_call_count: int = 0
-    use_cohere: bool = False
 
 
 class RagInferenceLangGraph(InferenceBase):
@@ -46,6 +51,7 @@ class RagInferenceLangGraph(InferenceBase):
         self,
         llm_model: str,
         pinecone_index_name: str,
+        use_cohere: bool = False,
         **kwargs,
     ):
         super().__init__(
@@ -54,6 +60,12 @@ class RagInferenceLangGraph(InferenceBase):
 
         self.output_llm = self.llm
         self.conversation_template = None
+        self.use_cohere = use_cohere
+
+        # Initialize the Pinecone retriever
+        self.pinecone_retriever = PineconeRetriever(
+            index_name=pinecone_index_name, embedding_model=self.embedding_model
+        )
 
         # Initialize memory saver for persistence
         self.memory = InMemorySaver()
@@ -92,6 +104,15 @@ class RagInferenceLangGraph(InferenceBase):
         graph = compiled_graph.with_config(self.config)
         return graph
 
+    def _get_cohere_retriever(self) -> ContextualCompressionRetriever:
+        retriever_base = self.vector_store.as_retriever(
+            search_type="mmr", search_kwargs={"k": 60, "fetch_k": 100}
+        )
+        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=40)
+        return ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=retriever_base
+        )
+
     def _generate_retrieval_query(self, state: RagState) -> dict:
         """Generate a retrieval query considering chat history."""
         retrieval_query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
@@ -104,14 +125,12 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _retrieve_context(self, state: RagState) -> dict:
         """Retrieve relevant documents based on the query."""
-        retriever_base = self.vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 60, "fetch_k": 100}
-        )
-        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=40)
-        retriever = ContextualCompressionRetriever(
-            base_compressor=compressor, base_retriever=retriever_base
-        )
-        retrieved_context = retriever.invoke(state.retrieval_query)
+        if self.use_cohere:
+            retriever = self._get_cohere_retriever()
+            retrieved_context = retriever.invoke(state.retrieval_query)
+        else:
+            retrieved_context = self.pinecone_retriever.retrieve(state.query)
+
         # todo: ensure these are ordered by rank
         return {
             "context": retrieved_context[0:20],
