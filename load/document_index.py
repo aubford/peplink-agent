@@ -20,13 +20,6 @@ import json
 
 
 def clean_text_for_inference(text: str) -> str:
-    """
-    Remove Markdown headers, XML/HTML tags, and image insertions from the text.
-    Args:
-        text: The input text to clean.
-    Returns:
-        Cleaned text content that is not useful for LLM.
-    """
     if not text or not isinstance(text, str):
         return ""
 
@@ -73,7 +66,7 @@ class DocumentIndex:
     ) -> pd.DataFrame:
         # remove markdown headers, xml/html tags, and other content that should be in
         # page_content for LLM inference but carries no semantic meaning when embedded
-        clean_column_name = f"{column_name}_embedding_clean" # should be "page_content_clean_for_embedding" instead
+        clean_column_name = f"{column_name}_embedding_clean"  # should be "page_content_clean_for_embedding" instead
         df[clean_column_name] = df[column_name].apply(clean_text_for_embedding)
         texts = df[clean_column_name].tolist()
 
@@ -116,8 +109,6 @@ class DocumentIndex:
     @classmethod
     def get_document_index(cls) -> pd.DataFrame:
         df = pd.read_parquet(cls.document_index_path)
-        # fill missing technical summaries embeddings in HTML elements with page_content embedding
-        # this is also reflected in the vector store
         for col in [
             "page_content_embedding",
             "technical_summary_embedding",

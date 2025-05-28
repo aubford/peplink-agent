@@ -10,7 +10,6 @@ import json
 
 
 class VectorStore:
-    """Base class for all data transformers."""
 
     this_dir: Path = Path(__file__).parent
 
@@ -74,14 +73,14 @@ class VectorStore:
                 "post_title",
                 "post_content",
                 "comment_content",
-                "page_content_embedding_clean",  # should be page_content_clean_for_embedding
+                "page_content_embedding_clean",  # page_content_clean_for_embedding would be more semantically accurate
                 "page_content_dirty",
                 "token_count",
                 "entities_pre_normalization",
             ],
             errors="ignore",
         )
-        # Replace all null values with empty string
+        # Replace all null values with empty string for Pinecone
         df = df.fillna("")
         return df
 

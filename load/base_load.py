@@ -55,6 +55,8 @@ From LLM: (EX: HTML)
 From Embedding Model:
 - technical_summary_embedding: Embedding of the technical_summary.
 - title_embedding: Embedding of the title column. (filter out short titles)
+- primary_content_embedding: Embedding of the primary_content.
+- lead_content_embedding: Embedding of the lead_content.
 """
 
 
