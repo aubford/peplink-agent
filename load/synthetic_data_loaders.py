@@ -56,12 +56,12 @@ class SyntheticDataLoader(ABC):
                 lead_content=example.get("lead_content", ""),
             )
 
-            # Format the expected output
+            # Format the expected knowledge_graph
             output = example["expected_output"]
             themes_str = ", ".join([f'"{theme}"' for theme in output["themes"]])
 
             expected_output = (
-                f'Expected output:\n'
+                f'Expected knowledge_graph:\n'
                 f'{{\n'
                 f'  "themes": [{themes_str}],\n'
                 f'  "technical_summary": "{output["technical_summary"]}",\n'
@@ -227,7 +227,7 @@ You will be provided with a forum conversation consisting of:
 
 Together, these form a single conversation turn between two forum users.
 
-Analyze this conversation and provide a structured output containing:
+Analyze this conversation and provide a structured knowledge_graph containing:
 1. "themes": A list of technical themes discussed.
 2. "technical_summary": A summary of the most useful technical information that can be gleaned from the conversation. Report only the technical facts presented in the conversation, do not discuss the conversation itself. Statements made as part of an inquiry should not be considered technical facts. Provide this in the form of a paragraph. No lists or special formatting.
 3. "is_useful": An assessment of whether there is useful technical information related to Pepwave products or IT networking.
@@ -324,7 +324,7 @@ Your task is to analyze a YouTube video transcript and extract key information.
 
 You will be provided with an excerpt of a transcript of a YouTube video.
 
-Analyze this content and provide a structured output containing:
+Analyze this content and provide a structured knowledge_graph containing:
 1. "themes": A list of technical themes discussed in the video.
 2. "technical_summary": A concise summary of the most useful technical information that can be gleaned from the video transcript. Report only the technical facts presented in the video, do not discuss the video itself. Provide this in the form of a paragraph. No lists or special formatting.
 3. "is_useful": An assessment of whether there is enough useful technical information related to Pepwave products or IT networking to be worth watching the video.

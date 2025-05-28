@@ -1,6 +1,6 @@
 *.parquet
 *.jsonl
-/evals/output/**
+/evals/knowledge_graph/**
 /evals/experiments/**
 
 # open all dirs for traversal
@@ -9,8 +9,8 @@
 !/evals/experiments/**/run_eval.py
 !/evals/runs/*.py
 !/evals/experiments/experiments_summary.parquet
-!/evals/output/__nodes.parquet
-!/evals/output/__relationships.parquet
+!/evals/knowledge_graph/__nodes.parquet
+!/evals/knowledge_graph/__relationships.parquet
 !/evals/testsets/**/*.json
 
 # completely ignore

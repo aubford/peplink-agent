@@ -7,7 +7,7 @@ from util.util_main import to_serialized_parquet
 from ragas.testset.graph import Node
 
 evals_dir = Path(__file__).parent
-output_dir = evals_dir / "output"
+output_dir = evals_dir / "knowledge_graph"
 kg_json_path = output_dir / "knowledge_graph.json"
 output_nodes_path = output_dir / "__nodes.parquet"
 output_relationships_path = output_dir / "__relationships.parquet"

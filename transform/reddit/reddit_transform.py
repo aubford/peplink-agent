@@ -264,7 +264,7 @@ class RedditTransform(BaseTransform):
 
         {post["page_content"]}
 
-        {Single comment and its replies from output of self.transform_comment}
+        {Single comment and its replies from knowledge_graph of self.transform_comment}
 
         We use the comment as the first class citizen instead of the post since we are looking for answers to
         questions as opposed to questions themselves. In a representative sample, the post is typically a question and

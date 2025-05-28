@@ -76,7 +76,7 @@ class RagasEval:
         self.runs_dir = evals_dir / "experiments"
         self.output_dir = self.runs_dir / run_name
         self.output_file_path = self.output_dir / f"{run_name}.parquet"
-        # If output file already exists, rename it with a timestamp
+        # If knowledge_graph file already exists, rename it with a timestamp
         handle_file_exists(self.output_file_path, should_raise=False)
 
         self.test_set: Testset = self.init_testset(generated_testset_df, nodes_df)

@@ -198,7 +198,7 @@ class BaseLoad:
         return len(tokenizer.encode(str(text)))
 
     def load_docs(self, documents: list[Document]) -> list[Document]:
-        """Perform final operations like text splitting, synthetic data generation, and output final product for upload to vector store."""
+        """Perform final operations like text splitting, synthetic data generation, and knowledge_graph final product for upload to vector store."""
         return documents
 
     def init_spacy(self):

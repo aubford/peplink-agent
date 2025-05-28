@@ -151,11 +151,11 @@ class GenerateTestSet:
     examples = [
         {
             "documents": PROMPTS["generate_testset/exampleA_documents"],
-            "output": PROMPTS["generate_testset/exampleA_output"],
+            "knowledge_graph": PROMPTS["generate_testset/exampleA_output"],
         },
         {
             "documents": PROMPTS["generate_testset/exampleB_documents"],
-            "output": PROMPTS["generate_testset/exampleB_output"],
+            "knowledge_graph": PROMPTS["generate_testset/exampleB_output"],
         },
     ]
 
@@ -379,7 +379,7 @@ class GenerateTestSet:
         Use the LLM to generate queries and answers for each node cluster, then save the results.
         """
         example_prompt = ChatPromptTemplate.from_messages(
-            [("human", self.main_prompt), ("ai", "{output}")]
+            [("human", self.main_prompt), ("ai", "{knowledge_graph}")]
         )
 
         few_shot_prompt = FewShotChatMessagePromptTemplate(
@@ -440,7 +440,7 @@ class GenerateTestSet:
 
     def copy_kg_data_to_testset_dir(self):
         """
-        Copy the knowledge graph data files to the output directory.
+        Copy the knowledge graph data files to the knowledge_graph directory.
         """
         shutil.copy(output_nodes_path, self.output_dir / output_nodes_path.name)
         shutil.copy(
@@ -486,7 +486,7 @@ class TransformTestset:
     def create_subsample_testset(self) -> None:
         """
         Create a subset of the testset taking every other sample (even cluster_id only),
-        and save as {name}__100_subsample.json in the same output directory.
+        and save as {name}__100_subsample.json in the same knowledge_graph directory.
         """
         # Keep only even cluster_id
         subsample = [item for item in self.data if item.get("cluster_id", 0) % 2 == 0]
