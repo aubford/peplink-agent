@@ -12,7 +12,7 @@ kg_json_path = output_dir / "knowledge_graph.json"
 output_nodes_path = output_dir / "__nodes.parquet"
 output_relationships_path = output_dir / "__relationships.parquet"
 kg_input_data_path = output_dir / "kg_input_data.parquet"
-runs_dir = evals_dir / "runs"
+runs_dir = evals_dir / "experiments"
 
 
 def node_meta(node: Node) -> dict[str, t.Any]:

@@ -36,7 +36,7 @@ def clean_text_for_inference(text: str) -> str:
     # Remove entire lines containing [IMG]... image inserts
     text = re.sub(r"^.*\[IMG\]\S*.*$\n?", "", text, flags=re.MULTILINE)
 
-    # Collapse runs of 3+ blank lines (optionally with whitespace) into exactly 2 newlines
+    # Collapse experiments of 3+ blank lines (optionally with whitespace) into exactly 2 newlines
     text = collapse_blank_lines(text)
 
     text = text.strip()

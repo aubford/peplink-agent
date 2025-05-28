@@ -15,7 +15,7 @@ TEST_RUN_DIRS: list[str] = [
     "test_eval_consistency_old_queries_B",
 ]
 
-# Base path for the runs directory
+# Base path for the experiments directory
 RUNS_BASE_PATH = Path(__file__).parent
 
 # Dictionary to store parquet file paths for each test run
@@ -31,7 +31,7 @@ def inf_run_volatility_dispersion_ratio(
     inference_run_eval_runs: list[pd.DataFrame], inference_run_name: str
 ) -> dict[str, float | str]:
     """
-    Computes the volatility dispersion ratio (VDR) for each column across multiple evaluation runs.
+    Computes the volatility dispersion ratio (VDR) for each column across multiple evaluation experiments.
     Returns a dictionary mapping each metric column to its VDR, along with the run_dir.
     Each VDR is the ratio of the std dev of per-sample volatility (std dev of std dev) to
     inter-sample score variation for that metric.
@@ -40,7 +40,7 @@ def inf_run_volatility_dispersion_ratio(
         "inference_run": inference_run_name
     }
     for col in inference_run_eval_runs[0].columns:
-        # Build a DataFrame where rows are samples, columns are eval runs
+        # Build a DataFrame where rows are samples, columns are eval experiments
         col_matrix = pd.concat([df[col] for df in inference_run_eval_runs], axis=1)
         sample_sds = col_matrix.std(axis=1)
         dispersion_of_volatility = sample_sds.std()
@@ -58,9 +58,9 @@ def calculate_icc_for_metric(
     cleaned_inference_run_eval_runs: list[pd.DataFrame], metric_name: str
 ) -> float:
     """
-    Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge runs
+    Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge experiments
     using the same testset/testrun (including the same inference response/context results). This measures how
-    consistent our RAGAS LLM-as-a-judge metric is across different evaluation runs performed on the same inference result.
+    consistent our RAGAS LLM-as-a-judge metric is across different evaluation experiments performed on the same inference result.
     i.e. It measures stuff that happens after we have the batch results from the first pass of RagasEval when we
     run RagInference on the testset.
 
@@ -189,7 +189,7 @@ def create_faithfulness_parquet(
     all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]],
 ) -> None:
     """
-    Simply concat the faithfulness columns across all runs for inspection. It's impractical
+    Simply concat the faithfulness columns across all experiments for inspection. It's impractical
     to run metrics on these.
     """
     columns = {}
@@ -223,7 +223,7 @@ def print_regression_summary(
 def eval_run_means_by_inf_run(
     all_eval_runs_by_inference_run: dict[str, list[pd.DataFrame]], metric_name: str
 ) -> pd.DataFrame:
-    """Calculate the per-sample mean for a given metric across all runs for each inference run."""
+    """Calculate the per-sample mean for a given metric across all experiments for each inference run."""
     inf_run_means = {}
     for inf_run_name, eval_runs_dfs in all_eval_runs_by_inference_run.items():
         series = [df[metric_name] for df in eval_runs_dfs]
@@ -239,13 +239,13 @@ def metrics_correlation(
     metric_b_name: str,
 ) -> None:
     """
-    Computes the relationship between two evaluation metrics by analyzing their correlation both within and across multiple evaluation runs.
+    Computes the relationship between two evaluation metrics by analyzing their correlation both within and across multiple evaluation experiments.
 
     This function performs two main analyses:
     1. Within-run correlation: For each evaluation run (and each rater), it calculates the Pearson correlation coefficient and p-value between the two specified columns (metrics) across all samples. The mean correlation and p-value are reported for each run, indicating how closely the two metrics move together within the same run.
-    2. Across-run delta correlation: For each sample, it computes the mean score for each metric across all raters in each run. It then calculates all pairwise differences (deltas) between runs for each sample and computes the Pearson correlation and p-value between the deltas of the two metrics. This reveals whether changes in one metric across runs are associated with changes in the other metric, i.e., whether the metrics are sensitive to the same sources of variation across runs. A regression summary is also printed to quantify the linear relationship between the deltas.
+    2. Across-run delta correlation: For each sample, it computes the mean score for each metric across all raters in each run. It then calculates all pairwise differences (deltas) between experiments for each sample and computes the Pearson correlation and p-value between the deltas of the two metrics. This reveals whether changes in one metric across experiments are associated with changes in the other metric, i.e., whether the metrics are sensitive to the same sources of variation across experiments. A regression summary is also printed to quantify the linear relationship between the deltas.
 
-    This technique helps assess whether two metrics are measuring similar underlying phenomena, both in terms of their agreement within a single evaluation and their sensitivity to changes across different runs. High correlation suggests the metrics are redundant or closely related, while low correlation indicates they capture different aspects of the evaluation.
+    This technique helps assess whether two metrics are measuring similar underlying phenomena, both in terms of their agreement within a single evaluation and their sensitivity to changes across different experiments. High correlation suggests the metrics are redundant or closely related, while low correlation indicates they capture different aspects of the evaluation.
 
     Args:
         all_dfs_by_run: Dictionary mapping run directory names to lists of DataFrames, each DataFrame representing a rater's scores for that run.
@@ -311,7 +311,7 @@ if __name__ == "__main__":
         for run_dir, parquet_files in test_run_parquet_files.items()
     }
     # check that metrics that are measuring the same thing actually move together
-    # when run against different inference runs.
+    # when run against different inference experiments.
     metrics_correlation(
         all_eval_runs_by_inference_run, "answer_relevancy", "answer_relevancy_diverse"
     )

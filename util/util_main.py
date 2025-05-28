@@ -175,7 +175,7 @@ def count_tokens(text: str) -> int:
 
 def collapse_blank_lines(text: str) -> str:
     """
-    Replace runs of 3 or more consecutive blank lines (optionally with whitespace) with exactly two newlines.
+    Replace experiments of 3 or more consecutive blank lines (optionally with whitespace) with exactly two newlines.
     """
     return re.sub(r'((?:[ \t]*\n){3,})', '\n\n', text)
 
@@ -203,7 +203,7 @@ def clean_text_for_embedding(text: str) -> str:
     # Remove excessive spaces/tabs (but not newlines)
     text = re.sub(r"[ \t]+", " ", text)
 
-    # Collapse runs of 3+ blank lines (optionally with whitespace) into exactly 2 newlines
+    # Collapse experiments of 3+ blank lines (optionally with whitespace) into exactly 2 newlines
     text = collapse_blank_lines(text)
 
     text = text.strip()

@@ -73,7 +73,7 @@ class RagasEval:
         nodes_df = pd.merge(
             nodes_df, document_index, on="id", how="inner", suffixes=("", "_di")
         )
-        self.runs_dir = evals_dir / "runs"
+        self.runs_dir = evals_dir / "experiments"
         self.output_dir = self.runs_dir / run_name
         self.output_file_path = self.output_dir / f"{run_name}.parquet"
         # If output file already exists, rename it with a timestamp
