@@ -8,7 +8,7 @@
 # unignore specifics
 !/evals/experiments/**/run_eval.py
 !/evals/runs/*.py
-!/evals/experiments/test_runs_summary.parquet
+!/evals/experiments/experiments_summary.parquet
 !/evals/output/__nodes.parquet
 !/evals/output/__relationships.parquet
 !/evals/testsets/**/*.json

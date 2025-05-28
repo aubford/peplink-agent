@@ -278,7 +278,7 @@ class RagasEval:
         summary_df = pd.DataFrame([self.metrics_summary])
 
         # Check if file exists
-        test_runs_summary_path = self.runs_dir / "test_runs_summary.parquet"
+        test_runs_summary_path = self.runs_dir / "experiments_summary.parquet"
         if os.path.exists(test_runs_summary_path):
             # Read existing file and append
             existing_df = pd.read_parquet(test_runs_summary_path)
