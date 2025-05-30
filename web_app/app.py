@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -5,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import json
 import asyncio
+import random
 from typing import AsyncGenerator, Annotated
 from contextlib import asynccontextmanager
 from inference.exec_graph import ChatLangGraph
@@ -37,9 +43,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Use relative paths within the web_app directory
-templates = Jinja2Templates(directory="web_app/templates")
-app.mount("/static", StaticFiles(directory="web_app/static"), name="static")
+# Use absolute paths based on the current file location
+web_app_dir = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(web_app_dir, "templates"))
+app.mount(
+    "/static", StaticFiles(directory=os.path.join(web_app_dir, "static")), name="static"
+)
 
 
 # Dependency to get chatbot instance
@@ -84,9 +93,51 @@ class ThreadHistoryResponse(BaseModel):
     messages: list[MessageInfo]
 
 
+class TestsetQuery(BaseModel):
+    query: str
+
+
+class TestsetQueriesResponse(BaseModel):
+    queries: list[TestsetQuery]
+
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/api/testset-queries", response_model=TestsetQueriesResponse)
+async def get_random_testset_queries():
+    """Get random queries from the testset for suggestions."""
+    try:
+        testset_path = (
+            "../evals/testsets/testset-200_main_testset_25-04-23/generated_testset.json"
+        )
+
+        if not os.path.exists(testset_path):
+            raise HTTPException(status_code=404, detail="Testset file not found")
+
+        with open(testset_path, 'r', encoding='utf-8') as f:
+            testset_data = json.load(f)
+
+        # Extract all queries
+        all_queries = []
+        for item in testset_data:
+            if 'query' in item and item['query'].strip():
+                all_queries.append(TestsetQuery(query=item['query']))
+
+        # Return 6 random queries for suggestions
+        if len(all_queries) >= 6:
+            random_queries = random.sample(all_queries, 6)
+        else:
+            random_queries = all_queries
+
+        return TestsetQueriesResponse(queries=random_queries)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to load testset queries: {str(e)}"
+        )
 
 
 @app.post("/api/threads", response_model=ThreadResponse, status_code=201)

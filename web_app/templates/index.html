@@ -548,7 +548,7 @@
                 <h2>How can I help you today?</h2>
                 <p>Ask me anything about Pepwave products, networking solutions, or technical support.</p>
 
-                <div class="welcome-suggestions">
+                <div class="welcome-suggestions" id="welcomeSuggestions">
                     <div class="suggestion-card" onclick="sendSuggestion('What is Pepwave router?')">
                         <div class="suggestion-title">What is a Pepwave router?</div>
                         <div class="suggestion-desc">Get an overview of Pepwave cellular routers</div>
@@ -561,6 +561,12 @@
                         <div class="suggestion-title">What are the best Pepwave models for digital nomads?</div>
                         <div class="suggestion-desc">Pepwave routers are popular among digital nomads, especially full-time RVers</div>
                     </div>
+                </div>
+
+                <h2 style="margin-top: 40px;">From the Test Set</h2>
+                <p>Some questions from the synthetic test set used to evaluate this application.</p>
+                <div class="welcome-suggestions" id="testsetSuggestions">
+                    <!-- Testset suggestions will be loaded here -->
                 </div>
             </div>
         </div>
@@ -592,6 +598,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadThreads();
             setupTextareaAutoResize();
+            loadTestsetSuggestions();
         });
 
         function setupTextareaAutoResize() {
@@ -991,6 +998,37 @@
             } catch (error) {
                 console.error('Error deleting thread:', error);
                 showError('Failed to delete conversation');
+            }
+        }
+
+        async function loadTestsetSuggestions() {
+            try {
+                const response = await fetch('/api/testset-queries');
+                const data = await response.json();
+                
+                const testsetSuggestions = document.getElementById('testsetSuggestions');
+                
+                // Add testset suggestions after the existing static ones
+                data.queries.forEach(queryObj => {
+                    const suggestionCard = document.createElement('div');
+                    suggestionCard.className = 'suggestion-card';
+                    suggestionCard.onclick = () => sendSuggestion(queryObj.query);
+                    
+                    // Truncate long queries for display
+                    const truncatedQuery = queryObj.query.length > 80 
+                        ? queryObj.query.substring(0, 80) + '...' 
+                        : queryObj.query;
+                    
+                    suggestionCard.innerHTML = `
+                        <div class="suggestion-title">${truncatedQuery}</div>
+                        <div class="suggestion-desc">From the evaluation test set</div>
+                    `;
+                    
+                    testsetSuggestions.appendChild(suggestionCard);
+                });
+            } catch (error) {
+                console.error('Error loading testset suggestions:', error);
+                // Fail silently - the static suggestions will still work
             }
         }
     </script>
