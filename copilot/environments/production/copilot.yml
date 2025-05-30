@@ -1,0 +1,15 @@
+name: production
+network:
+  vpc:
+    enable_logs: true
+
+cdn:
+  certificate_arn: ${CERT_ARN}  # SSL certificate ARN for HTTPS
+
+import:
+  secrets:
+    - from_parameter_store: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/OPENAI_API_KEY
+    - from_parameter_store: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/PINECONE_API_KEY
+    - from_parameter_store: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/LANGSMITH_API_KEY
+    - from_parameter_store: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/COHERE_API_KEY
+    - from_parameter_store: /copilot/${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/secrets/POSTGRES_PASSWORD

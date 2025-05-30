@@ -1,0 +1,21 @@
+name: postgres
+type: Aurora Serverless
+
+engine: postgres
+engine_version: "17.4"
+
+instance_class: db.serverless
+storage:
+  type: aurora
+
+environments:
+  production:
+    storage:
+      min_capacity: 0.5
+      max_capacity: 16
+      auto_pause:
+        enabled: true
+        scale_down_delay: 300s
+
+secrets:
+  - POSTGRES_PASSWORD

@@ -3,6 +3,8 @@ langserve[all]
 unstructured[pdf]
 langsmith
 langgraph
+langgraph-checkpoint-postgres
+psycopg[binary,pool]
 langchain-openai
 langchain-experimental
 langchain-community
