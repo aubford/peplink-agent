@@ -136,6 +136,22 @@ async def get_thread_history(
     return ThreadHistoryResponse(messages=messages)
 
 
+@app.delete("/api/threads/{thread_id}", status_code=204)
+async def delete_thread(
+    thread_id: str, bot: Annotated[ChatLangGraph, Depends(get_chatbot)]
+):
+    """Delete a conversation thread."""
+    try:
+        bot.delete_thread(thread_id)
+        return None  # 204 No Content
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to delete thread: {str(e)}"
+        )
+
+
 @app.post("/api/chat/stream")
 async def chat_stream(
     chat_message: ChatMessage, bot: Annotated[ChatLangGraph, Depends(get_chatbot)]

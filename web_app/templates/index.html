@@ -78,6 +78,10 @@
             background: #2d2d2d;
         }
 
+        .thread-item:hover .delete-thread-btn {
+            opacity: 1;
+        }
+
         .thread-item.active {
             background: #2d2d2d;
         }
@@ -93,6 +97,13 @@
             border-radius: 0 2px 2px 0;
         }
 
+        .thread-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
         .thread-title {
             font-weight: 400;
             color: #e1e1e1;
@@ -105,6 +116,32 @@
         .thread-meta {
             font-size: 12px;
             color: #8e8ea0;
+        }
+
+        .delete-thread-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: #2d2d2d;
+            border: 1px solid #4d4d4d;
+            color: #8e8ea0;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .delete-thread-btn:hover {
+            background: #ff4444;
+            border-color: #ff4444;
+            color: white;
         }
 
         .chat-container {
@@ -590,13 +627,22 @@
                     threadElement.className = 'thread-item';
                     threadElement.setAttribute('data-thread-id', thread.thread_id);
                     threadElement.onclick = (e) => {
+                        // Don't select thread if delete button was clicked
+                        if (e.target.closest('.delete-thread-btn')) {
+                            return;
+                        }
                         e.preventDefault();
                         selectThread(thread.thread_id, threadElement);
                     };
 
                     threadElement.innerHTML = `
-                        <div class="thread-title">${thread.title}</div>
-                        <div class="thread-meta">${thread.message_count} messages</div>
+                        <div class="thread-content">
+                            <div class="thread-title">${thread.title}</div>
+                            <div class="thread-meta">${thread.message_count} messages</div>
+                        </div>
+                        <button class="delete-thread-btn" onclick="deleteThread('${thread.thread_id}', event)" title="Delete conversation">
+                            🗑️
+                        </button>
                     `;
 
                     threadsList.appendChild(threadElement);
@@ -947,6 +993,37 @@
                 overlay.classList.remove('show');
             }
         });
+
+        async function deleteThread(threadId, event) {
+            event.stopPropagation(); // Prevent thread selection
+            
+            // Confirm deletion
+            if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/threads/${threadId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete thread');
+                }
+                
+                // If we deleted the currently selected thread, show no messages screen
+                if (currentThreadId === threadId) {
+                    showNoMessagesScreen();
+                }
+                
+                // Reload threads to update the sidebar
+                await loadThreads();
+                
+            } catch (error) {
+                console.error('Error deleting thread:', error);
+                showError('Failed to delete conversation');
+            }
+        }
     </script>
 </body>
 </html>

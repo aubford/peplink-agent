@@ -73,6 +73,41 @@ class ChatLangGraph(RagInferenceLangGraph):
         """List all available threads."""
         return self.active_threads
 
+    def delete_thread(self, thread_id: str) -> bool:
+        """Delete a conversation thread and its associated state."""
+        if thread_id not in self.active_threads:
+            raise KeyError(f"Thread {thread_id} not found")
+
+        # Remove from active threads
+        del self.active_threads[thread_id]
+
+        # Clear the thread's state from LangGraph
+        try:
+            # Get the current state to check if it exists
+            state = self.graph.get_state(
+                config={"configurable": {"thread_id": thread_id}}
+            )
+            if state.values:
+                # Clear the state by updating it to empty
+                self.graph.update_state(
+                    config={"configurable": {"thread_id": thread_id}},
+                    values={"messages": []},
+                )
+        except Exception:
+            # If state doesn't exist or can't be cleared, that's fine
+            pass
+
+        # If we deleted the current thread, switch to another or create new
+        if thread_id == self.current_thread_id:
+            if self.active_threads:
+                # Switch to the first available thread
+                self.current_thread_id = next(iter(self.active_threads))
+            else:
+                # Create a new thread if none exist
+                self.current_thread_id = self.create_new_thread()
+
+        return True
+
     def query(self, query: str, thread_id: str | None = None):
         """Stream the response token by token using LangGraph's messages streaming mode."""
         if thread_id is None:
