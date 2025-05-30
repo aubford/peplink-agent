@@ -12,264 +12,570 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #212121;
+            color: #e1e1e1;
             height: 100vh;
             display: flex;
+            overflow: hidden;
         }
 
         .sidebar {
-            width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            width: 260px;
+            background: #171717;
+            border-right: 1px solid #2d2d2d;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            transition: transform 0.3s ease;
         }
 
-        .sidebar h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.2em;
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #2d2d2d;
         }
 
         .new-thread-btn {
-            background: #667eea;
-            color: white;
-            border: none;
+            width: 100%;
+            background: transparent;
+            color: #e1e1e1;
+            border: 1px solid #4d4d4d;
             padding: 12px 16px;
             border-radius: 8px;
             cursor: pointer;
-            margin-bottom: 20px;
             font-weight: 500;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
 
         .new-thread-btn:hover {
-            background: #5a6fd8;
+            background: #2d2d2d;
+            border-color: #666;
         }
 
         .threads-list {
             flex: 1;
             overflow-y: auto;
+            padding: 8px;
         }
 
         .thread-item {
-            padding: 12px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.7);
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            background: transparent;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
-            border: 2px solid transparent;
+            border: none;
+            color: #e1e1e1;
+            font-size: 14px;
+            position: relative;
         }
 
         .thread-item:hover {
-            background: rgba(255, 255, 255, 0.9);
+            background: #2d2d2d;
         }
 
         .thread-item.active {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            background: #2d2d2d;
+        }
+
+        .thread-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #10a37f;
+            border-radius: 0 2px 2px 0;
         }
 
         .thread-title {
-            font-weight: 500;
-            color: #333;
+            font-weight: 400;
+            color: #e1e1e1;
             margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .thread-meta {
-            font-size: 0.8em;
-            color: #666;
+            font-size: 12px;
+            color: #8e8ea0;
         }
 
         .chat-container {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: #212121;
+            position: relative;
+        }
+
+        .mobile-header {
+            display: none;
+            padding: 16px;
+            background: #171717;
+            border-bottom: 1px solid #2d2d2d;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #e1e1e1;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
         }
 
         .chat-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.9);
+            padding: 16px 24px;
+            border-bottom: 1px solid #2d2d2d;
+            background: #212121;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .chat-header h1 {
-            color: #333;
-            font-size: 1.5em;
+            color: #e1e1e1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .current-thread {
+            font-size: 12px;
+            color: #8e8ea0;
+            margin-top: 4px;
         }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
+        }
+
+        .message-wrapper {
+            width: 100%;
+            padding: 24px;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .message-wrapper.user {
+            background: #212121;
+        }
+
+        .message-wrapper.assistant {
+            background: #171717;
+        }
+
+        .message-content {
+            max-width: 768px;
+            margin: 0 auto;
+            display: flex;
             gap: 16px;
+            align-items: flex-start;
         }
 
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            line-height: 1.4;
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
-        .message.user {
-            align-self: flex-end;
-            background: #667eea;
+        .message-avatar.user {
+            background: #10a37f;
             color: white;
         }
 
-        .message.assistant {
-            align-self: flex-start;
-            background: #f1f3f4;
-            color: #333;
-            border: 1px solid #e0e0e0;
+        .message-avatar.assistant {
+            background: #8e8ea0;
+            color: white;
         }
 
-        .message.assistant.streaming {
-            border-color: #667eea;
-            animation: pulse 1.5s infinite;
+        .message-text {
+            flex: 1;
+            line-height: 1.6;
+            color: #e1e1e1;
+            word-wrap: break-word;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        .message-text.streaming {
+            position: relative;
+        }
+
+        .message-text.streaming::after {
+            content: '▋';
+            animation: blink 1s infinite;
+            color: #10a37f;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
         .chat-input-container {
-            padding: 20px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.9);
+            padding: 24px;
+            background: #212121;
+            border-top: 1px solid #2d2d2d;
+        }
+
+        .chat-input-wrapper {
+            max-width: 768px;
+            margin: 0 auto;
+            position: relative;
         }
 
         .chat-input-form {
-            display: flex;
-            gap: 12px;
+            position: relative;
         }
 
         .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 24px;
+            width: 100%;
+            padding: 16px 60px 16px 16px;
+            background: #2d2d2d;
+            border: 1px solid #4d4d4d;
+            border-radius: 12px;
+            color: #e1e1e1;
             font-size: 16px;
             outline: none;
             transition: border-color 0.2s;
+            resize: none;
+            min-height: 52px;
+            max-height: 200px;
+            line-height: 1.5;
         }
 
         .chat-input:focus {
-            border-color: #667eea;
+            border-color: #10a37f;
+        }
+
+        .chat-input::placeholder {
+            color: #8e8ea0;
         }
 
         .send-btn {
-            background: #667eea;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #10a37f;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.2s;
+            font-size: 16px;
         }
 
         .send-btn:hover:not(:disabled) {
-            background: #5a6fd8;
+            background: #0d8f6b;
         }
 
         .send-btn:disabled {
-            background: #ccc;
+            background: #4d4d4d;
             cursor: not-allowed;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #666;
+            color: #8e8ea0;
         }
 
         .error {
-            background: #fee;
-            color: #c33;
-            padding: 12px;
+            background: #2d1b1b;
+            color: #ff6b6b;
+            padding: 16px;
             border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #fcc;
+            margin: 16px 24px;
+            border: 1px solid #4d2d2d;
+            font-size: 14px;
         }
 
+        .welcome-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #8e8ea0;
+            max-width: 600px;
+            padding: 0 24px;
+        }
+
+        .welcome-message h2 {
+            color: #e1e1e1;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 32px;
+        }
+
+        .welcome-message p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        .welcome-suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .suggestion-card {
+            background: #2d2d2d;
+            border: 1px solid #4d4d4d;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .suggestion-card:hover {
+            background: #3d3d3d;
+            border-color: #666;
+        }
+
+        .suggestion-title {
+            font-weight: 500;
+            color: #e1e1e1;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .suggestion-desc {
+            color: #8e8ea0;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .chat-messages.has-messages .welcome-message {
+            display: none;
+        }
+
+        .chat-messages:not(.has-messages) {
+            position: relative;
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
             .sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 200px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(-100%);
             }
 
-            .message {
-                max-width: 95%;
+            .sidebar.open {
+                transform: translateX(0);
             }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .chat-header {
+                display: none;
+            }
+
+            .chat-input-container {
+                padding: 16px;
+            }
+
+            .message-wrapper {
+                padding: 16px;
+            }
+
+            .message-content {
+                gap: 12px;
+            }
+
+            .message-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+
+            .welcome-message {
+                padding: 0 16px;
+                max-width: 90%;
+            }
+
+            .welcome-message h2 {
+                font-size: 24px;
+                margin-bottom: 12px;
+            }
+
+            .welcome-message p {
+                font-size: 14px;
+                margin-bottom: 24px;
+            }
+
+            .welcome-suggestions {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .suggestion-card {
+                padding: 12px;
+            }
+        }
+
+        /* Sidebar overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Scrollbar styling */
+        .threads-list::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .threads-list::-webkit-scrollbar-track,
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .threads-list::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #4d4d4d;
+            border-radius: 3px;
+        }
+
+        .threads-list::-webkit-scrollbar-thumb:hover,
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #666;
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>🧵 Conversations</h2>
-        <button class="new-thread-btn" onclick="createNewThread()">+ New Conversation</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="new-thread-btn" onclick="startNewChat()">
+                <span>+</span>
+                New chat
+            </button>
+        </div>
         <div class="threads-list" id="threadsList">
             <!-- Threads will be loaded here -->
         </div>
     </div>
 
     <div class="chat-container">
+        <div class="mobile-header">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h1>Pepwave ChatBot</h1>
+        </div>
+
         <div class="chat-header">
-            <h1>🤖 Pepwave ChatBot</h1>
-            <div id="currentThread" style="font-size: 0.9em; color: #666; margin-top: 4px;">
-                No thread selected
+            <h1>Pepwave ChatBot</h1>
+            <div class="current-thread" id="currentThread">
+                Select a conversation to start chatting
             </div>
         </div>
 
         <div class="chat-messages" id="chatMessages">
-            <div class="message assistant">
-                👋 Hello! I'm your Pepwave assistant. Ask me anything about Pepwave products, networking, or technical support.
+            <div class="welcome-message" id="welcomeMessage">
+                <h2>How can I help you today?</h2>
+                <p>Ask me anything about Pepwave products, networking solutions, or technical support.</p>
+
+                <div class="welcome-suggestions">
+                    <div class="suggestion-card" onclick="sendSuggestion('What is a Pepwave router and what makes it different?')">
+                        <div class="suggestion-title">Learn about Pepwave</div>
+                        <div class="suggestion-desc">Get an overview of Pepwave products and their unique features</div>
+                    </div>
+                    <div class="suggestion-card" onclick="sendSuggestion('How do I set up load balancing on my Pepwave device?')">
+                        <div class="suggestion-title">Setup guidance</div>
+                        <div class="suggestion-desc">Step-by-step instructions for configuring your device</div>
+                    </div>
+                    <div class="suggestion-card" onclick="sendSuggestion('What are the best Pepwave models for small businesses?')">
+                        <div class="suggestion-title">Product recommendations</div>
+                        <div class="suggestion-desc">Find the right Pepwave solution for your needs</div>
+                    </div>
+                    <div class="suggestion-card" onclick="sendSuggestion('How do I troubleshoot connectivity issues?')">
+                        <div class="suggestion-title">Troubleshooting help</div>
+                        <div class="suggestion-desc">Diagnose and fix common network problems</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="loading" id="loading">
-            <div>🤖 Thinking...</div>
-        </div>
-
         <div class="chat-input-container">
-            <form class="chat-input-form" onsubmit="sendMessage(event)">
-                <input
-                    type="text"
-                    class="chat-input"
-                    id="messageInput"
-                    placeholder="Ask me about Pepwave products..."
-                    required
-                >
-                <button type="submit" class="send-btn" id="sendBtn">Send</button>
-            </form>
+            <div class="chat-input-wrapper">
+                <form class="chat-input-form" onsubmit="sendMessage(event)">
+                    <textarea
+                        class="chat-input"
+                        id="messageInput"
+                        placeholder="Message Pepwave ChatBot..."
+                        rows="1"
+                        required
+                    ></textarea>
+                    <button type="submit" class="send-btn" id="sendBtn">
+                        <span>↑</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
         let currentThreadId = null;
         let isStreaming = false;
+        let provisionalThreadId = null;
 
         // Load threads on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadThreads();
+            setupTextareaAutoResize();
         });
+
+        function setupTextareaAutoResize() {
+            const textarea = document.getElementById('messageInput');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
 
         async function loadThreads() {
             try {
@@ -279,16 +585,14 @@
                 const threadsList = document.getElementById('threadsList');
                 threadsList.innerHTML = '';
 
-                if (data.threads.length === 0) {
-                    // Create first thread if none exist
-                    await createNewThread();
-                    return;
-                }
-
                 data.threads.forEach(thread => {
                     const threadElement = document.createElement('div');
                     threadElement.className = 'thread-item';
-                    threadElement.onclick = () => selectThread(thread.thread_id);
+                    threadElement.setAttribute('data-thread-id', thread.thread_id);
+                    threadElement.onclick = (e) => {
+                        e.preventDefault();
+                        selectThread(thread.thread_id, threadElement);
+                    };
 
                     threadElement.innerHTML = `
                         <div class="thread-title">${thread.title}</div>
@@ -298,13 +602,49 @@
                     threadsList.appendChild(threadElement);
                 });
 
-                // Select first thread by default
-                if (!currentThreadId && data.threads.length > 0) {
-                    selectThread(data.threads[0].thread_id);
+                // Only auto-select if we're reloading threads for an existing conversation
+                // Otherwise, show the no messages screen by default
+                if (currentThreadId && data.threads.find(t => t.thread_id === currentThreadId)) {
+                    // Maintain current selection if it still exists
+                    await selectThread(currentThreadId);
+                } else if (data.threads.length === 0) {
+                    // Show no messages screen if no threads exist
+                    showNoMessagesScreen();
+                } else {
+                    // Show no messages screen by default when app loads
+                    showNoMessagesScreen();
                 }
             } catch (error) {
                 console.error('Error loading threads:', error);
                 showError('Failed to load conversations');
+            }
+        }
+
+        function showNoMessagesScreen() {
+            currentThreadId = null;
+            provisionalThreadId = null;
+
+            const chatMessages = document.getElementById('chatMessages');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+
+            // Clear any existing messages
+            const existingMessages = chatMessages.querySelectorAll('.message-wrapper');
+            existingMessages.forEach(msg => msg.remove());
+
+            // Show welcome message
+            chatMessages.classList.remove('has-messages');
+            welcomeMessage.style.display = 'block';
+
+            document.getElementById('currentThread').textContent = 'Start a new conversation';
+        }
+
+        function startNewChat() {
+            // Show no messages screen without creating a thread yet
+            showNoMessagesScreen();
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
             }
         }
 
@@ -321,26 +661,88 @@
                 const data = await response.json();
                 await loadThreads();
                 selectThread(data.thread_id);
+
+                // Close sidebar on mobile after creating new thread
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
             } catch (error) {
                 console.error('Error creating thread:', error);
                 showError('Failed to create new conversation');
             }
         }
 
-        async function selectThread(threadId) {
+        async function selectThread(threadId, clickedElement = null) {
             currentThreadId = threadId;
+            provisionalThreadId = null;
 
-            // Update UI
+            // Update UI - remove active class from all threads
             document.querySelectorAll('.thread-item').forEach(item => {
                 item.classList.remove('active');
             });
 
-            event?.target?.closest('.thread-item')?.classList.add('active');
+            // Add active class to the selected thread
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            } else {
+                // Find thread by data attribute when called programmatically
+                const targetThread = document.querySelector(`[data-thread-id="${threadId}"]`);
+                if (targetThread) {
+                    targetThread.classList.add('active');
+                }
+            }
 
             document.getElementById('currentThread').textContent = `Thread: ${threadId}`;
 
             // Load thread history
             await loadThreadHistory(threadId);
+
+            // Close sidebar on mobile after selecting thread
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        async function ensureThreadExists() {
+            if (currentThreadId) {
+                return currentThreadId;
+            }
+
+            if (provisionalThreadId) {
+                return provisionalThreadId;
+            }
+
+            // Create a provisional thread
+            try {
+                const response = await fetch('/api/threads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                provisionalThreadId = data.thread_id;
+                return provisionalThreadId;
+            } catch (error) {
+                console.error('Error creating provisional thread:', error);
+                throw error;
+            }
+        }
+
+        async function sendSuggestion(message) {
+            if (isStreaming) return;
+
+            // Ensure we have a thread (provisional or real)
+            await ensureThreadExists();
+
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = message;
+
+            // Trigger the send message function
+            const event = new Event('submit');
+            document.querySelector('.chat-input-form').dispatchEvent(event);
         }
 
         async function loadThreadHistory(threadId) {
@@ -349,15 +751,19 @@
                 const data = await response.json();
 
                 const chatMessages = document.getElementById('chatMessages');
-                chatMessages.innerHTML = '';
+                const welcomeMessage = document.getElementById('welcomeMessage');
+
+                // Clear existing messages except welcome
+                const existingMessages = chatMessages.querySelectorAll('.message-wrapper');
+                existingMessages.forEach(msg => msg.remove());
 
                 if (data.messages.length === 0) {
-                    chatMessages.innerHTML = `
-                        <div class="message assistant">
-                            👋 Hello! I'm your Pepwave assistant. Ask me anything about Pepwave products, networking, or technical support.
-                        </div>
-                    `;
+                    chatMessages.classList.remove('has-messages');
+                    welcomeMessage.style.display = 'block';
                 } else {
+                    chatMessages.classList.add('has-messages');
+                    welcomeMessage.style.display = 'none';
+
                     data.messages.forEach(msg => {
                         addMessage(msg.content, msg.type === 'human' ? 'user' : 'assistant');
                     });
@@ -373,7 +779,7 @@
         async function sendMessage(event) {
             event.preventDefault();
 
-            if (isStreaming || !currentThreadId) {
+            if (isStreaming) {
                 return;
             }
 
@@ -382,9 +788,13 @@
 
             if (!message) return;
 
+            // Ensure we have a thread (create provisional if needed)
+            const threadId = await ensureThreadExists();
+
             // Add user message to chat
             addMessage(message, 'user');
             messageInput.value = '';
+            messageInput.style.height = 'auto';
 
             // Disable input and show loading
             setStreamingState(true);
@@ -401,7 +811,7 @@
                     },
                     body: JSON.stringify({
                         message: message,
-                        thread_id: currentThreadId
+                        thread_id: threadId
                     })
                 });
 
@@ -426,6 +836,16 @@
                                     scrollToBottom();
                                 } else if (data.type === 'complete') {
                                     assistantMessage.classList.remove('streaming');
+
+                                    // Convert provisional thread to real thread
+                                    if (provisionalThreadId && !currentThreadId) {
+                                        currentThreadId = provisionalThreadId;
+                                        provisionalThreadId = null;
+                                        document.getElementById('currentThread').textContent = `Thread: ${currentThreadId}`;
+                                    }
+
+                                    // Always reload threads to update message count in sidebar
+                                    await loadThreads();
                                 } else if (data.type === 'error') {
                                     showError(`Error: ${data.message}`);
                                     assistantMessage.textContent = 'Sorry, I encountered an error processing your request.';
@@ -438,9 +858,6 @@
                     }
                 }
 
-                // Reload threads to update message count
-                await loadThreads();
-
             } catch (error) {
                 console.error('Error sending message:', error);
                 showError('Failed to send message');
@@ -451,18 +868,38 @@
 
         function addMessage(content, type, streaming = false) {
             const chatMessages = document.getElementById('chatMessages');
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${type}`;
+            const welcomeMessage = document.getElementById('welcomeMessage');
 
-            if (streaming) {
-                messageElement.classList.add('streaming');
+            // Hide welcome message when first message is added
+            if (!chatMessages.classList.contains('has-messages')) {
+                chatMessages.classList.add('has-messages');
+                welcomeMessage.style.display = 'none';
             }
 
-            messageElement.textContent = content;
-            chatMessages.appendChild(messageElement);
-            scrollToBottom();
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `message-wrapper ${type}`;
 
-            return messageElement;
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+
+            const avatar = document.createElement('div');
+            avatar.className = `message-avatar ${type}`;
+            avatar.textContent = type === 'user' ? 'U' : 'AI';
+
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            if (streaming) {
+                messageText.classList.add('streaming');
+            }
+            messageText.textContent = content;
+
+            messageContent.appendChild(avatar);
+            messageContent.appendChild(messageText);
+            messageWrapper.appendChild(messageContent);
+            chatMessages.appendChild(messageWrapper);
+
+            scrollToBottom();
+            return messageText;
         }
 
         function setStreamingState(streaming) {
@@ -472,12 +909,6 @@
 
             sendBtn.disabled = streaming;
             messageInput.disabled = streaming;
-
-            if (streaming) {
-                sendBtn.textContent = 'Sending...';
-            } else {
-                sendBtn.textContent = 'Send';
-            }
         }
 
         function scrollToBottom() {
@@ -499,11 +930,21 @@
             }, 5000);
         }
 
-        // Handle Enter key in input
+        // Handle Enter key in textarea
         document.getElementById('messageInput').addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 sendMessage(event);
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
             }
         });
     </script>

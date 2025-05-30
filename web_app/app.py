@@ -9,7 +9,6 @@ from typing import AsyncGenerator, Annotated
 from contextlib import asynccontextmanager
 from inference.exec_graph import ChatLangGraph
 from langsmith import tracing_context
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
