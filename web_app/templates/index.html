@@ -549,21 +549,17 @@
                 <p>Ask me anything about Pepwave products, networking solutions, or technical support.</p>
 
                 <div class="welcome-suggestions">
-                    <div class="suggestion-card" onclick="sendSuggestion('What is a Pepwave router and what makes it different?')">
-                        <div class="suggestion-title">Learn about Pepwave</div>
-                        <div class="suggestion-desc">Get an overview of Pepwave products and their unique features</div>
+                    <div class="suggestion-card" onclick="sendSuggestion('What is Pepwave router?')">
+                        <div class="suggestion-title">What is a Pepwave router?</div>
+                        <div class="suggestion-desc">Get an overview of Pepwave cellular routers</div>
                     </div>
-                    <div class="suggestion-card" onclick="sendSuggestion('How do I set up load balancing on my Pepwave device?')">
-                        <div class="suggestion-title">Setup guidance</div>
-                        <div class="suggestion-desc">Step-by-step instructions for configuring your device</div>
+                    <div class="suggestion-card" onclick="sendSuggestion('What are pepwave routers used for?')">
+                        <div class="suggestion-title">What are pepwave routers used for?</div>
+                        <div class="suggestion-desc">Learn about the different uses of Pepwave routers</div>
                     </div>
-                    <div class="suggestion-card" onclick="sendSuggestion('What are the best Pepwave models for small businesses?')">
-                        <div class="suggestion-title">Product recommendations</div>
-                        <div class="suggestion-desc">Find the right Pepwave solution for your needs</div>
-                    </div>
-                    <div class="suggestion-card" onclick="sendSuggestion('How do I troubleshoot connectivity issues?')">
-                        <div class="suggestion-title">Troubleshooting help</div>
-                        <div class="suggestion-desc">Diagnose and fix common network problems</div>
+                    <div class="suggestion-card" onclick="sendSuggestion('What are the most useful Pepwave models for digital nomads?')">
+                        <div class="suggestion-title">What are the best Pepwave models for digital nomads?</div>
+                        <div class="suggestion-desc">Pepwave routers are popular among digital nomads, especially full-time RVers</div>
                     </div>
                 </div>
             </div>
@@ -694,30 +690,6 @@
             }
         }
 
-        async function createNewThread() {
-            try {
-                const response = await fetch('/api/threads', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({})
-                });
-
-                const data = await response.json();
-                await loadThreads();
-                selectThread(data.thread_id);
-
-                // Close sidebar on mobile after creating new thread
-                if (window.innerWidth <= 768) {
-                    toggleSidebar();
-                }
-            } catch (error) {
-                console.error('Error creating thread:', error);
-                showError('Failed to create new conversation');
-            }
-        }
-
         async function selectThread(threadId, clickedElement = null) {
             currentThreadId = threadId;
             provisionalThreadId = null;
@@ -779,9 +751,6 @@
 
         async function sendSuggestion(message) {
             if (isStreaming) return;
-
-            // Ensure we have a thread (provisional or real)
-            await ensureThreadExists();
 
             const messageInput = document.getElementById('messageInput');
             messageInput.value = message;
@@ -996,29 +965,29 @@
 
         async function deleteThread(threadId, event) {
             event.stopPropagation(); // Prevent thread selection
-            
+
             // Confirm deletion
             if (!confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/threads/${threadId}`, {
                     method: 'DELETE'
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Failed to delete thread');
                 }
-                
+
                 // If we deleted the currently selected thread, show no messages screen
                 if (currentThreadId === threadId) {
                     showNoMessagesScreen();
                 }
-                
+
                 // Reload threads to update the sidebar
                 await loadThreads();
-                
+
             } catch (error) {
                 console.error('Error deleting thread:', error);
                 showError('Failed to delete conversation');

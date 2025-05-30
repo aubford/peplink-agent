@@ -33,7 +33,7 @@ class ChatLangGraph(RagInferenceLangGraph):
 
         # Thread management
         self.active_threads: dict[str, dict] = {}
-        self.current_thread_id: str = self.create_new_thread()
+        self.current_thread_id: str | None = None
 
     def create_new_thread(self) -> str:
         """Create a new conversation thread and return its ID."""
@@ -97,14 +97,14 @@ class ChatLangGraph(RagInferenceLangGraph):
             # If state doesn't exist or can't be cleared, that's fine
             pass
 
-        # If we deleted the current thread, switch to another or create new
+        # If we deleted the current thread, switch to another or set to None
         if thread_id == self.current_thread_id:
             if self.active_threads:
                 # Switch to the first available thread
                 self.current_thread_id = next(iter(self.active_threads))
             else:
-                # Create a new thread if none exist
-                self.current_thread_id = self.create_new_thread()
+                # No threads exist, set to None
+                self.current_thread_id = None
 
         return True
 
