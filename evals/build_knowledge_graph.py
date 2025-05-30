@@ -72,6 +72,7 @@ def clean_meta(doc: Document) -> Document:
 
 
 def count_relationship_types(kg: KnowledgeGraph) -> None:
+    """Display only: Relationship types and their counts."""
     relationship_types = {}
     for rel in kg.relationships:
         rel_type = rel.type
@@ -205,17 +206,16 @@ def create_kg(df: pd.DataFrame, transforms: list[BaseGraphTransformation]) -> No
 - title_embedding
 - technical_summary
 - technical_summary_embedding
-2. Normalize the scores for each between 0 and 1
-3. Create a new KG that merges relationships with same source and target into a single relationship with a score based
-on a heuristic combining them.
-4. Filter out low scoring relationships (take the top half)?
+2. Separate siblings into their own relationship types for future clustering logic
+3. Merge multi-relationships into a single "multi" relationship
+4. Normalize the scores for each between 0 and 1
 
 Final relationship types:
 - multi
 - technical_summary_embedding_cosine_similarity
 - title_embedding_cosine_similarity
 - entities_overlap_score
-- html_overlap_score
+- html_overlap_score (overlap with user manual entities)
 - themes_overlap_score
 - sibling_technical_summary_embedding_cosine_similarity
 - sibling_title_embedding_cosine_similarity
@@ -269,6 +269,7 @@ with tracing_context(enabled=False):
             threshold=overlap_threshold * 1.5,
             filter_nodes=filter_themes_overlap,
         )
+        # compare non-html docs with >2 items against each other
         entities_overlap_sim = OverlapScoreBuilder(
             property_name="entities",
             new_property_name="entities_overlap_score",
@@ -277,6 +278,7 @@ with tracing_context(enabled=False):
             threshold=overlap_threshold,
             filter_nodes=filter_entities_overlap,
         )
+        # compare non-html docs against html docs since HTML docs (user manual) contains the most pertinent named entities
         html_overlap_sim = OverlapScoreBuilder(
             property_name="entities",
             new_property_name="html_overlap_score",

@@ -53,7 +53,7 @@ class HtmlLoad(BaseLoad):
         self.init_spacy()
         # Run NER to create the "entities" column
         df = self.ner(df)
-        # Merge the newly created "entities" column with "all_settings_entities"
+        # Merge the newly created "entities" column with "settings_entity_list"
         df["entities"] = df.apply(
             lambda row: list(set(row["entities"] + row["settings_entity_list"])),
             axis=1,
@@ -133,7 +133,8 @@ class HtmlLoad(BaseLoad):
         2. All subsequent rows with entity-description pairs are nested under that title
         3. Entity is extracted from the first <td> and description from subsequent <td>
 
-        Note: Keys "Important Note" and "Tip" are excluded from the results.
+        Exclude keys like "Important Note" and "Tip" that represent metadata patterns orthogonal
+        to the targeted structured entity-description pattern.
 
         Args:
             text: The HTML content containing tables to be parsed

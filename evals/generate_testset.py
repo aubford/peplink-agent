@@ -179,7 +179,7 @@ class GenerateTestSet:
 
     def find_relationship_clusters(self) -> set[FrozenSet[str]]:
         """
-        Find n clusters of relationships by traversing the knowledge graph using dataframe operations.
+        Find n clusters of (non-sibling) relationships by traversing the knowledge graph using dataframe operations.
         Returns:
             Set of frozensets, where each frozenset contains the IDs of nodes in a cluster/path
         """
@@ -396,9 +396,9 @@ class GenerateTestSet:
         )
 
         chain = prompt_messages | self.llm.with_structured_output(ResponseModel)
-        return self.invoke_chain(chain, self.doc_text_column)
+        return self.invoke_generate_testset_chain(chain, self.doc_text_column)
 
-    def invoke_chain(self, chain, doc_text_column: str):
+    def invoke_generate_testset_chain(self, chain, doc_text_column: str):
         results = []
         for i, node_cluster_df in enumerate(self.node_clusters):
             documents_text = ""

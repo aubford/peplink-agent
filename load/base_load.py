@@ -44,7 +44,7 @@ Not in HTML:
 - entities: Entities in primary_content and lead_content. (HTML: Only primary_content)
     Inference:
     - When comparing a non-HTML with HTML: Compare with both HTML.entities and HTML.settings_entity_list.
-    - Don't compare HTML with itself?
+    - Don't compare HTML with itself.
     - Always try to find an HTML relationship via this column.
 From LLM: (EX: HTML)
 - themes: Themes from primary_content and lead_content. (YouTube: Only primary_content)
@@ -230,12 +230,8 @@ class BaseLoad:
                 "URL",
                 "FAC",
                 "ORG",
-                "GPE",
                 "PRODUCT",
-                "LOC",
-                "WORK_OF_ART",
-                "EVENT",
-                "PEPWAVE_SETTINGS_ENTITY",  # Our custom entity type
+                "PEPWAVE_SETTINGS_ENTITY",  # Our custom entity type from user manual settings entities
             }
             and any(c.isalpha() for c in ent.text)
         }
