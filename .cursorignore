@@ -5,6 +5,8 @@ __pycache__/
 backup_data/
 data/
 logs/
+!.env*
+
 # !langchain_pepwave_env/*
 # !langchain_pepwave_env/lib/*
 # !langchain_pepwave_env/lib/python3.12/*

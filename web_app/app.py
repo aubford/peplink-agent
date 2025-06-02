@@ -27,11 +27,10 @@ chatbot: ChatLangGraph | None = None
 async def lifespan(app: FastAPI):
     # Startup
     global chatbot
-    with tracing_context(enabled=True, project_name="langchain-pepwave"):
-        chatbot = ChatLangGraph(
-            llm_model="gpt-4o-mini",
-            pinecone_index_name="pepwave-early-april-page-content-embedding",
-        )
+    chatbot = ChatLangGraph(
+        llm_model="gpt-4o-mini",
+        pinecone_index_name="pepwave-early-april-page-content-embedding",
+    )
     yield
     # Shutdown (cleanup if needed)
     chatbot = None
