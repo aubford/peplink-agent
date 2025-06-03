@@ -13,12 +13,11 @@ from prompts import load_prompts
 
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
-from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.state import CompiledStateGraph
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
 from pydantic import BaseModel, Field
-import os
 
 
 # Load prompts
@@ -64,18 +63,8 @@ class RagInferenceLangGraph(InferenceBase):
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
 
-        # Initialize PostgreSQL checkpointer for persistence
-        db_uri = os.getenv(
-            "DATABASE_URL",
-            "postgresql://postgres:postgres@localhost:5432/langgraph?sslmode=disable",
-        )
-        self.memory = PostgresSaver.from_conn_string(db_uri)
-        # Setup database tables on first use
-        try:
-            self.memory.setup()
-        except Exception:
-            # Tables may already exist, which is fine
-            pass
+        # Initialize memory saver for persistence
+        self.memory = InMemorySaver()
 
     def compile(
         self,
