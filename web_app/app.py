@@ -153,10 +153,14 @@ async def create_thread(
 ):
     """Create a new conversation thread."""
     thread_id = bot.create_new_thread()
-    if thread_data.title:
-        bot.active_threads[thread_id]["title"] = thread_data.title
+
+    # For new threads, use provided title or default
+    # The title will be updated automatically when the first message is sent
+    title = thread_data.title if thread_data.title else "New Conversation"
+
     return ThreadResponse(
-        thread_id=thread_id, title=bot.active_threads[thread_id]["title"]
+        thread_id=thread_id,
+        title=title
     )
 
 
