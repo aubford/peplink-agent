@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from .app import app
+from web_app.app import app
 import uvicorn
 
 if __name__ == "__main__":

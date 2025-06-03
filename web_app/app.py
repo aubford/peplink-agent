@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
     # Startup
     global chatbot
     chatbot = ChatLangGraph(
-        llm_model="gpt-4o-mini",
+        llm_model="gpt-4.1",
         pinecone_index_name="pepwave-early-april-page-content-embedding",
     )
     yield
