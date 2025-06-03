@@ -16,6 +16,7 @@ from contextlib import asynccontextmanager
 from inference.exec_graph import ChatLangGraph
 from langsmith import tracing_context
 from dotenv import load_dotenv
+from langgraph.checkpoint.postgres import PostgresSaver
 
 load_dotenv()
 
@@ -27,11 +28,18 @@ chatbot: ChatLangGraph | None = None
 async def lifespan(app: FastAPI):
     # Startup
     global chatbot
-    chatbot = ChatLangGraph(
-        llm_model="gpt-4.1",
-        pinecone_index_name="pepwave-early-april-page-content-embedding",
-    )
-    yield
+    with PostgresSaver.from_conn_string(os.getenv("DATABASE_URL")) as checkpointer:
+        # Uncomment the next line the first time you run with PostgreSQL
+        # checkpointer.setup()
+        print("✅ Using PostgreSQL for persistence")
+
+        chatbot = ChatLangGraph(
+            llm_model="gpt-4.1-nano",
+            pinecone_index_name="pepwave-early-april-page-content-embedding",
+            checkpointer=checkpointer,
+        )
+        print("✅ Chatbot initialized")
+        yield
     # Shutdown (cleanup if needed)
     chatbot = None
 
@@ -222,7 +230,7 @@ async def chat_stream(
                 # Send each token as a streaming event
                 yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
                 # Small delay to prevent overwhelming the client
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.001)
 
             # Send completion event
             yield f"data: {json.dumps({'type': 'complete', 'full_response': full_response})}\n\n"

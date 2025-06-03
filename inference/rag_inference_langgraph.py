@@ -13,7 +13,7 @@ from prompts import load_prompts
 
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.memory import InMemorySaver, BaseCheckpointSaver
 from langgraph.graph.state import CompiledStateGraph
 from load.batch_manager import BatchManager
 from evals.batch_llm import BatchChatOpenAI
@@ -48,6 +48,7 @@ class RagInferenceLangGraph(InferenceBase):
         llm_model: str,
         pinecone_index_name: str,
         use_cohere: bool = False,
+        checkpointer: BaseCheckpointSaver | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -57,6 +58,7 @@ class RagInferenceLangGraph(InferenceBase):
         self.output_llm = self.llm
         self.conversation_template = None
         self.use_cohere = use_cohere
+        print(f"use_cohere: {use_cohere}")
 
         # Initialize the Pinecone retriever
         self.pinecone = PineconeRetriever(
@@ -64,7 +66,7 @@ class RagInferenceLangGraph(InferenceBase):
         )
 
         # Initialize memory saver for persistence
-        self.memory = InMemorySaver()
+        self.checkpointer = checkpointer or InMemorySaver()
 
     def compile(
         self,
@@ -95,7 +97,7 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder.add_edge("generate_answer", "update_messages")
 
         # Compile
-        compiled_graph = graph_builder.compile(checkpointer=self.memory)
+        compiled_graph = graph_builder.compile(checkpointer=self.checkpointer)
         graph = compiled_graph.with_config(self.config)
         return graph
 

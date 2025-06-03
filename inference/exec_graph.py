@@ -21,12 +21,14 @@ class ChatLangGraph(RagInferenceLangGraph):
         pinecone_index_name: str,
         temperature: float = 1,
         minimal_tracer: bool = False,
+        checkpointer=None,
     ):
         super().__init__(
             llm_model,
             pinecone_index_name,
             minimal_tracer=minimal_tracer,
             temperature=temperature,
+            checkpointer=checkpointer,
             streaming=True,
         )
         self.graph = self.compile(conversation_template=default_conversation_template)
@@ -34,6 +36,77 @@ class ChatLangGraph(RagInferenceLangGraph):
         # Thread management
         self.active_threads: dict[str, dict] = {}
         self.current_thread_id: str | None = None
+
+        # Load existing threads from checkpointer if available
+        self._load_existing_threads()
+
+    def _load_existing_threads(self):
+        """Load existing threads from the checkpointer (PostgreSQL)."""
+        if not self.checkpointer:
+            return
+
+        try:
+            # Get all checkpoints from the database
+            checkpoints = list(self.checkpointer.list({}))
+
+            # Extract unique thread IDs and their metadata
+            thread_data = {}
+            for checkpoint in checkpoints:
+                thread_id = checkpoint.config.get("configurable", {}).get("thread_id")
+                if thread_id:
+                    # Get the state to extract conversation info
+                    try:
+                        state = self.graph.get_state(
+                            config={"configurable": {"thread_id": thread_id}}
+                        )
+                        messages = state.values.get("messages", []) if state.values else []
+
+                        # Generate title from first user message if available
+                        title = "Restored Conversation"
+                        if messages:
+                            for msg in messages:
+                                if hasattr(msg, 'type') and msg.type == "human":
+                                    title = msg.content[:50] + ("..." if len(msg.content) > 50 else "")
+                                    break
+
+                        # Use checkpoint created_at as creation time
+                        created_at = checkpoint.created_at if hasattr(checkpoint, 'created_at') and checkpoint.created_at else datetime.now()
+                        if isinstance(created_at, str):
+                            # Parse ISO format datetime string
+                            created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+
+                        thread_data[thread_id] = {
+                            "created_at": created_at,
+                            "title": title,
+                        }
+                    except Exception as e:
+                        # If we can't get state for this thread, create basic metadata
+                        created_at = checkpoint.created_at if hasattr(checkpoint, 'created_at') and checkpoint.created_at else datetime.now()
+                        if isinstance(created_at, str):
+                            created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+
+                        thread_data[thread_id] = {
+                            "created_at": created_at,
+                            "title": "Restored Conversation",
+                        }
+
+            # Update active_threads with loaded data
+            self.active_threads.update(thread_data)
+
+            # Set current thread to the most recent one if no current thread is set
+            if not self.current_thread_id and self.active_threads:
+                # Sort by creation time and pick the most recent
+                most_recent_thread = max(
+                    self.active_threads.items(),
+                    key=lambda x: x[1]["created_at"]
+                )[0]
+                self.current_thread_id = most_recent_thread
+
+            print(f"✅ Loaded {len(thread_data)} existing threads from database")
+
+        except Exception as e:
+            print(f"⚠️ Warning: Could not load existing threads from database: {e}")
+            # Continue with empty threads - this is not a fatal error
 
     def create_new_thread(self) -> str:
         """Create a new conversation thread and return its ID."""
@@ -49,6 +122,32 @@ class ChatLangGraph(RagInferenceLangGraph):
         if thread_id in self.active_threads:
             self.current_thread_id = thread_id
             return True
+
+        # Check if thread exists in database but not in memory
+        if self.checkpointer:
+            try:
+                state = self.graph.get_state(
+                    config={"configurable": {"thread_id": thread_id}}
+                )
+                if state.values and state.values.get("messages"):
+                    # Thread exists in database, add it to active_threads
+                    messages = state.values.get("messages", [])
+                    title = "Restored Conversation"
+                    if messages:
+                        for msg in messages:
+                            if hasattr(msg, 'type') and msg.type == "human":
+                                title = msg.content[:50] + ("..." if len(msg.content) > 50 else "")
+                                break
+
+                    self.active_threads[thread_id] = {
+                        "created_at": datetime.now(),  # Use current time since we don't have original
+                        "title": title,
+                    }
+                    self.current_thread_id = thread_id
+                    return True
+            except Exception:
+                pass
+
         return False
 
     def get_thread_history(self, thread_id: str | None = None) -> list:
