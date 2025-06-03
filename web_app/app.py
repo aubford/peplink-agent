@@ -94,6 +94,7 @@ class ThreadHistoryResponse(BaseModel):
 
 class TestsetQuery(BaseModel):
     query: str
+    answer: str
 
 
 class TestsetQueriesResponse(BaseModel):
@@ -122,8 +123,7 @@ async def get_random_testset_queries():
         # Extract all queries
         all_queries = []
         for item in testset_data:
-            if 'query' in item and item['query'].strip():
-                all_queries.append(TestsetQuery(query=item['query']))
+            all_queries.append(TestsetQuery(query=item['query'], answer=item['answer']))
 
         # Return 6 random queries for suggestions
         if len(all_queries) >= 6:
