@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     global chatbot
     with PostgresSaver.from_conn_string(os.getenv("DATABASE_URL")) as checkpointer:
         # Uncomment the next line the first time you run with PostgreSQL
-        # checkpointer.setup()
+        checkpointer.setup()
         print("✅ Using PostgreSQL for persistence")
 
         chatbot = ChatLangGraph(

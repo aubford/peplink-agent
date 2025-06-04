@@ -1,0 +1,73 @@
+# ===== LARGE DATA DIRECTORIES (CRITICAL - these are 16GB+) =====
+**/*.parquet
+**/*.jsonl
+**/batch/
+**/batches/
+/evals/knowledge_graph/
+/evals/experiments/**
+/evals/testsets/unclean/
+/transform/
+/extract/
+/tutorial/
+/data/
+/backup_data/
+/logs/
+/langchain_pepwave_env*/
+
+# ===== VIRTUAL ENVIRONMENTS =====
+.env
+.venv
+env/
+venv/
+ENV/
+
+# ===== PYTHON =====
+**/__pycache__/
+.Python
+.pytest_cache/
+cython_debug/
+
+# Testing
+.cache
+coverage.xml
+*.cover
+*.py,cover
+cover/
+
+# Distribution / packaging
+develop-eggs/
+eggs/
+.eggs/
+*.egg-info/
+lib/
+lib64/
+pip-log.txt
+
+# ===== JUPYTER =====
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# ===== IDE FILES =====
+.vscode/
+.idea/
+.cursorignore
+out/
+
+
+# ===== OS FILES =====
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# ===== GIT =====
+.git
+.gitignore
+.gitattributes
+
+# ===== DEVELOPMENT/DEPLOYMENT FILES =====
+env.example
+.env.example
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile
