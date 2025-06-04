@@ -18,14 +18,14 @@
           "value": "langgraph"
         },
         {
-          "name": "POSTGRES_USER", 
+          "name": "POSTGRES_USER",
           "value": "postgres"
         }
       ],
       "secrets": [
         {
           "name": "POSTGRES_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/postgres-password"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/POSTGRES_PASSWORD"
         }
       ],
       "healthCheck": {
@@ -59,36 +59,24 @@
         {
           "name": "DATABASE_URL",
           "value": "postgresql://postgres:${POSTGRES_PASSWORD}@localhost:5432/langgraph?sslmode=disable"
-        },
-        {
-          "name": "LANGSMITH_TRACING",
-          "value": "true"
-        },
-        {
-          "name": "LANGSMITH_PROJECT", 
-          "value": "langchain-pepwave-prod"
         }
       ],
       "secrets": [
         {
           "name": "POSTGRES_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/postgres-password"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/POSTGRES_PASSWORD"
         },
         {
           "name": "PINECONE_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/pinecone-api-key"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/PINECONE_API_KEY"
         },
         {
           "name": "OPENAI_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/openai-api-key"
-        },
-        {
-          "name": "LANGSMITH_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/langsmith-api-key"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/OPENAI_API_KEY"
         },
         {
           "name": "COHERE_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/cohere-api-key"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:003765455645:secret:langchain-pepwave/COHERE_API_KEY"
         }
       ],
       "dependsOn": [
@@ -114,4 +102,4 @@
       }
     }
   ]
-} 
+}
