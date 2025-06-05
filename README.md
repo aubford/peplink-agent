@@ -1,8 +1,9 @@
-# LangChain-Pepwave: RAG Pipeline & Evaluation Framework
+Peplink Tech Support RAG Agent
+(prototype iteration for future Discourse-Forum RAG Agent)
 
 ## Overview
 
-This repository implements a robust Retrieval-Augmented Generation (RAG) pipeline for technical document QA
+This repository implements a robust Retrieval-Augmented Generation (RAG) based agentic workflow for technical document QA
 chat on a multi-source technical corpora (e.g., forums, PDFs, web, YouTube) related to Pepwave
 cellular routers. Pepwave routers are popular among digital nomads like myself but are meant for network admins
 and not laypeople.  Notably, ChatGPT is not helpful in answering most questions I have had. The goal for this
