@@ -1,5 +1,4 @@
-Peplink Tech Support RAG Agent
-(prototype iteration for future Discourse-Forum RAG Agent)
+# Peplink Tech Support RAG Agent (Prototype for Discourse-Forum RAG Agent)
 
 ## Overview
 
