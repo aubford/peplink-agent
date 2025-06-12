@@ -22,11 +22,13 @@ COPY requirements-prod.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir --timeout 1000 -r requirements-prod.txt
 
-# Copy the entire application
+# Create data directories (do this before copying code)
+RUN mkdir -p data logs
+
+# Copy the application code (this should be last to maximize cache hits)
 COPY . .
 
-# Create data directories
-RUN mkdir -p data logs
+WORKDIR /app/web_app
 
 # Expose port
 EXPOSE 8000

@@ -1,5 +1,0 @@
-name: langchain-pepwave
-
-network:
-  vpc:
-    enable_logs: true
