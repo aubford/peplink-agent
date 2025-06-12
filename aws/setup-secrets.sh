@@ -12,7 +12,7 @@ create_or_update_secret() {
     local secret_description=$2
 
     echo "Please enter your $secret_description:"
-    read -s secret_value
+    read -rs secret_value
 
     # Check if secret exists
     if aws secretsmanager describe-secret --secret-id "$secret_name" --region $REGION >/dev/null 2>&1; then
@@ -42,7 +42,6 @@ echo ""
 create_or_update_secret "langchain-pepwave/POSTGRES_PASSWORD" "PostgreSQL Database Password"
 create_or_update_secret "langchain-pepwave/PINECONE_API_KEY" "Pinecone API Key"
 create_or_update_secret "langchain-pepwave/OPENAI_API_KEY" "OpenAI API Key"
-create_or_update_secret "langchain-pepwave/LANGSMITH_API_KEY" "LangSmith API Key"
 create_or_update_secret "langchain-pepwave/COHERE_API_KEY" "Cohere API Key"
 
 echo "🎉 All secrets have been configured successfully!"
