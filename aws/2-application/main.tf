@@ -99,6 +99,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     subnets          = data.terraform_remote_state.infrastructure.outputs.subnet_ids
+    security_groups  = [data.terraform_remote_state.infrastructure.outputs.ecs_security_group_id]
     assign_public_ip = true
   }
 }

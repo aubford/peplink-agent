@@ -27,3 +27,13 @@ output "ecs_task_execution_role_arn" {
   description = "ECS task execution role ARN"
   value       = aws_iam_role.ecs_task_execution_role.arn
 }
+
+output "ecs_security_group_id" {
+  description = "Security group ID for ECS tasks"
+  value       = aws_security_group.ecs_tasks.id
+}
+
+output "aws_region" {
+  description = "AWS region"
+  value       = var.aws_region
+}

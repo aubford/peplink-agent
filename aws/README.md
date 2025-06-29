@@ -49,6 +49,7 @@ This creates:
 - RDS PostgreSQL database
 - CloudWatch log group
 - ECS task execution role (for pulling images and logging)
+- Security group (allows inbound traffic on port 8000)
 
 ### 3. Build and Push Docker Image
 
@@ -92,6 +93,7 @@ This creates:
 - **RDS PostgreSQL** - Database (publicly accessible for demo)
 - **CloudWatch Log Group** - Application logs
 - **ECS Task Execution Role** - IAM role for ECS tasks to access AWS services
+- **Security Group** - Allows inbound HTTP traffic on port 8000
 
 ### Phase 2 Application:
 - **ECS Cluster** - Container orchestration

@@ -13,6 +13,7 @@ fi
 # Get ECR repository URL from Phase 1 output
 ECR_URL=$(terraform -chdir=1-infrastructure output -raw ecr_repository_url)
 REGISTRY=$(echo $ECR_URL | cut -d'/' -f1)
+AWS_REGION=$(terraform -chdir=1-infrastructure output -raw aws_region || echo "us-east-1")
 
 echo "📍 ECR Repository: $ECR_URL"
 
@@ -20,7 +21,7 @@ echo "📍 ECR Repository: $ECR_URL"
 cd ..
 
 echo "🔐 Logging into ECR..."
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REGISTRY
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REGISTRY
 
 echo "🏗️  Building Docker image..."
 docker build -t langchain-pepwave .

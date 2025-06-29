@@ -13,7 +13,7 @@ fi
 # Get ECR repository URL from Phase 1
 ECR_URL=$(terraform -chdir=../1-infrastructure output -raw ecr_repository_url)
 REPO_NAME=$(echo $ECR_URL | cut -d'/' -f2)
-REGION="us-east-1"
+REGION=$(terraform -chdir=../1-infrastructure output -raw aws_region || echo "us-east-1")
 
 echo "📍 Checking ECR Repository: $ECR_URL"
 
