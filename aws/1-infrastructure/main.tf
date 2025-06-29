@@ -55,6 +55,8 @@ resource "aws_db_instance" "postgres" {
   skip_final_snapshot = true
   publicly_accessible = true
 
+  vpc_security_group_ids = [aws_security_group.rds.id]
+
   tags = {
     Name = "langchain-pepwave-db"
   }
@@ -120,5 +122,43 @@ resource "aws_security_group" "ecs_tasks" {
 
   tags = {
     Name = "langchain-pepwave-ecs-tasks"
+  }
+}
+
+# Security Group for RDS
+resource "aws_security_group" "rds" {
+  name        = "langchain-pepwave-rds"
+  description = "Security group for RDS PostgreSQL"
+  vpc_id      = data.aws_vpc.default.id
+
+  # Allow inbound PostgreSQL traffic from ECS tasks
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_tasks.id]
+    description     = "PostgreSQL traffic from ECS tasks"
+  }
+
+  # Allow inbound PostgreSQL traffic from anywhere (for demo/debugging)
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "PostgreSQL traffic from anywhere (demo only)"
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "All outbound traffic"
+  }
+
+  tags = {
+    Name = "langchain-pepwave-rds"
   }
 }
