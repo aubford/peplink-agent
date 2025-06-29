@@ -11,6 +11,20 @@ provider "aws" {
   region = var.aws_region
 }
 
+# ECR Repository
+resource "aws_ecr_repository" "app" {
+  name                 = "langchain-pepwave"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name = "langchain-pepwave"
+  }
+}
+
 # Data sources for existing resources
 data "aws_vpc" "default" {
   default = true
