@@ -24,38 +24,7 @@ locals {
   validate_phase1 = data.terraform_remote_state.infrastructure.outputs.ecr_repository_url != null ? true : file("ERROR: Phase 1 not complete. Run 'terraform apply' in 1-infrastructure/ first.")
 }
 
-# Data sources for secrets (needed for container definition)
-data "aws_secretsmanager_secret" "postgres_password" {
-  name = "langchain-pepwave/POSTGRES_PASSWORD"
-}
-
-data "aws_secretsmanager_secret_version" "postgres_password" {
-  secret_id = data.aws_secretsmanager_secret.postgres_password.id
-}
-
-data "aws_secretsmanager_secret" "pinecone_api_key" {
-  name = "langchain-pepwave/PINECONE_API_KEY"
-}
-
-data "aws_secretsmanager_secret_version" "pinecone_api_key" {
-  secret_id = data.aws_secretsmanager_secret.pinecone_api_key.id
-}
-
-data "aws_secretsmanager_secret" "openai_api_key" {
-  name = "langchain-pepwave/OPENAI_API_KEY"
-}
-
-data "aws_secretsmanager_secret_version" "openai_api_key" {
-  secret_id = data.aws_secretsmanager_secret.openai_api_key.id
-}
-
-data "aws_secretsmanager_secret" "cohere_api_key" {
-  name = "langchain-pepwave/COHERE_API_KEY"
-}
-
-data "aws_secretsmanager_secret_version" "cohere_api_key" {
-  secret_id = data.aws_secretsmanager_secret.cohere_api_key.id
-}
+# No secrets data sources needed - using tfvars instead
 
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
@@ -91,19 +60,19 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         {
           name  = "DATABASE_URL"
-          value = "postgresql://postgres:${data.aws_secretsmanager_secret_version.postgres_password.secret_string}@${data.terraform_remote_state.infrastructure.outputs.rds_endpoint}:5432/langgraph?sslmode=require"
+          value = "postgresql://postgres:${var.postgres_password}@${data.terraform_remote_state.infrastructure.outputs.rds_endpoint}:5432/langgraph?sslmode=require"
         },
         {
           name  = "PINECONE_API_KEY"
-          value = data.aws_secretsmanager_secret_version.pinecone_api_key.secret_string
+          value = var.pinecone_api_key
         },
         {
           name  = "OPENAI_API_KEY"
-          value = data.aws_secretsmanager_secret_version.openai_api_key.secret_string
+          value = var.openai_api_key
         },
         {
           name  = "COHERE_API_KEY"
-          value = data.aws_secretsmanager_secret_version.cohere_api_key.secret_string
+          value = var.cohere_api_key
         }
       ]
 

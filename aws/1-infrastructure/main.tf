@@ -50,7 +50,7 @@ resource "aws_db_instance" "postgres" {
 
   db_name  = "langgraph"
   username = "postgres"
-  password = data.aws_secretsmanager_secret_version.postgres_password.secret_string
+  password = var.postgres_password
 
   skip_final_snapshot = true
   publicly_accessible = true

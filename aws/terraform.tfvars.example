@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your actual values
+# terraform.tfvars is gitignored so your secrets won't be committed
+
+# Database password (choose a secure password)
+postgres_password = "your-secure-database-password-here"
+
+# API Keys (get these from your respective services)
+pinecone_api_key = "your-pinecone-api-key-here"
+openai_api_key   = "your-openai-api-key-here"
+cohere_api_key   = "your-cohere-api-key-here"

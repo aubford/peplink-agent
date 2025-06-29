@@ -15,25 +15,30 @@ This deployment uses a **2-phase approach** to avoid failures during initial dep
 
 ### 1. Configure Secrets
 
-Navigate to the infrastructure directory:
+Create your secrets files in both directories:
 ```bash
+# Create secrets file for Phase 1
 cd 1-infrastructure
+cp terraform.tfvars.example terraform.tfvars
+
+# Create secrets file for Phase 2
+cd ../2-application
+cp terraform.tfvars.example terraform.tfvars
 ```
 
-Store your API keys in AWS Secrets Manager:
-```bash
-./setup-secrets.sh
-```
+Edit both `terraform.tfvars` files and fill in your actual values:
+- **postgres_password** - Choose a secure password for your database
+- **pinecone_api_key** - Your Pinecone API key
+- **openai_api_key** - Your OpenAI API key for LLM access
+- **cohere_api_key** - Your Cohere API key for embeddings/LLM
 
-This script will prompt you to enter the following secrets (input will be hidden):
-- **PostgreSQL Database Password** - Choose a secure password for your database
-- **Pinecone API Key** - Your Pinecone vector database API key
-- **OpenAI API Key** - Your OpenAI API key for LLM access
-- **Cohere API Key** - Your Cohere API key for embeddings/LLM
+The `terraform.tfvars` files are gitignored so your secrets won't be committed to version control.
 
 ### 2. Deploy Infrastructure
 
+Navigate to the infrastructure directory:
 ```bash
+cd 1-infrastructure
 terraform init
 terraform plan
 terraform apply
@@ -94,12 +99,13 @@ This creates:
 ## Workflow Summary
 
 ```
-1. cd 1-infrastructure
-2. ./setup-secrets.sh                        # Store API keys
-3. terraform init && terraform apply         # Deploy infrastructure
-4. cd .. && ./build-and-push.sh              # Build and push image
-5. cd 2-application && ./validate-image.sh   # Validate image exists
-6. terraform init && terraform apply         # Deploy application
+1. cd 1-infrastructure && cp terraform.tfvars.example terraform.tfvars  # Create secrets for Phase 1
+2. cd ../2-application && cp terraform.tfvars.example terraform.tfvars  # Create secrets for Phase 2
+3. # Edit both terraform.tfvars files with your API keys
+4. cd ../1-infrastructure && terraform init && terraform apply          # Deploy infrastructure
+5. cd .. && ./build-and-push.sh                                        # Build and push image
+6. cd 2-application && ./validate-image.sh                             # Validate image exists
+7. terraform init && terraform apply                                   # Deploy application
 ```
 
 ## Security Note
