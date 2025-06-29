@@ -13,6 +13,14 @@
 !/evals/knowledge_graph/__relationships.parquet
 !/evals/testsets/**/*.json
 
+
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+
 # completely ignore
 **/batch/
 **/batches/
