@@ -48,6 +48,7 @@ This creates:
 - ECR repository for your Docker images
 - RDS PostgreSQL database
 - CloudWatch log group
+- ECS task execution role (for pulling images and logging)
 
 ### 3. Build and Push Docker Image
 
@@ -90,6 +91,7 @@ This creates:
 - **ECR Repository** - Stores your Docker images
 - **RDS PostgreSQL** - Database (publicly accessible for demo)
 - **CloudWatch Log Group** - Application logs
+- **ECS Task Execution Role** - IAM role for ECS tasks to access AWS services
 
 ### Phase 2 Application:
 - **ECS Cluster** - Container orchestration

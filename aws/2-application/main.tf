@@ -42,6 +42,7 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "1024"
   memory                   = "2048"
+  execution_role_arn       = data.terraform_remote_state.infrastructure.outputs.ecs_task_execution_role_arn
 
   container_definitions = jsonencode([
     {
