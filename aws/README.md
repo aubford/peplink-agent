@@ -2,7 +2,7 @@
 
 This deployment uses a **2-phase approach** to avoid failures during initial deployment:
 
-1. **Phase 1**: Deploy infrastructure (RDS, ECR, IAM roles)
+1. **Phase 1**: Deploy infrastructure (RDS, ECR, CloudWatch)
 2. **Phase 2**: Deploy application (ECS) after Docker image is ready
 
 ## Prerequisites
@@ -43,38 +43,28 @@ This creates:
 - ECR repository for your Docker images
 - RDS PostgreSQL database
 - CloudWatch log group
-- VPC networking resources
 
 ### 3. Build and Push Docker Image
 
-After infrastructure is deployed, get the ECR repository URL:
+After infrastructure is deployed, use the helper script to build and push your Docker image:
+
 ```bash
-terraform output ecr_repository_url
+cd ..
+./build-and-push.sh
 ```
 
-Navigate back to the project root and build/push your image:
-```bash
-cd ../../
-
-# Login to ECR
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(terraform -chdir=langchain-pepwave/aws/1-infrastructure output -raw ecr_repository_url | cut -d'/' -f1)
-
-# Build the Docker image
-docker build -t langchain-pepwave .
-
-# Tag for ECR
-docker tag langchain-pepwave:latest $(terraform -chdir=langchain-pepwave/aws/1-infrastructure output -raw ecr_repository_url):latest
-
-# Push to ECR
-docker push $(terraform -chdir=langchain-pepwave/aws/1-infrastructure output -raw ecr_repository_url):latest
-```
+This script will:
+- Get the ECR repository URL from Phase 1
+- Login to ECR
+- Build your Docker image
+- Tag and push it to ECR
 
 ## Phase 2: Application Deployment
 
 Now that your Docker image is in ECR, deploy the ECS application:
 
 ```bash
-cd langchain-pepwave/aws/2-application
+cd 2-application
 
 # Optional: Validate that Docker image exists in ECR
 ./validate-image.sh
@@ -104,11 +94,12 @@ This creates:
 ## Workflow Summary
 
 ```
-1. cd 1-infrastructure && ./setup-secrets.sh
-2. terraform init && terraform apply          # Deploy infrastructure
-3. cd .. && ./build-and-push.sh              # Build and push image
-4. cd 2-application && ./validate-image.sh   # Validate image exists
-5. terraform init && terraform apply         # Deploy application
+1. cd 1-infrastructure
+2. ./setup-secrets.sh                        # Store API keys
+3. terraform init && terraform apply         # Deploy infrastructure
+4. cd .. && ./build-and-push.sh              # Build and push image
+5. cd 2-application && ./validate-image.sh   # Validate image exists
+6. terraform init && terraform apply         # Deploy application
 ```
 
 ## Security Note

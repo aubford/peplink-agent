@@ -17,7 +17,7 @@ REGISTRY=$(echo $ECR_URL | cut -d'/' -f1)
 echo "📍 ECR Repository: $ECR_URL"
 
 # Navigate to project root (langchain-pepwave directory)
-cd ../..
+cd ..
 
 echo "🔐 Logging into ECR..."
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REGISTRY
@@ -34,6 +34,6 @@ docker push $ECR_URL:latest
 echo "✅ Docker image successfully pushed to ECR!"
 echo ""
 echo "Next steps:"
-echo "1. cd langchain-pepwave/aws/2-application"
+echo "1. cd aws/2-application"
 echo "2. terraform init"
 echo "3. terraform apply"
