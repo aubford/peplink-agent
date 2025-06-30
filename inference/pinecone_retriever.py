@@ -65,7 +65,7 @@ class PineconeRetriever:
             "model": self.rerank_model,
         }
 
-        # Search Pinecone with reranking using the correct API syntax
+        # Search Pinecone with reranking
         response = self.pinecone_index.search(
             namespace=self.namespace,
             query=pc_query,

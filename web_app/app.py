@@ -13,10 +13,10 @@ import asyncio
 import random
 from typing import AsyncGenerator, Annotated
 from contextlib import asynccontextmanager
-from inference.exec_graph import ChatLangGraph
-from langsmith import tracing_context
+from inference.chat_agentic import ChatLangGraph
 from dotenv import load_dotenv
 from langgraph.checkpoint.postgres import PostgresSaver
+# from langsmith import tracing_context
 
 load_dotenv()
 
@@ -28,8 +28,11 @@ chatbot: ChatLangGraph | None = None
 async def lifespan(app: FastAPI):
     # Startup
     global chatbot
-    with PostgresSaver.from_conn_string(os.getenv("DATABASE_URL")) as checkpointer:
-        # Uncomment the next line the first time you run with PostgreSQL
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        raise ValueError("DATABASE_URL environment variable is required")
+
+    with PostgresSaver.from_conn_string(database_url) as checkpointer:
         checkpointer.setup()
         print("✅ Using PostgreSQL for persistence")
 

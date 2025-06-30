@@ -40,6 +40,7 @@ class ChatRagInference(RagInference):
         return result
 
 
+# CLI app for manual testing
 if __name__ == "__main__":
     with tracing_context(enabled=True, project_name="langchain-pepwave"):
         rag_inference = ChatRagInference(

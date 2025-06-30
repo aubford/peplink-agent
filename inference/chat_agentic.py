@@ -3,9 +3,9 @@ from inference.rag_inference import default_conversation_template
 
 from dotenv import load_dotenv
 from langchain.globals import set_verbose
-from langsmith import tracing_context
 from datetime import datetime
 import time
+# from langsmith import tracing_context
 
 load_dotenv()
 

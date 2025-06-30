@@ -27,7 +27,7 @@ web: $(VENV_DIR)
 # Start the CLI chatbot
 chat: $(VENV_DIR)
 	@echo "🤖 Starting CLI ChatBot..."
-	$(PYTHON) inference/exec_graph.py
+	$(PYTHON) inference/chat_agentic.py
 
 # Run tests
 test: $(VENV_DIR)
