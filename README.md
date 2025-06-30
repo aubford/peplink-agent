@@ -5,17 +5,15 @@
 This repository implements a robust Retrieval-Augmented Generation (RAG) based agentic workflow for technical document QA
 chat on a multi-source technical corpora (e.g., forums, PDFs, web, YouTube) related to Pepwave
 cellular routers. Pepwave routers are popular among digital nomads like myself but are meant for network admins
-and not laypeople.  Notably, ChatGPT is not helpful in answering most questions I have had. The goal for this
+and not laypeople.  Notably, ChatGPT is not helpful in answering most questions. The goal for this
 chatbot is to create an assistant that myself and other digital nomads can use to troubleshoot issues and learn
-to optimize their routers. I will know I have succeeded if it can pass the Pepwave Certified Engineer Exam.
+to optimize their routers. A yardstick for success is if it can pass the Pepwave Certified Engineer Exam which I have implemented as part of the evaluation framework.
 
 This project is also meant to be a platform for experimenting with various AI Engineering techniques. To support this,
 I developed a rigorous, modular evaluation system that enables controlled experimentation and provides quantitative,
 explainable feedback on the impact of different modeling, retrieval, and data processing strategies.
 
 This is also the first iteration of a larger project to create an OSS solution for quickly deploying a RAG chatbot for any given Discourse forum.
-
-Also see: `😬DISCLAIMER😬.md`.
 
 ## Architecture & Core Functionality
 
@@ -39,13 +37,14 @@ and prepares documents for vector storage.
 - Uploads documents to vector database (Pinecone).
 
 ### 4. RAG Inference (`inference/`)
-- **RagInference**: Implements a modular, history-aware RAG pipeline using LangChain, OpenAI LLMs, and Pinecone vector search.
+- **RagInference**: Implements a modular, history-aware RAG pipeline using LangChain, OpenAI LLMs, and Pinecone vector search to provide a chat interface for users.
+- **RagInferenceLangGraph**: Implements chat using a more complex LangGraph orchestration that leverages an agentic workflow to provide more reliable answers.
 
 ### 5. Evaluation Framework (`evals/`)
-- **RAGAS**: Created a highly customized fork of the RAGAS library customized for the specific needs of this project. See github repo `aubford/ragas`.
+- **RAGAS**: Highly customized fork of the RAGAS library customized for the specific needs of this project. See github repo `aubford/ragas`.
 - **Testset Generation**: Multi-hop QA testset creation using a knowledge graph strategy and LLM-driven prompt synthesis along with human refinement.
 - **RagasEval**: End-to-end RAG evaluation with metrics for context recall, precision, faithfulness, relevancy, and accuracy.
-- **MockExam**: A test module for pitting the chatbot against a combination of preparatory mock exam questions and the real Pepwave Certified Engineer Exam.
+- **MockExam**: A test module for pitting the chatbot against a combination of Pepwave-authored mock exam questions and the real Pepwave Certified Engineer Exam.
 
 ### 6. Utilities & Prompt Management (`util/`, `prompts/`)
 - NLP utilities for tokenization, deduplication, and similarity scoring.
@@ -65,7 +64,7 @@ and prepares documents for vector storage.
 1. **Extract**: Run extractors to collect raw data into `data/<source>/raw/`.
 2. **Transform**: Run transformers to normalize and serialize documents to `data/<source>/documents/`.
 3. **Load**: Run loaders to deduplicate, enrich, and embed documents and then upload to the vector store.
-4. **RAG Inference**: Run `RagInference` for conversational QA (see `inference/rag_inference.py`).
+4. **RAG Inference**: Run `RagInferenceLangGraph` for conversational QA (see `inference/rag_inference_langgraph.py`).
 5. **Evaluation**: Generate a knowledge graph, testsets and run RAGAS-based and MockExam evaluation using scripts in `evals/`.
 
 ## Design Highlights
