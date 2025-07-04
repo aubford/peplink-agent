@@ -112,6 +112,16 @@ This creates:
 7. terraform init && terraform apply                                   # Deploy application
 ```
 
+## Replace the existing image with a new one
+
+`./build-and-push.sh` will build and push the image to ECR.
+
+Force new deployment:
+```bash
+cd 2-application
+terraform apply -replace="aws_ecs_service.app"
+```
+
 ## Security Note
 
 This is a minimal demo configuration with:

@@ -43,6 +43,7 @@ resource "aws_ecs_task_definition" "app" {
   cpu                      = "1024"
   memory                   = "2048"
   execution_role_arn       = data.terraform_remote_state.infrastructure.outputs.ecs_task_execution_role_arn
+  task_role_arn            = data.terraform_remote_state.infrastructure.outputs.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {
@@ -61,7 +62,7 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         {
           name  = "DATABASE_URL"
-          value = "postgresql://postgres:${var.postgres_password}@${data.terraform_remote_state.infrastructure.outputs.rds_endpoint}:5432/langgraph?sslmode=require"
+          value = "postgresql://postgres:${var.postgres_password}@${data.terraform_remote_state.infrastructure.outputs.rds_endpoint}/langgraph?sslmode=disable"
         },
         {
           name  = "PINECONE_API_KEY"
@@ -96,6 +97,8 @@ resource "aws_ecs_service" "app" {
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 1
   launch_type     = "FARGATE"
+
+  enable_execute_command = true
 
   network_configuration {
     subnets          = data.terraform_remote_state.infrastructure.outputs.subnet_ids

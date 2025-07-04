@@ -96,6 +96,46 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# ECS Task Role (for ECS Exec)
+resource "aws_iam_role" "ecs_task_role" {
+  name = "langchain-pepwave-ecs-task-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Add SSM permissions for ECS Exec
+resource "aws_iam_role_policy" "ecs_exec_policy" {
+  name = "ecs-exec-policy"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Security Group for ECS tasks
 resource "aws_security_group" "ecs_tasks" {
   name        = "langchain-pepwave-ecs-tasks"
@@ -161,4 +201,9 @@ resource "aws_security_group" "rds" {
   tags = {
     Name = "langchain-pepwave-rds"
   }
+}
+
+output "ecs_task_role_arn" {
+  description = "ECS task role ARN"
+  value       = aws_iam_role.ecs_task_role.arn
 }

@@ -23,8 +23,8 @@ cd ..
 echo "🔐 Logging into ECR..."
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REGISTRY
 
-echo "🏗️  Building Docker image..."
-docker build -t langchain-pepwave .
+echo "🏗️  Building Docker image for AMD64 architecture..."
+docker build --platform linux/amd64 -t langchain-pepwave .
 
 echo "🏷️  Tagging image for ECR..."
 docker tag langchain-pepwave:latest $ECR_URL:latest
