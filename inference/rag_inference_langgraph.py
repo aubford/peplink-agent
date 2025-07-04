@@ -4,7 +4,7 @@ from langchain.retrievers.contextual_compression import ContextualCompressionRet
 from langchain_core.runnables.graph import MermaidDrawMethod
 
 from inference.history_aware_retrieval_query import (
-    get_history_aware_retrieval_query_chain,
+    get_history_aware_retrieval_chain,
 )
 from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rag_inference import InferenceBase
@@ -37,9 +37,6 @@ class RagState(BaseModel):
     cached_extra_context: list = Field(default_factory=list)
     answer: str = ""
     thread_id: str = "default"
-    cached_web_search: str | None = None
-    tool_call_count: int = 0
-    # prefetched_web_searches: asyncio.Queue[str] = Field(default_factory=asyncio.Queue)
 
 
 class RagInferenceLangGraph(InferenceBase):
@@ -112,7 +109,7 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
         """Generate a retrieval query considering chat history."""
-        retrieval_query_chain = get_history_aware_retrieval_query_chain(llm=self.llm)
+        retrieval_query_chain = get_history_aware_retrieval_chain(llm=self.llm)
 
         retrieval_query = retrieval_query_chain.invoke(
             {"query": state.query, "chat_history": state.messages}

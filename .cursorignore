@@ -7,6 +7,7 @@ data/
 logs/
 !.env.*
 .env
+.terraform
 
 # !langchain_pepwave_env/*
 # !langchain_pepwave_env/lib/*

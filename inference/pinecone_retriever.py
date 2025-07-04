@@ -36,7 +36,7 @@ class PineconeRetriever:
         self.index_name = index_name
         self.embedding_model = embedding_model
         self.rerank_model = rerank_model
-        self.namespace = ""
+        self.namespace = "__default__"
         self.fields = fields
 
         self.openai = OpenAI()

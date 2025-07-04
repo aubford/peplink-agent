@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from inference.history_aware_retrieval_query import (
-    get_history_aware_retrieval_query_chain,
+    get_history_aware_retrieval_chain,
 )
 from util.root_only_tracer import RootOnlyTracer
 from load.batch_manager import BatchManager
@@ -65,6 +65,7 @@ class InferenceBase(ABC):
             temperature=self.temperature,
             streaming=self.streaming,
             rate_limiter=openai_rate_limiter,
+            use_responses_api=False,
         )
 
     def set_temperature(self, temperature: float):
@@ -105,7 +106,7 @@ class RagInference(InferenceBase):
 
         return (
             RunnablePassthrough.assign(
-                retrieval_query=get_history_aware_retrieval_query_chain(llm=self.llm)
+                retrieval_query=get_history_aware_retrieval_chain(llm=self.llm)
             )
             .assign(
                 context=(lambda x: x["retrieval_query"]) | retriever,

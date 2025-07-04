@@ -28,7 +28,7 @@
 /data/
 /logs/
 /backup_data/
-/langchain_pepwave_env*/
+/*langchain_pepwave_env*/
 
 ### VisualStudioCode template
 !.vscode/settings.json

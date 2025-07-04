@@ -567,7 +567,7 @@
           <div class="welcome-suggestions" id="welcomeSuggestions">
             <div
               class="suggestion-card"
-              onclick="sendSuggestion('What is Pepwave router?')"
+              onclick="sendSuggestion('What is a Pepwave router?')"
             >
               <div class="suggestion-title">What is a Pepwave router?</div>
               <div class="suggestion-desc">
@@ -599,7 +599,7 @@
 
           <h2 style="margin-top: 40px">From the LLM-Generated Test Set</h2>
           <p>
-            Some questions from the synthetic test set used to evaluate this application.
+            Some example questions from the synthetic test set used to evaluate this application.
           </p>
           <div class="welcome-suggestions" id="testsetSuggestions">
             <!-- Testset suggestions will be loaded here -->
@@ -1015,15 +1015,6 @@
 
       async function deleteThread(threadId, event) {
         event.stopPropagation() // Prevent thread selection
-
-        // Confirm deletion
-        if (
-          !confirm(
-            "Are you sure you want to delete this conversation? This action cannot be undone."
-          )
-        ) {
-          return
-        }
 
         try {
           const response = await fetch(`/api/threads/${threadId}`, {

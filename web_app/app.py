@@ -121,12 +121,17 @@ async def read_root(request: Request):
 async def get_random_testset_queries():
     """Get random queries from the testset for suggestions."""
     try:
-        testset_path = (
-            "../evals/testsets/testset-200_main_testset_25-04-23/generated_testset.json"
+        # Fix the path - we need to go up one directory from web_app to langchain-pepwave root
+        testset_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "evals/testsets/testset-200_main_testset_25-04-23/generated_testset.json"
         )
 
+        print(f"Looking for testset at: {testset_path}")  # Debug logging
+
         if not os.path.exists(testset_path):
-            raise HTTPException(status_code=404, detail="Testset file not found")
+            print(f"Testset file not found at: {testset_path}")  # Debug logging
+            raise HTTPException(status_code=404, detail=f"Testset file not found at: {testset_path}")
 
         with open(testset_path, 'r', encoding='utf-8') as f:
             testset_data = json.load(f)
@@ -144,7 +149,12 @@ async def get_random_testset_queries():
 
         return TestsetQueriesResponse(queries=random_queries)
 
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is
+        raise
     except Exception as e:
+        # Log the actual error and include it in the response
+        print(f"Error loading testset queries: {str(e)}")  # Debug logging
         raise HTTPException(
             status_code=500, detail=f"Failed to load testset queries: {str(e)}"
         )

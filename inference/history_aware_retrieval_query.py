@@ -14,32 +14,11 @@ from langchain_core.messages import (
     ToolMessage,
     ChatMessage,
 )
-import textwrap
 from typing import Any, Dict
 
-prompt = (
-    """## INSTRUCTIONS:
+from prompts import load_prompts
 
-"""
-    "Given the following chat history and user question "
-    "which might reference context in the chat history, "
-    "formulate a standalone question which can be understood "
-    "without the chat history. Do NOT answer the question, just "
-    "reformulate it if needed and otherwise return it as is."
-    + textwrap.dedent(
-        """
-
-    ## Chat history to use as context:
-
-    {chat_history}
-
-    ## User question to reformulate to include referenced context from the chat history:
-
-    {query}
-    """
-    )
-)
-
+prompts = load_prompts()
 
 def normalize_messages(
     messages: list[tuple[str, str]],
@@ -79,21 +58,22 @@ def format_messages(
     )
 
 
-prompt_chain = {
-    "chat_history": lambda x: format_messages(x["chat_history"]),
-    "query": lambda x: x["query"],
-} | PromptTemplate.from_template(prompt)
-
-
 def _has_no_chat_history(state: Dict[str, Any]) -> bool:
     """Check if chat history is empty and print the check for debugging."""
     chat_history = state.get("chat_history")
     # Both empty string and empty list evaluate to False
     return not chat_history
 
+prompt = prompts["inference/old_gen_retrieval_plan"]
 
-def get_history_aware_retrieval_query_chain(llm: BaseChatModel) -> Runnable:
+prompt_chain = {
+    "chat_history": lambda x: format_messages(x["chat_history"]),
+    "query": lambda x: x["query"],
+} | PromptTemplate.from_template(prompt)
+
+def get_history_aware_retrieval_chain(llm: BaseChatModel) -> Runnable:
     """Given a chat history, summarize it into a single question."""
+    
 
     return RunnableBranch(
         (
