@@ -52,6 +52,8 @@ resource "aws_db_instance" "postgres" {
   username = "postgres"
   password = var.postgres_password
 
+  parameter_group_name = aws_db_parameter_group.postgres.name
+
   skip_final_snapshot = true
   publicly_accessible = true
 
@@ -200,6 +202,17 @@ resource "aws_security_group" "rds" {
 
   tags = {
     Name = "langchain-pepwave-rds"
+  }
+}
+
+# RDS Parameter Group
+# TODO: Remove (not critical)
+resource "aws_db_parameter_group" "postgres" {
+  family = "postgres15"
+  name   = "langchain-pepwave-postgres-params"
+
+  tags = {
+    Name = "langchain-pepwave-postgres-params"
   }
 }
 

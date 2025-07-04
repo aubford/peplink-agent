@@ -12,7 +12,7 @@
 /data/
 /backup_data/
 /logs/
-/langchain_pepwave_env*/
+/*langchain_pepwave_env*/
 
 # ===== VIRTUAL ENVIRONMENTS =====
 .env

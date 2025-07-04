@@ -62,7 +62,7 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         {
           name  = "DATABASE_URL"
-          value = "postgresql://postgres:${var.postgres_password}@${data.terraform_remote_state.infrastructure.outputs.rds_endpoint}/langgraph?sslmode=disable"
+          value = "postgresql://postgres:${var.postgres_password}@${data.terraform_remote_state.infrastructure.outputs.rds_endpoint}/langgraph?sslmode=require"
         },
         {
           name  = "PINECONE_API_KEY"
