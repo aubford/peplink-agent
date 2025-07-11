@@ -105,4 +105,15 @@ resource "aws_ecs_service" "app" {
     security_groups  = [data.terraform_remote_state.infrastructure.outputs.ecs_security_group_id]
     assign_public_ip = true
   }
+
+  # Add load balancer configuration
+  load_balancer {
+    target_group_arn = data.terraform_remote_state.infrastructure.outputs.target_group_arn
+    container_name   = "web"
+    container_port   = 8000
+  }
+
+  depends_on = [
+    data.terraform_remote_state.infrastructure
+  ]
 }

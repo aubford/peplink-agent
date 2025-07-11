@@ -41,7 +41,7 @@ data "aws_subnets" "default" {
 resource "aws_db_instance" "postgres" {
   identifier     = "langchain-pepwave-db"
   engine         = "postgres"
-  engine_version = "15.8"
+  engine_version = "15.12"
   instance_class = "db.t3.micro"
 
   allocated_storage = 20
@@ -138,13 +138,13 @@ resource "aws_iam_role_policy" "ecs_exec_policy" {
   })
 }
 
-# Security Group for ECS tasks
+# Security Group for ECS tasks (current - keeps direct access)
 resource "aws_security_group" "ecs_tasks" {
   name        = "langchain-pepwave-ecs-tasks"
   description = "Security group for ECS tasks"
   vpc_id      = data.aws_vpc.default.id
 
-  # Allow inbound HTTP traffic on port 8000
+  # Allow inbound HTTP traffic from anywhere (direct access)
   ingress {
     from_port   = 8000
     to_port     = 8000
@@ -215,6 +215,101 @@ resource "aws_db_parameter_group" "postgres" {
     Name = "langchain-pepwave-postgres-params"
   }
 }
+
+# Security Group for ALB
+resource "aws_security_group" "alb" {
+  name        = "langchain-pepwave-alb"
+  description = "Security group for Application Load Balancer"
+  vpc_id      = data.aws_vpc.default.id
+
+  # Allow inbound HTTP traffic
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP traffic"
+  }
+
+  # Allow inbound HTTPS traffic (optional, for future SSL)
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS traffic"
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "All outbound traffic"
+  }
+
+  tags = {
+    Name = "langchain-pepwave-alb"
+  }
+}
+
+# Application Load Balancer
+resource "aws_lb" "main" {
+  name               = "langchain-pepwave-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb.id]
+  subnets            = data.aws_subnets.default.ids
+
+  enable_deletion_protection = false
+
+  tags = {
+    Name = "langchain-pepwave-alb"
+  }
+}
+
+# Target Group for ECS tasks
+resource "aws_lb_target_group" "app" {
+  name        = "langchain-pepwave-tg"
+  port        = 8000
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.default.id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 30
+    matcher             = "200"
+    path                = "/"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 2
+  }
+∫
+  tags = {
+    Name = "langchain-pepwave-tg"
+  }
+}
+
+# ALB Listener
+resource "aws_lb_listener" "app" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
+  }
+
+  tags = {
+    Name = "langchain-pepwave-listener"
+  }
+}
+
 
 output "ecs_task_role_arn" {
   description = "ECS task role ARN"

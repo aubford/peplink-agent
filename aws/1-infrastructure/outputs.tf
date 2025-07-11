@@ -37,3 +37,23 @@ output "aws_region" {
   description = "AWS region"
   value       = var.aws_region
 }
+
+output "alb_dns_name" {
+  description = "ALB DNS name"
+  value       = aws_lb.main.dns_name
+}
+
+output "alb_zone_id" {
+  description = "ALB Zone ID"
+  value       = aws_lb.main.zone_id
+}
+
+output "target_group_arn" {
+  description = "Target group ARN"
+  value       = aws_lb_target_group.app.arn
+}
+
+output "alb_url" {
+  description = "Application URL"
+  value       = "http://${aws_lb.main.dns_name}"
+}

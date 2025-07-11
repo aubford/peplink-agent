@@ -40,6 +40,11 @@ class RagState(BaseModel):
 
 
 class RagInferenceLangGraph(InferenceBase):
+    """
+    Contains the logic for running the research and question answering agent pair. The goal is 
+    to perform thorough research as quickly and efficiently as possible with the least number of 
+    round-trips to the model provider.
+    """
     def __init__(
         self,
         llm_model: str,

@@ -12,3 +12,8 @@ output "task_definition_arn" {
   description = "ECS task definition ARN"
   value       = aws_ecs_task_definition.app.arn
 }
+
+output "application_url" {
+  description = "Application URL via ALB"
+  value       = data.terraform_remote_state.infrastructure.outputs.alb_url
+}
