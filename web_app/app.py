@@ -229,7 +229,7 @@ async def delete_thread(
 
 @app.post("/api/chat/stream")
 async def chat_stream(
-    chat_message: ChatMessage, bot: Annotated[ChatLangGraph, Depends(get_chatbot)]
+    chat_message: ChatMessage, graph: Annotated[ChatLangGraph, Depends(get_chatbot)]
 ):
     """Stream chat response using Server-Sent Events."""
 
@@ -242,7 +242,7 @@ async def chat_stream(
             full_response = ""
 
             # Stream the response from the chatbot
-            for token in bot.query(chat_message.message, chat_message.thread_id):
+            for token in graph.query(chat_message.message, chat_message.thread_id):
                 full_response += token
                 # Send each token as a streaming event
                 yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
