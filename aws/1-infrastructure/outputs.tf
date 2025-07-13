@@ -57,3 +57,19 @@ output "alb_url" {
   description = "Application URL"
   value       = "http://${aws_lb.main.dns_name}"
 }
+
+# Domain-related outputs
+output "custom_domain_url" {
+  description = "Custom domain URL (if domain is configured)"
+  value       = var.domain_name != "" ? "https://${var.subdomain}.${var.domain_name}" : "Domain not configured"
+}
+
+output "route53_zone_id" {
+  description = "Route 53 hosted zone ID (if domain is configured)"
+  value       = var.domain_name != "" ? aws_route53_zone.main[0].zone_id : null
+}
+
+output "ssl_certificate_arn" {
+  description = "SSL certificate ARN (if domain is configured)"
+  value       = var.domain_name != "" ? aws_acm_certificate.app[0].arn : null
+}

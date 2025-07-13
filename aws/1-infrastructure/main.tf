@@ -288,7 +288,7 @@ resource "aws_lb_target_group" "app" {
     timeout             = 5
     unhealthy_threshold = 2
   }
-∫
+
   tags = {
     Name = "langchain-pepwave-tg"
   }
@@ -310,6 +310,145 @@ resource "aws_lb_listener" "app" {
   }
 }
 
+# Domain Registration - ALREADY REGISTERED MANUALLY
+# Since you registered aubrey-ai.com manually in AWS console, we don't need this resource
+/*
+resource "aws_route53domains_registered_domain" "main" {
+  domain_name = var.domain_name
+
+  # Contact information is required - UPDATE THESE VALUES
+  registrant_contact {
+    contact_type = "PERSON" # or "COMPANY"
+    first_name   = "Aubrey"
+    last_name    = "Ford"
+    email        = "musicaubrey@gmail.com"
+    phone_number = "+1.8048331985"
+
+    address_line_1 = "514 Americas Way"
+    city           = "Box Elder"
+    state          = "SD"
+    country_code   = "US"
+    zip_code       = "57719"
+  }
+
+  # Admin and tech contacts can be the same as registrant
+  admin_contact {
+    contact_type = "PERSON"
+    first_name   = "Aubrey"
+    last_name    = "Ford"
+    email        = "musicaubrey@gmail.com"
+    phone_number = "+1.8048331985"
+
+    address_line_1 = "514 Americas Way"
+    city           = "Box Elder"
+    state          = "SD"
+    country_code   = "US"
+    zip_code       = "57719"
+  }
+
+  tech_contact {
+    contact_type = "PERSON"
+    first_name   = "Aubrey"
+    last_name    = "Ford"
+    email        = "musicaubrey@gmail.com"
+    phone_number = "+1.8048331985"
+
+    address_line_1 = "514 Americas Way"
+    city           = "Box Elder"
+    state          = "SD"
+    country_code   = "US"
+    zip_code       = "57719"
+  }
+
+  auto_renew = true
+
+  tags = {
+    Name = "langchain-pepwave-domain"
+  }
+}
+*/
+
+# Route 53 Hosted Zone (for manually registered domain)
+resource "aws_route53_zone" "main" {
+  count = var.domain_name != "" ? 1 : 0
+  name  = var.domain_name
+
+  tags = {
+    Name = "langchain-pepwave-zone"
+  }
+}
+
+# Route 53 Record for ALB
+resource "aws_route53_record" "app" {
+  count   = var.domain_name != "" ? 1 : 0
+  zone_id = aws_route53_zone.main[0].zone_id
+  name    = var.subdomain
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.main.dns_name
+    zone_id                = aws_lb.main.zone_id
+    evaluate_target_health = true
+  }
+}
+
+# SSL Certificate for custom domain
+resource "aws_acm_certificate" "app" {
+  count             = var.domain_name != "" ? 1 : 0
+  domain_name       = "${var.subdomain}.${var.domain_name}"
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "langchain-pepwave-cert"
+  }
+}
+
+# Certificate validation
+resource "aws_route53_record" "cert_validation" {
+  for_each = var.domain_name != "" ? {
+    for dvo in aws_acm_certificate.app[0].domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  } : {}
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = aws_route53_zone.main[0].zone_id
+}
+
+resource "aws_acm_certificate_validation" "app" {
+  count                   = var.domain_name != "" ? 1 : 0
+  certificate_arn         = aws_acm_certificate.app[0].arn
+  validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+}
+
+# HTTPS ALB Listener
+resource "aws_lb_listener" "app_https" {
+  count             = var.domain_name != "" ? 1 : 0
+  load_balancer_arn = aws_lb.main.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  certificate_arn   = aws_acm_certificate_validation.app[0].certificate_arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
+  }
+
+  tags = {
+    Name = "langchain-pepwave-https-listener"
+  }
+}
 
 output "ecs_task_role_arn" {
   description = "ECS task role ARN"

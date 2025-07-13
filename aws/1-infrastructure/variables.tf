@@ -33,3 +33,16 @@ variable "cohere_api_key" {
   type        = string
   sensitive   = true
 }
+
+# Domain configuration (optional)
+variable "domain_name" {
+  description = "Domain name for the application (e.g., pepwave-ai.com)"
+  type        = string
+  default     = ""
+}
+
+variable "subdomain" {
+  description = "Subdomain for the application (e.g., app)"
+  type        = string
+  default     = "app"
+}

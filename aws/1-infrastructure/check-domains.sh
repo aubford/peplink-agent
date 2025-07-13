@@ -5,15 +5,13 @@ echo "=================================================="
 
 # List of potential domain names to check
 domains=(
-    "pepwave-ai.com"
-    "langchain-pepwave.com"
-    "pepwave-chat.com"
-    "pepwave-assistant.com"
-    "pepwave-help.com"
-    "pepwave-ai.dev"
-    "pepwave-ai.app"
-    "langchain-pepwave.dev"
-    "langchain-pepwave.app"
+    "aubreyai.com"
+    "aubrey-ai.com"
+    "aubrey-ai-portfolio.com"
+    "aubreyford.com"
+    "aubrey-ford.com"
+    "aubreyai.dev"
+    "aubrey-ai.dev"
 )
 
 echo "Checking availability for these domains:"
