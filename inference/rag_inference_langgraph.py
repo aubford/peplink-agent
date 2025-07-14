@@ -62,12 +62,10 @@ class RagInferenceLangGraph(InferenceBase):
         self.use_cohere = use_cohere
         print(f"use_cohere: {use_cohere}")
 
-        # Initialize the Pinecone retriever
         self.pinecone = PineconeRetriever(
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
 
-        # Initialize memory saver for persistence
         self.checkpointer = checkpointer or InMemorySaver()
 
     def compile(

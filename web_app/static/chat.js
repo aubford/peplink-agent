@@ -75,8 +75,11 @@ async function sendMessage(event) {
 
   if (!message) return
 
-  // Ensure we have a thread (create provisional if needed)
-  const threadId = await ensureThreadExists()
+  // Generate a new thread ID if we don't have one
+  if (!currentThreadId) {
+    currentThreadId = generateUUID()
+    document.getElementById("currentThread").textContent = `Thread: ${currentThreadId}`
+  }
 
   // Add user message to chat
   addMessage(message, "user")
@@ -98,7 +101,7 @@ async function sendMessage(event) {
       },
       body: JSON.stringify({
         message: message,
-        thread_id: threadId,
+        thread_id: currentThreadId,
       }),
     })
 
@@ -123,15 +126,6 @@ async function sendMessage(event) {
               scrollToBottom()
             } else if (data.type === "complete") {
               assistantMessage.classList.remove("streaming")
-
-              // Convert provisional thread to real thread
-              if (provisionalThreadId && !currentThreadId) {
-                currentThreadId = provisionalThreadId
-                provisionalThreadId = null
-                document.getElementById(
-                  "currentThread"
-                ).textContent = `Thread: ${currentThreadId}`
-              }
 
               // Always reload threads to update message count in sidebar
               await loadData()
@@ -159,7 +153,6 @@ async function sendMessage(event) {
 
 function showNoMessagesScreen() {
   currentThreadId = null
-  provisionalThreadId = null
 
   const chatMessages = document.getElementById("chatMessages")
   const welcomeMessage = document.getElementById("welcomeMessage")
@@ -187,7 +180,6 @@ function startNewChat() {
 
 async function selectThread(threadId, clickedElement = null) {
   currentThreadId = threadId
-  provisionalThreadId = null
 
   // Update UI - remove active class from all threads
   document.querySelectorAll(".thread-item").forEach(item => {
@@ -216,33 +208,7 @@ async function selectThread(threadId, clickedElement = null) {
   }
 }
 
-async function ensureThreadExists() {
-  if (currentThreadId) {
-    return currentThreadId
-  }
 
-  if (provisionalThreadId) {
-    return provisionalThreadId
-  }
-
-  // Create a provisional thread
-  try {
-    const response = await fetch("/api/threads", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    })
-
-    const data = await response.json()
-    provisionalThreadId = data.thread_id
-    return provisionalThreadId
-  } catch (error) {
-    console.error("Error creating provisional thread:", error)
-    throw error
-  }
-}
 
 async function sendSuggestion(message) {
   if (isStreaming) return
@@ -372,7 +338,7 @@ function showError(message) {
   // Remove error after 5 seconds
   setTimeout(() => {
     errorElement.remove()
-  }, 5000)
+  }, 15000)
 }
 
 // Handle Enter key in textarea
@@ -428,4 +394,8 @@ function toggleSidebar() {
 
   sidebar.classList.toggle("open")
   overlay.classList.toggle("show")
+}
+
+function generateUUID() {
+  return crypto.randomUUID()
 }

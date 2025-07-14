@@ -33,30 +33,14 @@ class ChatLangGraph(RagInferenceLangGraph):
         )
         self.graph = self.compile(conversation_template=default_conversation_template)
 
-        # Only track current thread ID - no need for active_threads dictionary
-        self.current_thread_id: str | None = None
-
-    def create_new_thread(self) -> str:
-        """Create a new conversation thread and return its ID."""
-        # Generate a unique thread ID
-        thread_id = f"thread_{int(time.time())}_{id(self)}"
-        return thread_id
-
-
-    def get_thread_history(self, thread_id: str | None = None) -> list:
+    def get_thread_history(self, thread_id: str) -> list:
         """Get the conversation history for a specific thread."""
-        if thread_id is None:
-            thread_id = self.current_thread_id
+        state = self.graph.get_state(
+            config={"configurable": {"thread_id": thread_id}}
+        )
+        return state.values.get("messages", []) if state.values else []
 
-        try:
-            state = self.graph.get_state(
-                config={"configurable": {"thread_id": thread_id}}
-            )
-            return state.values.get("messages", []) if state.values else []
-        except:
-            return []
-
-    def get_thread_message_count(self, thread_id: str | None = None) -> int:
+    def get_thread_message_count(self, thread_id: str) -> int:
         """Get the message count for a specific thread from LangGraph state."""
         messages = self.get_thread_history(thread_id)
         return len(messages)
@@ -134,21 +118,13 @@ class ChatLangGraph(RagInferenceLangGraph):
             # Use the checkpointer's built-in delete_thread method
             # This properly deletes all checkpoints and writes from the database
             self.checkpointer.delete_thread(thread_id)
-
-            # If we deleted the current thread, clear current thread
-            if thread_id == self.current_thread_id:
-                self.current_thread_id = None
-
             return True
 
         except Exception:
             raise KeyError(f"Thread {thread_id} not found")
 
-    def query(self, query: str, thread_id: str | None = None):
+    def query(self, query: str, thread_id: str):
         """Stream the response token by token using LangGraph's messages streaming mode."""
-        if thread_id is None:
-            thread_id = self.current_thread_id
-
         initial_state = {"query": query, "thread_id": thread_id}
 
         # Use stream with messages mode to get token-by-token streaming

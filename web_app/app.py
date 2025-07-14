@@ -70,7 +70,7 @@ def get_chatbot() -> ChatLangGraph:
 
 class ChatMessage(BaseModel):
     message: str
-    thread_id: str | None = None
+    thread_id: str
 
 
 class ThreadCreate(BaseModel):
@@ -158,23 +158,6 @@ async def get_random_testset_queries():
         raise HTTPException(
             status_code=500, detail=f"Failed to load testset queries: {str(e)}"
         )
-
-
-@app.post("/api/threads", response_model=ThreadResponse, status_code=201)
-async def create_thread(
-    thread_data: ThreadCreate, bot: Annotated[ChatLangGraph, Depends(get_chatbot)]
-):
-    """Create a new conversation thread."""
-    thread_id = bot.create_new_thread()
-
-    # For new threads, use provided title or default
-    # The title will be updated automatically when the first message is sent
-    title = thread_data.title if thread_data.title else "New Conversation"
-
-    return ThreadResponse(
-        thread_id=thread_id,
-        title=title
-    )
 
 
 @app.get("/api/threads", response_model=ThreadsResponse)
