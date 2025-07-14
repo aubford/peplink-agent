@@ -107,7 +107,6 @@ class RagInferenceLangGraph(InferenceBase):
 
         self.tools = []
 
-
     def _entry_point_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
         If we have any context, start running the ReAct flow. Otherwise, initialize the first retrieval.
@@ -172,7 +171,6 @@ class RagInferenceLangGraph(InferenceBase):
             "context_history": retrieved_context,
         }
 
-
     def compile(self) -> CompiledStateGraph:
 
         graph_builder = StateGraph(MainState)
@@ -182,19 +180,26 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder.add_node(INIT_RETRIEVAL, self._init_retrieval)
         graph_builder.add_node(PROMPT_LLM_W_TOOLS, self._prompt_llm_w_tools)
         graph_builder.add_node(GENERATE_RERANKER_QUERY, self._generate_reranker_query)
-        graph_builder.add_node(TOOL_NODE, ToolNode(tools=self.tools, messages_key="tool_call_results"))
+        graph_builder.add_node(
+            TOOL_NODE, ToolNode(tools=self.tools, messages_key="tool_call_results")
+        )
         graph_builder.add_node(HANDLE_TOOL_RESULTS, self._handle_tool_results)
         graph_builder.add_node(RERANK, self._rerank)
 
         # Edges
-        graph_builder.set_conditional_entry_point(self._entry_point_condition)
+        graph_builder.set_conditional_entry_point(
+            self._entry_point_condition,
+            [EMBED_QUERY, INIT_RETRIEVAL, PROMPT_LLM_W_TOOLS],
+        )
         graph_builder.add_edge(EMBED_QUERY, TOOL_NODE)
         graph_builder.add_edge(INIT_RETRIEVAL, TOOL_NODE)
         graph_builder.add_conditional_edges(
             PROMPT_LLM_W_TOOLS,
             self.tools_condition,
+            [TOOL_NODE, GENERATE_RERANKER_QUERY, END],
         )
         graph_builder.add_edge(TOOL_NODE, HANDLE_TOOL_RESULTS)
+        graph_builder.add_edge(GENERATE_RERANKER_QUERY, HANDLE_TOOL_RESULTS)
         graph_builder.add_edge(HANDLE_TOOL_RESULTS, RERANK)
         graph_builder.add_edge(RERANK, PROMPT_LLM_W_TOOLS)
 
@@ -202,7 +207,6 @@ class RagInferenceLangGraph(InferenceBase):
         compiled_graph = graph_builder.compile(checkpointer=self.checkpointer)
         graph = compiled_graph.with_config(self.config)
         return graph
-
 
     def _get_cohere_retriever(self) -> ContextualCompressionRetriever:
         retriever_base = self.vector_store.as_retriever(
@@ -212,7 +216,6 @@ class RagInferenceLangGraph(InferenceBase):
         return ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=retriever_base
         )
-
 
     @property
     def llm(self):
@@ -224,4 +227,3 @@ class RagInferenceLangGraph(InferenceBase):
             use_responses_api=True,
             output_version="responses/v1",
         ).bind_tools(self.tools)
-
