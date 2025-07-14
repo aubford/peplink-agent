@@ -2,6 +2,7 @@ from typing import Any
 from langchain_core.documents import Document
 from pinecone import Pinecone
 from openai import OpenAI
+from inference.rate_limiters import pinecone_rate_limiter
 
 
 class PineconeRetriever:
@@ -11,7 +12,7 @@ class PineconeRetriever:
         self,
         index_name: str,
         embedding_model: str = "text-embedding-3-large",
-        rerank_model: str = "bge-reranker-v2-m3",
+        rerank_model: str = "cohere-rerank-3.5",
         fields: list[str] = [
             "id",
             "page_content",
@@ -20,17 +21,17 @@ class PineconeRetriever:
             "type",
             "post_category_name",
             "title",
-            "lead_content",
-            "primary_content",
+            # "lead_content",
+            # "primary_content",
             "score",
-            "creator_is_star",  # pep forum only
-            "themes",
-            "entities",
+            # "creator_is_star",  # pep forum only
+            # "themes",
+            # "entities",
             "created_at",  # standardized post/video created date
-            # html only
-            "settings_entities",
-            "settings_entity_list",
-            "all_settings_entities",
+            ### html only
+            # "settings_entities",
+            # "settings_entity_list",
+            # "all_settings_entities",
         ],
     ):
         self.index_name = index_name
@@ -63,14 +64,20 @@ class PineconeRetriever:
             "top_n": rerank_top_n,
             "rank_fields": [rank_field],  # only one field currently suported by pc
             "model": self.rerank_model,
+            "parameters": {
+                "truncate": "NONE",
+            }
         }
+
+        if pinecone_rate_limiter:
+            pinecone_rate_limiter.acquire()
 
         # Search Pinecone with reranking
         response = self.pinecone_index.search(
             namespace=self.namespace,
             query=pc_query,
             fields=self.fields,
-            rerank=rerank,
+            # rerank=rerank,  todo: fix rerank request length error
         )
 
         documents = []

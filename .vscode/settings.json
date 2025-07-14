@@ -9,7 +9,7 @@
     "**/.idea": true,
     "**/backup_data": true,
     "**/__pycache__": true,
-    "**/langchain_pepwave_env": true
+    "**/*langchain_pepwave_env": true
   },
   "search.exclude": {
     ".vscode": true,

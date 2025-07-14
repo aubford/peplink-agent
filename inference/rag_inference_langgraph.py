@@ -139,7 +139,7 @@ class RagInferenceLangGraph(InferenceBase):
             )
 
         return {
-            "context": retrieved_context[0:20],
+            "context": retrieved_context[0:20], # todo: remove slice
             "cached_extra_context": retrieved_context[20:],
             # todo: summary history in background thread
             "context_history": [

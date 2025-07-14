@@ -10,3 +10,8 @@ openai_rate_limiter = InMemoryRateLimiter(
     requests_per_second=3.0,
     max_bucket_size=20,
 )
+
+pinecone_rate_limiter = InMemoryRateLimiter(
+    requests_per_second=.9,
+    max_bucket_size=59,
+)
