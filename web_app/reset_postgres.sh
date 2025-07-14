@@ -44,8 +44,4 @@ DROP TABLE IF EXISTS writes CASCADE;
 " >/dev/null 2>&1
 
 echo -e "${GREEN}✅ Checkpoint tables dropped successfully${NC}"
-
-echo -e "${BLUE}🔄 To recreate the tables, run:${NC}"
-echo -e "${BLUE}   python web_app/setup_postgres.py${NC}"
-
 echo -e "${GREEN}✅ Database reset complete!${NC}"

@@ -65,8 +65,7 @@ class RagInferenceLangGraph(InferenceBase):
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
 
-        # self.checkpointer = checkpointer or InMemorySaver()
-        self.checkpointer = InMemorySaver()
+        self.checkpointer = checkpointer or InMemorySaver()
 
     def compile(
         self,

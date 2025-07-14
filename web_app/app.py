@@ -1,6 +1,8 @@
 import sys
 import os
 
+from langgraph.checkpoint.memory import InMemorySaver
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, Request, HTTPException, Depends
@@ -28,21 +30,34 @@ chatbot: ChatLangGraph | None = None
 async def lifespan(app: FastAPI):
     # Startup
     global chatbot
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise ValueError("DATABASE_URL environment variable is required")
 
-    with PostgresSaver.from_conn_string(database_url) as checkpointer:
-        checkpointer.setup()
-        print("✅ Using PostgreSQL for persistence")
-
+    use_in_memory_checkpointer = os.getenv("USE_IN_MEMORY_CHECKPOINTER", False)
+    if use_in_memory_checkpointer:
+        print("✅ Using in-memory checkpointer")
         chatbot = ChatLangGraph(
             llm_model="gpt-4.1-nano",
             pinecone_index_name="pepwave-early-april-page-content-embedding",
-            checkpointer=checkpointer,
+            checkpointer=InMemorySaver(),
         )
-        print("✅ Chatbot initialized")
         yield
+
+    else:
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable is required")
+
+        with PostgresSaver.from_conn_string(database_url) as checkpointer:
+            checkpointer.setup()
+            print("✅ Using PostgreSQL for persistence")
+
+            chatbot = ChatLangGraph(
+                llm_model="gpt-4.1-nano",
+                pinecone_index_name="pepwave-early-april-page-content-embedding",
+                checkpointer=checkpointer,
+            )
+            print("✅ Chatbot initialized")
+            yield
+
     # Shutdown (cleanup if needed)
     chatbot = None
 
