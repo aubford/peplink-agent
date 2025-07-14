@@ -1,5 +1,3 @@
-*.parquet
-*.jsonl
 /evals/knowledge_graph/**
 /evals/experiments/**
 
@@ -12,6 +10,11 @@
 !/evals/knowledge_graph/__nodes.parquet
 !/evals/knowledge_graph/__relationships.parquet
 !/evals/testsets/**/*.json
+
+# re-ignore after the !/**/ pattern
+node_modules
+*.parquet
+*.jsonl
 
 
 # Terraform files
