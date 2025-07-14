@@ -15,7 +15,7 @@
 node_modules
 *.parquet
 *.jsonl
-
+graph_diagram.png
 
 # Terraform files
 *.tfstate

@@ -64,7 +64,7 @@ def _has_no_chat_history(state: Dict[str, Any]) -> bool:
     # Both empty string and empty list evaluate to False
     return not chat_history
 
-prompt = prompts["inference/old_gen_retrieval_plan"]
+prompt = prompts["inference/old_history_aware_retrieval_query"]
 
 prompt_chain = {
     "chat_history": lambda x: format_messages(x["chat_history"]),

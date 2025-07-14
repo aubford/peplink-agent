@@ -1,10 +1,11 @@
-from inference.rag_inference_langgraph import RagInferenceLangGraph
-from inference.rag_inference import default_conversation_template
+from langchain_core.runnables.graph import MermaidDrawMethod
+from langgraph.checkpoint.memory import InMemorySaver
+from inference.rag_inference_langgraph import RagInferenceLangGraph, PROMPT_LLM_W_TOOLS
 
 from dotenv import load_dotenv
 from langchain.globals import set_verbose
 from datetime import datetime
-import time
+
 # from langsmith import tracing_context
 
 load_dotenv()
@@ -31,13 +32,11 @@ class ChatLangGraph(RagInferenceLangGraph):
             checkpointer=checkpointer,
             streaming=True,
         )
-        self.graph = self.compile(conversation_template=default_conversation_template)
+        self.graph = self.compile()
 
     def get_thread_history(self, thread_id: str) -> list:
         """Get the conversation history for a specific thread."""
-        state = self.graph.get_state(
-            config={"configurable": {"thread_id": thread_id}}
-        )
+        state = self.graph.get_state(config={"configurable": {"thread_id": thread_id}})
         return state.values.get("messages", []) if state.values else []
 
     def get_thread_message_count(self, thread_id: str) -> int:
@@ -61,13 +60,18 @@ class ChatLangGraph(RagInferenceLangGraph):
 
         try:
             # Get the thread's state history and find the earliest checkpoint
-            history = list(self.graph.get_state_history(
-                config={"configurable": {"thread_id": thread_id}}
-            ))
+            history = list(
+                self.graph.get_state_history(
+                    config={"configurable": {"thread_id": thread_id}}
+                )
+            )
             if history:
                 # History is ordered newest to oldest, so take the last one
                 earliest_checkpoint = history[-1]
-                if hasattr(earliest_checkpoint, 'created_at') and earliest_checkpoint.created_at:
+                if (
+                    hasattr(earliest_checkpoint, 'created_at')
+                    and earliest_checkpoint.created_at
+                ):
                     created_at = earliest_checkpoint.created_at
                     if isinstance(created_at, str):
                         return datetime.fromisoformat(created_at.replace('Z', '+00:00'))
@@ -137,5 +141,26 @@ class ChatLangGraph(RagInferenceLangGraph):
             if isinstance(chunk, tuple) and len(chunk) == 2:
                 message_chunk, metadata = chunk
                 # Only stream content from the generate_answer node (the LLM response)
-                if metadata.get('langgraph_node') == 'generate_answer' and message_chunk.text():
+                if (
+                    metadata.get('langgraph_node') == PROMPT_LLM_W_TOOLS
+                    and message_chunk.text()
+                ):
                     yield str(message_chunk.text())
+
+    def draw_graph(self):
+        self.graph.get_graph().print_ascii()
+        self.graph.get_graph(xray=True).draw_mermaid_png(
+            output_file_path="graph_diagram.png",
+            draw_method=MermaidDrawMethod.PYPPETEER,
+            max_retries=3,
+            retry_delay=2.0,
+        )
+
+
+if __name__ == "__main__":
+    chatbot = ChatLangGraph(
+        llm_model="gpt-4.1",
+        pinecone_index_name="pepwave-early-april-page-content-embedding",
+        checkpointer=InMemorySaver(),
+    )
+    chatbot.draw_graph()

@@ -77,7 +77,7 @@ class PineconeRetriever:
             namespace=self.namespace,
             query=pc_query,
             fields=self.fields,
-            # rerank=rerank,  todo: fix rerank request length error
+            rerank=rerank,  # todo: fix rerank request length issue
         )
 
         documents = []

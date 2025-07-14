@@ -14,7 +14,6 @@ from prompts import load_prompts
 from langchain_core.runnables import RunnableConfig
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from inference.cohere_rerank import RateLimitedCohereRerank
-from inference.rate_limiters import openai_rate_limiter
 from langchain_core.runnables.base import Runnable
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
@@ -58,65 +57,5 @@ class InferenceBase(ABC):
                 RootOnlyTracer(project_name="langchain-pepwave")
             ]
 
-    @property
-    def llm(self):
-        return ChatOpenAI(
-            model=self.llm_model,
-            temperature=self.temperature,
-            streaming=self.streaming,
-            rate_limiter=openai_rate_limiter,
-            use_responses_api=True,
-            output_version="responses/v1",
-        )
-
     def set_temperature(self, temperature: float):
         self.temperature = temperature
-
-    @abstractmethod
-    def compile(
-        self,
-        conversation_template: BasePromptTemplate,
-        batch_manager: BatchManager | None,
-    ) -> Runnable:
-        pass
-
-
-class RagInference(InferenceBase):
-    def compile(
-        self,
-        conversation_template: BasePromptTemplate,
-        batch_manager: BatchManager | None = None,
-    ) -> Runnable:
-        final_llm = (
-            BatchChatOpenAI(
-                model=self.llm_model,
-                batch_manager=batch_manager,
-            )
-            if batch_manager is not None
-            else self.llm
-        )
-
-        base_retriever = self.vector_store.as_retriever(
-            search_type="mmr", search_kwargs={"k": 30, "fetch_k": 50}
-        )
-
-        compressor = RateLimitedCohereRerank(model="rerank-v3.5", top_n=20)
-        retriever = ContextualCompressionRetriever(
-            base_compressor=compressor, base_retriever=base_retriever
-        )
-
-        return (
-            RunnablePassthrough.assign(
-                retrieval_query=get_history_aware_retrieval_chain(llm=self.llm)
-            )
-            .assign(
-                context=(lambda x: x["retrieval_query"]) | retriever,
-            )
-            .assign(
-                answer=create_stuff_documents_chain(
-                    final_llm,
-                    conversation_template,
-                    document_separator="\n\n</ContextDocument>\n\n<ContextDocument>\n\n",
-                )
-            )
-        ).with_config(self.config)
