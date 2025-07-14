@@ -65,7 +65,8 @@ class InferenceBase(ABC):
             temperature=self.temperature,
             streaming=self.streaming,
             rate_limiter=openai_rate_limiter,
-            use_responses_api=False,
+            use_responses_api=True,
+            output_version="responses/v1",
         )
 
     def set_temperature(self, temperature: float):

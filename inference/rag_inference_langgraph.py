@@ -34,7 +34,6 @@ class RagState(BaseModel):
     retrieval_query_embedding: list[float] = Field(default_factory=list)
     context: list = Field(default_factory=list)
     context_history: list = Field(default_factory=list)
-    cached_extra_context: list = Field(default_factory=list)
     answer: str = ""
     thread_id: str = "default"
 
@@ -66,7 +65,8 @@ class RagInferenceLangGraph(InferenceBase):
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
 
-        self.checkpointer = checkpointer or InMemorySaver()
+        # self.checkpointer = checkpointer or InMemorySaver()
+        self.checkpointer = InMemorySaver()
 
     def compile(
         self,
@@ -78,6 +78,7 @@ class RagInferenceLangGraph(InferenceBase):
             self.output_llm = BatchChatOpenAI(
                 model=self.llm_model,
                 batch_manager=batch_manager,
+                use_responses_api=getattr(batch_manager, 'use_responses_api', False),
             )
 
         graph_builder = StateGraph(RagState)
@@ -112,18 +113,12 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _generate_retrieval_query(self, state: RagState) -> dict:
         """Generate a retrieval query considering chat history."""
-        retrieval_query_chain = get_history_aware_retrieval_chain(llm=self.llm)
-
-        retrieval_query = retrieval_query_chain.invoke(
-            {"query": state.query, "chat_history": state.messages}
-        )
-
         if self.use_cohere:
-            return {"retrieval_query": retrieval_query}
+            return {"retrieval_query": state.query}
 
-        retrieval_query_embedding = self.pinecone.get_query_embedding(retrieval_query)
+        retrieval_query_embedding = self.pinecone.get_query_embedding(state.query)
         return {
-            "retrieval_query": retrieval_query,
+            "retrieval_query": state.query,
             "retrieval_query_embedding": retrieval_query_embedding,
         }
 
@@ -139,9 +134,7 @@ class RagInferenceLangGraph(InferenceBase):
             )
 
         return {
-            "context": retrieved_context[0:20], # todo: remove slice
-            "cached_extra_context": retrieved_context[20:],
-            # todo: summary history in background thread
+            "context": retrieved_context,
             "context_history": [
                 *state.context_history,
                 *state.context,
@@ -162,7 +155,7 @@ class RagInferenceLangGraph(InferenceBase):
             }
         )
         answer = self.output_llm.invoke(messages)
-        return {"answer": answer.content}
+        return {"answer": answer.text()}
 
     def _update_messages(self, state: RagState) -> dict:
         """Update the message history with the new query and answer."""

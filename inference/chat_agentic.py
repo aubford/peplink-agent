@@ -137,9 +137,5 @@ class ChatLangGraph(RagInferenceLangGraph):
             if isinstance(chunk, tuple) and len(chunk) == 2:
                 message_chunk, metadata = chunk
                 # Only stream content from the generate_answer node (the LLM response)
-                if (
-                    hasattr(message_chunk, 'content')
-                    and message_chunk.content
-                    and metadata.get('langgraph_node') == 'generate_answer'
-                ):
-                    yield str(message_chunk.content)
+                if metadata.get('langgraph_node') == 'generate_answer' and message_chunk.text():
+                    yield str(message_chunk.text())

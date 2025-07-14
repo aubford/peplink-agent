@@ -2,6 +2,7 @@ import os
 import json
 import time
 import shutil
+import logging
 from typing import Any, Literal
 from pathlib import Path
 from pydantic import BaseModel
@@ -11,7 +12,7 @@ from openai import OpenAI
 from openai.lib._parsing._completions import type_to_response_format_param
 
 # Define ValidEndpoints type
-ValidEndpoints = Literal["/v1/chat/completions", "/v1/embeddings", "/v1/completions"]
+ValidEndpoints = Literal["/v1/chat/completions", "/v1/embeddings", "/v1/completions", "/v1/responses"]
 
 
 class BatchManager:
@@ -32,46 +33,57 @@ class BatchManager:
         endpoint: ValidEndpoints = "/v1/chat/completions",
         batch_name: str = "batch",
         schema: type[BaseModel] | None = None,
+        use_responses_api: bool = False,
     ):
-        """
-        Initialize the BatchManager with OpenAI client and a base path for file operations.
-
+        """Initialize BatchManager with configurable API endpoint.
+        
         Args:
-            base_path: Directory path to use for storing batch files and results
-            endpoint: API endpoint to use for the batch (must be one of '/v1/chat/completions', '/v1/embeddings', '/v1/completions')
+            base_path: Base directory for batch files
+            endpoint: API endpoint to use
+            batch_name: Name for the batch
+            schema: Optional schema for structured output
+            use_responses_api: Whether to use Responses API format instead of Chat Completions
         """
+        self.base_path = Path(base_path)
+        self.batch_name = batch_name
+        self.use_responses_api = use_responses_api
+
+        # Set endpoint based on API choice
+        if use_responses_api:
+            self.endpoint = "/v1/responses"
+        else:
+            self.endpoint = endpoint
+
+        self.schema = schema
+        self.base_path.mkdir(parents=True, exist_ok=True)
+
+        self.file_name = self.base_path / f"{batch_name}.jsonl"
+        self.status_file = self.base_path / f"{batch_name}_status.json"
+        self.results_file = self.base_path / f"{batch_name}_results.jsonl"
+
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY environment variable not set")
         self.client = OpenAI(api_key=api_key)
 
-        # Ensure base_path and batch subfolder exist
-        base_path.mkdir(parents=True, exist_ok=True)
-        batch_path = base_path / batch_name
-        batch_path.mkdir(parents=True, exist_ok=True)
-
-        self.batch_path = batch_path
-        self.file_name = batch_path / "batchfile.jsonl"
-        self.output_file_name = batch_path / "batch_results.json"
-        self.status_file_name = batch_path / "batch_status.json"
-        self.endpoint: ValidEndpoints = endpoint
-        self.schema = schema
-
         # Load batch_id from status file if it exists
-        if self.status_file_name.exists():
-            with open(self.status_file_name, "r") as status_file:
+        if self.status_file.exists():
+            with open(self.status_file, "r") as status_file:
                 status_data = json.load(status_file)
                 self.batch_id = status_data.get("id")
         else:
             self.batch_id = None
+
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
 
     @property
     def current_batch_id(self) -> str | None:
         """
         Get the current batch ID if it is set, otherwise try to load it from the status file.
         """
-        if self.status_file_name.exists() and not self.batch_id:
-            with open(self.status_file_name, "r") as status_file:
+        if self.status_file.exists() and not self.batch_id:
+            with open(self.status_file, "r") as status_file:
                 status_data = json.load(status_file)
                 return status_data.get("id")
         else:
@@ -81,9 +93,9 @@ class BatchManager:
         """
         Clear all batch files in the batch directory.
         """
-        if self.batch_path.exists():
-            shutil.rmtree(self.batch_path)
-        self.batch_path.mkdir(parents=True, exist_ok=True)
+        if self.base_path.exists():
+            shutil.rmtree(self.base_path)
+        self.base_path.mkdir(parents=True, exist_ok=True)
 
     def create_batch_task(
         self,
@@ -109,24 +121,53 @@ class BatchManager:
             max_tokens: Max tokens for response
             **kwargs: Additional keyword arguments for the body
         """
-        task = {
-            "custom_id": custom_id,
-            "method": "POST",
-            "url": self.endpoint,
-            "body": {
-                "model": model,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    *messages,
-                ],
-                **kwargs,
-            },
-        }
-        schema = schema or self.schema
-        if schema:
-            task["body"]["response_format"] = type_to_response_format_param(schema)  # type: ignore
+        if self.use_responses_api:
+            # Responses API format
+            # Convert messages to Responses API input format
+            input_messages = [
+                {"role": "system", "content": system_prompt},
+                *messages,
+            ]
+
+            task = {
+                "custom_id": custom_id,
+                "method": "POST",
+                "url": self.endpoint,
+                "body": {
+                    "model": model,
+                    "input": input_messages,
+                    "temperature": temperature,
+                    "max_completion_tokens": max_tokens,
+                    **kwargs,
+                },
+            }
+
+            # Note: Responses API may handle structured output differently
+            # For now, we'll include the response_format if schema is provided
+            schema = schema or self.schema
+            if schema:
+                task["body"]["response_format"] = type_to_response_format_param(schema)  # type: ignore
+        else:
+            # Chat Completions API format (original)
+            task = {
+                "custom_id": custom_id,
+                "method": "POST",
+                "url": self.endpoint,
+                "body": {
+                    "model": model,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        *messages,
+                    ],
+                    **kwargs,
+                },
+            }
+            schema = schema or self.schema
+            if schema:
+                task["body"]["response_format"] = type_to_response_format_param(schema)  # type: ignore
+
         return task
 
     def create_batch_tasks_to_batchfile(
@@ -170,7 +211,7 @@ class BatchManager:
             batch_job: The batch job object to write to file
         """
         print(f"Batch status: {batch_job.status}")
-        with open(self.status_file_name, "w") as f:
+        with open(self.status_file, "w") as f:
             json.dump(batch_job.model_dump(), f, indent=2)
 
     def create_batch_job(self) -> Any:
@@ -241,7 +282,7 @@ class BatchManager:
                     "status": "completed",
                     "batch_id": batch_id,
                     "results": results,
-                    "output_file": str(self.output_file_name),
+                    "output_file": str(self.results_file),
                 }
             except Exception as e:
                 return {
@@ -265,8 +306,8 @@ class BatchManager:
 
     def get_content_if_ready(self) -> dict[str, str]:
         # If results file exists, load and return its contents
-        if self.output_file_name.exists():
-            with open(self.output_file_name, "r") as f:
+        if self.results_file.exists():
+            with open(self.results_file, "r") as f:
                 results = json.load(f)
             return self._map_custom_id_to_content(results)
         # Otherwise, check status and fetch from API if completed
@@ -280,13 +321,36 @@ class BatchManager:
     def _map_custom_id_to_content(self, results: list[dict]) -> dict[str, str]:
         """
         Map a list of result dicts to a {custom_id: content} dictionary.
+        Handles both Chat Completions API and Responses API formats.
         """
-        return {
-            item["custom_id"]: item["response"]["body"]["choices"][0]["message"][
-                "content"
-            ]
-            for item in results
-        }
+        content_map = {}
+
+        for item in results:
+            custom_id = item["custom_id"]
+            response_body = item["response"]["body"]
+
+            try:
+                if self.use_responses_api:
+                    # Responses API format: extract from output[0].content[0].text
+                    output = response_body.get("output", [])
+                    if output and len(output) > 0:
+                        content_blocks = output[0].get("content", [])
+                        content = ""
+                        for content_block in content_blocks:
+                            if content_block.get("type") == "output_text":
+                                content += content_block.get("text", "")
+                        content_map[custom_id] = content
+                    else:
+                        content_map[custom_id] = ""
+                else:
+                    # Chat Completions API format: extract from choices[0].message.content
+                    content_map[custom_id] = response_body["choices"][0]["message"]["content"]
+
+            except (KeyError, IndexError) as e:
+                self.logger.error(f"Error extracting content for {custom_id}: {e}")
+                content_map[custom_id] = ""
+
+        return content_map
 
     def _get_results(self, batch_job: Any) -> list[dict[str, Any]]:
         """
@@ -309,7 +373,7 @@ class BatchManager:
                 results.append(json.loads(line))
 
         # Save as JSON file
-        with open(self.output_file_name, "w") as file:
+        with open(self.results_file, "w") as file:
             json.dump(results, file, indent=2)
 
         return results
@@ -376,18 +440,44 @@ class BatchManager:
             # Run each task against the regular API
             for task in tasks:
                 body = task.get("body", {})
-                messages = body.get("messages", [])
                 model = body.get("model", "gpt-4.1-nano")
                 temperature = body.get("temperature", 0.2)
-                max_tokens = body.get("max_tokens", 300)
 
-                # Call the OpenAI API directly
-                response = self.client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
+                if self.use_responses_api:
+                    # Responses API format
+                    input_data = body.get("input", [])
+                    max_completion_tokens = body.get("max_completion_tokens", 300)
+                    
+                    # Call the OpenAI Responses API directly
+                    response = self.client.responses.create(
+                        model=model,
+                        input=input_data,
+                        temperature=temperature,
+                        max_completion_tokens=max_completion_tokens,
+                    )
+                    
+                    # Extract content from Responses API response
+                    content = ""
+                    if response.output and len(response.output) > 0:
+                        for output_item in response.output:
+                            if hasattr(output_item, 'content') and output_item.content:
+                                for content_block in output_item.content:
+                                    if hasattr(content_block, 'text'):
+                                        content += content_block.text
+                else:
+                    # Chat Completions API format (original)
+                    messages = body.get("messages", [])
+                    max_tokens = body.get("max_tokens", 300)
+                    
+                    # Call the OpenAI Chat Completions API directly
+                    response = self.client.chat.completions.create(
+                        model=model,
+                        messages=messages,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                    
+                    content = response.choices[0].message.content
 
                 # Extract usage data safely
                 usage_data = {}
@@ -400,13 +490,23 @@ class BatchManager:
                         ),
                     }
 
+                # Extract prompt data based on API format
+                if self.use_responses_api:
+                    input_data = body.get("input", [])
+                    prompt = input_data[-1].get("content", "") if input_data else ""
+                    finish_reason = "completed"  # Responses API may use different finish reasons
+                else:
+                    messages = body.get("messages", [])
+                    prompt = messages[-1].get("content", "") if messages else ""
+                    finish_reason = response.choices[0].finish_reason
+
                 results.append(
                     {
                         "task_id": task.get("custom_id"),
-                        "prompt": messages[-1].get("content") if messages else "",
-                        "response": response.choices[0].message.content,
+                        "prompt": prompt,
+                        "response": content,
                         "model": model,
-                        "finish_reason": response.choices[0].finish_reason,
+                        "finish_reason": finish_reason,
                         "usage": usage_data,
                     }
                 )

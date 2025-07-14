@@ -24,6 +24,8 @@ class BatchChatOpenAI(BaseChatModel):
     system_prompt: str = "You are a helpful assistant."
     """Default system prompt to use if none is provided in messages."""
     batch_manager: BatchManager
+    use_responses_api: bool = Field(default=False)
+    """Whether to use Responses API format instead of Chat Completions API."""
 
     @staticmethod
     def hash_messages(messages: str) -> str:
@@ -39,6 +41,12 @@ class BatchChatOpenAI(BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         """Write the request to a batch file instead of calling the API."""
+        # Ensure batch manager is configured for the correct API
+        if hasattr(self.batch_manager, 'use_responses_api'):
+            self.batch_manager.use_responses_api = self.use_responses_api
+            if self.use_responses_api:
+                self.batch_manager.endpoint = "/v1/responses"
+            
         system_prompt = self.system_prompt
         human_messages_for_hash = ""
         formatted_messages = []
@@ -65,6 +73,17 @@ class BatchChatOpenAI(BaseChatModel):
             **({"stop": stop} if stop else {}),
             **kwargs,
         }
+        
+        # For Responses API, use max_completion_tokens instead of max_tokens
+        max_tokens_key = "max_completion_tokens" if self.use_responses_api else "max_tokens"
+        batch_kwargs = {
+            **all_kwargs,
+            max_tokens_key: self.model_kwargs.get("max_tokens", 5000)
+        }
+        # Remove max_tokens if we're using max_completion_tokens to avoid conflicts
+        if self.use_responses_api and "max_tokens" in batch_kwargs:
+            del batch_kwargs["max_tokens"]
+            
         # Create the batch task using BatchManager's method
         task = self.batch_manager.create_batch_task(
             custom_id=messages_hash,
@@ -72,8 +91,7 @@ class BatchChatOpenAI(BaseChatModel):
             system_prompt=system_prompt,
             model=self.model_name,
             temperature=self.temperature,
-            max_tokens=self.model_kwargs.get("max_tokens", 5000),
-            **all_kwargs,
+            **batch_kwargs,
         )
         # Write to batch file
         with open(self.batch_manager.file_name, "a") as f:

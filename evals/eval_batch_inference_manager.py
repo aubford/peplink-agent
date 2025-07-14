@@ -16,11 +16,13 @@ class EvalBatchInferenceManager(BatchManager):
         conversation_template: BasePromptTemplate,
         inference: InferenceBase,
         schema: type[BaseModel] | None = None,
+        use_responses_api: bool = False,
     ):
         super().__init__(
             base_path=runs_dir / run_name / "batches",
             batch_name=batch_name,
             schema=schema,
+            use_responses_api=use_responses_api,
         )
 
         # ensure temp is 0 for eval operations
