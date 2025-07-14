@@ -1,31 +1,7 @@
 let currentThreadId = null
 let isStreaming = false
-let provisionalThreadId = null
 
-// Load threads on page load
-document.addEventListener("DOMContentLoaded", function () {
-  loadThreads()
-  setupTextareaAutoResize()
-  loadTestsetSuggestions()
-})
-
-function setupTextareaAutoResize() {
-  const textarea = document.getElementById("messageInput")
-  textarea.addEventListener("input", function () {
-    this.style.height = "auto"
-    this.style.height = Math.min(this.scrollHeight, 200) + "px"
-  })
-}
-
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar")
-  const overlay = document.getElementById("sidebarOverlay")
-
-  sidebar.classList.toggle("open")
-  overlay.classList.toggle("show")
-}
-
-async function loadThreads() {
+async function loadData() {
   try {
     const response = await fetch("/api/threads")
     const data = await response.json()
@@ -79,6 +55,107 @@ async function loadThreads() {
     showError("Failed to load conversations")
   }
 }
+
+// Load threads on page load
+document.addEventListener("DOMContentLoaded", function () {
+  loadData()
+  loadTestsetSuggestions()
+  setupTextareaAutoResize()
+})
+
+async function sendMessage(event) {
+  event.preventDefault()
+
+  if (isStreaming) {
+    return
+  }
+
+  const messageInput = document.getElementById("messageInput")
+  const message = messageInput.value.trim()
+
+  if (!message) return
+
+  // Ensure we have a thread (create provisional if needed)
+  const threadId = await ensureThreadExists()
+
+  // Add user message to chat
+  addMessage(message, "user")
+  messageInput.value = ""
+  messageInput.style.height = "auto"
+
+  // Disable input and show loading
+  setStreamingState(true)
+
+  try {
+    // Create assistant message element for streaming
+    const assistantMessage = addMessage("", "assistant", true)
+
+    // Start streaming
+    const response = await fetch("/api/chat/stream", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: message,
+        thread_id: threadId,
+      }),
+    })
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+
+    while (true) {
+      const { done, value } = await reader.read()
+
+      if (done) break
+
+      const chunk = decoder.decode(value)
+      const lines = chunk.split("\n")
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.slice(6))
+
+            if (data.type === "token") {
+              assistantMessage.textContent += data.content
+              scrollToBottom()
+            } else if (data.type === "complete") {
+              assistantMessage.classList.remove("streaming")
+
+              // Convert provisional thread to real thread
+              if (provisionalThreadId && !currentThreadId) {
+                currentThreadId = provisionalThreadId
+                provisionalThreadId = null
+                document.getElementById(
+                  "currentThread"
+                ).textContent = `Thread: ${currentThreadId}`
+              }
+
+              // Always reload threads to update message count in sidebar
+              await loadData()
+            } else if (data.type === "error") {
+              showError(`Error: ${data.message}`)
+              assistantMessage.textContent =
+                "Sorry, I encountered an error processing your request."
+              assistantMessage.classList.remove("streaming")
+            }
+          } catch (e) {
+            // Ignore JSON parse errors for incomplete chunks
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error sending message:", error)
+    showError("Failed to send message")
+  } finally {
+    setStreamingState(false)
+  }
+}
+
+
 
 function showNoMessagesScreen() {
   currentThreadId = null
@@ -209,98 +286,6 @@ async function loadThreadHistory(threadId) {
   }
 }
 
-async function sendMessage(event) {
-  event.preventDefault()
-
-  if (isStreaming) {
-    return
-  }
-
-  const messageInput = document.getElementById("messageInput")
-  const message = messageInput.value.trim()
-
-  if (!message) return
-
-  // Ensure we have a thread (create provisional if needed)
-  const threadId = await ensureThreadExists()
-
-  // Add user message to chat
-  addMessage(message, "user")
-  messageInput.value = ""
-  messageInput.style.height = "auto"
-
-  // Disable input and show loading
-  setStreamingState(true)
-
-  try {
-    // Create assistant message element for streaming
-    const assistantMessage = addMessage("", "assistant", true)
-
-    // Start streaming
-    const response = await fetch("/api/chat/stream", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: message,
-        thread_id: threadId,
-      }),
-    })
-
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-
-    while (true) {
-      const { done, value } = await reader.read()
-
-      if (done) break
-
-      const chunk = decoder.decode(value)
-      const lines = chunk.split("\n")
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          try {
-            const data = JSON.parse(line.slice(6))
-
-            if (data.type === "token") {
-              assistantMessage.textContent += data.content
-              scrollToBottom()
-            } else if (data.type === "complete") {
-              assistantMessage.classList.remove("streaming")
-
-              // Convert provisional thread to real thread
-              if (provisionalThreadId && !currentThreadId) {
-                currentThreadId = provisionalThreadId
-                provisionalThreadId = null
-                document.getElementById(
-                  "currentThread"
-                ).textContent = `Thread: ${currentThreadId}`
-              }
-
-              // Always reload threads to update message count in sidebar
-              await loadThreads()
-            } else if (data.type === "error") {
-              showError(`Error: ${data.message}`)
-              assistantMessage.textContent =
-                "Sorry, I encountered an error processing your request."
-              assistantMessage.classList.remove("streaming")
-            }
-          } catch (e) {
-            // Ignore JSON parse errors for incomplete chunks
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error sending message:", error)
-    showError("Failed to send message")
-  } finally {
-    setStreamingState(false)
-  }
-}
-
 function addMessage(content, type, streaming = false) {
   const chatMessages = document.getElementById("chatMessages")
   const welcomeMessage = document.getElementById("welcomeMessage")
@@ -335,6 +320,31 @@ function addMessage(content, type, streaming = false) {
 
   scrollToBottom()
   return messageText
+}
+
+async function deleteThread(threadId, event) {
+  event.stopPropagation() // Prevent thread selection
+
+  try {
+    const response = await fetch(`/api/threads/${threadId}`, {
+      method: "DELETE",
+    })
+
+    if (!response.ok) {
+      throw new Error("Failed to delete thread")
+    }
+
+    // If we deleted the currently selected thread, show no messages screen
+    if (currentThreadId === threadId) {
+      showNoMessagesScreen()
+    }
+
+    // Reload threads to update the sidebar
+    await loadData()
+  } catch (error) {
+    console.error("Error deleting thread:", error)
+    showError("Failed to delete conversation")
+  }
 }
 
 function setStreamingState(streaming) {
@@ -385,31 +395,6 @@ window.addEventListener("resize", function () {
   }
 })
 
-async function deleteThread(threadId, event) {
-  event.stopPropagation() // Prevent thread selection
-
-  try {
-    const response = await fetch(`/api/threads/${threadId}`, {
-      method: "DELETE",
-    })
-
-    if (!response.ok) {
-      throw new Error("Failed to delete thread")
-    }
-
-    // If we deleted the currently selected thread, show no messages screen
-    if (currentThreadId === threadId) {
-      showNoMessagesScreen()
-    }
-
-    // Reload threads to update the sidebar
-    await loadThreads()
-  } catch (error) {
-    console.error("Error deleting thread:", error)
-    showError("Failed to delete conversation")
-  }
-}
-
 async function loadTestsetSuggestions() {
   const response = await fetch("/api/testset-queries")
   const data = await response.json()
@@ -427,4 +412,20 @@ async function loadTestsetSuggestions() {
             `
     testsetSuggestions.appendChild(suggestionCard)
   })
+}
+
+function setupTextareaAutoResize() {
+  const textarea = document.getElementById("messageInput")
+  textarea.addEventListener("input", function () {
+    this.style.height = "auto"
+    this.style.height = Math.min(this.scrollHeight, 200) + "px"
+  })
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar")
+  const overlay = document.getElementById("sidebarOverlay")
+
+  sidebar.classList.toggle("open")
+  overlay.classList.toggle("show")
 }
