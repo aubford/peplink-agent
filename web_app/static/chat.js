@@ -37,10 +37,7 @@ async function loadData() {
 
     // Only auto-select if we're reloading threads for an existing conversation
     // Otherwise, show the no messages screen by default
-    if (
-      currentThreadId &&
-      data.threads.find(t => t.thread_id === currentThreadId)
-    ) {
+    if (currentThreadId && data.threads.find(t => t.thread_id === currentThreadId)) {
       // Maintain current selection if it still exists
       await selectThread(currentThreadId)
     } else if (data.threads.length === 0) {
@@ -149,8 +146,6 @@ async function sendMessage(event) {
   }
 }
 
-
-
 function showNoMessagesScreen() {
   currentThreadId = null
 
@@ -207,8 +202,6 @@ async function selectThread(threadId, clickedElement = null) {
     toggleSidebar()
   }
 }
-
-
 
 async function sendSuggestion(message) {
   if (isStreaming) return
@@ -342,14 +335,12 @@ function showError(message) {
 }
 
 // Handle Enter key in textarea
-document
-  .getElementById("messageInput")
-  .addEventListener("keydown", function (event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault()
-      sendMessage(event)
-    }
-  })
+document.getElementById("messageInput").addEventListener("keydown", function (event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault()
+    sendMessage(event)
+  }
+})
 
 // Handle window resize
 window.addEventListener("resize", function () {

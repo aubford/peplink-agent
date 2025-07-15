@@ -96,6 +96,36 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return INIT_RETRIEVAL
 
+    def _add_tool_call_descriptions(
+        self,
+        ai_message,
+        intro_text: str = "I'll research your question using these tools:",
+    ):
+        """Add descriptive content to AI messages based on their tool calls."""
+        if not hasattr(ai_message, 'tool_calls') or not ai_message.tool_calls:
+            return ai_message
+
+        tool_descriptions = []
+        for tool_call in ai_message.tool_calls:
+            tool_name = tool_call['name']
+            if tool_name == 'semantic_search':
+                tool_descriptions.append(
+                    f"🔍 Searching vector database for: {tool_call['args']['search_query']}"
+                )
+            elif tool_name == 'search_web':
+                tool_descriptions.append(
+                    f"🌐 Searching web for: {tool_call['args']['search_query']}"
+                )
+            elif tool_name == 'search_wikipedia':
+                tool_descriptions.append(
+                    f"📚 Searching Wikipedia for: {tool_call['args']['search_query']}"
+                )
+
+        if tool_descriptions:
+            ai_message.content = f"{intro_text}\n\n" + "\n\n".join(tool_descriptions)
+
+        return ai_message
+
     def _init_retrieval(self, state: MainState):
         messages = [
             ("system", PROMPTS["inference/retrieval_system"]),
@@ -106,6 +136,8 @@ class RagInferenceLangGraph(InferenceBase):
         ]
         llm = self.llm.bind_tools(self.tools, tool_choice="required")
         ai_tool_calls = llm.invoke(messages)
+        ai_tool_calls = self._add_tool_call_descriptions(ai_tool_calls)
+
         return {"messages": [state.query, ai_tool_calls], "reranker_query": state.query}
 
     def _get_user_message(self, num_research_iterations: int) -> str:
@@ -145,6 +177,8 @@ class RagInferenceLangGraph(InferenceBase):
             else self.llm
         )
         answer_or_tool_calls = llm.invoke(messages)
+        answer_or_tool_calls = self._add_tool_call_descriptions(answer_or_tool_calls)
+
         messages = (
             [state.query, answer_or_tool_calls]
             if state.num_research_iterations == 0
@@ -189,7 +223,7 @@ class RagInferenceLangGraph(InferenceBase):
         return documents
 
     def _rerank(self, state: MainState):
-        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=40)
+        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=30)
         reranked_docs = reranker.compress_documents(
             documents=self._get_all_tool_documents(state), query=state.reranker_query
         )
@@ -214,16 +248,16 @@ class RagInferenceLangGraph(InferenceBase):
             a semantic search query. This tool is the primary
             means of retrieving information about Peplink products and services but it also
             contains some information about general IT networking concepts that are adjacent
-            to Peplink products and services. You should always make at least one call to this
-            too when doing research, typically with a version of the entire user query formatted
-            for optimal semantic search via vector database.
+            to Peplink products and services.
             """
             query_embedding = self.pinecone.get_query_embedding(search_query)
             docs = self.pinecone.retrieve(
-                search_query, query_embedding, top_k=70, rerank_top_n=20
+                search_query, query_embedding, top_k=70, rerank_top_n=30
             )
-
-            return ([doc.page_content for doc in docs], docs)
+            content = f"<<Retrieved {len(docs)} docs from Pinecone search: '{search_query}'>>\n\nFirst 3 docs:\n\n\n"
+            for i, doc in enumerate(docs[0:3], 1):
+                content += f"Document {i}:\n{doc.page_content}\n\n"
+            return (content, docs)
 
         @tool(response_format="content_and_artifact")
         def search_web(
@@ -233,8 +267,8 @@ class RagInferenceLangGraph(InferenceBase):
             ],
         ):
             """Use this tool when you need to drill down on a specific aspect of the user query by performing
-            a web search using Google. This tool is most useful for general questions about IT networking and
-            not for specific questions about Peplink products and services. Do not use this tool more than once
+            a web search using Google. This tool is most useful for general questions about IT networking. It is not
+            useful for specific questions about Peplink products and services. Do not use this tool more than once
             in a given turn.
             """
             response_doc = Document(
@@ -244,7 +278,10 @@ class RagInferenceLangGraph(InferenceBase):
                     "search_query": search_query,
                 },
             )
-            return ([response_doc.page_content], [response_doc])
+            content = (
+                f"<<Searched Web: '{search_query}'>>\n\n{response_doc.page_content}\n\n"
+            )
+            return (content, [response_doc])
 
         @tool(response_format="content_and_artifact")
         def search_wikipedia(
@@ -255,7 +292,7 @@ class RagInferenceLangGraph(InferenceBase):
         ):
             """Use this tool to perform a Wikipedia search when you need general information about a topic that
             is not about Peplink/Pepwave products and services. This can be used to get information specific to
-            the IT networking domain or information from any other domain in general. It is most useful for
+            the IT networking domain or general information from any other domain. It is most useful for
             broad, general concepts that you would typically find in an encyclopedia. Do not use this tool more than
             twice in a given turn.
             """
@@ -266,7 +303,8 @@ class RagInferenceLangGraph(InferenceBase):
                     "search_query": search_query,
                 },
             )
-            return ([response_doc.page_content], [response_doc])
+            content = f"<<Searched Wikipedia: '{search_query}'>>\n\n{response_doc.page_content}\n\n"
+            return (content, [response_doc])
 
         return [semantic_search, search_web, search_wikipedia]
 
