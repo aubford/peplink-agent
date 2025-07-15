@@ -1,13 +1,11 @@
 import operator
+import re
 from typing import Annotated, Hashable
 from langchain_core.documents import Document
-from langchain_core.prompts import BasePromptTemplate
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
-from langchain_core.prompts.chat import ChatPromptTemplate
-from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_core.tools import tool
 from langchain_core.messages import ToolMessage
-from langgraph.constants import START, END
+from langgraph.constants import END
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import ToolNode, InjectedState
 from inference.cohere_rerank import RateLimitedCohereRerank
@@ -22,10 +20,7 @@ from langgraph.graph.message import add_messages
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph.state import CompiledStateGraph
-from load.batch_manager import BatchManager
-from evals.batch_llm import BatchChatOpenAI
 from pydantic import BaseModel, Field
-from typing_extensions import Literal
 
 
 # Load prompts
@@ -148,6 +143,33 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return PROMPTS["inference/user_retry_after_tools"]
 
+    def _strip_tool_call_retrieved_docs(self, messages: list) -> list:
+        processed_messages = []
+        pattern = r'(<<[^>]*>>).*'
+
+        for message in messages:
+            if isinstance(message, ToolMessage):
+                content = (
+                    message.content
+                    if isinstance(message.content, str)
+                    else str(message.content)
+                )
+                match = re.search(pattern, content, re.DOTALL)
+                if match:
+                    # Create a new ToolMessage with stripped content
+                    new_message = ToolMessage(
+                        content=match.group(1)
+                        + "\n\nTool call successful. Documents merged into context corpus",
+                        tool_call_id=message.tool_call_id,
+                    )
+                    processed_messages.append(new_message)
+                else:
+                    processed_messages.append(message)
+            else:
+                processed_messages.append(message)
+
+        return processed_messages
+
     def _prompt_llm_w_tools(self, state: MainState) -> dict:
         allow_research = state.num_research_iterations <= 2
         system_message = (
@@ -162,7 +184,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         messages = [
             ("system", system_message.format(context=context)),
-            *state.messages,
+            *self._strip_tool_call_retrieved_docs(state.messages),
             (
                 "human",
                 self._get_user_message(state.num_research_iterations).format(
