@@ -94,7 +94,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         self.checkpointer = checkpointer or InMemorySaver()
 
-        self.tools = [self.semantic_search, self.search_web, self.search_wikipedia]
+        self.tools = self._create_tools()
 
     def _entry_point_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -178,7 +178,7 @@ class RagInferenceLangGraph(InferenceBase):
     # "tools": ToolNode
 
     def _handle_tool_results(self, state: MainState):
-        tool_results = state.latest_tool_call_results
+        tool_results = state.messages[-1]
 
         modified_messages = []
         for result in tool_results:
@@ -206,72 +206,74 @@ class RagInferenceLangGraph(InferenceBase):
             "current_context": reranked_docs,
         }
 
-    @tool
-    def semantic_search(
-        self,
-        search_query: Annotated[
-            str,
-            "The search query to use for semantic search in the vector database. Should be a well-formed query that describes what information you are looking for.",
-        ],
-    ) -> list[Document]:
-        """The primary data source for information about Peplink products and services.
-        Search the vector database for information relevant to the user query by providing
-        a semantic search query. This tool is the primary
-        means of retrieving information about Peplink products and services but it also
-        contains some information about general IT networking concepts that are adjacent
-        to Peplink products and services. You should always make at least one call to this
-        too when doing research, typically with a version of the entire user query formatted
-        for optimal semantic search via vector database.
-        """
-        query_embedding = self.pinecone.get_query_embedding(search_query)
-        return self.pinecone.retrieve(
-            search_query, query_embedding, top_k=70, rerank_top_n=20
-        )
+    def _create_tools(self):
+        """Create bound tools that don't have self parameters."""
 
-    @tool
-    def search_web(
-        self,
-        search_query: Annotated[
-            str,
-            "A web search for a concept or entity to drill down on",
-        ],
-    ) -> list[Document]:
-        """Use this tool when you need to drill down on a specific aspect of the user query by performing
-        a web search using Google. This tool is most useful for general questions about IT networking and
-        not for specific questions about Peplink products and services.
-        """
-        return [
-            Document(
-                page_content="Example web search results",
-                metadata={
-                    "source": "web",
-                    "search_query": search_query,
-                },
+        @tool
+        def semantic_search(
+            search_query: Annotated[
+                str,
+                "The search query to use for semantic search in the vector database. Should be a well-formed query that describes what information you are looking for.",
+            ],
+        ) -> list[Document]:
+            """The primary data source for information about Peplink products and services.
+            Search the vector database for information relevant to the user query by providing
+            a semantic search query. This tool is the primary
+            means of retrieving information about Peplink products and services but it also
+            contains some information about general IT networking concepts that are adjacent
+            to Peplink products and services. You should always make at least one call to this
+            too when doing research, typically with a version of the entire user query formatted
+            for optimal semantic search via vector database.
+            """
+            query_embedding = self.pinecone.get_query_embedding(search_query)
+            return self.pinecone.retrieve(
+                search_query, query_embedding, top_k=70, rerank_top_n=20
             )
-        ]
 
-    @tool
-    def search_wikipedia(
-        self,
-        search_query: Annotated[
-            str,
-            "The search query to use for Wikipedia search. Should be a specific entity or concept.",
-        ],
-    ) -> list[Document]:
-        """Use this tool to perform a Wikipedia search when you need general information about a topic that
-        is not about Peplink/Pepwave products and services. This can be used to get information specific to
-        the IT networking domain or information from any other domain in general. It is most useful for
-        broad, general concepts that you would typically find in an encyclopedia.
-        """
-        return [
-            Document(
-                page_content="Example Wikipedia search results",
-                metadata={
-                    "source": "wikipedia",
-                    "search_query": search_query,
-                },
-            )
-        ]
+        @tool
+        def search_web(
+            search_query: Annotated[
+                str,
+                "A web search for a concept or entity to drill down on",
+            ],
+        ) -> list[Document]:
+            """Use this tool when you need to drill down on a specific aspect of the user query by performing
+            a web search using Google. This tool is most useful for general questions about IT networking and
+            not for specific questions about Peplink products and services.
+            """
+            return [
+                Document(
+                    page_content="Example web search results",
+                    metadata={
+                        "source": "web",
+                        "search_query": search_query,
+                    },
+                )
+            ]
+
+        @tool
+        def search_wikipedia(
+            search_query: Annotated[
+                str,
+                "The search query to use for Wikipedia search. Should be a specific entity or concept.",
+            ],
+        ) -> list[Document]:
+            """Use this tool to perform a Wikipedia search when you need general information about a topic that
+            is not about Peplink/Pepwave products and services. This can be used to get information specific to
+            the IT networking domain or information from any other domain in general. It is most useful for
+            broad, general concepts that you would typically find in an encyclopedia.
+            """
+            return [
+                Document(
+                    page_content="Example Wikipedia search results",
+                    metadata={
+                        "source": "wikipedia",
+                        "search_query": search_query,
+                    },
+                )
+            ]
+
+        return [semantic_search, search_web, search_wikipedia]
 
     def compile(self) -> CompiledStateGraph:
 
@@ -283,7 +285,7 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder.add_node(GENERATE_RERANKER_QUERY, self._generate_reranker_query)
         graph_builder.add_node(
             TOOL_NODE,
-            ToolNode(tools=self.tools, messages_key="latest_tool_call_results"),
+            ToolNode(tools=self.tools),
         )
         graph_builder.add_node(HANDLE_TOOL_RESULTS, self._handle_tool_results)
         graph_builder.add_node(RERANK, self._rerank)
@@ -325,6 +327,6 @@ class RagInferenceLangGraph(InferenceBase):
             temperature=self.temperature,
             streaming=self.streaming,
             rate_limiter=openai_rate_limiter,
-            use_responses_api=True,
-            output_version="responses/v1",
+            use_responses_api=False,
+            # output_version="responses/v1",
         )

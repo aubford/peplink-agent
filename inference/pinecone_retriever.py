@@ -64,9 +64,6 @@ class PineconeRetriever:
             "top_n": rerank_top_n,
             "rank_fields": [rank_field],  # only one field currently suported by pc
             "model": self.rerank_model,
-            "parameters": {
-                "truncate": "NONE",
-            }
         }
 
         if pinecone_rate_limiter:
