@@ -36,7 +36,7 @@ class InferenceBase(ABC):
         llm_model: str,
         pinecone_index_name: str,
         embedding_model: str = "text-embedding-3-large",
-        temperature: float = 1,  # openai default temp
+        temperature: float = 0.5,  # openai default temp
         streaming: bool = False,
         minimal_tracer: bool = False,
     ):

@@ -1,12 +1,14 @@
 import operator
 from typing import Annotated, Hashable
+from langchain_core.documents import Document
 from langchain_core.prompts import BasePromptTemplate
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_core.runnables.graph import MermaidDrawMethod
+from langchain_core.tools import tool
 from langgraph.constants import START, END
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import ToolNode
+from langgraph.prebuilt import ToolNode, InjectedState
 from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rag_inference import InferenceBase
 from inference.pinecone_retriever import PineconeRetriever
@@ -29,22 +31,12 @@ from typing_extensions import Literal
 PROMPTS = load_prompts()
 
 # Node name constants
-EMBED_QUERY = "NODE__EMBED_QUERY"
 INIT_RETRIEVAL = "NODE__INIT_RETRIEVAL"
 PROMPT_LLM_W_TOOLS = "NODE__PROMPT_LLM_W_TOOLS"
 GENERATE_RERANKER_QUERY = "NODE__GENERATE_RERANKER_QUERY"
 TOOL_NODE = "NODE__TOOL_NODE"
 HANDLE_TOOL_RESULTS = "NODE__HANDLE_TOOL_RESULTS"
 RERANK = "NODE__RERANK"
-
-
-default_conversation_template = ChatPromptTemplate(
-    [
-        ("system", PROMPTS["inference/system"]),
-        ("placeholder", "{chat_history}"),
-        ("human", "{query}"),
-    ]
-)
 
 
 # Define the state schema using Pydantic
@@ -59,7 +51,6 @@ class MainState(BaseModel):
         query: current user query
         num_research_iterations: number of times research has been done for a single user query
         reranker_query: pretty much only used for tracing
-        reranker_query_embedding: used for reranking in following step
         answer: the answer to the user query
         thread_id: the thread id for the user query
     """
@@ -73,7 +64,6 @@ class MainState(BaseModel):
     thread_id: str = "default"
     latest_tool_call_results: list = Field(default_factory=list)
     reranker_query: str = ""
-    reranker_query_embedding: list[float] = Field(default_factory=list)
     tool_call_results: list = Field(default_factory=list)
 
     answer: str = ""
@@ -91,7 +81,6 @@ class RagInferenceLangGraph(InferenceBase):
         llm_model: str,
         pinecone_index_name: str,
         checkpointer: BaseCheckpointSaver | None = None,
-        conversation_template: BasePromptTemplate = default_conversation_template,
         **kwargs,
     ):
         super().__init__(
@@ -103,9 +92,8 @@ class RagInferenceLangGraph(InferenceBase):
         )
 
         self.checkpointer = checkpointer or InMemorySaver()
-        self.conversation_template = conversation_template
 
-        self.tools = []
+        self.tools = [self.semantic_search, self.search_web, self.search_wikipedia]
 
     def _entry_point_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -114,28 +102,55 @@ class RagInferenceLangGraph(InferenceBase):
         if state.current_context:
             return PROMPT_LLM_W_TOOLS
         else:
-            return [EMBED_QUERY, INIT_RETRIEVAL]
-
-    def _embed_query(self, state: MainState):
-        query_embedding = self.pinecone.get_query_embedding(state.query)
-        return {"query_embedding": query_embedding}
+            return INIT_RETRIEVAL
 
     def _init_retrieval(self, state: MainState):
-        return {}
+        messages = [
+            ("system", PROMPTS["inference/retrieval_system"]),
+            ("human", PROMPTS["inference/init_retrieval"].format(query=state.query)),
+        ]
+        llm = self.llm.bind_tools(self.tools, tool_choice="required")
+        answer = llm.invoke(messages)
+        return {"messages": [state.query, answer]}
+
+    def _get_user_message(self, num_research_iterations: int) -> str:
+        if num_research_iterations == 0:
+            return PROMPTS["inference/user_new_followup"]
+        if num_research_iterations > 2:
+            return PROMPTS["inference/user_must_answer"]
+        else:
+            return PROMPTS["inference/user_retry_after_tools"]
 
     def _prompt_llm_w_tools(self, state: MainState) -> dict:
-        """Generate an answer based on the context and query."""
-        messages = self.conversation_template.invoke(
-            {
-                "query": state.query,
-                "chat_history": state.messages,
-                "context": "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
-                    [doc.page_content for doc in state.current_context]
-                ),
-            }
+        allow_research = state.num_research_iterations > 2
+        system_message = (
+            PROMPTS["inference/system_allow_research"]
+            if allow_research
+            else PROMPTS["inference/system_deny_research"]
         )
-        answer = self.llm.invoke(messages)
-        return {"messages": [answer]}
+
+        context = "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
+            [doc.page_content for doc in state.current_context]
+        )
+
+        messages = [
+            ("system", system_message.format(context=context)),
+            ("placeholder", state.messages),
+            (
+                "human",
+                self._get_user_message(state.num_research_iterations).format(
+                    {"user_query": state.query}
+                ),
+            ),
+        ]
+
+        llm = (
+            self.llm.bind_tools(self.tools, tool_choice="auto")
+            if allow_research
+            else self.llm
+        )
+        answer = llm.invoke(messages)
+        return {"messages": [state.query, answer]}
 
     def tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -149,7 +164,12 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _generate_reranker_query(self, state: MainState):
         """Generate a reranker query considering chat history."""
-        return {}
+        llm = self.llm.bind(temperature=0)
+        messages = [
+            ("system", PROMPTS["inference/generate_reranker_query_system"]),
+            ("placeholder", state.messages),
+        ]
+        return {"reranker_query": llm.invoke(messages)}
 
     # "tools": ToolNode
 
@@ -157,26 +177,59 @@ class RagInferenceLangGraph(InferenceBase):
         return {}
 
     def _rerank(self, state: MainState):
-        return {}
+        return {"num_research_iterations": state.num_research_iterations + 1}
 
-    def _semantic_search_tool(self, state: MainState) -> dict:
-        """Retrieve relevant documents based on the query."""
-        assert state.query_embedding
-        retrieved_context = self.pinecone.retrieve(
-            state.query, state.query_embedding, top_k=100, rerank_top_n=40
+    @tool
+    def semantic_search(self, search_query: str):
+        """The primary data source for information about Peplink products and services.
+        Search the vector database for information relevant to the user query by providing
+        a semantic search query. This tool is the primary
+        means of retrieving information about Peplink products and services but it also
+        contains some information about general IT networking concepts that are adjacent
+        to Peplink products and services. You should always make at least one call to this
+        too when doing research, typically with a version of the entire user query formatted
+        for optimal semantic search via vector database.
+        """
+        query_embedding = self.pinecone.get_query_embedding(search_query)
+        return self.pinecone.retrieve(
+            search_query, query_embedding, top_k=70, rerank_top_n=20
         )
 
-        return {
-            "context": retrieved_context,
-            "context_history": retrieved_context,
-        }
+    @tool
+    def search_web(self, search_query: str):
+        """Use this tool when you need to drill down on a specific aspect of the user query by performing
+        a web search using Google. This tool is most useful for general questions about IT networking and
+        not for specific questions about Peplink products and services.
+        """
+        query_embedding = self.pinecone.get_query_embedding(search_query)
+        return Document(
+            page_content="Example web search results",
+            metadata={
+                "source": "web",
+                "search_query": search_query,
+            },
+        )
+
+    @tool
+    def search_wikipedia(self, search_query: str):
+        """Use this tool to perform a Wikipedia search when you need general information about a topic that
+        is not about Peplink/Pepwave products and services. This can be used to get information specific to
+        the IT networking domain or information from any other domain in general. It is most useful for
+        broad, general concepts that you would typically find in an encyclopedia.
+        """
+        return Document(
+            page_content="Example Wikipedia search results",
+            metadata={
+                "source": "wikipedia",
+                "search_query": search_query,
+            },
+        )
 
     def compile(self) -> CompiledStateGraph:
 
         graph_builder = StateGraph(MainState)
 
         # Nodes
-        graph_builder.add_node(EMBED_QUERY, self._embed_query)
         graph_builder.add_node(INIT_RETRIEVAL, self._init_retrieval)
         graph_builder.add_node(PROMPT_LLM_W_TOOLS, self._prompt_llm_w_tools)
         graph_builder.add_node(GENERATE_RERANKER_QUERY, self._generate_reranker_query)
@@ -189,9 +242,8 @@ class RagInferenceLangGraph(InferenceBase):
         # Edges
         graph_builder.set_conditional_entry_point(
             self._entry_point_condition,
-            [EMBED_QUERY, INIT_RETRIEVAL, PROMPT_LLM_W_TOOLS],
+            [INIT_RETRIEVAL, PROMPT_LLM_W_TOOLS],
         )
-        graph_builder.add_edge(EMBED_QUERY, TOOL_NODE)
         graph_builder.add_edge(INIT_RETRIEVAL, TOOL_NODE)
         graph_builder.add_conditional_edges(
             PROMPT_LLM_W_TOOLS,
@@ -226,4 +278,4 @@ class RagInferenceLangGraph(InferenceBase):
             rate_limiter=openai_rate_limiter,
             use_responses_api=True,
             output_version="responses/v1",
-        ).bind_tools(self.tools)
+        )
