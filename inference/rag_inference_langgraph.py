@@ -56,9 +56,9 @@ class MainState(BaseModel):
     messages: Annotated[list, add_messages] = Field(default_factory=list)
     num_research_iterations: int = 0
     query: str = ""
-    query_embedding: list[float] = Field(default_factory=list)
     current_context: list = Field(default_factory=list)
     reranker_query: str = ""
+    thread_id: str = "default"
 
 
 class RagInferenceLangGraph(InferenceBase):
@@ -117,7 +117,7 @@ class RagInferenceLangGraph(InferenceBase):
             return PROMPTS["inference/user_retry_after_tools"]
 
     def _prompt_llm_w_tools(self, state: MainState) -> dict:
-        allow_research = state.num_research_iterations > 2
+        allow_research = state.num_research_iterations <= 2
         system_message = (
             PROMPTS["inference/system_allow_research"]
             if allow_research
@@ -125,7 +125,7 @@ class RagInferenceLangGraph(InferenceBase):
         )
 
         context = "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
-            [doc.page_content for doc in state.current_context]
+            doc.page_content for doc in state.current_context
         )
 
         messages = [
@@ -145,7 +145,12 @@ class RagInferenceLangGraph(InferenceBase):
             else self.llm
         )
         answer_or_tool_calls = llm.invoke(messages)
-        return {"messages": [state.query, answer_or_tool_calls]}
+        messages = (
+            [state.query, answer_or_tool_calls]
+            if state.num_research_iterations == 0
+            else [answer_or_tool_calls]
+        )
+        return {"messages": messages}
 
     def tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -186,7 +191,7 @@ class RagInferenceLangGraph(InferenceBase):
     def _rerank(self, state: MainState):
         reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=40)
         reranked_docs = reranker.compress_documents(
-            documents=state.current_context, query=state.reranker_query
+            documents=self._get_all_tool_documents(state), query=state.reranker_query
         )
 
         return {
