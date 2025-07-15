@@ -34,11 +34,6 @@ class ChatLangGraph(RagInferenceLangGraph):
         )
         self.graph = self.compile()
 
-    def get_thread_history(self, thread_id: str) -> list:
-        """Get the conversation history for a specific thread."""
-        state = self.graph.get_state(config={"configurable": {"thread_id": thread_id}})
-        return state.values.get("messages", []) if state.values else []
-
     def get_thread_message_count(self, thread_id: str) -> int:
         """Get the message count for a specific thread from LangGraph state."""
         messages = self.get_thread_history(thread_id)
@@ -127,16 +122,23 @@ class ChatLangGraph(RagInferenceLangGraph):
         except Exception:
             raise KeyError(f"Thread {thread_id} not found")
 
+    def get_thread_history(self, thread_id: str) -> list:
+        """Get the conversation history for a specific thread."""
+        state = self.graph.get_state(config={"configurable": {"thread_id": thread_id}})
+        return state.values.get("messages", []) if state.values else []
+
     def query(self, query: str, thread_id: str):
         """Stream the response token by token using LangGraph's messages streaming mode."""
-        initial_state = {"query": query, "thread_id": thread_id}
-
-        # Use stream with messages mode to get token-by-token streaming
-        for chunk in self.graph.stream(
-            initial_state,
+        for stream_mode, chunk in self.graph.stream(
+            {"query": query, "thread_id": thread_id},
             config={"configurable": {"thread_id": thread_id}},
-            stream_mode="messages",
+            stream_mode=[
+                "values",
+                "messages",
+            ],
         ):
+            if stream_mode == "values":
+                yield chunk["messages"]  # type: ignore
             # chunk is a tuple of (message_chunk, metadata)
             if isinstance(chunk, tuple) and len(chunk) == 2:
                 message_chunk, metadata = chunk

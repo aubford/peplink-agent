@@ -18,6 +18,7 @@ from contextlib import asynccontextmanager
 from inference.chat_agentic import ChatLangGraph
 from dotenv import load_dotenv
 from langgraph.checkpoint.postgres import PostgresSaver
+
 # from langsmith import tracing_context
 
 load_dotenv()
@@ -138,14 +139,16 @@ async def get_random_testset_queries():
         # Fix the path - we need to go up one directory from web_app to langchain-pepwave root
         testset_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "evals/testsets/testset-200_main_testset_25-04-23/generated_testset.json"
+            "evals/testsets/testset-200_main_testset_25-04-23/generated_testset.json",
         )
 
         print(f"Looking for testset at: {testset_path}")  # Debug logging
 
         if not os.path.exists(testset_path):
             print(f"Testset file not found at: {testset_path}")  # Debug logging
-            raise HTTPException(status_code=404, detail=f"Testset file not found at: {testset_path}")
+            raise HTTPException(
+                status_code=404, detail=f"Testset file not found at: {testset_path}"
+            )
 
         with open(testset_path, 'r', encoding='utf-8') as f:
             testset_data = json.load(f)
@@ -239,10 +242,19 @@ async def chat_stream(
             full_response = ""
 
             # Stream the response from the chatbot
-            for token in graph.query(chat_message.message, chat_message.thread_id):
-                full_response += token
-                # Send each token as a streaming event
-                yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+            for chunk in graph.query(chat_message.message, chat_message.thread_id):
+                if isinstance(chunk, list):
+                    messages = [
+                        {"type": msg.type, "content": msg.content} for msg in chunk
+                    ]
+                    json_messages = json.dumps(
+                        {'type': 'messages', 'messages': messages}
+                    )
+                    yield f"data: {json_messages}\n\n"
+                else:
+                    full_response += chunk
+                    # Send each token as a streaming event
+                    yield f"data: {json.dumps({'type': 'token', 'content': chunk})}\n\n"
                 # Small delay to prevent overwhelming the client
                 await asyncio.sleep(0.001)
 

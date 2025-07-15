@@ -86,9 +86,11 @@ async function sendMessage(event) {
   // Disable input and show loading
   setStreamingState(true)
 
+  let assistantMessageContent = ""
+
   try {
     // Create assistant message element for streaming
-    const assistantMessage = addMessage("", "assistant", true)
+    let assistantMessage = addMessage("", "assistant", true)
 
     // Start streaming
     const response = await fetch("/api/chat/stream", {
@@ -117,9 +119,34 @@ async function sendMessage(event) {
         if (line.startsWith("data: ")) {
           try {
             const data = JSON.parse(line.slice(6))
+            console.log("📨 Received data:", data) // Enhanced logging
 
             if (data.type === "token") {
+              console.log("🔤 Token received:", data.content) // Debug token streaming
               assistantMessage.textContent += data.content
+              assistantMessageContent += data.content
+            } else if (data.type === "messages" && data.messages.length > 0) {
+              console.log("💬 Messages update:", data.messages.length, "messages") // Debug message updates
+              replaceMessages(data.messages)
+
+              // Debug: Check DOM state after replaceMessages
+              // const chatMessages = document.getElementById("chatMessages")
+              // console.log("📊 DOM state after replaceMessages:", {
+              //   hasMessages: chatMessages.classList.contains("has-messages"),
+              //   messageCount: chatMessages.querySelectorAll(".message-wrapper").length,
+              //   innerHTML: chatMessages.innerHTML.length,
+              // })
+
+              assistantMessage = addMessage(assistantMessageContent, "assistant", true)
+
+              // // Debug: Check DOM state after addMessage
+              // console.log("📊 DOM state after addMessage:", {
+              //   hasMessages: chatMessages.classList.contains("has-messages"),
+              //   messageCount: chatMessages.querySelectorAll(".message-wrapper").length,
+              //   lastMessageText: chatMessages.querySelector(
+              //     ".message-wrapper:last-child .message-text"
+              //   )?.textContent,
+              // })
               scrollToBottom()
             } else if (data.type === "complete") {
               assistantMessage.classList.remove("streaming")
@@ -218,30 +245,32 @@ async function loadThreadHistory(threadId) {
   try {
     const response = await fetch(`/api/threads/${threadId}/history`)
     const data = await response.json()
-
-    const chatMessages = document.getElementById("chatMessages")
-    const welcomeMessage = document.getElementById("welcomeMessage")
-
-    // Clear existing messages except welcome
-    const existingMessages = chatMessages.querySelectorAll(".message-wrapper")
-    existingMessages.forEach(msg => msg.remove())
-
-    if (data.messages.length === 0) {
-      chatMessages.classList.remove("has-messages")
-      welcomeMessage.style.display = "block"
-    } else {
-      chatMessages.classList.add("has-messages")
-      welcomeMessage.style.display = "none"
-
-      data.messages.forEach(msg => {
-        addMessage(msg.content, msg.type === "human" ? "user" : "assistant")
-      })
-    }
-
+    replaceMessages(data.messages)
     scrollToBottom()
   } catch (error) {
     console.error("Error loading thread history:", error)
     showError("Failed to load conversation history")
+  }
+}
+
+function replaceMessages(messages) {
+  const chatMessages = document.getElementById("chatMessages")
+  const welcomeMessage = document.getElementById("welcomeMessage")
+
+  // Clear existing messages except welcome
+  const existingMessages = chatMessages.querySelectorAll(".message-wrapper")
+  existingMessages.forEach(msg => msg.remove())
+
+  if (messages.length === 0) {
+    chatMessages.classList.remove("has-messages")
+    welcomeMessage.style.display = "block"
+  } else {
+    chatMessages.classList.add("has-messages")
+    welcomeMessage.style.display = "none"
+
+    messages.forEach(msg => {
+      addMessage(msg.content, msg.type === "human" ? "user" : "assistant")
+    })
   }
 }
 
