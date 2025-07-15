@@ -108,7 +108,10 @@ class RagInferenceLangGraph(InferenceBase):
     def _init_retrieval(self, state: MainState):
         messages = [
             ("system", PROMPTS["inference/retrieval_system"]),
-            ("human", PROMPTS["inference/init_retrieval"].format(query=state.query)),
+            (
+                "human",
+                PROMPTS["inference/init_retrieval"].format(user_query=state.query),
+            ),
         ]
         llm = self.llm.bind_tools(self.tools, tool_choice="required")
         ai_tool_calls = llm.invoke(messages)
@@ -140,7 +143,7 @@ class RagInferenceLangGraph(InferenceBase):
             (
                 "human",
                 self._get_user_message(state.num_research_iterations).format(
-                    {"user_query": state.query}
+                    user_query=state.query
                 ),
             ),
         ]
@@ -193,7 +196,15 @@ class RagInferenceLangGraph(InferenceBase):
         }
 
     def _rerank(self, state: MainState):
-        return {"num_research_iterations": state.num_research_iterations + 1}
+        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=70)
+        reranked_docs = reranker.compress_documents(
+            documents=state.all_retrieved_context, query=state.reranker_query
+        )
+
+        return {
+            "num_research_iterations": state.num_research_iterations + 1,
+            "current_context": reranked_docs,
+        }
 
     @tool
     def semantic_search(
