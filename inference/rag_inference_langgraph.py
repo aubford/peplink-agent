@@ -45,14 +45,11 @@ class MainState(BaseModel):
     """State for RAG inference system using Pydantic.
 
     Attributes:
-        tool_call_results: only used for intra-graph operations
-        all_retrieved_context: used for future reranking
         current_context: the actual docs exposed to the LLM in system msg
         messages: What the user sees
         query: current user query
         num_research_iterations: number of times research has been done for a single user query
         reranker_query: pretty much only used for tracing
-        answer: the answer to the user query
         thread_id: the thread id for the user query
     """
 
@@ -61,13 +58,7 @@ class MainState(BaseModel):
     query: str = ""
     query_embedding: list[float] = Field(default_factory=list)
     current_context: list = Field(default_factory=list)
-    all_retrieved_context: Annotated[list, operator.add] = Field(default_factory=list)
-    thread_id: str = "default"
-    latest_tool_call_results: list = Field(default_factory=list)
     reranker_query: str = ""
-    tool_call_results: list = Field(default_factory=list)
-
-    answer: str = ""
 
 
 class RagInferenceLangGraph(InferenceBase):
@@ -115,7 +106,7 @@ class RagInferenceLangGraph(InferenceBase):
         ]
         llm = self.llm.bind_tools(self.tools, tool_choice="required")
         ai_tool_calls = llm.invoke(messages)
-        return {"messages": [state.query, ai_tool_calls]}
+        return {"messages": [state.query, ai_tool_calls], "reranker_query": state.query}
 
     def _get_user_message(self, num_research_iterations: int) -> str:
         if num_research_iterations == 0:
@@ -139,7 +130,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         messages = [
             ("system", system_message.format(context=context)),
-            ("placeholder", state.messages),
+            *state.messages,
             (
                 "human",
                 self._get_user_message(state.num_research_iterations).format(
@@ -171,34 +162,31 @@ class RagInferenceLangGraph(InferenceBase):
         llm = self.llm.bind(temperature=0)
         messages = [
             ("system", PROMPTS["inference/generate_reranker_query_system"]),
-            ("placeholder", state.messages),
+            *state.messages,
         ]
         return {"reranker_query": llm.invoke(messages)}
 
     # "tools": ToolNode
 
-    def _handle_tool_results(self, state: MainState):
-        tool_results = state.messages[-1]
+    def _get_all_tool_documents(self, state: MainState) -> list[Document]:
+        """Extract all Document objects from tool call results in the message history."""
+        documents = []
 
-        modified_messages = []
-        for result in tool_results:
-            if isinstance(result, ToolMessage):
-                modified_message = ToolMessage(
-                    content="Tool call successful, results appended to context corpus",
-                    tool_call_id=result.tool_call_id,
-                    name=result.name,
-                )
-                modified_messages.append(modified_message)
+        for message in state.messages:
+            if isinstance(message, ToolMessage):
+                # The artifact contains the Document objects when using response_format="content_and_artifact"
+                if hasattr(message, 'artifact') and message.artifact:
+                    if isinstance(message.artifact, list):
+                        documents.extend(message.artifact)
+                    else:
+                        documents.append(message.artifact)
 
-        return {
-            "messages": modified_messages,
-            "all_retrieved_context": tool_results,
-        }
+        return documents
 
     def _rerank(self, state: MainState):
-        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=70)
+        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=40)
         reranked_docs = reranker.compress_documents(
-            documents=state.all_retrieved_context, query=state.reranker_query
+            documents=state.current_context, query=state.reranker_query
         )
 
         return {
@@ -209,13 +197,13 @@ class RagInferenceLangGraph(InferenceBase):
     def _create_tools(self):
         """Create bound tools that don't have self parameters."""
 
-        @tool
+        @tool(response_format="content_and_artifact")
         def semantic_search(
             search_query: Annotated[
                 str,
                 "The search query to use for semantic search in the vector database. Should be a well-formed query that describes what information you are looking for.",
             ],
-        ) -> list[Document]:
+        ):
             """The primary data source for information about Peplink products and services.
             Search the vector database for information relevant to the user query by providing
             a semantic search query. This tool is the primary
@@ -226,52 +214,54 @@ class RagInferenceLangGraph(InferenceBase):
             for optimal semantic search via vector database.
             """
             query_embedding = self.pinecone.get_query_embedding(search_query)
-            return self.pinecone.retrieve(
+            docs = self.pinecone.retrieve(
                 search_query, query_embedding, top_k=70, rerank_top_n=20
             )
 
-        @tool
+            return ([doc.page_content for doc in docs], docs)
+
+        @tool(response_format="content_and_artifact")
         def search_web(
             search_query: Annotated[
                 str,
                 "A web search for a concept or entity to drill down on",
             ],
-        ) -> list[Document]:
+        ):
             """Use this tool when you need to drill down on a specific aspect of the user query by performing
             a web search using Google. This tool is most useful for general questions about IT networking and
-            not for specific questions about Peplink products and services.
+            not for specific questions about Peplink products and services. Do not use this tool more than once
+            in a given turn.
             """
-            return [
-                Document(
-                    page_content="Example web search results",
-                    metadata={
-                        "source": "web",
-                        "search_query": search_query,
-                    },
-                )
-            ]
+            response_doc = Document(
+                page_content="Example web search results",
+                metadata={
+                    "source": "web",
+                    "search_query": search_query,
+                },
+            )
+            return ([response_doc.page_content], [response_doc])
 
-        @tool
+        @tool(response_format="content_and_artifact")
         def search_wikipedia(
             search_query: Annotated[
                 str,
                 "The search query to use for Wikipedia search. Should be a specific entity or concept.",
             ],
-        ) -> list[Document]:
+        ):
             """Use this tool to perform a Wikipedia search when you need general information about a topic that
             is not about Peplink/Pepwave products and services. This can be used to get information specific to
             the IT networking domain or information from any other domain in general. It is most useful for
-            broad, general concepts that you would typically find in an encyclopedia.
+            broad, general concepts that you would typically find in an encyclopedia. Do not use this tool more than
+            twice in a given turn.
             """
-            return [
-                Document(
-                    page_content="Example Wikipedia search results",
-                    metadata={
-                        "source": "wikipedia",
-                        "search_query": search_query,
-                    },
-                )
-            ]
+            response_doc = Document(
+                page_content="Example Wikipedia search results",
+                metadata={
+                    "source": "wikipedia",
+                    "search_query": search_query,
+                },
+            )
+            return ([response_doc.page_content], [response_doc])
 
         return [semantic_search, search_web, search_wikipedia]
 
@@ -287,7 +277,6 @@ class RagInferenceLangGraph(InferenceBase):
             TOOL_NODE,
             ToolNode(tools=self.tools),
         )
-        graph_builder.add_node(HANDLE_TOOL_RESULTS, self._handle_tool_results)
         graph_builder.add_node(RERANK, self._rerank)
 
         # Edges
@@ -301,9 +290,8 @@ class RagInferenceLangGraph(InferenceBase):
             self.tools_condition,
             [TOOL_NODE, GENERATE_RERANKER_QUERY, END],
         )
-        graph_builder.add_edge(TOOL_NODE, HANDLE_TOOL_RESULTS)
-        graph_builder.add_edge(GENERATE_RERANKER_QUERY, HANDLE_TOOL_RESULTS)
-        graph_builder.add_edge(HANDLE_TOOL_RESULTS, RERANK)
+        graph_builder.add_edge(TOOL_NODE, RERANK)
+        graph_builder.add_edge(GENERATE_RERANKER_QUERY, RERANK)
         graph_builder.add_edge(RERANK, PROMPT_LLM_W_TOOLS)
 
         # Compile
