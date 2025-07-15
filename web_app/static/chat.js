@@ -417,5 +417,19 @@ function toggleSidebar() {
 }
 
 function generateUUID() {
-  return crypto.randomUUID()
+  // Try to use crypto.randomUUID() if available (modern browsers, secure context)
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    try {
+      return crypto.randomUUID()
+    } catch (error) {
+      console.warn("crypto.randomUUID() failed, falling back to alternative method")
+    }
+  }
+
+  // Fallback UUID generation that works everywhere
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0
+    const v = c === "x" ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
 }
