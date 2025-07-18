@@ -36,9 +36,9 @@ variable "cohere_api_key" {
 
 # Domain configuration (optional)
 variable "domain_name" {
-  description = "Domain name for the application (e.g., pepwave-ai.com)"
+  description = "Domain name for the application"
   type        = string
-  default     = ""
+  default     = "aubrey-ai.com"
 }
 
 variable "subdomain" {
