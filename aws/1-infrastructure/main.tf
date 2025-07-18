@@ -310,64 +310,6 @@ resource "aws_lb_listener" "app" {
   }
 }
 
-# Domain Registration - ALREADY REGISTERED MANUALLY
-# Since you registered aubrey-ai.com manually in AWS console, we don't need this resource
-/*
-resource "aws_route53domains_registered_domain" "main" {
-  domain_name = var.domain_name
-
-  # Contact information is required - UPDATE THESE VALUES
-  registrant_contact {
-    contact_type = "PERSON" # or "COMPANY"
-    first_name   = "Aubrey"
-    last_name    = "Ford"
-    email        = "musicaubrey@gmail.com"
-    phone_number = "+1.8048331985"
-
-    address_line_1 = "514 Americas Way"
-    city           = "Box Elder"
-    state          = "SD"
-    country_code   = "US"
-    zip_code       = "57719"
-  }
-
-  # Admin and tech contacts can be the same as registrant
-  admin_contact {
-    contact_type = "PERSON"
-    first_name   = "Aubrey"
-    last_name    = "Ford"
-    email        = "musicaubrey@gmail.com"
-    phone_number = "+1.8048331985"
-
-    address_line_1 = "514 Americas Way"
-    city           = "Box Elder"
-    state          = "SD"
-    country_code   = "US"
-    zip_code       = "57719"
-  }
-
-  tech_contact {
-    contact_type = "PERSON"
-    first_name   = "Aubrey"
-    last_name    = "Ford"
-    email        = "musicaubrey@gmail.com"
-    phone_number = "+1.8048331985"
-
-    address_line_1 = "514 Americas Way"
-    city           = "Box Elder"
-    state          = "SD"
-    country_code   = "US"
-    zip_code       = "57719"
-  }
-
-  auto_renew = true
-
-  tags = {
-    Name = "langchain-pepwave-domain"
-  }
-}
-*/
-
 # Route 53 Hosted Zone (for manually registered domain)
 resource "aws_route53_zone" "main" {
   count = var.domain_name != "" ? 1 : 0
