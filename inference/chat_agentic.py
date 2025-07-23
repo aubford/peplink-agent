@@ -134,20 +134,14 @@ class ChatLangGraph(RagInferenceLangGraph):
             config={"configurable": {"thread_id": thread_id}},
             stream_mode=[
                 "values",
-                "messages",
+                "custom",
             ],
         ):
             if stream_mode == "values":
-                yield chunk["messages"]  # type: ignore
-            # chunk is a tuple of (message_chunk, metadata)
-            if isinstance(chunk, tuple) and len(chunk) == 2:
-                message_chunk, metadata = chunk
-                # Only stream content from the generate_answer node (the LLM response)
-                if (
-                    metadata.get('langgraph_node') == PROMPT_LLM_W_TOOLS
-                    and message_chunk.text()
-                ):
-                    yield str(message_chunk.text())
+                yield chunk["messages"]
+            if stream_mode == "custom" and chunk.get("type") == "llm_response":
+                text = chunk["text"]
+                yield str(text)
 
     def draw_graph(self):
         self.graph.get_graph().print_ascii()

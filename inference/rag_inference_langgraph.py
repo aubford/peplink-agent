@@ -1,13 +1,17 @@
+import json
 import operator
 import re
-from typing import Annotated, Hashable
+from typing import Annotated, Hashable, TypedDict
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_core.runnables import RunnableBranch, RunnablePassthrough
 from langchain_core.tools import tool
 from langchain_core.messages import ToolMessage
 from langgraph.constants import END
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import ToolNode, InjectedState
+from langgraph.config import get_stream_writer
+from langchain_core.output_parsers import JsonOutputParser
 from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rag_inference import InferenceBase
 from inference.pinecone_retriever import PineconeRetriever
@@ -33,6 +37,34 @@ GENERATE_RERANKER_QUERY = "NODE__GENERATE_RERANKER_QUERY"
 TOOL_NODE = "NODE__TOOL_NODE"
 HANDLE_TOOL_RESULTS = "NODE__HANDLE_TOOL_RESULTS"
 RERANK = "NODE__RERANK"
+
+
+class RAGInferenceOutputTyped(TypedDict):
+    have_enough_information: Annotated[
+        bool, ..., "Whether you have enough information to answer the user query."
+    ]
+    have_enough_information_reasoning: Annotated[
+        str,
+        ...,
+        "Briefly explain your reasoning for why you do or do not have enough information to answer the user query.",
+    ]
+    answer: Annotated[
+        str,
+        ...,
+        "The answer to the user query. If you do not have enough information, you should return an empty string.",
+    ]
+
+
+class RAGInferenceOutput(BaseModel):
+    have_enough_information: bool = Field(
+        description="Whether you have enough information to answer the user query."
+    )
+    have_enough_information_reasoning: str = Field(
+        description="Reasoning for why you do or do not have enough information to answer the user query."
+    )
+    answer: str = Field(
+        description="The answer to the user query. If you do not have enough information, you should return an empty string."
+    )
 
 
 # Define the state schema using Pydantic
@@ -91,14 +123,14 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return INIT_RETRIEVAL
 
-    def _add_tool_call_descriptions(
+    def _format_response(
         self,
         ai_message,
         intro_text: str = "I'll research your question using these tools:",
     ):
         """Add descriptive content to AI messages based on their tool calls."""
         if not hasattr(ai_message, 'tool_calls') or not ai_message.tool_calls:
-            return ai_message
+            return ai_message["answer"]
 
         tool_descriptions = []
         for tool_call in ai_message.tool_calls:
@@ -131,7 +163,7 @@ class RagInferenceLangGraph(InferenceBase):
         ]
         llm = self.llm.bind_tools(self.tools, tool_choice="required")
         ai_tool_calls = llm.invoke(messages)
-        ai_tool_calls = self._add_tool_call_descriptions(ai_tool_calls)
+        ai_tool_calls = self._format_response(ai_tool_calls)
 
         return {"messages": [state.query, ai_tool_calls], "reranker_query": state.query}
 
@@ -193,22 +225,42 @@ class RagInferenceLangGraph(InferenceBase):
             ),
         ]
 
-        llm = (
-            self.llm.bind_tools(self.tools, tool_choice="auto")
-            if allow_research
-            else self.llm
-        )
-        answer_or_tool_calls = llm.invoke(messages)
-        answer_or_tool_calls = self._add_tool_call_descriptions(answer_or_tool_calls)
+        if allow_research:
+            # Use the recent LangChain support for combining tools with structured output
+            llm = self.llm.bind_tools(
+                self.tools, tool_choice="auto", response_format=RAGInferenceOutput
+            )
+        else:
+            llm = self.llm.with_structured_output(
+                RAGInferenceOutputTyped, method="json_schema"
+            )
 
+        STREAM = "STREAM"
+        PASSTHRU = "PASSTHRU"
+        # Create the LCEL chain with RunnableBranch for conditional processing
+        chain = llm | {
+            STREAM: JsonOutputParser(),
+            PASSTHRU: RunnablePassthrough(),
+        }
+
+        writer = get_stream_writer()
+
+        # Stream the chain and collect the final result
+        for chunk in chain.stream(messages):
+            answer_or_tool_calls = chunk.get(STREAM, {})
+            # Stream answer content if it's structured output with answer field i.e. the LLM is not using tools
+            if "answer" in answer_or_tool_calls:
+                writer({"text": answer_or_tool_calls["answer"], "type": "llm_response"})
+
+        final_response = self._format_response(chunk[PASSTHRU])
         messages = (
-            [state.query, answer_or_tool_calls]
+            [state.query, final_response]
             if state.num_research_iterations == 0
-            else [answer_or_tool_calls]
+            else [final_response]
         )
         return {"messages": messages}
 
-    def tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
+    def _tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
         Determine if we should run tools or exit the flow.
         """
@@ -352,7 +404,7 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder.add_edge(INIT_RETRIEVAL, TOOL_NODE)
         graph_builder.add_conditional_edges(
             PROMPT_LLM_W_TOOLS,
-            self.tools_condition,
+            self._tools_condition,
             [TOOL_NODE, GENERATE_RERANKER_QUERY, END],
         )
         graph_builder.add_edge(TOOL_NODE, RERANK)

@@ -243,6 +243,7 @@ async def chat_stream(
 
             # Stream the response from the chatbot
             for chunk in graph.query(chat_message.message, chat_message.thread_id):
+                # If the chunk is a list, it's a list of messages
                 if isinstance(chunk, list):
                     messages = [
                         {"type": msg.type, "content": msg.content} for msg in chunk
@@ -251,6 +252,7 @@ async def chat_stream(
                         {'type': 'messages', 'messages': messages}
                     )
                     yield f"data: {json_messages}\n\n"
+                # If the chunk is a string, it's a token from custom stream
                 else:
                     full_response += chunk
                     # Send each token as a streaming event
