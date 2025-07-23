@@ -238,9 +238,6 @@ async def chat_stream(
             # Send initial event to indicate streaming started
             yield f"data: {json.dumps({'type': 'start'})}\n\n"
 
-            # Collect the full response for potential use
-            full_response = ""
-
             # Stream the response from the chatbot
             for chunk in graph.query(chat_message.message, chat_message.thread_id):
                 # If the chunk is a list, it's a list of messages
@@ -252,16 +249,15 @@ async def chat_stream(
                         {'type': 'messages', 'messages': messages}
                     )
                     yield f"data: {json_messages}\n\n"
-                # If the chunk is a string, it's a token from custom stream
+                # If the chunk is a string, it contains the complete response up to this point
                 else:
-                    full_response += chunk
-                    # Send each token as a streaming event
+                    # Send the complete response as a streaming event
                     yield f"data: {json.dumps({'type': 'token', 'content': chunk})}\n\n"
                 # Small delay to prevent overwhelming the client
                 await asyncio.sleep(0.001)
 
             # Send completion event
-            yield f"data: {json.dumps({'type': 'complete', 'full_response': full_response})}\n\n"
+            yield f"data: {json.dumps({'type': 'complete'})}\n\n"
 
         except Exception as e:
             # Send error event

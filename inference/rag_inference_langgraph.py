@@ -4,10 +4,11 @@ import re
 from typing import Annotated, Hashable, TypedDict
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_core.messages.ai import AIMessage
 from langchain_core.runnables import RunnableBranch, RunnablePassthrough
 from langchain_core.tools import tool
-from langchain_core.messages import ToolMessage
-from langgraph.constants import END
+from langchain_core.messages import AIMessageChunk, ToolMessage
+from langgraph.constants import END, START
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import ToolNode, InjectedState
 from langgraph.config import get_stream_writer
@@ -31,12 +32,15 @@ from pydantic import BaseModel, Field
 PROMPTS = load_prompts()
 
 # Node name constants
+ENTRY_POINT = "NODE__ENTRY_POINT"
 INIT_RETRIEVAL = "NODE__INIT_RETRIEVAL"
 PROMPT_LLM_W_TOOLS = "NODE__PROMPT_LLM_W_TOOLS"
 GENERATE_RERANKER_QUERY = "NODE__GENERATE_RERANKER_QUERY"
 TOOL_NODE = "NODE__TOOL_NODE"
 HANDLE_TOOL_RESULTS = "NODE__HANDLE_TOOL_RESULTS"
 RERANK = "NODE__RERANK"
+STREAM = "STREAM"
+PASSTHRU = "PASSTHRU"
 
 
 class RAGInferenceOutputTyped(TypedDict):
@@ -114,6 +118,9 @@ class RagInferenceLangGraph(InferenceBase):
 
         self.tools = self._create_tools()
 
+    def _entry_point(self, state: MainState) -> MainState:
+        return {"messages": [state.query], "num_research_iterations": 0}
+
     def _entry_point_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
         If we have any context, start running the ReAct flow. Otherwise, initialize the first retrieval.
@@ -125,12 +132,13 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _format_response(
         self,
-        ai_message,
+        ai_message: AIMessageChunk,
         intro_text: str = "I'll research your question using these tools:",
-    ):
+    ) -> AIMessage:
         """Add descriptive content to AI messages based on their tool calls."""
         if not hasattr(ai_message, 'tool_calls') or not ai_message.tool_calls:
-            return ai_message["answer"]
+            ai_message.content = ai_message.additional_kwargs["parsed"].answer
+            return ai_message
 
         tool_descriptions = []
         for tool_call in ai_message.tool_calls:
@@ -165,7 +173,7 @@ class RagInferenceLangGraph(InferenceBase):
         ai_tool_calls = llm.invoke(messages)
         ai_tool_calls = self._format_response(ai_tool_calls)
 
-        return {"messages": [state.query, ai_tool_calls], "reranker_query": state.query}
+        return {"messages": [ai_tool_calls], "reranker_query": state.query}
 
     def _get_user_message(self, num_research_iterations: int) -> str:
         if num_research_iterations == 0:
@@ -235,8 +243,6 @@ class RagInferenceLangGraph(InferenceBase):
                 RAGInferenceOutputTyped, method="json_schema"
             )
 
-        STREAM = "STREAM"
-        PASSTHRU = "PASSTHRU"
         # Create the LCEL chain with RunnableBranch for conditional processing
         chain = llm | {
             STREAM: JsonOutputParser(),
@@ -244,21 +250,13 @@ class RagInferenceLangGraph(InferenceBase):
         }
 
         writer = get_stream_writer()
-
-        # Stream the chain and collect the final result
         for chunk in chain.stream(messages):
-            answer_or_tool_calls = chunk.get(STREAM, {})
+            streaming_content = chunk.get(STREAM, {})
             # Stream answer content if it's structured output with answer field i.e. the LLM is not using tools
-            if "answer" in answer_or_tool_calls:
-                writer({"text": answer_or_tool_calls["answer"], "type": "llm_response"})
+            if "answer" in streaming_content:
+                writer({"text": streaming_content["answer"], "type": "llm_response"})
 
-        final_response = self._format_response(chunk[PASSTHRU])
-        messages = (
-            [state.query, final_response]
-            if state.num_research_iterations == 0
-            else [final_response]
-        )
-        return {"messages": messages}
+        return {"messages": [self._format_response(chunk[PASSTHRU])]}
 
     def _tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -387,6 +385,7 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder = StateGraph(MainState)
 
         # Nodes
+        graph_builder.add_node(ENTRY_POINT, self._entry_point)
         graph_builder.add_node(INIT_RETRIEVAL, self._init_retrieval)
         graph_builder.add_node(PROMPT_LLM_W_TOOLS, self._prompt_llm_w_tools)
         graph_builder.add_node(GENERATE_RERANKER_QUERY, self._generate_reranker_query)
@@ -397,7 +396,9 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder.add_node(RERANK, self._rerank)
 
         # Edges
-        graph_builder.set_conditional_entry_point(
+        graph_builder.add_edge(START, ENTRY_POINT)
+        graph_builder.add_conditional_edges(
+            ENTRY_POINT,
             self._entry_point_condition,
             [INIT_RETRIEVAL, PROMPT_LLM_W_TOOLS],
         )

@@ -123,8 +123,8 @@ async function sendMessage(event) {
 
             if (data.type === "token") {
               console.log("🔤 Token received:", data.content) // Debug token streaming
-              assistantMessage.textContent += data.content
-              assistantMessageContent += data.content
+              assistantMessage.textContent = data.content
+              assistantMessageContent = data.content
             } else if (data.type === "messages" && data.messages.length > 0) {
               console.log("💬 Messages update:", data.messages.length, "messages") // Debug message updates
               replaceMessages(data.messages)
