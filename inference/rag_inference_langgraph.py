@@ -1,16 +1,19 @@
-import json
-import operator
 import re
-from typing import Annotated, Hashable, TypedDict
+from typing import Annotated, Hashable, Literal, TypedDict
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_core.messages.ai import AIMessage
-from langchain_core.runnables import RunnableBranch, RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough
 from langchain_core.tools import tool
-from langchain_core.messages import AIMessageChunk, ToolMessage
+from langchain_core.messages import (
+    AIMessageChunk,
+    AnyMessage,
+    BaseMessage,
+    ToolMessage,
+)
 from langgraph.constants import END, START
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import ToolNode, InjectedState
+from langgraph.prebuilt import ToolNode
 from langgraph.config import get_stream_writer
 from langchain_core.output_parsers import JsonOutputParser
 from inference.cohere_rerank import RateLimitedCohereRerank
@@ -43,9 +46,17 @@ STREAM = "STREAM"
 PASSTHRU = "PASSTHRU"
 
 
+class StreamMessage(BaseModel):
+    type: Literal["token", "messages", "complete", "error", "log"]
+    content: str
+
+
+# TODO: can remove?
 class RAGInferenceOutputTyped(TypedDict):
     have_enough_information: Annotated[
-        bool, ..., "Whether you have enough information to answer the user query."
+        bool,
+        ...,
+        "Whether you have enough information to answer the user query using only the context corpus documents above.",
     ]
     have_enough_information_reasoning: Annotated[
         str,
@@ -78,15 +89,15 @@ class MainState(BaseModel):
     Attributes:
         current_context: the actual docs exposed to the LLM in system msg
         messages: What the user sees
-        query: current user query
+        current_turn_index: the index of the user query message in the messages list for the current turn
         num_research_iterations: number of times research has been done for a single user query
         reranker_query: pretty much only used for tracing
         thread_id: the thread id for the user query
     """
 
-    messages: Annotated[list, add_messages] = Field(default_factory=list)
+    messages: Annotated[list[AnyMessage], add_messages] = Field(default_factory=list)
     num_research_iterations: int = 0
-    query: str = ""
+    current_turn_query_index: int = 0
     current_context: list = Field(default_factory=list)
     reranker_query: str = ""
     thread_id: str = "default"
@@ -118,8 +129,33 @@ class RagInferenceLangGraph(InferenceBase):
 
         self.tools = self._create_tools()
 
-    def _entry_point(self, state: MainState) -> MainState:
-        return {"messages": [state.query], "num_research_iterations": 0}
+    def _stream_message(
+        self,
+        message_type: Literal["token", "messages", "complete", "error", "log"],
+        content: str,
+    ) -> None:
+        """Helper to create and write a StreamMessage using the current stream writer."""
+        try:
+            writer = get_stream_writer()
+            writer(StreamMessage(type=message_type, content=content))
+        except Exception:
+            # Silently ignore if no stream writer context is available
+            raise RuntimeError("No stream writer context is available")
+
+    def get_user_query(self, state: MainState) -> str:
+        """Get the content of the user query message at current_turn_query_index."""
+        message = state.messages[state.current_turn_query_index]
+        return str(message.content)
+
+    def node_entry_point(self, state: MainState):
+        self._stream_message(
+            "log",
+            f"🔍 Entry point state: {state.model_dump_json(indent=2)}",
+        )
+        return {
+            "num_research_iterations": 0,
+            "current_turn_query_index": len(state.messages) - 1,
+        }
 
     def _entry_point_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -132,11 +168,11 @@ class RagInferenceLangGraph(InferenceBase):
 
     def _format_response(
         self,
-        ai_message: AIMessageChunk,
+        ai_message: AIMessage,
         intro_text: str = "I'll research your question using these tools:",
     ) -> AIMessage:
-        """Add descriptive content to AI messages based on their tool calls."""
-        if not hasattr(ai_message, 'tool_calls') or not ai_message.tool_calls:
+        """Format the response from the LLM whether it be a tool call or the final answer."""
+        if not ai_message.tool_calls:
             ai_message.content = ai_message.additional_kwargs["parsed"].answer
             return ai_message
 
@@ -161,19 +197,28 @@ class RagInferenceLangGraph(InferenceBase):
 
         return ai_message
 
-    def _init_retrieval(self, state: MainState):
+    def node_init_retrieval(self, state: MainState):
         messages = [
             ("system", PROMPTS["inference/retrieval_system"]),
             (
                 "human",
-                PROMPTS["inference/init_retrieval"].format(user_query=state.query),
+                PROMPTS["inference/init_retrieval"].format(
+                    user_query=self.get_user_query(state)
+                ),
             ),
         ]
         llm = self.llm.bind_tools(self.tools, tool_choice="required")
         ai_tool_calls = llm.invoke(messages)
+
+        assert isinstance(
+            ai_tool_calls, AIMessage
+        ), f"Expected AIMessage got {type(ai_tool_calls)}"
         ai_tool_calls = self._format_response(ai_tool_calls)
 
-        return {"messages": [ai_tool_calls], "reranker_query": state.query}
+        return {
+            "messages": [ai_tool_calls],
+            "reranker_query": self.get_user_query(state),
+        }
 
     def _get_user_message(self, num_research_iterations: int) -> str:
         if num_research_iterations == 0:
@@ -183,34 +228,33 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return PROMPTS["inference/user_retry_after_tools"]
 
-    def _strip_tool_call_retrieved_docs(self, messages: list) -> list:
+    def _get_messages(self, state: MainState) -> list[BaseMessage]:
+        """Strip tool call contents and replace with success message.
+        Remove user query message if necessary.
+        """
         processed_messages = []
         pattern = r'(<<[^>]*>>).*'
 
-        for message in messages:
+        for message in state.messages:
             if isinstance(message, ToolMessage):
-                content = (
-                    message.content
-                    if isinstance(message.content, str)
-                    else str(message.content)
-                )
+                content = str(message.content)
                 match = re.search(pattern, content, re.DOTALL)
                 if match:
-                    # Create a new ToolMessage with stripped content
-                    new_message = ToolMessage(
+                    message = ToolMessage(
                         content=match.group(1)
                         + "\n\nTool call successful. Documents merged into context corpus",
                         tool_call_id=message.tool_call_id,
                     )
-                    processed_messages.append(new_message)
-                else:
-                    processed_messages.append(message)
-            else:
-                processed_messages.append(message)
+            processed_messages.append(message)
+
+        # We replace the user query message with a prompt if it is a new turn
+        if state.num_research_iterations == 0:
+            assert len(state.messages) == state.current_turn_query_index + 1
+            processed_messages.pop()
 
         return processed_messages
 
-    def _prompt_llm_w_tools(self, state: MainState) -> dict:
+    def node_prompt_llm_w_tools(self, state: MainState) -> dict:
         allow_research = state.num_research_iterations <= 2
         system_message = (
             PROMPTS["inference/system_allow_research"]
@@ -224,11 +268,11 @@ class RagInferenceLangGraph(InferenceBase):
 
         messages = [
             ("system", system_message.format(context=context)),
-            *self._strip_tool_call_retrieved_docs(state.messages),
+            *self._get_messages(state),
             (
                 "human",
                 self._get_user_message(state.num_research_iterations).format(
-                    user_query=state.query
+                    user_query=self.get_user_query(state)
                 ),
             ),
         ]
@@ -240,7 +284,7 @@ class RagInferenceLangGraph(InferenceBase):
             )
         else:
             llm = self.llm.with_structured_output(
-                RAGInferenceOutputTyped, method="json_schema"
+                RAGInferenceOutput, method="json_schema"
             )
 
         # Create the LCEL chain with RunnableBranch for conditional processing
@@ -249,35 +293,38 @@ class RagInferenceLangGraph(InferenceBase):
             PASSTHRU: RunnablePassthrough(),
         }
 
-        writer = get_stream_writer()
+        chunk = None
         for chunk in chain.stream(messages):
             streaming_content = chunk.get(STREAM, {})
             # Stream answer content if it's structured output with answer field i.e. the LLM is not using tools
             if "answer" in streaming_content:
-                writer({"text": streaming_content["answer"], "type": "llm_response"})
+                self._stream_message("token", streaming_content["answer"])
 
-        return {"messages": [self._format_response(chunk[PASSTHRU])]}
+        if chunk is None:
+            raise RuntimeError("No response received from LLM chain")
+
+        final_response = self._format_response(chunk[PASSTHRU])
+        return {"messages": [final_response]}
 
     def _tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
         Determine if we should run tools or exit the flow.
         """
         ai_message = state.messages[-1]
-        if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
+        if isinstance(ai_message, AIMessage) and ai_message.tool_calls:
             return [TOOL_NODE, GENERATE_RERANKER_QUERY]
         else:
             return END
 
-    def _generate_reranker_query(self, state: MainState):
+    def node_generate_reranker_query(self, state: MainState):
         """Generate a reranker query considering chat history."""
         llm = self.llm.bind(temperature=0)
         messages = [
             ("system", PROMPTS["inference/generate_reranker_query_system"]),
             *state.messages,
         ]
-        return {"reranker_query": llm.invoke(messages)}
-
-    # "tools": ToolNode
+        response = llm.invoke(messages)
+        return {"reranker_query": response.content}
 
     def _get_all_tool_documents(self, state: MainState) -> list[Document]:
         """Extract all Document objects from tool call results in the message history."""
@@ -294,7 +341,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         return documents
 
-    def _rerank(self, state: MainState):
+    def node_rerank(self, state: MainState):
         reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=30)
         reranked_docs = reranker.compress_documents(
             documents=self._get_all_tool_documents(state), query=state.reranker_query
@@ -326,9 +373,7 @@ class RagInferenceLangGraph(InferenceBase):
             docs = self.pinecone.retrieve(
                 search_query, query_embedding, top_k=70, rerank_top_n=30
             )
-            content = f"<<Retrieved {len(docs)} docs from Pinecone search: '{search_query}'>>\n\nFirst 3 docs:\n\n\n"
-            for i, doc in enumerate(docs[0:3], 1):
-                content += f"Document {i}:\n{doc.page_content}\n\n"
+            content = f"<<Semantic Search: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
             return (content, docs)
 
         @tool(response_format="content_and_artifact")
@@ -350,9 +395,7 @@ class RagInferenceLangGraph(InferenceBase):
                     "search_query": search_query,
                 },
             )
-            content = (
-                f"<<Searched Web: '{search_query}'>>\n\n{response_doc.page_content}\n\n"
-            )
+            content = f"<<Web: '{search_query}'>>\n\n{response_doc.page_content}"
             return (content, [response_doc])
 
         @tool(response_format="content_and_artifact")
@@ -375,7 +418,7 @@ class RagInferenceLangGraph(InferenceBase):
                     "search_query": search_query,
                 },
             )
-            content = f"<<Searched Wikipedia: '{search_query}'>>\n\n{response_doc.page_content}\n\n"
+            content = f"<<Wikipedia: '{search_query}'>>\n\n{response_doc.page_content}"
             return (content, [response_doc])
 
         return [semantic_search, search_web, search_wikipedia]
@@ -385,15 +428,17 @@ class RagInferenceLangGraph(InferenceBase):
         graph_builder = StateGraph(MainState)
 
         # Nodes
-        graph_builder.add_node(ENTRY_POINT, self._entry_point)
-        graph_builder.add_node(INIT_RETRIEVAL, self._init_retrieval)
-        graph_builder.add_node(PROMPT_LLM_W_TOOLS, self._prompt_llm_w_tools)
-        graph_builder.add_node(GENERATE_RERANKER_QUERY, self._generate_reranker_query)
+        graph_builder.add_node(ENTRY_POINT, self.node_entry_point)
+        graph_builder.add_node(INIT_RETRIEVAL, self.node_init_retrieval)
+        graph_builder.add_node(PROMPT_LLM_W_TOOLS, self.node_prompt_llm_w_tools)
+        graph_builder.add_node(
+            GENERATE_RERANKER_QUERY, self.node_generate_reranker_query
+        )
         graph_builder.add_node(
             TOOL_NODE,
             ToolNode(tools=self.tools),
         )
-        graph_builder.add_node(RERANK, self._rerank)
+        graph_builder.add_node(RERANK, self.node_rerank)
 
         # Edges
         graph_builder.add_edge(START, ENTRY_POINT)

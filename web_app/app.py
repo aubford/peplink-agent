@@ -240,19 +240,7 @@ async def chat_stream(
 
             # Stream the response from the chatbot
             for chunk in graph.query(chat_message.message, chat_message.thread_id):
-                # If the chunk is a list, it's a list of messages
-                if isinstance(chunk, list):
-                    messages = [
-                        {"type": msg.type, "content": msg.content} for msg in chunk
-                    ]
-                    json_messages = json.dumps(
-                        {'type': 'messages', 'messages': messages}
-                    )
-                    yield f"data: {json_messages}\n\n"
-                # If the chunk is a string, it contains the complete response up to this point
-                else:
-                    # Send the complete response as a streaming event
-                    yield f"data: {json.dumps({'type': 'token', 'content': chunk})}\n\n"
+                yield f"data: {chunk}\n\n"
                 # Small delay to prevent overwhelming the client
                 await asyncio.sleep(0.001)
 

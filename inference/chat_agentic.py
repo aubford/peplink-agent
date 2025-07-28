@@ -1,6 +1,9 @@
+import json
+from typing import AsyncGenerator, Generator
+from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langgraph.checkpoint.memory import InMemorySaver
-from inference.rag_inference_langgraph import RagInferenceLangGraph, PROMPT_LLM_W_TOOLS
+from inference.rag_inference_langgraph import RagInferenceLangGraph, StreamMessage
 
 from dotenv import load_dotenv
 from langchain.globals import set_verbose
@@ -95,6 +98,7 @@ class ChatLangGraph(RagInferenceLangGraph):
             threads = {}
             for thread_id in thread_ids:
                 # Only include threads that have actual conversation messages
+                # TODO: Clean up all these redundant database calls via get_thread_history.
                 messages = self.get_thread_history(thread_id)
                 if messages:  # Only include threads with messages
                     threads[thread_id] = {
@@ -127,21 +131,25 @@ class ChatLangGraph(RagInferenceLangGraph):
         state = self.graph.get_state(config={"configurable": {"thread_id": thread_id}})
         return state.values.get("messages", []) if state.values else []
 
-    def query(self, query: str, thread_id: str):
-        """Stream the response token by token using LangGraph's messages streaming mode."""
+    def query(self, user_query: str, thread_id: str) -> Generator[str, None, None]:
+        """Stream the response using LangGraph's messages streaming mode."""
+        # TODO: Make this async?
         for stream_mode, chunk in self.graph.stream(
-            {"query": query, "thread_id": thread_id},
+            {"messages": [HumanMessage(content=user_query)], "thread_id": thread_id},
             config={"configurable": {"thread_id": thread_id}},
             stream_mode=[
                 "values",
                 "custom",
             ],
         ):
-            if stream_mode == "values":
-                yield chunk["messages"]
-            if stream_mode == "custom" and chunk.get("type") == "llm_response":
-                text = chunk["text"]
-                yield str(text)
+            if isinstance(chunk, dict) and stream_mode == "values":
+                messages = [
+                    {"type": msg.type, "content": msg.content}
+                    for msg in chunk["messages"]
+                ]
+                yield json.dumps({'type': 'messages', 'messages': messages})
+            elif isinstance(chunk, StreamMessage):
+                yield chunk.model_dump_json()
 
     def draw_graph(self):
         self.graph.get_graph().print_ascii()

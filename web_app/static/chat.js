@@ -92,7 +92,7 @@ async function sendMessage(event) {
     // Create assistant message element for streaming
     let assistantMessage = addMessage("", "assistant", true)
 
-    // Start streaming
+    // Start streaming with proper buffering
     const response = await fetch("/api/chat/stream", {
       method: "POST",
       headers: {
@@ -106,69 +106,71 @@ async function sendMessage(event) {
 
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
+    let buffer = "" // Buffer for incomplete lines
 
     while (true) {
       const { done, value } = await reader.read()
 
-      if (done) break
+      if (done) {
+        // Process any remaining data in buffer
+        if (buffer.trim()) {
+          processSSELine(buffer.trim())
+        }
+        break
+      }
 
-      const chunk = decoder.decode(value)
-      const lines = chunk.split("\n")
+      // Decode chunk and add to buffer
+      const chunk = decoder.decode(value, { stream: true })
+      buffer += chunk
 
+      // Process complete lines
+      const lines = buffer.split("\n")
+      // Keep the last (potentially incomplete) line in buffer
+      buffer = lines.pop() || ""
+
+      // Process each complete line
       for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          try {
-            const data = JSON.parse(line.slice(6))
-            console.log("📨 Received data:", data) // Enhanced logging
+        processSSELine(line)
+      }
+    }
 
-            if (data.type === "token") {
-              console.log("🔤 Token received:", data.content) // Debug token streaming
-              assistantMessage.textContent = data.content
-              assistantMessageContent = data.content
-            } else if (data.type === "messages" && data.messages.length > 0) {
-              console.log("💬 Messages update:", data.messages.length, "messages") // Debug message updates
-              replaceMessages(data.messages)
+    function processSSELine(line) {
+      if (line.startsWith("data: ")) {
+        try {
+          const data = JSON.parse(line.slice(6))
+          console.log("📨 Received data:", data)
 
-              // Debug: Check DOM state after replaceMessages
-              // const chatMessages = document.getElementById("chatMessages")
-              // console.log("📊 DOM state after replaceMessages:", {
-              //   hasMessages: chatMessages.classList.contains("has-messages"),
-              //   messageCount: chatMessages.querySelectorAll(".message-wrapper").length,
-              //   innerHTML: chatMessages.innerHTML.length,
-              // })
-
-              assistantMessage = addMessage(assistantMessageContent, "assistant", true)
-
-              // // Debug: Check DOM state after addMessage
-              // console.log("📊 DOM state after addMessage:", {
-              //   hasMessages: chatMessages.classList.contains("has-messages"),
-              //   messageCount: chatMessages.querySelectorAll(".message-wrapper").length,
-              //   lastMessageText: chatMessages.querySelector(
-              //     ".message-wrapper:last-child .message-text"
-              //   )?.textContent,
-              // })
-              scrollToBottom()
-            } else if (data.type === "complete") {
-              assistantMessage.classList.remove("streaming")
-
-              // Always reload threads to update message count in sidebar
-              await loadData()
-            } else if (data.type === "error") {
-              showError(`Error: ${data.message}`)
-              assistantMessage.textContent =
-                "Sorry, I encountered an error processing your request."
-              assistantMessage.classList.remove("streaming")
-            }
-          } catch (e) {
-            // Ignore JSON parse errors for incomplete chunks
+          if (data.type === "token") {
+            console.log("🔤 Token received:", data.content)
+            assistantMessage.textContent = data.content
+            assistantMessageContent = data.content
+          } else if (data.type === "messages" && data.messages.length > 0) {
+            console.log("💬 Messages update:", data.messages.length, "messages")
+            replaceMessages(data.messages)
+            assistantMessage = addMessage(assistantMessageContent, "assistant", true)
+            scrollToBottom()
+          } else if (data.type === "complete") {
+            assistantMessage.classList.remove("streaming")
+            setStreamingState(false)
+            // Always reload threads to update message count in sidebar
+            loadData()
+          } else if (data.type === "error") {
+            showError(`Error: ${data.message}`)
+            assistantMessage.textContent =
+              "Sorry, I encountered an error processing your request."
+            assistantMessage.classList.remove("streaming")
+            setStreamingState(false)
+          } else if (data.type === "log") {
+            console.log("🔍 Log:", data.content)
           }
+        } catch (e) {
+          console.error("Error parsing SSE line:", e, "Line:", line)
         }
       }
     }
   } catch (error) {
     console.error("Error sending message:", error)
     showError("Failed to send message")
-  } finally {
     setStreamingState(false)
   }
 }
