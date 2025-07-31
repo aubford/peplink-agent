@@ -249,6 +249,7 @@ async def chat_stream(
 
         except Exception as e:
             # Send error event
+            print(f"Error: {str(e)}")
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
     return StreamingResponse(

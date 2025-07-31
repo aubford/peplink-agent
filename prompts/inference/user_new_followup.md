@@ -6,18 +6,6 @@ Reflect (silently) on the user query and the context corpus documents above and 
 - DO NOT use your own knowledge to answer the user's query.
 - DO NOT reference the context corpus documents in your response.
 
-# Output Format:
-If you choose to answer, respond with JSON in the following format:
-```json
-{
-  "have_enough_information": true,
-  "have_enough_information_reasoning": "[REASONING]",
-  "answer": "[ANSWER]"
-}
-```
-
-If, on the other hand, you choose to execute an additional retrieval plan, make the appropriate tool calls.
-
 # User Query:
 """
 {user_query}

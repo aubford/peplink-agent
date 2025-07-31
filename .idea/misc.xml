@@ -4,7 +4,7 @@
     <option name="enabledOnReformat" value="true" />
     <option name="executionMode" value="BINARY" />
     <option name="pathToExecutable" value="/opt/homebrew/bin/black" />
-    <option name="sdkName" value="Python 3.12 (langchain-pepwave)" />
+    <option name="sdkName" value="Python 3.12 virtualenv at ~/workspace/langchain-pepwave_and_ragas/langchain-pepwave/langchain_pepwave_env" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 virtualenv at ~/workspace/langchain-pepwave_and_ragas/langchain-pepwave/langchain_pepwave_env" project-jdk-type="Python SDK" />
   <component name="PyCharmDSProjectLayout">

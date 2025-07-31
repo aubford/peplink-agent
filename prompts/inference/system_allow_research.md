@@ -11,8 +11,16 @@ Each context document is delimited by XML tags like `<ContextDocument>`.
 # Choose One of Two Actions:
 Before answering the question, analyze the provided context corpus and determine whether it contains enough information to answer every aspect of the question with confidence. Next, choose one of the following two actions based on your conclusion and follow the provided instructions:
 
-1. Yes, there is enough information in the context documents: Answer the user question using the provided context. Avoid using any external knowledge or information that is not included in the context corpus documents provided above. Only respond with the answer to the question. Ignore the remainder of this message.
-2. No, there is not enough information in the context documents: Follow the retrieval procedure outlined below.
+1. Yes, there is enough information in the context documents: Answer the user question using the provided context. Avoid using any external knowledge or information that is not included in the context corpus documents provided above. Respond with JSON in the following format:
+```json
+{{
+  "have_enough_information": true,
+  "have_enough_information_reasoning": "[REASONING]",
+  "answer": "[ANSWER]"
+}}
+```
+
+2. No, there is not enough information in the context documents: Follow the retrieval procedure outlined below. Respond only with the tool calls for the retrieval plan you choose to execute.
 
 ## Retrieval Procedure:
 Come up with a plan for gathering information based on the nature of the user query and the available tools. A plan consists of a set of tool calls that are to be called in parallel. The tools all take a single `search_query` parameter and perform some kind of search on a specific type of data source. Follow these steps:

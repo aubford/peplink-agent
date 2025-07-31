@@ -1,20 +1,12 @@
-from abc import ABC, abstractmethod
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+import httpx
+from abc import ABC
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from langchain_core.runnables.passthrough import RunnablePassthrough
-from inference.history_aware_retrieval_query import (
-    get_history_aware_retrieval_chain,
-)
+from inference.logging_transport import LoggingTransport, AsyncLoggingTransport
 from util.root_only_tracer import RootOnlyTracer
-from load.batch_manager import BatchManager
-from evals.batch_llm import BatchChatOpenAI
 from prompts import load_prompts
 from langchain_core.runnables import RunnableConfig
-from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
-from inference.cohere_rerank import RateLimitedCohereRerank
-from langchain_core.runnables.base import Runnable
 
 # Note: for reasoning models: "include only the most relevant information to prevent the model from overcomplicating its response." - api docs
 # Other advice for reasoning models: https://platform.openai.com/docs/guides/reasoning#advice-on-prompting
@@ -50,6 +42,12 @@ class InferenceBase(ABC):
         self.temperature = temperature
         self.streaming = streaming
         self.pinecone_index_name = pinecone_index_name
+        self.client_with_logging = httpx.Client(
+            transport=LoggingTransport(httpx.HTTPTransport())
+        )
+        self.async_client_with_logging = httpx.AsyncClient(
+            transport=AsyncLoggingTransport(httpx.AsyncHTTPTransport())
+        )
 
         self.config = RunnableConfig({"run_name": "rag_inference"})
         if minimal_tracer:

@@ -1,4 +1,5 @@
 import re
+import os
 from typing import Annotated, Hashable, Literal, TypedDict
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
@@ -6,7 +7,6 @@ from langchain_core.messages.ai import AIMessage
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.tools import tool
 from langchain_core.messages import (
-    AIMessageChunk,
     AnyMessage,
     BaseMessage,
     ToolMessage,
@@ -473,11 +473,22 @@ class RagInferenceLangGraph(InferenceBase):
 
     @property
     def llm(self):
-        return ChatOpenAI(
-            model=self.llm_model,
-            temperature=self.temperature,
-            streaming=self.streaming,
-            rate_limiter=openai_rate_limiter,
-            use_responses_api=False,
-            # output_version="responses/v1",
-        )
+        if os.getenv("DEVELOPMENT") == "true":
+            return ChatOpenAI(
+                model=self.llm_model,
+                temperature=self.temperature,
+                streaming=self.streaming,
+                rate_limiter=openai_rate_limiter,
+                use_responses_api=False,
+                http_client=self.client_with_logging,
+                http_async_client=self.async_client_with_logging,
+                # output_version="responses/v1",
+            )
+        else:
+            return ChatOpenAI(
+                model=self.llm_model,
+                temperature=self.temperature,
+                streaming=self.streaming,
+                rate_limiter=openai_rate_limiter,
+                use_responses_api=False,
+            )
