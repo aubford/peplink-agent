@@ -35,7 +35,7 @@ def _parse_streaming_content(content: str) -> str:
     try:
 
         # OpenAI streaming format: data: {...}\n\ndata: {...}\n\ndata: [DONE]\n\n
-        lines = content.strip().split('\n')
+        lines = content.splitlines()
         collected_chunks = []
 
         for line in lines:
@@ -54,20 +54,84 @@ def _parse_streaming_content(content: str) -> str:
                             if choice['message']['content']:
                                 collected_chunks.append(choice['message']['content'])
                 except json.JSONDecodeError:
+                    logger.warning(f"Failed to parse streaming line: {line}")
                     continue
 
         complete_content = ''.join(collected_chunks)
 
         if complete_content:
             # Return just the complete response content
-            return complete_content
+            return json.dumps(
+                json.loads(complete_content), indent=2, ensure_ascii=False
+            )
         else:
-            # If we couldn't parse chunks, return indication of failure
-            return "[Could not parse streaming response content]"
+            return "[No text (e.g. tool calls)]"
 
     except Exception as e:
         logger.warning(f"Failed to collect streaming content: {e}")
         return "[Failed to collect streaming content]"
+
+
+class _TeeStream(httpx.SyncByteStream):
+    """
+    Pass-through stream that yields bytes to the caller while buffering them.
+    When the caller finishes (close is called) we reconstruct the assistant
+    content from the buffered chunks and write a single log entry.
+    """
+
+    def __init__(self, inner: httpx.SyncByteStream, url: str, status_code: int):
+        self._inner = inner
+        self._buf: list[bytes] = []
+        self._url = url
+        self._status = status_code
+
+    def __iter__(self) -> Iterator[bytes]:
+        for chunk in self._inner:
+            self._buf.append(chunk)
+            yield chunk
+
+    def close(self) -> None:
+        # Close the underlying stream first to release the connection
+        self._inner.close()
+        # Now assemble and log the full content reconstructed from SSE lines
+        try:
+            complete = _parse_streaming_content(
+                b"".join(self._buf).decode("utf-8", errors="replace")
+            )
+            logger.info(
+                f"RESPONSE ({self._status}) [COMPLETE STREAM] to {self._url}:\n{complete}"
+            )
+        except Exception as e:
+            logger.warning(f"Failed to log complete streamed response: {e}")
+
+
+class _AsyncTeeStream(httpx.AsyncByteStream):
+    """
+    Async counterpart to _TeeStream.
+    """
+
+    def __init__(self, inner: httpx.AsyncByteStream, url: str, status_code: int):
+        self._inner = inner
+        self._buf: list[bytes] = []
+        self._url = url
+        self._status = status_code
+
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        async for chunk in self._inner:
+            self._buf.append(chunk)
+            yield chunk
+
+    async def aclose(self) -> None:
+        await self._inner.aclose()
+        try:
+            complete = _parse_streaming_content(
+                b"".join(self._buf).decode("utf-8", errors="replace")
+            )
+            logger.info(
+                f"ASYNC RESPONSE ({self._status}) [COMPLETE STREAM] to {self._url}:\n{complete}"
+            )
+        except Exception as e:
+            logger.warning(f"Failed to log complete streamed response: {e}")
 
 
 class LoggingTransport(httpx.BaseTransport):
@@ -94,28 +158,19 @@ class LoggingTransport(httpx.BaseTransport):
         # Handle response logging
         try:
             if is_streaming:
-                # For streaming requests, collect and log the complete response
+                # Preserve true streaming semantics by teeing the underlying byte stream
                 logger.info(
-                    f"RESPONSE ({response.status_code}) [STREAMING]: Collecting stream for {request.url}"
+                    f"RESPONSE ({response.status_code}) [STREAMING]: Passing through stream for {request.url}"
                 )
-
-                # Read the content once
-                original_content = response.read()
-
-                # Parse the streaming content
-                complete_content = _parse_streaming_content(
-                    original_content.decode('utf-8')
+                tee = _TeeStream(
+                    response.stream, str(request.url), response.status_code
                 )
-                logger.info(
-                    f"RESPONSE ({response.status_code}) [COMPLETE STREAM]:\n{complete_content}"
-                )
-
-                # Return response with the content we read
                 return httpx.Response(
                     status_code=response.status_code,
                     headers=response.headers,
-                    content=original_content,
+                    stream=tee,
                     request=request,
+                    extensions=response.extensions,
                 )
             else:
                 # For non-streaming responses, log immediately
@@ -168,28 +223,18 @@ class AsyncLoggingTransport(httpx.AsyncBaseTransport):
         # Handle response logging
         try:
             if is_streaming:
-                # For streaming requests, collect and log the complete response
                 logger.info(
-                    f"ASYNC RESPONSE ({response.status_code}) [STREAMING]: Collecting stream for {request.url}"
+                    f"ASYNC RESPONSE ({response.status_code}) [STREAMING]: Passing through stream for {request.url}"
                 )
-
-                # Read the content once
-                original_content = await response.aread()
-
-                # Parse the streaming content
-                complete_content = _parse_streaming_content(
-                    original_content.decode('utf-8')
+                tee = _AsyncTeeStream(
+                    response.stream, str(request.url), response.status_code
                 )
-                logger.info(
-                    f"ASYNC RESPONSE ({response.status_code}) [COMPLETE STREAM]:\n{complete_content}"
-                )
-
-                # Return response with the content we read
                 return httpx.Response(
                     status_code=response.status_code,
                     headers=response.headers,
-                    content=original_content,
+                    stream=tee,
                     request=request,
+                    extensions=response.extensions,
                 )
             else:
                 # For non-streaming responses, log immediately
@@ -218,26 +263,3 @@ class AsyncLoggingTransport(httpx.AsyncBaseTransport):
         except Exception as e:
             logger.warning(f"Failed to log async response body: {e}")
             return response
-
-
-def log_streaming_response(
-    content: str, url: str, status_code: int, is_async: bool = False
-):
-    """Helper function to log streaming responses after they've been consumed."""
-    try:
-        # Try to parse as JSON for pretty formatting
-        try:
-            parsed_json = json.loads(content)
-            pretty_content = json.dumps(parsed_json, indent=2, ensure_ascii=False)
-            prefix = "ASYNC " if is_async else ""
-            logger.info(
-                f"{prefix}RESPONSE ({status_code}) [COMPLETE STREAM] to {url}:\n{pretty_content}"
-            )
-        except json.JSONDecodeError:
-            # Log non-JSON responses as-is
-            prefix = "ASYNC " if is_async else ""
-            logger.info(
-                f"{prefix}RESPONSE ({status_code}) [COMPLETE STREAM - NON-JSON] to {url}:\n{content}"
-            )
-    except Exception as e:
-        logger.warning(f"Failed to log complete streamed response: {e}")
