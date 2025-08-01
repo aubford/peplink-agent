@@ -3,8 +3,9 @@ import json
 import os
 import logging
 from typing import Iterator, AsyncIterator, Union
+from pathlib import Path
 
-LOG_DIR = "logs"
+LOG_DIR = Path(__file__).parent.parent / "logs"
 LOG_FILE = os.path.join(LOG_DIR, "openai_trace.log")
 
 os.makedirs(LOG_DIR, exist_ok=True)
