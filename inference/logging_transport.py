@@ -31,41 +31,71 @@ def _is_streaming_request(request_body: str) -> bool:
 
 
 def _parse_streaming_content(content: str) -> str:
-    """Parse all streaming content from an OpenAI response."""
     try:
-
-        # OpenAI streaming format: data: {...}\n\ndata: {...}\n\ndata: [DONE]\n\n
-        lines = content.splitlines()
-        collected_chunks = []
+        lines = content.splitlines()  # handles \n and \r\n
+        text_parts: list[str] = []
+        tool_acc: dict[int, dict] = (
+            {}
+        )  # index -> {id, type, function:{name, arguments}}
 
         for line in lines:
-            if line.startswith('data: ') and not line.endswith('[DONE]'):
-                try:
-                    data_content = line[6:]  # Remove "data: " prefix
-                    chunk_json = json.loads(data_content)
+            if not line.startswith("data: "):
+                continue
+            payload = line[6:].strip()
+            if payload == "[DONE]":
+                continue
 
-                    # Extract content from different types of chunks
-                    if 'choices' in chunk_json and chunk_json['choices']:
-                        choice = chunk_json['choices'][0]
-                        if 'delta' in choice and 'content' in choice['delta']:
-                            if choice['delta']['content']:
-                                collected_chunks.append(choice['delta']['content'])
-                        elif 'message' in choice and 'content' in choice['message']:
-                            if choice['message']['content']:
-                                collected_chunks.append(choice['message']['content'])
-                except json.JSONDecodeError:
-                    logger.warning(f"Failed to parse streaming line: {line}")
-                    continue
+            try:
+                chunk = json.loads(payload)
+            except json.JSONDecodeError:
+                logger.warning(f"Failed to parse streaming line: {line}")
+                continue
 
-        complete_content = ''.join(collected_chunks)
+            choice = (chunk.get("choices") or [{}])[0]
+            delta = choice.get("delta") or {}
 
-        if complete_content:
-            # Return just the complete response content
-            return json.dumps(
-                json.loads(complete_content), indent=2, ensure_ascii=False
-            )
-        else:
-            return "[No text (e.g. tool calls)]"
+            # 1) normal assistant text
+            piece = delta.get("content")
+            if piece:
+                text_parts.append(piece)
+
+            # 2) tool call deltas
+            for tc in delta.get("tool_calls", []):
+                idx = tc.get("index", 0)
+                acc = tool_acc.setdefault(
+                    idx,
+                    {
+                        "id": None,
+                        "type": None,
+                        "function": {"name": None, "arguments": ""},
+                    },
+                )
+                if "id" in tc:
+                    acc["id"] = tc["id"]
+                if "type" in tc:
+                    acc["type"] = tc["type"]
+                fn = tc.get("function") or {}
+                if "name" in fn:
+                    acc["function"]["name"] = fn["name"]
+                if "arguments" in fn:
+                    acc["function"]["arguments"] += fn["arguments"]
+
+        # Prefer returning something structured and readable
+        if text_parts:
+            text = "".join(text_parts)
+            # pretty-print if the text happens to be JSON; otherwise return as-is
+            try:
+                return json.dumps(json.loads(text), indent=2, ensure_ascii=False)
+            except json.JSONDecodeError:
+                return text
+
+        if tool_acc:
+            # Log reconstructed tool calls when there was no text
+            result = {"tool_calls": [tool_acc[i] for i in sorted(tool_acc.keys())]}
+            return json.dumps(result, indent=2, ensure_ascii=False)
+
+        logger.warning(f"Could not parse streaming response content: {content}")
+        return "[Could not parse streaming response content]"
 
     except Exception as e:
         logger.warning(f"Failed to collect streaming content: {e}")
