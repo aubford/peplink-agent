@@ -188,10 +188,7 @@ class LoggingTransport(httpx.BaseTransport):
         # Handle response logging
         try:
             if is_streaming:
-                # Preserve true streaming semantics by teeing the underlying byte stream
-                logger.info(
-                    f"RESPONSE ({response.status_code}) [STREAMING]: Passing through stream for {request.url}"
-                )
+                # Preserve true streaming by teeing the underlying byte stream
                 tee = _TeeStream(
                     response.stream, str(request.url), response.status_code
                 )
