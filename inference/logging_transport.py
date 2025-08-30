@@ -2,7 +2,7 @@ import httpx
 import json
 import os
 import logging
-from typing import Iterator, AsyncIterator, Union
+from typing import Iterator, AsyncIterator
 from pathlib import Path
 
 LOG_DIR = Path(__file__).parent.parent / "logs"
@@ -190,7 +190,7 @@ class LoggingTransport(httpx.BaseTransport):
             if is_streaming:
                 # Preserve true streaming by teeing the underlying byte stream
                 tee = _TeeStream(
-                    response.stream, str(request.url), response.status_code
+                    response.stream, str(request.url), response.status_code  # type: ignore
                 )
                 return httpx.Response(
                     status_code=response.status_code,
@@ -254,7 +254,7 @@ class AsyncLoggingTransport(httpx.AsyncBaseTransport):
                     f"ASYNC RESPONSE ({response.status_code}) [STREAMING]: Passing through stream for {request.url}"
                 )
                 tee = _AsyncTeeStream(
-                    response.stream, str(request.url), response.status_code
+                    response.stream, str(request.url), response.status_code  # type: ignore
                 )
                 return httpx.Response(
                     status_code=response.status_code,

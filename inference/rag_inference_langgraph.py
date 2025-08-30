@@ -359,16 +359,10 @@ class RagInferenceLangGraph(InferenceBase):
         def semantic_search(
             search_query: Annotated[
                 str,
-                "The search query to use for semantic search in the vector database. Should be a well-formed query that describes what information you are looking for.",
+                "The semantic search query. It should be a well-formed query that describes what information you are looking for and is optimized for semantic search in a vector database",
             ],
         ):
-            """The primary data source for information about Peplink products and services.
-            Search the vector database for information relevant to the user query by providing
-            a semantic search query. This tool is the primary
-            means of retrieving information about Peplink products and services but it also
-            contains some information about general IT networking concepts that are adjacent
-            to Peplink products and services.
-            """
+            """Use this tool when you need information about Peplink or Pepwave cellular networking products and services or tangential IT networking topics. This is the primary data source and should be used more than the other tools. Use this tool 1-4 times in a given turn. Avoid repeating previously searched queries."""
             query_embedding = self.pinecone.get_query_embedding(search_query)
             docs = self.pinecone.retrieve(
                 search_query, query_embedding, top_k=70, rerank_top_n=30
@@ -383,11 +377,7 @@ class RagInferenceLangGraph(InferenceBase):
                 "A web search for a concept or entity to drill down on",
             ],
         ):
-            """Use this tool when you need to drill down on a specific aspect of the user query by performing
-            a web search using Google. This tool is most useful for general questions about IT networking. It is not
-            useful for specific questions about Peplink products and services. Do not use this tool more than once
-            in a given turn.
-            """
+            """Use this tool to drill down on a specific aspect of the user query by performing a web search using Google. This tool is most useful for general questions about IT networking. Do not use to research Peplink or Pepwave cellular networking products and services. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
             response_doc = Document(
                 page_content="Example web search results",
                 metadata={
@@ -405,12 +395,7 @@ class RagInferenceLangGraph(InferenceBase):
                 "The search query to use for Wikipedia search. Should be a specific entity or concept.",
             ],
         ):
-            """Use this tool to perform a Wikipedia search when you need general information about a topic that
-            is not about Peplink/Pepwave products and services. This can be used to get information specific to
-            the IT networking domain or general information from any other domain. It is most useful for
-            broad, general concepts that you would typically find in an encyclopedia. Do not use this tool more than
-            twice in a given turn.
-            """
+            """Use this tool to perform a Wikipedia search when you need general information about a specific topic mentioned in the user query that isn't specifically about Peplink or Pepwave cellular networking products and services. This can be used to get information specific to the IT networking domain or general information from any other domain other than Peplink or Pepwave products and services. It is most useful for researching broad, general topics that you would typically find in an encyclopedia. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
             response_doc = Document(
                 page_content="Example Wikipedia search results",
                 metadata={

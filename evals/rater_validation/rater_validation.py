@@ -31,7 +31,7 @@ def inf_run_volatility_dispersion_ratio(
     inference_run_eval_runs: list[pd.DataFrame], inference_run_name: str
 ) -> dict[str, float | str]:
     """
-    Computes the volatility dispersion ratio (VDR) for each column across multiple evaluation experiments.
+    Computes the volatility dispersion ratio for each column across multiple evaluation experiments.
     Returns a dictionary mapping each metric column to its VDR, along with the run_dir.
     Each VDR is the ratio of the std dev of per-sample volatility (std dev of std dev) to
     inter-sample score variation for that metric.
@@ -61,8 +61,6 @@ def calculate_icc_for_metric(
     Calculate the Intraclass Correlation Coefficient (ICC) for a given column across multiple LLM-as-a-judge experiments
     using the same testset/testrun (including the same inference response/context results). This measures how
     consistent our RAGAS LLM-as-a-judge metric is across different evaluation experiments performed on the same inference result.
-    i.e. It measures stuff that happens after we have the batch results from the first pass of RagasEval when we
-    run RagInference on the testset.
 
     Args:
         dfs: List of DataFrames, each representing a single eval_run (ragas evaluation run), with rows as the subjects (samples).
@@ -241,8 +239,10 @@ def metrics_correlation(
     """
     Computes the relationship between two evaluation metrics by analyzing their correlation both within and across multiple evaluation experiments.
 
+    The goal is to make sure my new, customized versions of the metrics are doing the same thing as their original counterparts.
+
     This function performs two main analyses:
-    1. Within-run correlation: For each evaluation run (and each rater), it calculates the Pearson correlation coefficient and p-value between the two specified columns (metrics) across all samples. The mean correlation and p-value are reported for each run, indicating how closely the two metrics move together within the same run.
+    1. Within-run correlation: For each evaluation run (and each rater e.g. answer_relevancy & answer_relevancy_diverse), it calculates the Pearson correlation coefficient and p-value between the two specified columns (metrics) across all samples. The mean correlation and p-value are reported for each run, indicating how closely the two metrics move together within the same run.
     2. Across-run delta correlation: For each sample, it computes the mean score for each metric across all raters in each run. It then calculates all pairwise differences (deltas) between experiments for each sample and computes the Pearson correlation and p-value between the deltas of the two metrics. This reveals whether changes in one metric across experiments are associated with changes in the other metric, i.e., whether the metrics are sensitive to the same sources of variation across experiments. A regression summary is also printed to quantify the linear relationship between the deltas.
 
     This technique helps assess whether two metrics are measuring similar underlying phenomena, both in terms of their agreement within a single evaluation and their sensitivity to changes across different experiments. High correlation suggests the metrics are redundant or closely related, while low correlation indicates they capture different aspects of the evaluation.
