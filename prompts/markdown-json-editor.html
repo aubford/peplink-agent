@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown JSON Editor</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+      }
+      .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        height: 80vh;
+      }
+      .panel {
+        background: #2d2d2d;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #404040;
+      }
+      .panel h2 {
+        margin-top: 0;
+        color: #f0f0f0;
+        border-bottom: 2px solid #4db8ff;
+        padding-bottom: 10px;
+      }
+      textarea {
+        flex: 1;
+        border: 1px solid #555;
+        border-radius: 4px;
+        padding: 12px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        resize: none;
+        outline: none;
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+      }
+      textarea:focus {
+        border-color: #4db8ff;
+        box-shadow: 0 0 5px rgba(77, 184, 255, 0.4);
+      }
+      textarea::placeholder {
+        color: #888;
+      }
+      .buttons {
+        margin: 15px 0;
+        display: flex;
+        gap: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+        color: white;
+      }
+      .btn-primary {
+        background-color: #4db8ff;
+        color: #000;
+      }
+      .btn-primary:hover {
+        background-color: #2ea3ff;
+      }
+      .btn-secondary {
+        background-color: #666;
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #777;
+      }
+      .btn-success {
+        background-color: #28a745;
+        color: white;
+      }
+      .btn-success:hover {
+        background-color: #34ce57;
+      }
+      .status {
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 4px;
+        text-align: center;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .status.show {
+        opacity: 1;
+      }
+      .status.success {
+        background-color: #1e4a2b;
+        color: #a3d9a5;
+        border: 1px solid #2d6a3a;
+      }
+      .status.error {
+        background-color: #4a1e1e;
+        color: #d9a3a3;
+        border: 1px solid #6a2d2d;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .header h1 {
+        color: #f0f0f0;
+        margin-bottom: 10px;
+      }
+      .header p {
+        color: #b0b0b0;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Markdown JSON Editor</h1>
+      <p>Convert between stringified JSON content and readable markdown for editing</p>
+    </div>
+
+    <div class="container">
+      <div class="panel">
+        <h2>Stringified JSON Content</h2>
+        <textarea
+          id="jsonInput"
+          placeholder="Paste your stringified content from the JSON file here..."
+        ></textarea>
+        <div class="buttons">
+          <button class="btn-primary" onclick="convertToMarkdown()">
+            Convert to Markdown →
+          </button>
+          <button class="btn-secondary" onclick="clearJson()">Clear</button>
+        </div>
+        <div id="jsonStatus" class="status"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Editable Markdown</h2>
+        <textarea
+          id="markdownEditor"
+          placeholder="Your converted markdown will appear here for editing..."
+        ></textarea>
+        <div class="buttons">
+          <button class="btn-primary" onclick="convertToString()">
+            ← Convert to String
+          </button>
+          <button class="btn-success" onclick="copyToClipboard()">Copy String</button>
+          <button class="btn-secondary" onclick="clearMarkdown()">Clear</button>
+        </div>
+        <div id="markdownStatus" class="status"></div>
+      </div>
+    </div>
+
+    <script>
+      function convertToMarkdown() {
+        const jsonInput = document.getElementById("jsonInput")
+        const markdownEditor = document.getElementById("markdownEditor")
+        const status = document.getElementById("jsonStatus")
+
+        try {
+          // Parse the stringified content
+          const unescaped = JSON.parse('"' + jsonInput.value.replace(/"/g, '\\"') + '"')
+          markdownEditor.value = unescaped
+          showStatus("jsonStatus", "Successfully converted to markdown!", "success")
+        } catch (error) {
+          try {
+            // If that fails, try direct parsing assuming it's already a JSON string
+            const unescaped = JSON.parse(jsonInput.value)
+            markdownEditor.value = unescaped
+            showStatus("jsonStatus", "Successfully converted to markdown!", "success")
+          } catch (error2) {
+            // If both fail, try simple unescape
+            const unescaped = jsonInput.value
+              .replace(/\\n/g, "\n")
+              .replace(/\\"/g, '"')
+              .replace(/\\\\/g, "\\")
+            markdownEditor.value = unescaped
+            showStatus(
+              "jsonStatus",
+              "Converted with basic unescape (manual check recommended)",
+              "success"
+            )
+          }
+        }
+      }
+
+      function convertToString() {
+        const markdownEditor = document.getElementById("markdownEditor")
+        const jsonInput = document.getElementById("jsonInput")
+
+        try {
+          // Stringify the markdown content
+          const stringified = JSON.stringify(markdownEditor.value)
+          // Remove the surrounding quotes added by JSON.stringify
+          jsonInput.value = stringified.slice(1, -1)
+          showStatus("markdownStatus", "Successfully converted to string!", "success")
+        } catch (error) {
+          showStatus(
+            "markdownStatus",
+            "Error converting to string: " + error.message,
+            "error"
+          )
+        }
+      }
+
+      function copyToClipboard() {
+        const jsonInput = document.getElementById("jsonInput")
+
+        if (jsonInput.value.trim() === "") {
+          showStatus(
+            "markdownStatus",
+            "Nothing to copy! Convert markdown to string first.",
+            "error"
+          )
+          return
+        }
+
+        jsonInput.select()
+        document.execCommand("copy")
+        showStatus("markdownStatus", "String copied to clipboard!", "success")
+      }
+
+      function clearJson() {
+        document.getElementById("jsonInput").value = ""
+        hideStatus("jsonStatus")
+      }
+
+      function clearMarkdown() {
+        document.getElementById("markdownEditor").value = ""
+        hideStatus("markdownStatus")
+      }
+
+      function showStatus(elementId, message, type) {
+        const status = document.getElementById(elementId)
+        status.textContent = message
+        status.className = `status show ${type}`
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => hideStatus(elementId), 3000)
+      }
+
+      function hideStatus(elementId) {
+        const status = document.getElementById(elementId)
+        status.classList.remove("show")
+      }
+
+      // Add keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey || e.metaKey) {
+          switch (e.key) {
+            case "ArrowRight":
+              e.preventDefault()
+              convertToMarkdown()
+              break
+            case "ArrowLeft":
+              e.preventDefault()
+              convertToString()
+              break
+            case "k":
+              e.preventDefault()
+              copyToClipboard()
+              break
+          }
+        }
+      })
+
+      // Add some sample content on load for demo
+      window.addEventListener("load", function () {
+        const sampleContent = `# Role and Objective\\nProvide accurate answers to user questions strictly using the provided corpus of context documents, which are enclosed by \`<ContextDocument>\` XML tags.\\n\\nYou are an agent - keep going until the user's query is completely resolved before ending your turn and yielding back to the user. Only terminate your turn when you have provided an accurate answer grounded in the context documents.`
+
+        // Uncomment the line below to load sample content on startup
+        // document.getElementById('jsonInput').value = sampleContent;
+      })
+    </script>
+  </body>
+</html>
