@@ -7,8 +7,7 @@
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 1400px;
-        margin: 0 auto;
+        margin: 0;
         padding: 20px;
         background-color: #1a1a1a;
         color: #e0e0e0;
@@ -17,7 +16,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
-        height: 80vh;
+        min-height: 90vh;
       }
       .panel {
         background: #2d2d2d;
@@ -34,17 +33,24 @@
         border-bottom: 2px solid #4db8ff;
         padding-bottom: 10px;
       }
+      :root {
+        --textarea-font-family: monospace;
+        --textarea-font-size: 13px;
+      }
       textarea {
-        flex: 1;
+        width: 100%;
+        min-height: 300px;
         border: 1px solid #555;
         border-radius: 4px;
         padding: 12px;
-        font-family: "Courier New", monospace;
-        font-size: 13px;
+        font-family: var(--textarea-font-family) !important;
+        font-size: var(--textarea-font-size) !important;
         resize: none;
         outline: none;
         background-color: #1e1e1e;
         color: #e0e0e0;
+        box-sizing: border-box;
+        overflow: hidden;
       }
       textarea:focus {
         border-color: #4db8ff;
@@ -54,10 +60,14 @@
         color: #888;
       }
       .buttons {
-        margin: 15px 0;
+        margin: 0 0 15px 0;
         display: flex;
         gap: 10px;
       }
+      .btn-convert-right {
+        margin-left: auto;
+      }
+
       button {
         padding: 10px 20px;
         border: none;
@@ -122,6 +132,46 @@
         color: #b0b0b0;
         margin: 0;
       }
+      .font-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin: 20px 0;
+        padding: 15px;
+        background: #2d2d2d;
+        border-radius: 8px;
+        border: 1px solid #404040;
+      }
+      .font-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #e0e0e0;
+      }
+      .font-control label {
+        font-size: 14px;
+        font-weight: 500;
+        min-width: 80px;
+      }
+      .font-control select,
+      .font-control input {
+        background: #1e1e1e;
+        border: 1px solid #555;
+        border-radius: 4px;
+        color: #e0e0e0;
+        padding: 6px 10px;
+        font-size: 14px;
+        outline: none;
+      }
+      .font-control select:focus,
+      .font-control input:focus {
+        border-color: #4db8ff;
+        box-shadow: 0 0 5px rgba(77, 184, 255, 0.4);
+      }
+      .font-control input[type="number"] {
+        width: 80px;
+      }
     </style>
   </head>
   <body>
@@ -130,35 +180,66 @@
       <p>Convert between stringified JSON content and readable markdown for editing</p>
     </div>
 
+    <div class="font-controls">
+      <div class="font-control">
+        <label for="fontFamily">Font Family:</label>
+        <select id="fontFamily" onchange="updateFontSettings()">
+          <option value="monospace" selected>System Monospace</option>
+          <option value="'Courier New', Courier, monospace">Courier New</option>
+          <option value="'Times New Roman', Times, serif">Times New Roman</option>
+          <option value="Arial, Helvetica, sans-serif">Arial</option>
+          <option value="'Lucida Console', Monaco, monospace">Lucida Console</option>
+          <option value="Consolas, 'Lucida Console', monospace">Consolas</option>
+          <option value="Monaco, 'Lucida Console', monospace">Monaco</option>
+          <option value="Menlo, Monaco, 'Lucida Console', monospace">Menlo</option>
+          <option value="Verdana, Geneva, sans-serif">Verdana</option>
+          <option value="Georgia, 'Times New Roman', serif">Georgia</option>
+        </select>
+      </div>
+      <div class="font-control">
+        <label for="fontSize">Font Size:</label>
+        <input
+          type="number"
+          id="fontSize"
+          value="13"
+          min="8"
+          max="24"
+          onchange="updateFontSettings()"
+        />
+        <span style="color: #888">px</span>
+      </div>
+    </div>
+
     <div class="container">
       <div class="panel">
         <h2>Stringified JSON Content</h2>
+        <div class="buttons">
+          <button class="btn-success" onclick="copyJsonToClipboard()">Copy String</button>
+          <button class="btn-secondary" onclick="clearJson()">Clear</button>
+          <button class="btn-primary btn-convert-right" onclick="convertToMarkdown()">
+            Convert to Markdown →
+          </button>
+        </div>
         <textarea
           id="jsonInput"
           placeholder="Paste your stringified content from the JSON file here..."
         ></textarea>
-        <div class="buttons">
-          <button class="btn-primary" onclick="convertToMarkdown()">
-            Convert to Markdown →
-          </button>
-          <button class="btn-secondary" onclick="clearJson()">Clear</button>
-        </div>
         <div id="jsonStatus" class="status"></div>
       </div>
 
       <div class="panel">
         <h2>Editable Markdown</h2>
-        <textarea
-          id="markdownEditor"
-          placeholder="Your converted markdown will appear here for editing..."
-        ></textarea>
         <div class="buttons">
           <button class="btn-primary" onclick="convertToString()">
             ← Convert to String
           </button>
-          <button class="btn-success" onclick="copyToClipboard()">Copy String</button>
+          <button class="btn-success" onclick="copyToClipboard()">Copy Markdown</button>
           <button class="btn-secondary" onclick="clearMarkdown()">Clear</button>
         </div>
+        <textarea
+          id="markdownEditor"
+          placeholder="Your converted markdown will appear here for editing..."
+        ></textarea>
         <div id="markdownStatus" class="status"></div>
       </div>
     </div>
@@ -173,12 +254,14 @@
           // Parse the stringified content
           const unescaped = JSON.parse('"' + jsonInput.value.replace(/"/g, '\\"') + '"')
           markdownEditor.value = unescaped
+          autoResize(markdownEditor)
           showStatus("jsonStatus", "Successfully converted to markdown!", "success")
         } catch (error) {
           try {
             // If that fails, try direct parsing assuming it's already a JSON string
             const unescaped = JSON.parse(jsonInput.value)
             markdownEditor.value = unescaped
+            autoResize(markdownEditor)
             showStatus("jsonStatus", "Successfully converted to markdown!", "success")
           } catch (error2) {
             // If both fail, try simple unescape
@@ -187,6 +270,7 @@
               .replace(/\\"/g, '"')
               .replace(/\\\\/g, "\\")
             markdownEditor.value = unescaped
+            autoResize(markdownEditor)
             showStatus(
               "jsonStatus",
               "Converted with basic unescape (manual check recommended)",
@@ -205,6 +289,7 @@
           const stringified = JSON.stringify(markdownEditor.value)
           // Remove the surrounding quotes added by JSON.stringify
           jsonInput.value = stringified.slice(1, -1)
+          autoResize(jsonInput)
           showStatus("markdownStatus", "Successfully converted to string!", "success")
         } catch (error) {
           showStatus(
@@ -216,29 +301,46 @@
       }
 
       function copyToClipboard() {
-        const jsonInput = document.getElementById("jsonInput")
+        const markdownEditor = document.getElementById("markdownEditor")
 
-        if (jsonInput.value.trim() === "") {
+        if (markdownEditor.value.trim() === "") {
           showStatus(
             "markdownStatus",
-            "Nothing to copy! Convert markdown to string first.",
+            "Nothing to copy! Add some markdown content first.",
             "error"
           )
           return
         }
 
+        markdownEditor.select()
+        document.execCommand("copy")
+        showStatus("markdownStatus", "Markdown content copied to clipboard!", "success")
+      }
+
+      function copyJsonToClipboard() {
+        const jsonInput = document.getElementById("jsonInput")
+
+        if (jsonInput.value.trim() === "") {
+          showStatus("jsonStatus", "Nothing to copy! Paste JSON content first.", "error")
+          return
+        }
+
         jsonInput.select()
         document.execCommand("copy")
-        showStatus("markdownStatus", "String copied to clipboard!", "success")
+        showStatus("jsonStatus", "JSON content copied to clipboard!", "success")
       }
 
       function clearJson() {
-        document.getElementById("jsonInput").value = ""
+        const jsonInput = document.getElementById("jsonInput")
+        jsonInput.value = ""
+        autoResize(jsonInput)
         hideStatus("jsonStatus")
       }
 
       function clearMarkdown() {
-        document.getElementById("markdownEditor").value = ""
+        const markdownEditor = document.getElementById("markdownEditor")
+        markdownEditor.value = ""
+        autoResize(markdownEditor)
         hideStatus("markdownStatus")
       }
 
@@ -276,8 +378,70 @@
         }
       })
 
-      // Add some sample content on load for demo
+      // Auto-resize textarea function
+      function autoResize(textarea) {
+        textarea.style.height = "auto"
+        textarea.style.height = Math.max(300, textarea.scrollHeight) + "px"
+      }
+
+      // Update font settings for both textareas
+      function updateFontSettings() {
+        const fontFamily = document.getElementById("fontFamily").value
+        const fontSize = document.getElementById("fontSize").value + "px"
+
+        // Update CSS custom properties - this is the most reliable method
+        document.documentElement.style.setProperty("--textarea-font-family", fontFamily)
+        document.documentElement.style.setProperty("--textarea-font-size", fontSize)
+
+        // Resize textareas after font change as it affects content height
+        setTimeout(() => {
+          const jsonInput = document.getElementById("jsonInput")
+          const markdownEditor = document.getElementById("markdownEditor")
+          if (jsonInput) autoResize(jsonInput)
+          if (markdownEditor) autoResize(markdownEditor)
+        }, 100)
+
+        // Save preferences to localStorage
+        localStorage.setItem("editorFontFamily", fontFamily)
+        localStorage.setItem("editorFontSize", document.getElementById("fontSize").value)
+      }
+
+      // Add event listeners for auto-resize
       window.addEventListener("load", function () {
+        const jsonInput = document.getElementById("jsonInput")
+        const markdownEditor = document.getElementById("markdownEditor")
+
+        // Load saved font preferences
+        const savedFontFamily = localStorage.getItem("editorFontFamily")
+        const savedFontSize = localStorage.getItem("editorFontSize")
+
+        if (savedFontFamily) {
+          document.getElementById("fontFamily").value = savedFontFamily
+        }
+        if (savedFontSize) {
+          // Handle both old format (with "px") and new format (just number)
+          const numericSize = savedFontSize.toString().replace("px", "")
+          document.getElementById("fontSize").value = numericSize
+        }
+
+        // Apply initial font settings
+        setTimeout(() => {
+          updateFontSettings()
+        }, 50)
+
+        // Add input event listeners for auto-resize
+        jsonInput.addEventListener("input", function () {
+          autoResize(this)
+        })
+
+        markdownEditor.addEventListener("input", function () {
+          autoResize(this)
+        })
+
+        // Initial resize on load
+        autoResize(jsonInput)
+        autoResize(markdownEditor)
+
         const sampleContent = `# Role and Objective\\nProvide accurate answers to user questions strictly using the provided corpus of context documents, which are enclosed by \`<ContextDocument>\` XML tags.\\n\\nYou are an agent - keep going until the user's query is completely resolved before ending your turn and yielding back to the user. Only terminate your turn when you have provided an accurate answer grounded in the context documents.`
 
         // Uncomment the line below to load sample content on startup
