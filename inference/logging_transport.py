@@ -4,6 +4,8 @@ import os
 import logging
 from typing import Iterator, AsyncIterator
 from pathlib import Path
+from typing import Any
+from langsmith.run_helpers import trace
 
 LOG_DIR = Path(__file__).parent.parent / "logs"
 LOG_FILE = os.path.join(LOG_DIR, "openai_trace.log")
@@ -102,6 +104,28 @@ def _parse_streaming_content(content: str) -> str:
         return "[Failed to collect streaming content]"
 
 
+def _should_langsmith_trace() -> bool:
+    """Whether to emit custom traces to LangSmith.
+
+    Requires LANGCHAIN_TRACING=true and a LangSmith API key configured.
+    """
+    try:
+        tracing_enabled = os.getenv("LANGSMITH_TRACING", "").lower() == "true"
+        api_key = os.getenv("LANGSMITH_API_KEY") or os.getenv("LANGCHAIN_API_KEY")
+        res = bool(tracing_enabled and api_key and trace)
+        return res
+    except Exception:
+        return False
+
+
+def _safe_json_loads(value: str) -> Any:
+    """Parse JSON if possible, otherwise return the original string."""
+    try:
+        return json.loads(value)
+    except Exception:
+        return value
+
+
 class _TeeStream(httpx.SyncByteStream):
     """
     Pass-through stream that yields bytes to the caller while buffering them.
@@ -109,11 +133,18 @@ class _TeeStream(httpx.SyncByteStream):
     content from the buffered chunks and write a single log entry.
     """
 
-    def __init__(self, inner: httpx.SyncByteStream, url: str, status_code: int):
+    def __init__(
+        self,
+        inner: httpx.SyncByteStream,
+        url: str,
+        status_code: int,
+        request_body: str | None,
+    ):
         self._inner = inner
         self._buf: list[bytes] = []
         self._url = url
         self._status = status_code
+        self._request_body = request_body
 
     def __iter__(self) -> Iterator[bytes]:
         for chunk in self._inner:
@@ -131,6 +162,20 @@ class _TeeStream(httpx.SyncByteStream):
             logger.info(
                 f"RESPONSE ({self._status}) [COMPLETE STREAM] to {self._url}:\n{complete}"
             )
+
+            # Emit a custom LangSmith trace capturing request and final streamed response
+            if _should_langsmith_trace():
+                inputs = (
+                    _safe_json_loads(self._request_body) if self._request_body else {}
+                )
+                with trace(
+                    "openai_http_stream",
+                    inputs=inputs,
+                    tags=["httpx", "openai", "stream"],
+                    project_name=os.getenv("LANGSMITH_PROJECT"),
+                    metadata={"transport": "logging_transport"},
+                ) as run:
+                    run.end(outputs={"response": _safe_json_loads(complete)})
         except Exception as e:
             logger.warning(f"Failed to log complete streamed response: {e}")
 
@@ -140,11 +185,18 @@ class _AsyncTeeStream(httpx.AsyncByteStream):
     Async counterpart to _TeeStream.
     """
 
-    def __init__(self, inner: httpx.AsyncByteStream, url: str, status_code: int):
+    def __init__(
+        self,
+        inner: httpx.AsyncByteStream,
+        url: str,
+        status_code: int,
+        request_body: str | None,
+    ):
         self._inner = inner
         self._buf: list[bytes] = []
         self._url = url
         self._status = status_code
+        self._request_body = request_body
 
     async def __aiter__(self) -> AsyncIterator[bytes]:
         async for chunk in self._inner:
@@ -160,6 +212,19 @@ class _AsyncTeeStream(httpx.AsyncByteStream):
             logger.info(
                 f"ASYNC RESPONSE ({self._status}) [COMPLETE STREAM] to {self._url}:\n{complete}"
             )
+
+            if _should_langsmith_trace():
+                inputs = (
+                    _safe_json_loads(self._request_body) if self._request_body else {}
+                )
+                with trace(
+                    "openai_http_stream_async",
+                    inputs=inputs,
+                    project_name=os.getenv("LANGSMITH_PROJECT"),
+                    tags=["httpx", "openai", "stream", "async"],
+                    metadata={"transport": "logging_transport"},
+                ) as run:  # type: ignore
+                    run.end(outputs={"response": _safe_json_loads(complete)})
         except Exception as e:
             logger.warning(f"Failed to log complete streamed response: {e}")
 
@@ -182,6 +247,7 @@ class LoggingTransport(httpx.BaseTransport):
         except Exception as e:
             logger.warning(f"Failed to log request body: {e}")
             is_streaming = False
+            body = None
 
         response = self._wrapped.handle_request(request)
 
@@ -190,7 +256,10 @@ class LoggingTransport(httpx.BaseTransport):
             if is_streaming:
                 # Preserve true streaming by teeing the underlying byte stream
                 tee = _TeeStream(
-                    response.stream, str(request.url), response.status_code  # type: ignore
+                    response.stream,  # type: ignore
+                    str(request.url),
+                    response.status_code,
+                    body,
                 )
                 return httpx.Response(
                     status_code=response.status_code,
@@ -214,6 +283,18 @@ class LoggingTransport(httpx.BaseTransport):
                     logger.info(
                         f"RESPONSE ({response.status_code}) [NON-JSON]:\n{content_str}"
                     )
+
+                # Emit a custom LangSmith trace for non-streaming
+                if _should_langsmith_trace():
+                    inputs = _safe_json_loads(body) if body else {}
+                    with trace(
+                        "openai_http",
+                        inputs=inputs,
+                        project_name=os.getenv("LANGSMITH_PROJECT"),
+                        tags=["httpx", "openai", "non_stream"],
+                        metadata={"transport": "logging_transport"},
+                    ) as run:
+                        run.end(outputs={"response": _safe_json_loads(content_str)})
 
                 return httpx.Response(
                     status_code=response.status_code,
@@ -244,6 +325,7 @@ class AsyncLoggingTransport(httpx.AsyncBaseTransport):
         except Exception as e:
             logger.warning(f"Failed to log async request body: {e}")
             is_streaming = False
+            body = None
 
         response = await self._wrapped.handle_async_request(request)
 
@@ -254,7 +336,10 @@ class AsyncLoggingTransport(httpx.AsyncBaseTransport):
                     f"ASYNC RESPONSE ({response.status_code}) [STREAMING]: Passing through stream for {request.url}"
                 )
                 tee = _AsyncTeeStream(
-                    response.stream, str(request.url), response.status_code  # type: ignore
+                    response.stream,  # type: ignore
+                    str(request.url),
+                    response.status_code,
+                    body,
                 )
                 return httpx.Response(
                     status_code=response.status_code,
@@ -280,6 +365,17 @@ class AsyncLoggingTransport(httpx.AsyncBaseTransport):
                     logger.info(
                         f"ASYNC RESPONSE ({response.status_code}) [NON-JSON]:\n{content_str}"
                     )
+
+                if _should_langsmith_trace():
+                    inputs = _safe_json_loads(body) if body else {}
+                    with trace(
+                        "openai_http_async",
+                        inputs=inputs,
+                        project_name=os.getenv("LANGSMITH_PROJECT"),
+                        tags=["httpx", "openai", "non_stream", "async"],
+                        metadata={"transport": "logging_transport"},
+                    ) as run:
+                        run.end(outputs={"response": _safe_json_loads(content_str)})
 
                 return httpx.Response(
                     status_code=response.status_code,
