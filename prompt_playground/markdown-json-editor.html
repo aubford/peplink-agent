@@ -358,26 +358,6 @@
         status.classList.remove("show")
       }
 
-      // Add keyboard shortcuts
-      document.addEventListener("keydown", function (e) {
-        if (e.ctrlKey || e.metaKey) {
-          switch (e.key) {
-            case "ArrowRight":
-              e.preventDefault()
-              convertToMarkdown()
-              break
-            case "ArrowLeft":
-              e.preventDefault()
-              convertToString()
-              break
-            case "k":
-              e.preventDefault()
-              copyToClipboard()
-              break
-          }
-        }
-      })
-
       // Auto-resize textarea function
       function autoResize(textarea) {
         textarea.style.height = "auto"
