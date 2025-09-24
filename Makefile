@@ -1,4 +1,4 @@
-.PHONY: help install dev web chat test clean lint format
+.PHONY: help install dev web chat test clean lint format graph-diagram
 
 # Virtual environment setup
 VENV_DIR = langchain_pepwave_env
@@ -46,3 +46,8 @@ dev-web: $(VENV_DIR)
 	@echo "🔄 Starting development server with auto-reload..."
 	@echo "🌐 Open http://localhost:8000 in your browser"
 	$(PYTHON) -m uvicorn web_app.app:app --reload --host 0.0.0.0 --port 8000
+
+# Generate graph diagram
+graph-diagram: $(VENV_DIR)
+	@echo "📊 Generating LangGraph diagram..."
+	$(PYTHON) inference/generate_graph_diagram.py
