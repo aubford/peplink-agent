@@ -248,12 +248,6 @@ class RagInferenceLangGraph(InferenceBase):
                         tool_call_id=message.tool_call_id,
                     )
             processed_messages.append(message)
-
-        # We replace the user query message with a prompt if it is a new turn
-        if state.num_research_iterations == 0:
-            assert len(state.messages) == state.current_turn_query_index + 1
-            processed_messages.pop()
-
         return processed_messages
 
     @staticmethod
@@ -297,6 +291,14 @@ class RagInferenceLangGraph(InferenceBase):
 
         if self._is_answer_tool_call(res):
             res = self._convert_answer_tool_call_to_message(res)
+        else:
+            assert isinstance(res, AIMessage), f"Expected AIMessage got {type(res)}"
+            assert (
+                len(res.tool_calls) > 1
+            ), "Expected multiple tool calls when not answering"
+            res.tool_calls = [
+                tc for tc in res.tool_calls if tc["name"] != "decide_have_enough_info"
+            ]
 
         return {"messages": [res]}
 
