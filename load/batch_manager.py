@@ -12,7 +12,9 @@ from openai import OpenAI
 from openai.lib._parsing._completions import type_to_response_format_param
 
 # Define ValidEndpoints type
-ValidEndpoints = Literal["/v1/chat/completions", "/v1/embeddings", "/v1/completions", "/v1/responses"]
+ValidEndpoints = Literal[
+    "/v1/chat/completions", "/v1/embeddings", "/v1/completions", "/v1/responses"
+]
 
 
 class BatchManager:
@@ -36,7 +38,7 @@ class BatchManager:
         use_responses_api: bool = False,
     ):
         """Initialize BatchManager with configurable API endpoint.
-        
+
         Args:
             base_path: Base directory for batch files
             endpoint: API endpoint to use
@@ -447,7 +449,7 @@ class BatchManager:
                     # Responses API format
                     input_data = body.get("input", [])
                     max_completion_tokens = body.get("max_completion_tokens", 300)
-                    
+
                     # Call the OpenAI Responses API directly
                     response = self.client.responses.create(
                         model=model,
@@ -455,7 +457,7 @@ class BatchManager:
                         temperature=temperature,
                         max_completion_tokens=max_completion_tokens,
                     )
-                    
+
                     # Extract content from Responses API response
                     content = ""
                     if response.output and len(response.output) > 0:
@@ -468,7 +470,7 @@ class BatchManager:
                     # Chat Completions API format (original)
                     messages = body.get("messages", [])
                     max_tokens = body.get("max_tokens", 300)
-                    
+
                     # Call the OpenAI Chat Completions API directly
                     response = self.client.chat.completions.create(
                         model=model,
@@ -476,7 +478,7 @@ class BatchManager:
                         temperature=temperature,
                         max_tokens=max_tokens,
                     )
-                    
+
                     content = response.choices[0].message.content
 
                 # Extract usage data safely

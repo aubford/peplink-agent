@@ -46,7 +46,7 @@ class BatchChatOpenAI(BaseChatModel):
             self.batch_manager.use_responses_api = self.use_responses_api
             if self.use_responses_api:
                 self.batch_manager.endpoint = "/v1/responses"
-            
+
         system_prompt = self.system_prompt
         human_messages_for_hash = ""
         formatted_messages = []
@@ -73,17 +73,19 @@ class BatchChatOpenAI(BaseChatModel):
             **({"stop": stop} if stop else {}),
             **kwargs,
         }
-        
+
         # For Responses API, use max_completion_tokens instead of max_tokens
-        max_tokens_key = "max_completion_tokens" if self.use_responses_api else "max_tokens"
+        max_tokens_key = (
+            "max_completion_tokens" if self.use_responses_api else "max_tokens"
+        )
         batch_kwargs = {
             **all_kwargs,
-            max_tokens_key: self.model_kwargs.get("max_tokens", 5000)
+            max_tokens_key: self.model_kwargs.get("max_tokens", 5000),
         }
         # Remove max_tokens if we're using max_completion_tokens to avoid conflicts
         if self.use_responses_api and "max_tokens" in batch_kwargs:
             del batch_kwargs["max_tokens"]
-            
+
         # Create the batch task using BatchManager's method
         task = self.batch_manager.create_batch_task(
             custom_id=messages_hash,
