@@ -239,7 +239,9 @@ async def chat_stream(
             yield f"data: {json.dumps({'type': 'start'})}\n\n"
 
             # Stream the response from the chatbot
-            for chunk in graph.query(chat_message.message, chat_message.thread_id):
+            async for chunk in graph.query(
+                chat_message.message, chat_message.thread_id
+            ):
                 yield f"data: {chunk}\n\n"
                 # Small delay to prevent overwhelming the client
                 await asyncio.sleep(0.001)

@@ -1,10 +1,10 @@
 import re
 import os
-from typing import Annotated, Hashable, Literal, TypedDict
+from typing import Annotated, Hashable, Literal, TypedDict, TypeGuard
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_core.messages.ai import AIMessage
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.messages.human import HumanMessage
 from langchain_core.tools import tool
 from langchain_core.messages import (
     AnyMessage,
@@ -15,7 +15,6 @@ from langgraph.constants import END, START
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import ToolNode
 from langgraph.config import get_stream_writer
-from langchain_core.output_parsers import JsonOutputParser
 from inference.cohere_rerank import RateLimitedCohereRerank
 from inference.rag_inference import InferenceBase
 from inference.pinecone_retriever import PineconeRetriever
@@ -129,6 +128,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         self.tools = self._create_tools()
 
+    # todo: remove
     def _stream_message(
         self,
         message_type: Literal["token", "messages", "complete", "error", "log"],
@@ -166,7 +166,7 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return INIT_RETRIEVAL
 
-    def _format_response(
+    def _format_init_retrieval_response_ai_msg(
         self,
         ai_message: AIMessage,
         intro_text: str = "I'll research your question using these tools:",
@@ -208,27 +208,29 @@ class RagInferenceLangGraph(InferenceBase):
             ),
         ]
         llm = self.llm.bind_tools(self.tools, tool_choice="required")
-        ai_tool_calls = llm.invoke(messages)
+        ai_msg_w_tool_calls = llm.invoke(messages)
 
         assert isinstance(
-            ai_tool_calls, AIMessage
-        ), f"Expected AIMessage got {type(ai_tool_calls)}"
-        ai_tool_calls = self._format_response(ai_tool_calls)
+            ai_msg_w_tool_calls, AIMessage
+        ), f"Expected AIMessage got {type(ai_msg_w_tool_calls)}"
+        ai_msg_w_tool_calls = self._format_init_retrieval_response_ai_msg(
+            ai_msg_w_tool_calls
+        )
 
         return {
-            "messages": [ai_tool_calls],
+            "messages": [ai_msg_w_tool_calls],
             "reranker_query": self.get_user_query(state),
         }
 
-    def _get_user_message(self, num_research_iterations: int) -> str:
-        if num_research_iterations == 0:
-            return PROMPTS["inference/user_new_followup"]
-        if num_research_iterations > 2:
-            return PROMPTS["inference/user_must_answer"]
-        else:
-            return PROMPTS["inference/user_retry_after_tools"]
+    # def _get_user_message(self, num_research_iterations: int) -> str:
+    #     if num_research_iterations == 0:
+    #         return PROMPTS["inference/user_new_followup"]
+    #     if num_research_iterations > 2:
+    #         return PROMPTS["inference/user_must_answer"]
+    #     else:
+    #         return PROMPTS["inference/user_retry_after_tools"]
 
-    def _get_messages(self, state: MainState) -> list[BaseMessage]:
+    def _format_messages_for_llm(self, state: MainState) -> list[BaseMessage]:
         """Strip tool call contents and replace with success message.
         Remove user query message if necessary.
         """
@@ -254,6 +256,21 @@ class RagInferenceLangGraph(InferenceBase):
 
         return processed_messages
 
+    @staticmethod
+    def _is_answer_tool_call(res: BaseMessage) -> TypeGuard[AIMessage]:
+        if isinstance(res, AIMessage) and res.tool_calls:
+            first_tool_call = res.tool_calls[0]
+            return (
+                first_tool_call["name"] == 'decide_have_enough_info'
+                and first_tool_call["args"]["have_enough_information"] == True
+            )
+        return False
+
+    @staticmethod
+    def _convert_answer_tool_call_to_message(res: AIMessage) -> AIMessage:
+        answer = res.tool_calls[0]["args"]["answer"]
+        return AIMessage(content=answer)
+
     def node_prompt_llm_w_tools(self, state: MainState) -> dict:
         allow_research = state.num_research_iterations <= 2
         system_message = (
@@ -268,43 +285,20 @@ class RagInferenceLangGraph(InferenceBase):
 
         messages = [
             ("system", system_message.format(context=context)),
-            *self._get_messages(state),
-            (
-                "human",
-                self._get_user_message(state.num_research_iterations).format(
-                    user_query=self.get_user_query(state)
-                ),
-            ),
+            *self._format_messages_for_llm(state),
         ]
 
         if allow_research:
-            # Use the recent LangChain support for combining tools with structured output
-            llm = self.llm.bind_tools(
-                self.tools, tool_choice="auto", response_format=RAGInferenceOutput
-            )
+            llm = self.llm.bind_tools(self.tools, tool_choice="required")
         else:
-            llm = self.llm.with_structured_output(
-                RAGInferenceOutput, method="json_schema"
-            )
+            llm = self.llm
 
-        # Create the LCEL chain with RunnableBranch for conditional processing
-        chain = llm | {
-            STREAM: JsonOutputParser(),
-            PASSTHRU: RunnablePassthrough(),
-        }
+        res = llm.invoke(messages)
 
-        chunk = None
-        for chunk in chain.stream(messages):
-            streaming_content = chunk.get(STREAM, {})
-            # Stream answer content if it's structured output with answer field i.e. the LLM is not using tools
-            if "answer" in streaming_content:
-                self._stream_message("token", streaming_content["answer"])
+        if self._is_answer_tool_call(res):
+            res = self._convert_answer_tool_call_to_message(res)
 
-        if chunk is None:
-            raise RuntimeError("No response received from LLM chain")
-
-        final_response = self._format_response(chunk[PASSTHRU])
-        return {"messages": [final_response]}
+        return {"messages": [res]}
 
     def _tools_condition(self, state: MainState) -> Hashable | list[Hashable]:
         """
@@ -319,14 +313,20 @@ class RagInferenceLangGraph(InferenceBase):
     def node_generate_reranker_query(self, state: MainState):
         """Generate a reranker query considering chat history."""
         llm = self.llm.bind(temperature=0)
+        reranker_messages = state.messages
+        for i in range(len(state.messages) - 1, -1, -1):
+            if isinstance(state.messages[i], HumanMessage):
+                reranker_messages = state.messages[: i + 1]
+                break
         messages = [
             ("system", PROMPTS["inference/generate_reranker_query_system"]),
-            *state.messages,
+            *reranker_messages,
         ]
         response = llm.invoke(messages)
         return {"reranker_query": response.content}
 
-    def _get_all_tool_documents(self, state: MainState) -> list[Document]:
+    @staticmethod
+    def _get_all_tool_documents(state: MainState) -> list[Document]:
         """Extract all Document objects from tool call results in the message history."""
         documents = []
 
@@ -406,7 +406,34 @@ class RagInferenceLangGraph(InferenceBase):
             content = f"<<Wikipedia: '{search_query}'>>\n\n{response_doc.page_content}"
             return (content, [response_doc])
 
-        return [semantic_search, search_web, search_wikipedia]
+        # noinspection PyUnusedLocal
+        @tool
+        def decide_have_enough_info(
+            have_enough_information: Annotated[
+                bool,
+                "True if the context documents are sufficient to answer the user's question accurately and confidently.",
+            ],
+            have_enough_information_reasoning: Annotated[
+                str,
+                "Reasoning behind whether there is enough information in the current context.",
+            ],
+            answer: Annotated[
+                str,
+                "The answer to the user query if there is enough information; otherwise, return an empty string.",
+            ],
+        ):
+            """Decide whether there's enough information in the current context to answer the user query accurately and explain the reasoning."""
+            # This should never be called because we will convert
+            raise ValueError(
+                "decide_have_enough_info function body should never be called because we will convert it to an AIMessage"
+            )
+
+        return [
+            semantic_search,
+            search_web,
+            search_wikipedia,
+            decide_have_enough_info,
+        ]
 
     def compile(self) -> CompiledStateGraph:
 

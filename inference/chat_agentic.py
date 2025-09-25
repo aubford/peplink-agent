@@ -1,8 +1,7 @@
 import json
-from typing import AsyncGenerator, Generator
-from langchain_core.messages import HumanMessage, BaseMessage
+from typing import AsyncGenerator
+from langchain_core.messages import HumanMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
-from langgraph.checkpoint.memory import InMemorySaver
 from inference.rag_inference_langgraph import RagInferenceLangGraph, StreamMessage
 
 from dotenv import load_dotenv
@@ -131,10 +130,9 @@ class ChatLangGraph(RagInferenceLangGraph):
         state = self.graph.get_state(config={"configurable": {"thread_id": thread_id}})
         return state.values.get("messages", []) if state.values else []
 
-    def query(self, user_query: str, thread_id: str) -> Generator[str, None, None]:
+    async def query(self, user_query: str, thread_id: str) -> AsyncGenerator[str, None]:
         """Stream the response using LangGraph's messages streaming mode."""
-        # TODO: Make this async?
-        for stream_mode, chunk in self.graph.stream(
+        async for stream_mode, chunk in self.graph.astream(
             {"messages": [HumanMessage(content=user_query)], "thread_id": thread_id},
             config={"configurable": {"thread_id": thread_id}},
             stream_mode=[
@@ -146,6 +144,7 @@ class ChatLangGraph(RagInferenceLangGraph):
                 messages = [
                     {"type": msg.type, "content": msg.content}
                     for msg in chunk["messages"]
+                    if msg.content and msg.content.strip()
                 ]
                 yield json.dumps({'type': 'messages', 'messages': messages})
             elif isinstance(chunk, StreamMessage):
@@ -159,12 +158,3 @@ class ChatLangGraph(RagInferenceLangGraph):
             max_retries=3,
             retry_delay=2.0,
         )
-
-
-if __name__ == "__main__":
-    chatbot = ChatLangGraph(
-        llm_model="gpt-4.1",
-        pinecone_index_name="pepwave-early-april-page-content-embedding",
-        checkpointer=InMemorySaver(),
-    )
-    chatbot.draw_graph()
