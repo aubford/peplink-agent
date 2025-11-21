@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     if os.getenv("USE_IN_MEMORY_CHECKPOINTER", False):
         print("✅ Using in-memory checkpointer")
         chatbot = ChatLangGraph(
-            llm_model="gpt-4.1",
+            llm_model="gpt-5.1",
             pinecone_index_name="pepwave-early-april-page-content-embedding",
             checkpointer=InMemorySaver(),
         )
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
             print("✅ Using PostgreSQL for persistence")
 
             chatbot = ChatLangGraph(
-                llm_model="gpt-4.1",
+                llm_model="gpt-5.1",
                 pinecone_index_name="pepwave-early-april-page-content-embedding",
                 checkpointer=checkpointer,
             )
