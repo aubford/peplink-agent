@@ -2,7 +2,7 @@ from langchain_core.tracers.langchain import LangChainTracer
 
 
 class RootOnlyTracer(LangChainTracer):
-    """Emit the first chain span, then silence its children."""
+    """Ignore all chain spans, but track other callbacks (LLM, retriever, agent, etc.)."""
 
     # _root_seen: bool = False
 

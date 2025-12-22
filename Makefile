@@ -48,6 +48,6 @@ dev-web: $(VENV_DIR)
 	$(PYTHON) -m uvicorn web_app.app:app --reload --host 0.0.0.0 --port 8000
 
 # Generate graph diagram
-graph-diagram: $(VENV_DIR)
+graph: $(VENV_DIR)
 	@echo "📊 Generating LangGraph diagram..."
 	$(PYTHON) inference/generate_graph_diagram.py

@@ -12,7 +12,7 @@ class PineconeRetriever:
         self,
         index_name: str,
         embedding_model: str = "text-embedding-3-large",
-        rerank_model: str = "cohere-rerank-3.5",
+        rerank_model: str = "pinecone-rerank-v0",
         fields: list[str] = [
             "id",
             "page_content",
@@ -69,13 +69,15 @@ class PineconeRetriever:
         if pinecone_rate_limiter:
             pinecone_rate_limiter.acquire()
 
-        # Search Pinecone with reranking
-        response = self.pinecone_index.search(
-            namespace=self.namespace,
-            query=pc_query,
-            fields=self.fields,
-            rerank=rerank,  # todo: fix rerank request length issue
-        )
+        try:
+            response = self.pinecone_index.search(
+                namespace=self.namespace,
+                query=pc_query,
+                fields=self.fields,
+                rerank=rerank,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Pinecone search failed: {e}")
 
         documents = []
         for match in response.result.hits:
