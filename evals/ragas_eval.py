@@ -107,7 +107,7 @@ class RagasEval:
         self.eval_llm = LangchainLLMWrapper(
             ChatOpenAI(
                 model=eval_llm,
-                temperature=0,
+                temperature=0.1,
             )
         )
 
