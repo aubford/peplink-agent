@@ -228,6 +228,13 @@ class RagInferenceLangGraph(InferenceBase):
             "reranker_query": self.get_user_query(state),
         }
 
+    @staticmethod
+    def _format_context_documents(documents: list[Document]) -> str:
+        """Join document page contents with ContextDocument separator."""
+        return "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
+            doc.page_content for doc in documents
+        )
+
     def _replace_tool_call_msgs_w_success_msg(
         self, messages: list[BaseMessage]
     ) -> list[BaseMessage]:
@@ -259,9 +266,7 @@ class RagInferenceLangGraph(InferenceBase):
         state.messages: [system, human, AI(will do research), *tool calls(with artifacts and first docs)] OR [system, Human, AI(will do research), *tool calls(with artifacts and first docs), AI(answer), Human]
         """
         system_message = PROMPTS["inference/system_allow_research_decide"]
-        context = "\n\n</ContextDocument>\n\n<ContextDocument>\n\n".join(
-            doc.page_content for doc in state.current_context
-        )
+        context = self._format_context_documents(state.current_context)
 
         messages = [
             ("system", system_message.format(context=context)),
@@ -328,11 +333,18 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return PROMPT_LLM_DEMAND_ANSWER
 
-    # todo: handle this case and add conditional node before
     def node_prompt_llm_demand_answer(self, state: MainState) -> dict:
+        context = self._format_context_documents(state.current_context)
         system_message = PROMPTS["inference/system_deny_research"]
         llm = self.llm
-        pass
+        messages = [
+            ("system", system_message.format(context=context)),
+            *self._replace_tool_call_msgs_w_success_msg(state.messages),
+        ]
+        response = llm.invoke(messages)
+        return {
+            "messages": [response],
+        }
 
     def node_generate_reranker_query(self, state: MainState):
         """Generate a reranker query considering chat history."""
