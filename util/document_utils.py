@@ -75,3 +75,30 @@ def get_all_parquet_in_dir(dir_path: Path) -> List[Path]:
         raise FileNotFoundError(f"Directory '{dir_path}' does not exist")
 
     return sorted(p for p in dir_path.glob("*.parquet") if p.is_file())
+
+
+def document_to_dict(doc: Document) -> Dict[str, Any]:
+    """Convert a Document object to a dict for state serialization."""
+    result = {
+        "page_content": doc.page_content,
+        "metadata": doc.metadata,
+    }
+    if hasattr(doc, "id") and doc.id is not None:
+        result["id"] = doc.id
+    return result
+
+
+def documents_to_dicts(docs: List[Document]) -> List[Dict[str, Any]]:
+    """Convert a list of Document objects to dicts for state serialization."""
+    return [document_to_dict(doc) for doc in docs]
+
+
+def dict_to_document(doc_dict: Dict[str, Any]) -> Document:
+    """Convert a dict back to a Document object."""
+    doc_kwargs = {
+        "page_content": doc_dict.get("page_content", ""),
+        "metadata": doc_dict.get("metadata", {}),
+    }
+    if "id" in doc_dict:
+        doc_kwargs["id"] = doc_dict["id"]
+    return Document(**doc_kwargs)

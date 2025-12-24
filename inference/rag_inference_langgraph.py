@@ -20,6 +20,7 @@ from inference.rag_inference import InferenceBase
 from inference.pinecone_retriever import PineconeRetriever
 from inference.rate_limiters import openai_rate_limiter
 from prompts import load_prompts
+from util.document_utils import documents_to_dicts, dict_to_document
 
 
 from langgraph.graph import StateGraph
@@ -365,17 +366,28 @@ class RagInferenceLangGraph(InferenceBase):
 
     @staticmethod
     def _get_all_tool_artifact_documents(state: MainState) -> list[Document]:
-        """Extract all Document objects from ToolMessage artifact lists in the message history."""
+        """Extract all Document objects from ToolMessage artifact lists in the message history.
+
+        Artifacts are stored as dicts in state (for serialization), so we convert them
+        back to Document objects here.
+        """
         documents = []
 
         for message in state.messages:
             if isinstance(message, ToolMessage):
-                # The artifact contains the Document objects when using response_format="content_and_artifact"
-                if hasattr(message, 'artifact') and message.artifact:
-                    if isinstance(message.artifact, list):
-                        documents.extend(message.artifact)
-                    else:
-                        documents.append(message.artifact)
+                # The artifact contains dict representations of Document objects when using response_format="content_and_artifact"
+                assert (
+                    hasattr(message, 'artifact') and message.artifact
+                ), "ToolMessage must have an artifact"
+                assert isinstance(
+                    message.artifact, list
+                ), f"Expected artifact to be a list, got {type(message.artifact)}"
+
+                for item in message.artifact:
+                    assert isinstance(
+                        item, dict
+                    ), f"Expected artifact list items to be dicts, got {type(item)}"
+                    documents.append(dict_to_document(item))
 
         return documents
 
@@ -408,7 +420,8 @@ class RagInferenceLangGraph(InferenceBase):
                 search_query, query_embedding, top_k=70, rerank_top_n=30
             )
             content = f"<<Semantic Search: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
-            return content, docs
+            # Convert Documents to dicts for state serialization
+            return content, documents_to_dicts(docs)
 
         @tool(response_format="content_and_artifact")
         def search_web(
@@ -418,15 +431,15 @@ class RagInferenceLangGraph(InferenceBase):
             ],
         ):
             """Use this tool to drill down on a specific aspect of the user query by performing a web search using Google. This tool is most useful for general questions about IT networking. Do not use to research Peplink or Pepwave cellular networking products and services. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
-            response_doc = Document(
-                page_content="Example web search results",
-                metadata={
+            doc_dict = {
+                "page_content": "Example web search results",
+                "metadata": {
                     "source": "web",
                     "search_query": search_query,
                 },
-            )
-            content = f"<<Web: '{search_query}'>>\n\n{response_doc.page_content}"
-            return content, [response_doc]
+            }
+            content = f"<<Web: '{search_query}'>>\n\n{doc_dict['page_content']}"
+            return content, [doc_dict]
 
         @tool(response_format="content_and_artifact")
         def search_wikipedia(
@@ -436,15 +449,15 @@ class RagInferenceLangGraph(InferenceBase):
             ],
         ):
             """Use this tool to perform a Wikipedia search when you need general information about a specific topic mentioned in the user query that isn't specifically about Peplink or Pepwave cellular networking products and services. This can be used to get information specific to the IT networking domain or general information from any other domain other than Peplink or Pepwave products and services. It is most useful for researching broad, general topics that you would typically find in an encyclopedia. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
-            response_doc = Document(
-                page_content="Example Wikipedia search results",
-                metadata={
+            doc_dict = {
+                "page_content": "Example Wikipedia search results",
+                "metadata": {
                     "source": "wikipedia",
                     "search_query": search_query,
                 },
-            )
-            content = f"<<Wikipedia: '{search_query}'>>\n\n{response_doc.page_content}"
-            return content, [response_doc]
+            }
+            content = f"<<Wikipedia: '{search_query}'>>\n\n{doc_dict['page_content']}"
+            return content, [doc_dict]
 
         return [
             semantic_search,
