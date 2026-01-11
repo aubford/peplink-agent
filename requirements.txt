@@ -8,6 +8,7 @@ psycopg[binary,pool]
 langchain-openai
 langchain-experimental
 langchain-community
+wikipedia
 langchain-google-community
 langchain-pinecone
 langchain-qdrant

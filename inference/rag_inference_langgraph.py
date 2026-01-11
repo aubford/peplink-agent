@@ -3,6 +3,7 @@ import os
 from typing import Annotated, Hashable, Literal, TypedDict, TypeGuard
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_community.retrievers import WikipediaRetriever
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.human import HumanMessage
 from langchain_core.tools import tool
@@ -130,6 +131,7 @@ class RagInferenceLangGraph(InferenceBase):
         self.pinecone = PineconeRetriever(
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
+        self.wikipedia_retriever = WikipediaRetriever(load_max_docs=3)
         self.checkpointer = checkpointer or InMemorySaver()
         self.research_tools = self._create_research_tools()
 
@@ -426,13 +428,16 @@ class RagInferenceLangGraph(InferenceBase):
                 "The semantic search query. It should be a well-formed query that describes what information you are looking for and is optimized for semantic search in a vector database",
             ],
         ):
+            print(f"START: semantic_search for search_query: {search_query}")
             """Use this tool when you need information about Peplink or Pepwave cellular networking products and services or tangential IT networking topics. This is the primary data source and should be used more than the other tools. Use this tool 1-4 times in a given turn. Avoid repeating previously searched queries."""
             query_embedding = self.pinecone.get_query_embedding(search_query)
+            # reranking evaluates query<>document directly and is more accurate than vectore similarity; cast a wide net with top_k and then rerank to get the best matches
             docs = self.pinecone.retrieve(
                 search_query, query_embedding, top_k=70, rerank_top_n=30
             )
             content = f"<<Semantic Search: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
             # Convert Documents to dicts for state serialization
+            print(f"END: semantic_search for search_query: {search_query}")
             return content, documents_to_dicts(docs)
 
         @tool(response_format="content_and_artifact")
@@ -461,15 +466,14 @@ class RagInferenceLangGraph(InferenceBase):
             ],
         ):
             """Use this tool to perform a Wikipedia search when you need general information about a specific topic mentioned in the user query that isn't specifically about Peplink or Pepwave cellular networking products and services. This can be used to get information specific to the IT networking domain or general information from any other domain other than Peplink or Pepwave products and services. It is most useful for researching broad, general topics that you would typically find in an encyclopedia. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
-            doc_dict = {
-                "page_content": "Example Wikipedia search results",
-                "metadata": {
-                    "source": "wikipedia",
-                    "search_query": search_query,
-                },
-            }
-            content = f"<<Wikipedia: '{search_query}'>>\n\n{doc_dict['page_content']}"
-            return content, [doc_dict]
+            docs = self.wikipedia_retriever.invoke(search_query)
+            if docs:
+                content = f"<<Wikipedia: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
+            else:
+                content = (
+                    f"<<Wikipedia: '{search_query}'; Docs: 0>>\n\nNo results found."
+                )
+            return content, documents_to_dicts(docs)
 
         return [
             semantic_search,
