@@ -117,6 +117,11 @@ def nltk_get_lemmatized_tokens(text: str) -> List[str]:
     """
     Tokenize using NLTK, less strict with stop words
     Significantly faster and less memory intensive than spaCy
+
+    Lemmatizing normalizes tokens to their base forms so the deduplication
+    logic compares semantic content rather than surface inflections. Lemmatizing reduces
+    token variance (e.g., “runs”, “running” → “run”), which improves overlap measures and
+    similarity scores for near‑duplicate detection while keeping tokenization fast.
     """
     stop_words = set(stopwords.words("english"))
     stop_words.update(
@@ -260,7 +265,7 @@ class TokenizedDoc:
         self.original_text = df_row["page_content"]
         self.df_row = df_row
         self.tokens = nltk_get_lemmatized_tokens(self.original_text)
-        
+
     def get_chunked_tokens(self, ngram: int = 1, shift: int | None = None) -> list[str]:
         if ngram == 1:
             return self.tokens

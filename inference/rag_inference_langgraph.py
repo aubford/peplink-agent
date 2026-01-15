@@ -21,7 +21,7 @@ from inference.rag_inference import InferenceBase
 from inference.pinecone_retriever import PineconeRetriever
 from inference.rate_limiters import openai_rate_limiter
 from prompts import load_prompts
-from util.document_utils import documents_to_dicts, dict_to_document
+from util.document_utils import documents_to_dicts, dict_to_document, get_docs_of_type
 
 
 from langgraph.graph import StateGraph
@@ -379,7 +379,12 @@ class RagInferenceLangGraph(InferenceBase):
         }
 
     @staticmethod
-    def _get_all_tool_artifact_documents(state: MainState) -> list[Document]:
+    def _is_not_duplicate_doc_dict(doc: dict, docs: list[Document]):
+        existing_ids = [d.metadata["id"] for d in docs if "id" in d]
+        doc_id = doc["metadata"].get("id", None)
+        return doc_id not in existing_ids
+
+    def _get_all_tool_artifact_documents(self, state: MainState) -> list[Document]:
         """Extract all Document objects from ToolMessage artifact lists in the message history.
 
         Artifacts are stored as dicts in state (for serialization), so we convert them
@@ -397,25 +402,47 @@ class RagInferenceLangGraph(InferenceBase):
                     message.artifact, list
                 ), f"Expected artifact to be a list, got {type(message.artifact)}"
 
-                for item in message.artifact:
+                for doc in message.artifact:
                     assert isinstance(
-                        item, dict
-                    ), f"Expected artifact list items to be dicts, got {type(item)}"
-                    documents.append(dict_to_document(item))
+                        doc, dict
+                    ), f"Expected artifact list items to be dicts, got {type(doc)}"
+                    # dedupe
+                    if self._is_not_duplicate_doc_dict(doc, documents):
+                        documents.append(dict_to_document(doc))
 
         return documents
 
+    @staticmethod
+    def _select_top_docs(
+        reranked_docs: list[Document],
+        top_n: int = 30,
+        min_wikipedia_docs: int = 2,
+    ) -> list[Document]:
+        top_docs = list(reranked_docs[:top_n])
+        other_docs = list(reranked_docs[top_n:])
+        wikipedia_in_other = get_docs_of_type(other_docs, "wikipedia")
+        wikipedia_in_top = get_docs_of_type(top_docs, "wikipedia")
+        min_wikipedia_docs = min(len(wikipedia_in_other), min_wikipedia_docs)
+        needed_wikipedia = min_wikipedia_docs - len(wikipedia_in_top)
+        if needed_wikipedia < 1:
+            return top_docs
+        replacements = wikipedia_in_other[:needed_wikipedia]
+        top_docs[-len(replacements) :] = replacements
+        return top_docs
+
     def node_rerank(self, state: MainState):
         """Get all the documents that have been fetched so far and select the top 30 that are applicable to the current conversation"""
-        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=30)
+        all_docs = self._get_all_tool_artifact_documents(state)
+        reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=None)
         reranked_docs = reranker.compress_documents(
-            documents=self._get_all_tool_artifact_documents(state),
+            documents=all_docs,
             query=state.reranker_query,
         )
+        top_docs = self._select_top_docs(reranked_docs)
 
         return {
             "num_research_iterations": state.num_research_iterations + 1,
-            "current_context": reranked_docs,
+            "current_context": top_docs,
         }
 
     def _create_research_tools(self):
@@ -428,8 +455,8 @@ class RagInferenceLangGraph(InferenceBase):
                 "The semantic search query. It should be a well-formed query that describes what information you are looking for and is optimized for semantic search in a vector database",
             ],
         ):
-            print(f"START: semantic_search for search_query: {search_query}")
             """Use this tool when you need information about Peplink or Pepwave cellular networking products and services or tangential IT networking topics. This is the primary data source and should be used more than the other tools. Use this tool 1-4 times in a given turn. Avoid repeating previously searched queries."""
+            print(f"START: semantic_search for search_query: {search_query}")
             query_embedding = self.pinecone.get_query_embedding(search_query)
             # reranking evaluates query<>document directly and is more accurate than vectore similarity; cast a wide net with top_k and then rerank to get the best matches
             docs = self.pinecone.retrieve(
@@ -451,7 +478,7 @@ class RagInferenceLangGraph(InferenceBase):
             doc_dict = {
                 "page_content": "Example web search results",
                 "metadata": {
-                    "source": "web",
+                    "type": "web",
                     "search_query": search_query,
                 },
             }
@@ -465,7 +492,7 @@ class RagInferenceLangGraph(InferenceBase):
                 "The search query to use for Wikipedia search. Should be a specific entity or concept.",
             ],
         ):
-            """Use this tool to perform a Wikipedia search when you need general information about a specific topic mentioned in the user query that isn't specifically about Peplink or Pepwave cellular networking products and services. This can be used to get information specific to the IT networking domain or general information from any other domain other than Peplink or Pepwave products and services. It is most useful for researching broad, general topics that you would typically find in an encyclopedia. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
+            """Use this tool to perform a Wikipedia search when you need general information about a specific term or topic mentioned in the user query. Do not use to research Peplink or Pepwave cellular networking products and services. This can be used to get information specific to the IT networking domain or general information from any other domain other than Peplink or Pepwave products and services. It is most useful for researching broad, general topics that you would typically find in an encyclopedia or to lookup the definition of a specific term. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
             docs = self.wikipedia_retriever.invoke(search_query)
             if docs:
                 content = f"<<Wikipedia: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
@@ -473,6 +500,8 @@ class RagInferenceLangGraph(InferenceBase):
                 content = (
                     f"<<Wikipedia: '{search_query}'; Docs: 0>>\n\nNo results found."
                 )
+            for doc in docs:
+                doc.metadata["type"] = "wikipedia"
             return content, documents_to_dicts(docs)
 
         return [

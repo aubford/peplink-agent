@@ -102,3 +102,7 @@ def dict_to_document(doc_dict: Dict[str, Any]) -> Document:
     if "id" in doc_dict:
         doc_kwargs["id"] = doc_dict["id"]
     return Document(**doc_kwargs)
+
+
+def get_docs_of_type(docs: list[Document], doctype: str):
+    return [doc for doc in docs if doc.metadata.get("type") == doctype]
