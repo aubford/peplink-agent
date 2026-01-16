@@ -6,13 +6,14 @@ from langchain.retrievers.contextual_compression import ContextualCompressionRet
 from langchain_community.retrievers import WikipediaRetriever
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.human import HumanMessage
-from langchain_core.tools import tool
+from langchain_core.tools import ToolException, tool
 from langchain_core.messages import (
     AnyMessage,
     BaseMessage,
     ToolMessage,
 )
 from langgraph.constants import END, START
+from langchain_tavily import TavilySearch
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import ToolNode
 from langgraph.config import get_stream_writer
@@ -105,7 +106,7 @@ class MainState(BaseModel):
     num_research_iterations: int = 0
     current_turn_query_index: int = 0
     reranker_query_for_query_index: int = 0
-    current_context: list = Field(default_factory=list)
+    current_context: list[Document] = Field(default_factory=list)
     reranker_query: str = ""
     thread_id: str = "default"
 
@@ -396,7 +397,7 @@ class RagInferenceLangGraph(InferenceBase):
             if isinstance(message, ToolMessage):
                 # The artifact contains dict representations of Document objects when using response_format="content_and_artifact"
                 assert (
-                    hasattr(message, 'artifact') and message.artifact
+                    hasattr(message, 'artifact') and message.artifact is not None
                 ), "ToolMessage must have an artifact"
                 assert isinstance(
                     message.artifact, list
@@ -474,16 +475,48 @@ class RagInferenceLangGraph(InferenceBase):
                 "A web search for a concept or entity to drill down on",
             ],
         ):
-            """Use this tool to drill down on a specific aspect of the user query by performing a web search using Google. This tool is most useful for general questions about IT networking. Do not use to research Peplink or Pepwave cellular networking products and services. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
-            doc_dict = {
-                "page_content": "Example web search results",
-                "metadata": {
-                    "type": "web",
-                    "search_query": search_query,
-                },
-            }
-            content = f"<<Web: '{search_query}'>>\n\n{doc_dict['page_content']}"
-            return content, [doc_dict]
+            """Use this tool to drill down on a specific aspect of the user query by performing a web search using Tavily. This tool is most useful for general questions about IT networking. Do not use to research Peplink or Pepwave cellular networking products and services. Do not Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
+            tavily_api_key = os.environ.get("TAVILY_API_KEY")
+            if not tavily_api_key:
+                content = f"<<Web: '{search_query}'; Docs: 0>>\n\nMissing TAVILY_API_KEY in .env."
+                return content, []
+            tavily = TavilySearch(
+                tavily_api_key=tavily_api_key,
+                max_results=5,
+                include_answer=False,
+                include_raw_content=False,
+            )
+
+            try:
+                results = tavily.invoke({"query": search_query})
+            except ToolException as exc:
+                content = f"<<Web: '{search_query}'; Docs: 0>>\n\n{exc}"
+                return content, []
+
+            if isinstance(results, dict) and results.get("error"):
+                content = f"<<Web: '{search_query}'; Docs: 0>>\n\n{results['error']}"
+                return content, []
+
+            docs = []
+            for result in results.get("results", []):
+                docs.append(
+                    Document(
+                        page_content=result.get("content", ""),
+                        metadata={
+                            "type": "web",
+                            "search_query": search_query,
+                            "title": result.get("title"),
+                            "url": result.get("url"),
+                            "score": result.get("score"),
+                        },
+                    )
+                )
+
+            if docs:
+                content = f"<<Web: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
+            else:
+                content = f"<<Web: '{search_query}'; Docs: 0>>\n\nNo results found."
+            return content, documents_to_dicts(docs)
 
         @tool(response_format="content_and_artifact")
         def search_wikipedia(
@@ -496,10 +529,9 @@ class RagInferenceLangGraph(InferenceBase):
             docs = self.wikipedia_retriever.invoke(search_query)
             if docs:
                 content = f"<<Wikipedia: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
-            else:
-                content = (
-                    f"<<Wikipedia: '{search_query}'; Docs: 0>>\n\nNo results found."
-                )
+                return content, []
+
+            content = f"<<Wikipedia: '{search_query}'; Docs: 0>>\n\nNo results found."
             for doc in docs:
                 doc.metadata["type"] = "wikipedia"
             return content, documents_to_dicts(docs)

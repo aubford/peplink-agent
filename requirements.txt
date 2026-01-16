@@ -15,7 +15,6 @@ langchain-qdrant
 langchain-cohere~=0.4.4
 pinecone
 debugpy
-grandalf~=0.8
 torch
 transformers
 sentence-transformers
@@ -67,3 +66,4 @@ fastapi
 uvicorn[standard]
 jinja2
 python-multipart
+langchain-tavily~=0.2.16
