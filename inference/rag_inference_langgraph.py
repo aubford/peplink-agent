@@ -1,6 +1,6 @@
 import re
 import os
-from typing import Annotated, Hashable, Literal, TypedDict, TypeGuard
+from typing import Annotated, Hashable, Literal
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain_community.retrievers import WikipediaRetriever
@@ -370,6 +370,7 @@ class RagInferenceLangGraph(InferenceBase):
         # Get all messages up to and including the current user query
         reranker_messages = state.messages[: state.current_turn_query_index + 1]
         messages = [
+            # TODO: Improve reranker query to explicitly request a reranker query by taking into consideration the following: user query, conversation history and the prior set of tool queries. Ask for the query "that will result in the most pertinent documents".
             ("system", PROMPTS["inference/generate_reranker_query_system"]),
             *self._replace_tool_call_msgs_w_success_msg(reranker_messages),
         ]
@@ -419,6 +420,7 @@ class RagInferenceLangGraph(InferenceBase):
         top_n: int = 30,
         min_wikipedia_docs: int = 2,
     ) -> list[Document]:
+        """Select the top_n docs from the reranked docs. Enforce that a minimum number of wikipedia docs are selected. Swap in the highest ranked wikipedia docs as needed."""
         top_docs = list(reranked_docs[:top_n])
         other_docs = list(reranked_docs[top_n:])
         wikipedia_in_other = get_docs_of_type(other_docs, "wikipedia")
@@ -429,6 +431,18 @@ class RagInferenceLangGraph(InferenceBase):
             return top_docs
         replacements = wikipedia_in_other[:needed_wikipedia]
         top_docs[-len(replacements) :] = replacements
+        # TODO: If this is not research iteration 0, then ask LLM "summarize any pertinent information" from any docs that we are dropping from previous iterations. Additional iterations imply that we are dealing with a challenging user query and may require more information than usual. We want to avoid situations where the LLM wants additional information but also needs to rely on what they have already gathered. Conceptually, this could cause an endless loop if we didn't limit research iterations.
+        # Example of problem:
+        # Required context: ABC
+        # Iteration 0: queryA + queryB -> AB
+        # Rerank -> AB
+        # Context: AB
+        # Iteration 1: queryC -> C
+        # Rerank -> AC
+
+        # For future user queries: ask LLM which summaries are pertinent in parallel with tool calls.
+        # Store summaries in `MainState.context_summaries` and `MainState.applicable_context_summaries`.
+
         return top_docs
 
     def node_rerank(self, state: MainState):
