@@ -17,7 +17,7 @@ from typing import AsyncGenerator, Annotated
 from contextlib import asynccontextmanager
 from inference.chat_agentic import ChatLangGraph
 from dotenv import load_dotenv
-from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 # from langsmith import tracing_context
 
@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
     # Startup
     global chatbot
 
-    if os.getenv("USE_IN_MEMORY_CHECKPOINTER", False):
+    if os.getenv("USE_IN_MEMORY_CHECKPOINTER"):
         print("✅ Using in-memory checkpointer")
         chatbot = ChatLangGraph(
             llm_model="gpt-5.2",
@@ -46,8 +46,8 @@ async def lifespan(app: FastAPI):
         if not database_url:
             raise ValueError("DATABASE_URL environment variable is required")
 
-        with PostgresSaver.from_conn_string(database_url) as checkpointer:
-            checkpointer.setup()
+        async with AsyncPostgresSaver.from_conn_string(database_url) as checkpointer:
+            await checkpointer.setup()
             print("✅ Using PostgreSQL for persistence")
 
             chatbot = ChatLangGraph(

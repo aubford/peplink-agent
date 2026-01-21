@@ -122,6 +122,11 @@ cd 2-application
 terraform apply -replace="aws_ecs_service.app"
 ```
 
+Or use the helper script:
+```bash
+./redeploy-app.sh
+```
+
 ## Security Note
 
 This is a minimal demo configuration with:
