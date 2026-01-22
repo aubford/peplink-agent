@@ -1,5 +1,6 @@
 import re
 import os
+import wikipedia as wikipedia_client
 from typing import Annotated, Hashable, Literal
 from langchain_core.documents import Document
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
@@ -9,7 +10,6 @@ from langchain_core.messages.human import HumanMessage
 from langchain_core.tools import ToolException, tool
 from langchain_core.messages import (
     AnyMessage,
-    BaseMessage,
     ToolMessage,
 )
 from langgraph.constants import END, START
@@ -132,7 +132,10 @@ class RagInferenceLangGraph(InferenceBase):
         self.pinecone = PineconeRetriever(
             index_name=pinecone_index_name, embedding_model=self.embedding_model
         )
-        self.wikipedia_retriever = WikipediaRetriever(load_max_docs=3)
+        self.wikipedia_retriever = WikipediaRetriever(
+            wiki_client=wikipedia_client,
+            top_k_results=3,
+        )
         self.checkpointer = checkpointer or InMemorySaver()
         self.research_tools = self._create_research_tools()
 
@@ -206,7 +209,7 @@ class RagInferenceLangGraph(InferenceBase):
 
         return ai_message
 
-    def node_init_retrieval(self, state: MainState):
+    async def node_init_retrieval(self, state: MainState):
         messages = [
             ("system", PROMPTS["inference/retrieval_system"].format(addendum="")),
             (
@@ -217,7 +220,7 @@ class RagInferenceLangGraph(InferenceBase):
             ),
         ]
         llm = self.llm.bind_tools(self.research_tools, tool_choice="required")
-        ai_msg_w_tool_calls = llm.invoke(messages)
+        ai_msg_w_tool_calls = await llm.ainvoke(messages)
 
         assert isinstance(
             ai_msg_w_tool_calls, AIMessage
@@ -239,8 +242,8 @@ class RagInferenceLangGraph(InferenceBase):
         )
 
     def _replace_tool_call_msgs_w_success_msg(
-        self, messages: list[BaseMessage]
-    ) -> list[BaseMessage]:
+        self, messages: list[AnyMessage]
+    ) -> list[AnyMessage]:
         """Strip tool call contents and replace with success message so we aren't sending context documents to the model twice."""
         processed_messages = []
         pattern = r'(<<[^>]*>>).*'
@@ -263,7 +266,7 @@ class RagInferenceLangGraph(InferenceBase):
         answer = res.tool_calls[0]["args"]["answer"]
         return AIMessage(content=answer)
 
-    def node_prompt_llm_main(self, state: MainState) -> dict:
+    async def node_prompt_llm_main(self, state: MainState) -> dict:
         """Determine if we need to do further research and then either provide an answer or make research tool calls
 
         state.messages: [system, human, AI(will do research), *tool calls(with artifacts and first docs)] OR [system, Human, AI(will do research), *tool calls(with artifacts and first docs), AI(answer), Human]
@@ -277,7 +280,7 @@ class RagInferenceLangGraph(InferenceBase):
         ]
 
         decide_llm = self.llm.with_structured_output(RAGInferenceOutput)
-        decide_res = decide_llm.invoke(messages)
+        decide_res = await decide_llm.ainvoke(messages)
         assert isinstance(
             decide_res, RAGInferenceOutput
         ), f"Expected RAGInferenceOutput got {type(decide_res)}"
@@ -306,7 +309,7 @@ class RagInferenceLangGraph(InferenceBase):
         )
 
         llm = self.llm.bind_tools(self.research_tools, tool_choice="required")
-        ai_msg_w_tool_calls = llm.invoke(research_messages)
+        ai_msg_w_tool_calls = await llm.ainvoke(research_messages)
 
         assert isinstance(
             ai_msg_w_tool_calls, AIMessage
@@ -336,7 +339,7 @@ class RagInferenceLangGraph(InferenceBase):
         else:
             return PROMPT_LLM_DEMAND_ANSWER
 
-    def node_prompt_llm_demand_answer(self, state: MainState) -> dict:
+    async def node_prompt_llm_demand_answer(self, state: MainState) -> dict:
         context = self._format_context_documents(state.current_context)
         system_message = PROMPTS["inference/system_deny_research"]
         llm = self.llm
@@ -344,12 +347,12 @@ class RagInferenceLangGraph(InferenceBase):
             ("system", system_message.format(context=context)),
             *self._replace_tool_call_msgs_w_success_msg(state.messages),
         ]
-        response = llm.invoke(messages)
+        response = await llm.ainvoke(messages)
         return {
             "messages": [response],
         }
 
-    def node_generate_reranker_query(self, state: MainState):
+    async def node_generate_reranker_query(self, state: MainState):
         """Generate a reranker query considering chat history."""
         if state.reranker_query_for_query_index == state.current_turn_query_index:
             return
@@ -374,7 +377,7 @@ class RagInferenceLangGraph(InferenceBase):
             ("system", PROMPTS["inference/generate_reranker_query_system"]),
             *self._replace_tool_call_msgs_w_success_msg(reranker_messages),
         ]
-        response = llm.invoke(messages)
+        response = await llm.ainvoke(messages)
         return {
             "reranker_query": response.content,
             "reranker_query_for_query_index": state.current_turn_query_index,
@@ -382,7 +385,7 @@ class RagInferenceLangGraph(InferenceBase):
 
     @staticmethod
     def _is_not_duplicate_doc_dict(doc: dict, docs: list[Document]):
-        existing_ids = [d.metadata["id"] for d in docs if "id" in d]
+        existing_ids = [d.metadata["id"] for d in docs if "id" in d.metadata]
         doc_id = doc["metadata"].get("id", None)
         return doc_id not in existing_ids
 
@@ -445,15 +448,15 @@ class RagInferenceLangGraph(InferenceBase):
 
         return top_docs
 
-    def node_rerank(self, state: MainState):
+    async def node_rerank(self, state: MainState):
         """Get all the documents that have been fetched so far and select the top 30 that are applicable to the current conversation"""
         all_docs = self._get_all_tool_artifact_documents(state)
         reranker = RateLimitedCohereRerank(model="rerank-v3.5", top_n=None)
-        reranked_docs = reranker.compress_documents(
+        reranked_docs = await reranker.acompress_documents(
             documents=all_docs,
             query=state.reranker_query,
         )
-        top_docs = self._select_top_docs(reranked_docs)
+        top_docs = self._select_top_docs(list(reranked_docs))
 
         return {
             "num_research_iterations": state.num_research_iterations + 1,
@@ -464,7 +467,7 @@ class RagInferenceLangGraph(InferenceBase):
         """Create bound tools that don't have self parameters."""
 
         @tool(response_format="content_and_artifact")
-        def semantic_search(
+        async def semantic_search(
             search_query: Annotated[
                 str,
                 "The semantic search query. It should be a well-formed query that describes what information you are looking for and is optimized for semantic search in a vector database",
@@ -472,9 +475,9 @@ class RagInferenceLangGraph(InferenceBase):
         ):
             """Use this tool when you need information about Peplink or Pepwave cellular networking products and services or tangential IT networking topics. This is the primary data source and should be used more than the other tools. Use this tool 1-4 times in a given turn. Avoid repeating previously searched queries."""
             print(f"START: semantic_search for search_query: {search_query}")
-            query_embedding = self.pinecone.get_query_embedding(search_query)
+            query_embedding = await self.pinecone.aget_query_embedding(search_query)
             # reranking evaluates query<>document directly and is more accurate than vectore similarity; cast a wide net with top_k and then rerank to get the best matches
-            docs = self.pinecone.retrieve(
+            docs = await self.pinecone.aretrieve(
                 search_query, query_embedding, top_k=70, rerank_top_n=30
             )
             content = f"<<Semantic Search: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
@@ -483,7 +486,7 @@ class RagInferenceLangGraph(InferenceBase):
             return content, documents_to_dicts(docs)
 
         @tool(response_format="content_and_artifact")
-        def search_web(
+        async def search_web(
             search_query: Annotated[
                 str,
                 "A web search for a concept or entity to drill down on",
@@ -502,7 +505,7 @@ class RagInferenceLangGraph(InferenceBase):
             )
 
             try:
-                results = tavily.invoke({"query": search_query})
+                results = await tavily.ainvoke({"query": search_query})
             except ToolException as exc:
                 content = f"<<Web: '{search_query}'; Docs: 0>>\n\n{exc}"
                 return content, []
@@ -533,14 +536,14 @@ class RagInferenceLangGraph(InferenceBase):
             return content, documents_to_dicts(docs)
 
         @tool(response_format="content_and_artifact")
-        def search_wikipedia(
+        async def search_wikipedia(
             search_query: Annotated[
                 str,
                 "The search query to use for Wikipedia search. Should be a specific entity or concept.",
             ],
         ):
             """Use this tool to perform a Wikipedia search when you need general information about a specific term or topic mentioned in the user query. Do not use to research Peplink or Pepwave cellular networking products and services. This can be used to get information specific to the IT networking domain or general information from any other domain other than Peplink or Pepwave products and services. It is most useful for researching broad, general topics that you would typically find in an encyclopedia or to lookup the definition of a specific term. Use this tool 0-2 times in a given turn. Avoid repeating previously searched queries."""
-            docs = self.wikipedia_retriever.invoke(search_query)
+            docs = await self.wikipedia_retriever.ainvoke(search_query)
             if docs:
                 content = f"<<Wikipedia: '{search_query}'; Docs: {len(docs)}>>\n\n____FIRST DOC____\n\n{docs[0].page_content}"
                 return content, []

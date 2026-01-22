@@ -181,12 +181,12 @@ async def get_random_testset_queries():
 async def list_threads(bot: Annotated[ChatLangGraph, Depends(get_chatbot)]):
     """List all conversation threads."""
     threads = []
-    for thread_id, info in bot.list_threads().items():
+    for thread_id, info in (await bot.list_threads()).items():
         threads.append(
             ThreadInfo(
                 thread_id=thread_id,
                 title=info["title"],
-                message_count=bot.get_thread_message_count(thread_id),
+                message_count=await bot.get_thread_message_count(thread_id),
                 created_at=info["created_at"].isoformat(),
             )
         )
@@ -198,7 +198,7 @@ async def get_thread_history(
     thread_id: str, bot: Annotated[ChatLangGraph, Depends(get_chatbot)]
 ):
     """Get conversation history for a specific thread."""
-    history = bot.get_thread_history(thread_id)
+    history = await bot.get_thread_history(thread_id)
     messages = []
     for msg in history:
         messages.append(
@@ -217,7 +217,7 @@ async def delete_thread(
 ):
     """Delete a conversation thread."""
     try:
-        bot.delete_thread(thread_id)
+        await bot.delete_thread(thread_id)
         return None  # 204 No Content
     except KeyError:
         raise HTTPException(status_code=404, detail="Thread not found")

@@ -36,32 +36,33 @@ class ChatLangGraph(RagInferenceLangGraph):
         )
         self.graph = self.compile()
 
-    def get_thread_message_count(self, thread_id: str) -> int:
+    async def get_thread_message_count(self, thread_id: str) -> int:
         """Get the message count for a specific thread from LangGraph state."""
-        messages = self.get_thread_history(thread_id)
+        messages = await self.get_thread_history(thread_id)
         return len(messages)
 
-    def _get_thread_title(self, thread_id: str) -> str:
+    async def _get_thread_title(self, thread_id: str) -> str:
         """Generate a title for a thread based on its first user message."""
-        messages = self.get_thread_history(thread_id)
+        messages = await self.get_thread_history(thread_id)
         if messages:
             for msg in messages:
                 if hasattr(msg, 'type') and msg.type == "human":
                     return msg.content[:50] + ("..." if len(msg.content) > 50 else "")
         return "New Conversation"
 
-    def _get_thread_created_at(self, thread_id: str) -> datetime:
+    async def _get_thread_created_at(self, thread_id: str) -> datetime:
         """Get the creation time of a thread from its earliest checkpoint."""
         if not self.checkpointer:
             return datetime.now()
 
         try:
             # Get the thread's state history and find the earliest checkpoint
-            history = list(
-                self.graph.get_state_history(
+            history = [
+                cp
+                async for cp in self.graph.aget_state_history(
                     config={"configurable": {"thread_id": thread_id}}
                 )
-            )
+            ]
             if history:
                 # History is ordered newest to oldest, so take the last one
                 earliest_checkpoint = history[-1]
@@ -77,14 +78,14 @@ class ChatLangGraph(RagInferenceLangGraph):
             pass
         return datetime.now()
 
-    def list_threads(self) -> dict[str, dict]:
+    async def list_threads(self) -> dict[str, dict]:
         """List all available threads by querying the checkpointer."""
         if not self.checkpointer:
             return {}
 
         try:
             # Get all checkpoints from the database
-            checkpoints = list(self.checkpointer.list(None))
+            checkpoints = [cp async for cp in self.checkpointer.alist(None)]
 
             # Extract unique thread IDs
             thread_ids = set()
@@ -98,11 +99,11 @@ class ChatLangGraph(RagInferenceLangGraph):
             for thread_id in thread_ids:
                 # Only include threads that have actual conversation messages
                 # TODO: Clean up all these redundant database calls via get_thread_history.
-                messages = self.get_thread_history(thread_id)
+                messages = await self.get_thread_history(thread_id)
                 if messages:  # Only include threads with messages
                     threads[thread_id] = {
-                        "created_at": self._get_thread_created_at(thread_id),
-                        "title": self._get_thread_title(thread_id),
+                        "created_at": await self._get_thread_created_at(thread_id),
+                        "title": await self._get_thread_title(thread_id),
                     }
 
             return threads
@@ -111,7 +112,7 @@ class ChatLangGraph(RagInferenceLangGraph):
             print(f"⚠️ Warning: Could not list threads from database: {e}")
             return {}
 
-    def delete_thread(self, thread_id: str) -> bool:
+    async def delete_thread(self, thread_id: str) -> bool:
         """Delete a conversation thread and its associated state."""
         if not self.checkpointer:
             return False
@@ -119,15 +120,17 @@ class ChatLangGraph(RagInferenceLangGraph):
         try:
             # Use the checkpointer's built-in delete_thread method
             # This properly deletes all checkpoints and writes from the database
-            self.checkpointer.delete_thread(thread_id)
+            await self.checkpointer.adelete_thread(thread_id)
             return True
 
         except Exception:
             raise KeyError(f"Thread {thread_id} not found")
 
-    def get_thread_history(self, thread_id: str) -> list:
+    async def get_thread_history(self, thread_id: str) -> list:
         """Get the conversation history for a specific thread."""
-        state = self.graph.get_state(config={"configurable": {"thread_id": thread_id}})
+        state = await self.graph.aget_state(
+            config={"configurable": {"thread_id": thread_id}}
+        )
         return state.values.get("messages", []) if state.values else []
 
     async def query(self, user_query: str, thread_id: str) -> AsyncGenerator[str, None]:

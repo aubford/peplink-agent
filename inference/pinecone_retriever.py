@@ -1,7 +1,7 @@
 from typing import Any
 from langchain_core.documents import Document
 from pinecone import Pinecone
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 from inference.rate_limiters import pinecone_rate_limiter
 
 
@@ -41,11 +41,19 @@ class PineconeRetriever:
         self.fields = fields
 
         self.openai = OpenAI()
+        self.async_openai = AsyncOpenAI()
         self.pinecone = Pinecone()
         self.pinecone_index = self.pinecone.Index(index_name)
+        self.index_host = self.pinecone.describe_index(name=index_name).host
 
     def get_query_embedding(self, query: str) -> list[float]:
         vector_response = self.openai.embeddings.create(
+            input=query, model=self.embedding_model
+        )
+        return vector_response.data[0].embedding
+
+    async def aget_query_embedding(self, query: str) -> list[float]:
+        vector_response = await self.async_openai.embeddings.create(
             input=query, model=self.embedding_model
         )
         return vector_response.data[0].embedding
@@ -89,6 +97,44 @@ class PineconeRetriever:
 
         return documents
 
+    async def aretrieve(
+        self,
+        query: str,
+        query_embedding: list[float],
+        top_k: int = 100,
+        rerank_top_n: int = 40,
+        rank_field: str = "technical_summary",
+    ) -> list[Document]:
+        pc_query: Any = {"vector": {"values": query_embedding}, "top_k": top_k}
+        rerank: Any = {
+            "query": query,
+            "top_n": rerank_top_n,
+            "rank_fields": [rank_field],
+            "model": self.rerank_model,
+        }
+
+        if pinecone_rate_limiter:
+            await pinecone_rate_limiter.aacquire()
+
+        try:
+            async with self.pinecone.IndexAsyncio(host=self.index_host) as idx:
+                response = await idx.search(
+                    namespace=self.namespace,
+                    query=pc_query,
+                    fields=self.fields,
+                    rerank=rerank,
+                )
+        except Exception as e:
+            raise RuntimeError(f"Pinecone search failed: {e}")
+
+        documents: list[Document] = []
+        for match in response.result.hits:
+            metadata = match.fields.copy()
+            page_content = metadata.pop("page_content")
+            documents.append(Document(page_content=page_content, metadata=metadata))
+
+        return documents
+
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
@@ -98,4 +144,5 @@ if __name__ == "__main__":
     retriever = PineconeRetriever(
         index_name="pepwave-early-april-page-content-embedding",
     )
-    retriever.retrieve(query="What is a Pepwave?")
+    embedding = retriever.get_query_embedding("What is a Pepwave?")
+    retriever.retrieve(query="What is a Pepwave?", query_embedding=embedding)
