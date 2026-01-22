@@ -84,7 +84,7 @@ class ChatLangGraph(RagInferenceLangGraph):
 
         try:
             # Get all checkpoints from the database
-            checkpoints = list(self.checkpointer.list({}))
+            checkpoints = list(self.checkpointer.list(None))
 
             # Extract unique thread IDs
             thread_ids = set()
