@@ -66,4 +66,4 @@ fastapi
 uvicorn[standard]
 jinja2
 python-multipart
-langchain-tavily~=0.2.16
+langchain-tavily~=0.2.17

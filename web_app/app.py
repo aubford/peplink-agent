@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
     # Startup
     global chatbot
 
-    if os.getenv("USE_IN_MEMORY_CHECKPOINTER"):
+    if os.getenv("USE_IN_MEMORY_CHECKPOINTER") == "true":
         print("✅ Using in-memory checkpointer")
         chatbot = ChatLangGraph(
             llm_model="gpt-5.2",
