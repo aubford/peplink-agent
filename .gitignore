@@ -287,3 +287,5 @@ cython_debug/
 
 # Mac
 .DS_Store
+.env
+langchain_pepwave_env/
