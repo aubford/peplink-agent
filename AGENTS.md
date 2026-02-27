@@ -8,12 +8,28 @@ Pepwave Tech Support RAG Chatbot — a Python 3.12 FastAPI + LangGraph applicati
 
 ### Running the web app (dev mode)
 
+**With PostgreSQL (preferred — persistent conversations):**
+
+```bash
+# Start PostgreSQL (Docker must be running: sudo dockerd if not)
+docker compose up -d postgres
+
+# Start the web app
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/langgraph?sslmode=disable"
+export USE_IN_MEMORY_CHECKPOINTER=false
+PYTHONPATH=/workspace langchain_pepwave_env/bin/python -m uvicorn web_app.app:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Without PostgreSQL (in-memory, state lost on restart):**
+
 ```bash
 export USE_IN_MEMORY_CHECKPOINTER=true
 PYTHONPATH=/workspace langchain_pepwave_env/bin/python -m uvicorn web_app.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-**Gotcha:** The environment may pre-set `USE_IN_MEMORY_CHECKPOINTER=false`. Since `python-dotenv` does not override existing env vars, you must `export USE_IN_MEMORY_CHECKPOINTER=true` explicitly before starting the server to avoid requiring PostgreSQL.
+**Gotcha:** The environment may pre-set `USE_IN_MEMORY_CHECKPOINTER=false`. Since `python-dotenv` does not override existing env vars, you must explicitly `export` the variable before starting the server. If PostgreSQL is not running and `USE_IN_MEMORY_CHECKPOINTER` is not `true`, the app will crash on startup with a connection error.
+
+**Gotcha:** Docker in this cloud VM requires `sudo dockerd` to start the daemon, and `sudo chmod 666 /var/run/docker.sock` for non-root access.
 
 ### Required API keys (environment secrets)
 
