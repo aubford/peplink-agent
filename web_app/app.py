@@ -18,6 +18,8 @@ from contextlib import asynccontextmanager
 from inference.chat_agentic import ChatLangGraph
 from dotenv import load_dotenv
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from psycopg_pool import AsyncConnectionPool
+from psycopg.rows import dict_row
 
 # from langsmith import tracing_context
 
@@ -46,9 +48,19 @@ async def lifespan(app: FastAPI):
         if not database_url:
             raise ValueError("DATABASE_URL environment variable is required")
 
-        async with AsyncPostgresSaver.from_conn_string(database_url) as checkpointer:
+        async with AsyncConnectionPool(
+            conninfo=database_url,
+            kwargs={
+                "autocommit": True,
+                "prepare_threshold": 0,
+                "row_factory": dict_row,
+            },
+            min_size=1,
+            max_size=10,
+        ) as pool:
+            checkpointer = AsyncPostgresSaver(pool)  # type: ignore[arg-type]
             await checkpointer.setup()
-            print("✅ Using PostgreSQL for persistence")
+            print("✅ Using PostgreSQL for persistence (connection pool)")
 
             chatbot = ChatLangGraph(
                 llm_model="gpt-5.2",
