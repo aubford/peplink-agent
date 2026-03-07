@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="${SCRIPT_DIR}/2-application"
 
-AUTO_APPROVE="false"
+AUTO_APPROVE="true"
 SKIP_VALIDATE="false"
 
 usage() {
@@ -13,18 +13,18 @@ usage() {
 Redeploy the ECS service (force new deployment).
 
 Usage:
-  ./redeploy-app.sh [--auto-approve] [--skip-validate]
+  ./redeploy-app.sh [--no-auto-approve] [--skip-validate]
 
 Options:
-  --auto-approve    Run terraform apply without prompting.
+  --no-auto-approve Prompt for confirmation before applying (default: auto-approve).
   --skip-validate   Skip ./validate-image.sh check.
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --auto-approve)
-      AUTO_APPROVE="true"
+    --no-auto-approve)
+      AUTO_APPROVE="false"
       shift
       ;;
     --skip-validate)
